@@ -1,0 +1,27 @@
+{
+  "canvas": { "w": 48, "h": 48, "originX": 24, "originY": 22 },
+  "tones": { "perMaterial": 4 },
+  "frames": { "walk": 4 },
+  "light": { "x": -0.6, "y": -0.8 },
+  "outline": { "enabled": true, "material": "ink" },
+  "body": { "scale": 1 },
+  "gait": { "swing": 0.08, "lift": 1.5 },
+  "texture": { "speckle": 0 },
+
+  "_anchors": {
+    "canvas.w": "48 = 3x the 16px cell of the Stardew idiom (BACKLOG round 1, control). Height comes out of the idiom, it is not an independent knob this round.",
+    "canvas.h": "square with canvas.w",
+    "canvas.originX": "canvas.w / 2",
+    "canvas.originY": "canvas.h / 2 - 2, so the fixture's 12px legs land inside the frame",
+    "tones.perMaterial": "the opening conviction of BACKLOG round 1: 4, knob range 3-6",
+    "frames.walk": "4, anchored to the Stardew idiom, which is the control",
+    "light.x": "unit vector from the upper left (-0.6, -0.8), the pixel-art default; the anchor every future shading rule is derived against",
+    "light.y": "the y half of light.x's unit vector; y grows down, so -0.8 is above",
+    "outline.enabled": "on, and it is a knob: the 'ink' question held for the human in BACKLOG turns on it",
+    "outline.material": "the palette ramp the outline draws from; its darkest tone",
+    "body.scale": "1 = identity; the grammar is authored at 1:1 with canvas pixels",
+    "gait.swing": "asin(6/12) in turns = 0.0805 -> 0.08: a foot stride of half the 12px leg length",
+    "gait.lift": "trunk height (2 * ry = 18px) / 12 = 1.5",
+    "texture.speckle": "0 = the injected RNG is never called. Sample C (high-budget idiom) is where it turns on."
+  }
+}
