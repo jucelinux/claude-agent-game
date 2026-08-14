@@ -43,3 +43,9 @@ turn — `TASTE-LOOP.md` §3.8. Recording is not propagating.
 - 14/08 · INSTRUMENT · the channel's four null cases run in the suite, not in prose · the rule that was skipped three times is now a test that fails
 - 14/08 · LOCK · animation family locked with margin 0.02 of the canvas, not byte-inequality · a twitch of 0.0009 passes equality and fails the margin, measured in both directions
 - 14/08 · LOCK · every tunable must carry a named anchor, asserted by test · a free-floating constant breaks on the first knob turn
+- 14/08 · CHANNEL · the human's channel is a self-contained HTML page, not an animated GIF · the human overrode the model's recommendation; "never judge a still" is a property of the viewer, not of the file format, and in HTML it is enforced instead of inherited
+- 14/08 · CHANNEL · two viewers from one emitter: bench with controls for the model, gate with none for the human · the rule against stills protects his reading, so the model keeps its scrubbing and he does not get any
+- 14/08 · GATE · controls and the naming machinery are compiled out of the gate page, not switched off in it · a disabled control is one typo away from an enabled one, and the thing it enables is the end of the reading
+- 14/08 · STACK · no game engine; "the sprite in situ" becomes its own axis after the gate · an engine smooths and reintroduces a clock at the point of comparison, and the error has a direction — it flatters the model's own cell
+- 14/08 · KNOB · playback at 125 ms per frame and integer scale x4 · 8 fps is the Stardew control's walk; a fractional scale is judged through mud and 1:1 through a microscope
+- 14/08 · INSTRUMENT · the viewer's runtime runs headless against a fake DOM, and the visible null case ships beside it · five defects planted, five caught, all five flattering

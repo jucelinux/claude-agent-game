@@ -74,6 +74,21 @@ reading arrives.
       grammar. Against absence, count; looking does not catch it.
 - [x] **Latency of one bench turn.** 90 ms wall, 9 ms of it render. Under the ~100 ms
       reference — no work owed. Re-measure when the arthropod's part count lands.
+- [x] **The human's channel.** A self-contained HTML page, no dependency, no network.
+      **bench** (labels, `t`, pause, step) is mine; **gate** (no control, no label, no
+      tooltip, nothing that names a cell) is his, and both are compiled from the same
+      emitter so a cell can never be compared as a renderer: one blit path,
+      nearest-neighbour, integer ×4, and **one tick for the whole page**.
+- [x] **Null case for the viewer, both ways.** `selftest.html` shows a human what each
+      failure looks like; `tests/viewer-runtime.test.ts` runs the same inlined runtime
+      headless against a fake DOM. Five defects planted, five caught — smoothing on,
+      label leaked into the gate, empty payload, dead tick, index 0 painted opaque. All
+      five flatter the sprite. That is the direction instrument defects come in.
+- [ ] **Image cells** — his five published loops decoded into the *same* blit path as
+      mine. Unbuilt: it cannot be null-cased without the files. Round 1.
+- [ ] **The gate sheet builder** — shuffles with a seed he picks, writes
+      `sheet/mapping.<seed>.json`, which I never read. Round 1, and blocked on the loops
+      being his to supply.
 - [ ] **Mark portable/stack on every grammar rule in the turn it is born.** Standing, never
       ticked. Live since 14/08: `src/core/types.ts` and `src/core/skeleton.ts` carry
       `portable`, `src/grammars/fixture.ts` carries `stack`.
@@ -94,7 +109,8 @@ without both is a rumour.
 | full cycle: record → replay → compare | 1.0 s | `node bin/record.ts /tmp/c.run.json && node bin/run.ts /tmp/c.run.json && npm test` | 14/08 |
 | fixture baseline hash | `8d3118679a7194d2` | `npm run baseline` | 14/08 |
 | min pair distance, shipped tunables | 0.109 | `node bin/run.ts runs/fixture.run.json` | 14/08 |
-| locks green | 22 | `npm test` | 14/08 |
+| locks green | 34 | `npm test` | 14/08 |
+| gate page, tells found by grep | 0 | `grep -cE "fixture\|label\|keydown\|button\|http\|seed" .out/gate.html` | 14/08 |
 
 ## The harness, as of 14/08
 
@@ -102,10 +118,12 @@ Four commands, and the second is the loop.
 
 | command | what it is |
 |---|---|
-| `npm test` | the locks. Determinism, baseline, tunables, the channel's null cases, the animation family |
+| `npm test` | the locks. Determinism, baseline, tunables, both channels' null cases, the animation family |
 | `node bin/bench.ts [run] [--set path=value]` | one bench turn: author → look → name the defect. Contact sheet, 25% silhouette, counts, elapsed |
 | `node bin/run.ts <run.json>` | headless: state hash and metrics, no presentation layer |
 | `node bin/record.ts <out.json> [--set …]` | capture what the bench is showing into a replayable run file |
+| `node bin/view.ts [runs…] [--mode gate]` | the human's channel → `.out/bench.html` or `.out/gate.html` |
+| `node bin/selftest.ts` | the viewer's null case, made visible → `.out/selftest.html` |
 
 Every tunable lives in `tunables/default.json` and is anchored there — the anchor is
 locked, not a comment. A grammar is data in `src/grammars/`; `fixture` is the harness's
@@ -117,6 +135,10 @@ own subject and **is not content**.
 
 In a batch, binary, with samples attached.
 
+- [ ] **The five published loops: do they exist as files, or is capturing them work with no
+      owner yet?** Not a taste question — a constraint that flows from him to me. Their
+      canvas size and frame rate set what my cell has to be for the comparison to be
+      honest, and the gate cannot take its first reading without them. Asked 14/08.
 - [ ] **Is "ink" in the name aspiration or direction?** `claude-ink-2d` names ink, and ink
       is Comix Zone — the overshoot I just declared unreachable, against Chrono Trigger as
       the target. Binary: **(A)** the name is aspiration, the bar in `TASTE.md` §1b is

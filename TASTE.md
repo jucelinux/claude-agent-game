@@ -29,6 +29,11 @@ Last distillation: none — the log does not exist yet._
 - `[declared]` **He declines the menu and names his own option.** Three availability
   options offered, none chosen, his own answer better than all three. That is §7 happening:
   translate, do not offer a menu.
+- `[declared]` **He picks the medium, delegates the taste inside it, and asks to be told
+  before it is applied.** Overrode the GIF recommendation with "let's go HTML", floated a
+  game engine as a question rather than an instruction, then handed the call back. The
+  shape to read from it: he sets direction and wants the reasoning out loud, not the
+  options.
 
 > The three references **do not converge**, and that is what makes them a probe rather than
 > a bar. Floor, target and overshoot arrived together.

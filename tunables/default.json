@@ -7,6 +7,7 @@
   "body": { "scale": 1 },
   "gait": { "swing": 0.08, "lift": 1.5 },
   "texture": { "speckle": 0 },
+  "playback": { "msPerFrame": 125, "scale": 4 },
 
   "_anchors": {
     "canvas.w": "48 = 3x the 16px cell of the Stardew idiom (BACKLOG round 1, control). Height comes out of the idiom, it is not an independent knob this round.",
@@ -22,6 +23,8 @@
     "body.scale": "1 = identity; the grammar is authored at 1:1 with canvas pixels",
     "gait.swing": "asin(6/12) in turns = 0.0805 -> 0.08: a foot stride of half the 12px leg length",
     "gait.lift": "trunk height (2 * ry = 18px) / 12 = 1.5",
-    "texture.speckle": "0 = the injected RNG is never called. Sample C (high-budget idiom) is where it turns on."
+    "texture.speckle": "0 = the injected RNG is never called. Sample C (high-budget idiom) is where it turns on.",
+    "playback.msPerFrame": "125 ms = 8 fps. frames.walk (4) at 8 fps is a 0.5 s cycle, which is the Stardew control's walk; the '~1 s' sample of CLAUDE.md section 1 is the clip, and it loops twice inside it. The core never reads this number - it is the page's tick, and the first number a timing round will move.",
+    "playback.scale": "4 = integer nearest-neighbour. 48 px at x4 is a 192 px cell: readable at arm's length, and no fractional scale to judge through."
   }
 }
