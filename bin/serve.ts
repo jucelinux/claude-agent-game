@@ -75,6 +75,7 @@ function payload(): string {
       label: cell.label,
       scale: cell.scale,
       msPerFrame: cell.msPerFrame,
+      summary: cell.summary,
     })),
   ]
   return JSON.stringify({ mode: 'live', scale: current.scale, msPerFrame: current.msPerFrame, cells })
@@ -88,7 +89,7 @@ const shell = emit({
   msPerFrame: current.msPerFrame,
   cells: [],
   title: 'claude-ink-2d',
-  notes: ['live run first, kept history behind it · space pauses · left and right step a frame'],
+  notes: ['left and right arrows walk the history · space pauses · , and . step one frame'],
 })
 const selftest = emit(SELFTEST)
 

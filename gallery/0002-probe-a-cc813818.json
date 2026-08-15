@@ -1,4 +1,45 @@
 {
+  "params": {
+    "canvas": {
+      "w": 32,
+      "h": 32,
+      "originX": 16,
+      "originY": 18
+    },
+    "tones": {
+      "perMaterial": 3
+    },
+    "frames": {
+      "walk": 4
+    },
+    "light": {
+      "x": -0.6,
+      "y": -0.8,
+      "curve": 1.9
+    },
+    "outline": {
+      "enabled": true,
+      "material": "ink",
+      "inner": true
+    },
+    "body": {
+      "scale": 0.7
+    },
+    "gait": {
+      "swing": 0.07,
+      "lift": 1.2
+    },
+    "texture": {
+      "speckle": 0
+    },
+    "playback": {
+      "msPerFrame": 150,
+      "scale": 6
+    }
+  },
+  "summary": [
+    "first kept generation of this grammar"
+  ],
   "n": 2,
   "date": "2026-08-15",
   "grammar": "probe-a",

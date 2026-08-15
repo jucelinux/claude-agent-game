@@ -30,6 +30,11 @@ export function buildCells(specs: readonly RunSpec[]): PageData {
       label: `${result.spec.grammar} · ${result.hash}`,
       scale: result.params.playback.scale,
       msPerFrame: result.params.playback.msPerFrame,
+      summary: [
+        `${result.params.canvas.w}×${result.params.canvas.h} · ${result.frames.length} frames · ${result.params.playback.msPerFrame} ms/frame`,
+        '',
+        'live — this is what the code renders right now, not a kept generation',
+      ],
     })),
   }
 }
@@ -49,6 +54,7 @@ export function toJson(data: PageData, mode: 'live'): string {
       label: cell.label,
       scale: cell.scale,
       msPerFrame: cell.msPerFrame,
+      summary: cell.summary,
     })),
   })
 }

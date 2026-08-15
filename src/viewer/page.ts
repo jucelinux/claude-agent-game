@@ -28,7 +28,19 @@ export type ViewCell = {
   /** Defaults to the page's. See the note on the runtime: a cell may own a **rate**, never
    * a clock — a 4-frame walk and an 8-frame walk have to finish a cycle together. */
   readonly msPerFrame?: number
+  /** What this generation was about. Derived from what changed, never narrated. */
+  readonly summary?: readonly string[]
 }
+
+/**
+ * Black, at the human's request, 14/08. One thing to know about it: index 0 is transparent,
+ * so the page's ground *is* the sprite's background, and the darkest ink tones here sit at
+ * RGB 10–26. Against black they are nearly invisible, which quietly hides whatever happens
+ * in the darkest step of a ramp. The self-test deliberately keeps a mid grey for exactly
+ * that reason — a page whose ground can swallow a defect cannot be the page that proves
+ * defects are visible.
+ */
+export const GROUND = '#000000'
 
 export type ViewSpec = {
   /**
@@ -43,6 +55,8 @@ export type ViewSpec = {
   readonly cells: readonly ViewCell[]
   readonly title?: string
   readonly notes?: readonly string[]
+  /** Defaults to `GROUND`. The self-test overrides it, and its reason is on `GROUND`. */
+  readonly ground?: string
 }
 
 export function emit(spec: ViewSpec): string {
@@ -51,6 +65,14 @@ export function emit(spec: ViewSpec): string {
   }
   const gate = spec.mode === 'gate'
   const live = spec.mode === 'live'
+  /**
+   * **Slides, and only on the live page.** The gate is a comparison and must show all six
+   * cells at once; the self-test is four cells whose whole point is being seen together.
+   * The live page is the one place where history is long and one-at-a-time is the readable
+   * shape.
+   */
+  const slides = live
+  const ground = spec.ground ?? GROUND
 
   const cells = spec.cells.map((cell) => {
     const per = cell.w * cell.h
@@ -75,6 +97,7 @@ export function emit(spec: ViewSpec): string {
       if (!Number.isInteger(cell.msPerFrame) || cell.msPerFrame < 1) throw new Error(`cell msPerFrame must be a positive integer, is ${cell.msPerFrame}`)
       payload['msPerFrame'] = cell.msPerFrame
     }
+    if (!gate && cell.summary !== undefined) payload['summary'] = cell.summary
     return payload
   })
 
@@ -103,21 +126,27 @@ export function emit(spec: ViewSpec): string {
   :root { color-scheme: dark }
   html, body { margin: 0; height: 100% }
   body {
-    background: #6b6b6b;
-    color: #1c1c1c;
+    background: ${ground};
+    color: ${ground === GROUND ? '#8a8a8a' : '#1c1c1c'};
     font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 100%; padding: 32px; box-sizing: border-box; gap: 24px;
+    min-height: 100%; padding: 32px; box-sizing: border-box; gap: 20px;
   }
   #stage { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; justify-content: center }
   .cell { display: flex; flex-direction: column; align-items: center; gap: 6px }
   canvas { image-rendering: pixelated; display: block }
-${gate ? '' : '  .label { color: #2a2a2a }\n  .notes { max-width: 68ch; color: #232323; white-space: pre-wrap }'}
+${gate ? '' : `  .label { color: ${ground === GROUND ? '#9a9a9a' : '#2a2a2a'} }
+  .notes { max-width: 68ch; color: ${ground === GROUND ? '#767676' : '#232323'}; white-space: pre-wrap }
+  #nav { display: flex; gap: 16px; align-items: center; user-select: none }
+  #nav span { cursor: pointer; padding: 2px 10px; border: 1px solid currentColor; color: inherit }
+  #caption { max-width: 72ch; min-height: 5em; white-space: pre-wrap; text-align: left }
+  #caption b { color: ${ground === GROUND ? '#d8d8d8' : '#101010'}; font-weight: normal }`}
 </style>
 ${notes.length > 0 ? `<div class="notes">${notes.map(escapeText).join('\n')}</div>` : ''}
 <div id="stage"></div>
+${slides ? '<div id="nav"></div>\n<div id="caption"></div>' : ''}
 <script>
-${runtime({ controls: spec.mode === 'bench' || live, labels: !gate, swap: live })}
+${runtime({ controls: spec.mode === 'bench' || live, labels: !gate && !slides, swap: live, slides })}
 ${live ? 'var page = start' : 'start'}(${escapeScript(JSON.stringify(data))});
 ${live ? BOOTSTRAP : ''}</script>
 `
@@ -145,12 +174,22 @@ new EventSource('/events').onmessage = function () { pull(); };
  * switched off in it. A disabled control is one typo away from an enabled one, and the
  * things they would enable are judging a still and naming the impostor.
  */
-const runtime = ({ controls, labels, swap }: { controls: boolean; labels: boolean; swap: boolean }): string => `
+const runtime = ({
+  controls,
+  labels,
+  swap,
+  slides,
+}: {
+  controls: boolean
+  labels: boolean
+  swap: boolean
+  slides: boolean
+}): string => `
 function start(D) {
   var stage = document.getElementById('stage');
   var cells = [];
   var ms = D.msPerFrame;
-  var elapsed = 0, paused = false;
+  var elapsed = 0, paused = false, slide = 0;
 
   // Rebuilding the cells never touches the frame counter or the accumulator. That is the
   // whole trick of the live page: the loop does not restart, so a change is seen in motion.
@@ -204,13 +243,49 @@ ${
     : ''
 }    stage.appendChild(wrap);
 
-    return { n: c.n, ms: c.msPerFrame || D.msPerFrame, images: images, off: off, octx: octx, ctx: ctx, view: view${labels ? ', tag: tag, name: c.label' : ''} };
+    return { n: c.n, ms: c.msPerFrame || D.msPerFrame, images: images, off: off, octx: octx, ctx: ctx, view: view, wrap: wrap, name: ${labels || slides ? 'c.label' : 'null'}, summary: ${slides ? 'c.summary' : 'null'}${labels ? ', tag: tag' : ''} };
   });
-  }
+${
+  slides
+    ? `  if (slide >= cells.length) slide = 0;
+  show(slide);
+`
+    : ''
+}  }
+${
+  slides
+    ? `
+  // One at a time. The history is long and getting longer; a wall of cells is a wall.
+  function show(i) {
+    if (cells.length === 0) return;
+    slide = ((i % cells.length) + cells.length) % cells.length;
+    for (var k = 0; k < cells.length; k++) cells[k].wrap.style.display = k === slide ? 'flex' : 'none';
+    var nav = document.getElementById('nav');
+    nav.textContent = '';
+    var back = document.createElement('span'); back.textContent = '\\u2039';
+    back.onclick = function () { show(slide - 1); };
+    var count = document.createElement('div'); count.textContent = (slide + 1) + ' / ' + cells.length;
+    var next = document.createElement('span'); next.textContent = '\\u203a';
+    next.onclick = function () { show(slide + 1); };
+    nav.appendChild(back); nav.appendChild(count); nav.appendChild(next);
 
+    var caption = document.getElementById('caption');
+    caption.textContent = '';
+    var head = document.createElement('b');
+    head.textContent = cells[slide].name || '';
+    caption.appendChild(head);
+    var lines = cells[slide].summary || [];
+    for (var s = 0; s < lines.length; s++) {
+      caption.appendChild(document.createTextNode('\\n' + lines[s]));
+    }
+    draw(elapsed);
+  }
+`
+    : ''
+}
   function draw(elapsed) {
     for (var i = 0; i < cells.length; i++) {
-      var cell = cells[i];
+${slides ? '      if (i !== slide) continue;\n' : ''}      var cell = cells[i];
       var k = Math.floor(elapsed / cell.ms) % cell.n;
       cell.octx.putImageData(cell.images[k], 0, 0);
       cell.ctx.clearRect(0, 0, cell.view.width, cell.view.height);
@@ -239,8 +314,15 @@ ${
     ? `
   document.addEventListener('keydown', function (e) {
     if (e.key === ' ') { paused = !paused; e.preventDefault(); }
-    else if (e.key === 'ArrowRight') { paused = true; elapsed += ms; draw(elapsed); }
-    else if (e.key === 'ArrowLeft') { paused = true; elapsed = elapsed > ms ? elapsed - ms : 0; draw(elapsed); }
+${
+  slides
+    ? `    else if (e.key === 'ArrowRight') { show(slide + 1); }
+    else if (e.key === 'ArrowLeft') { show(slide - 1); }
+    else if (e.key === '.') { paused = true; elapsed += ms; draw(elapsed); }
+    else if (e.key === ',') { paused = true; elapsed = elapsed > ms ? elapsed - ms : 0; draw(elapsed); }`
+    : `    else if (e.key === 'ArrowRight') { paused = true; elapsed += ms; draw(elapsed); }
+    else if (e.key === 'ArrowLeft') { paused = true; elapsed = elapsed > ms ? elapsed - ms : 0; draw(elapsed); }`
+}
   });
 `
     : ''

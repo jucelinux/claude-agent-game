@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { execute } from '../src/io/load.ts'
 import { emit } from '../src/viewer/page.ts'
+import { SELFTEST } from '../src/viewer/selftest.ts'
 import type { ViewCell } from '../src/viewer/page.ts'
 
 const SPEC = { grammar: 'fixture', tunables: 'default', seed: 1 } as const
@@ -108,6 +109,28 @@ describe('viewer — the human channel', () => {
     for (const mode of ['bench', 'gate', 'selftest'] as const) {
       expect(emit({ ...BASE, mode, cells: cellsFor() }).includes('swap'), `${mode} can swap`).toBe(false)
     }
+  })
+
+  it('the live page is slides; every comparison page is not', () => {
+    // One at a time is right for a history that only grows. It is wrong for the gate,
+    // which is a comparison, and wrong for the self-test, whose four cells only mean
+    // anything side by side.
+    const live = emit({ ...BASE, mode: 'live', cells: [] })
+    expect(live).toContain('id="nav"')
+    expect(live).toContain('id="caption"')
+    for (const mode of ['gate', 'selftest', 'bench'] as const) {
+      const html = emit({ ...BASE, mode, cells: cellsFor() })
+      expect(html.includes('id="nav"'), `${mode} is on slides`).toBe(false)
+    }
+  })
+
+  it('the ground is black, and the self-test keeps its grey on purpose', () => {
+    expect(emit({ ...BASE, mode: 'live', cells: [] })).toContain('background: #000000')
+    expect(emit({ ...BASE, mode: 'gate', cells: cellsFor() })).toContain('background: #000000')
+    // A black ground hides the darkest ink against transparency, which is exactly the
+    // failure the ring case exists to catch. The page that proves defects show cannot be
+    // the page whose ground swallows one.
+    expect(emit({ ...SELFTEST })).toContain('background: #6b6b6b')
   })
 
   it('index 0 is transparent, so no cell carries a ground the others do not', () => {

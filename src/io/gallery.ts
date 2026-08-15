@@ -43,11 +43,51 @@ export type GalleryEntry = {
   readonly palette: readonly RGB[]
   /** All frames, concatenated, base64. Index space — the palette is separate on purpose. */
   readonly indices: string
+  /** The resolved tunables, minus the anchors. What makes an entry self-describing. */
+  readonly params: Readonly<Record<string, unknown>>
+  /** What this generation was about: **derived** from what changed, never narrated. */
+  readonly summary: readonly string[]
   readonly note?: string
 }
 
+/** Flatten to dotted paths so two generations can be compared leaf by leaf. */
+function flatten(value: unknown, prefix = ''): Map<string, string> {
+  const out = new Map<string, string>()
+  if (typeof value !== 'object' || value === null) {
+    out.set(prefix, JSON.stringify(value))
+    return out
+  }
+  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    for (const [path, leaf] of flatten(child, prefix === '' ? key : `${prefix}.${key}`)) out.set(path, leaf)
+  }
+  return out
+}
+
+/**
+ * The summary is a diff, and that is the point: a narrated note says what I meant to do,
+ * a diff says what actually changed. When they disagree the diff is right.
+ */
+export function summarise(params: Record<string, unknown>, previous: GalleryEntry | undefined): string[] {
+  if (previous === undefined) return ['first kept generation of this grammar']
+  const before = flatten(previous.params)
+  const after = flatten(params)
+  const lines: string[] = []
+  for (const [path, value] of after) {
+    const was = before.get(path)
+    if (was === undefined) lines.push(`${path}  born  ${value}`)
+    else if (was !== value) lines.push(`${path}  ${was} → ${value}`)
+  }
+  for (const path of before.keys()) if (!after.has(path)) lines.push(`${path}  removed`)
+  return lines.length === 0 ? ['no tunable moved — the change was in the grammar itself'] : lines
+}
+
 export function entryFrom(result: RunResult, n: number, date: string, note?: string): GalleryEntry {
+  const { _anchors, ...params } = result.params as unknown as Record<string, unknown>
+  void _anchors
+  const previous = list().filter((e) => e.grammar === result.spec.grammar).pop()
   return {
+    params,
+    summary: summarise(params, previous),
     n,
     date,
     grammar: result.spec.grammar,
@@ -98,8 +138,13 @@ export function cellOf(entry: GalleryEntry): ViewCell {
     h: entry.h,
     frames,
     palette: entry.palette,
-    label: `#${String(entry.n).padStart(4, '0')} · ${entry.grammar} · ${entry.date}${entry.note === undefined ? '' : ` · ${entry.note}`}`,
+    label: `#${String(entry.n).padStart(4, '0')} · ${entry.grammar} · ${entry.date} · ${entry.hash}${entry.note === undefined ? '' : ` · ${entry.note}`}`,
     scale: entry.scale,
     msPerFrame: entry.msPerFrame,
+    summary: [
+      `${entry.w}×${entry.h} · ${entry.frames} frames · ${entry.msPerFrame} ms/frame · ${entry.frames * entry.msPerFrame} ms cycle`,
+      '',
+      ...(entry.summary ?? []),
+    ],
   }
 }
