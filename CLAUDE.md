@@ -36,9 +36,9 @@ collects the five references has seen them, so the sixth is theirs by eliminatio
   mode this project already names in §1.
 - **Every run still gets its own reading** — beat the previous ceiling or not — because
   that is the only signal about *direction*. It informs; it no longer kills.
-- **Standing at 0 of 3 on 14/08.** The live count lives at the top of `BACKLOG.md` and is
-  updated in the same turn a reading arrives; `DECISIONS.md` records that it changed, never
-  by how much.
+- **The readings so far live at the top of `BACKLOG.md`** and are written in the same turn
+  one arrives: run 3 and run 4 both failed to beat run 2. `DECISIONS.md` records that a
+  reading happened, never the tally.
 - **The five references are fixed once and reused for every reading**, so a change in
   position is my art moving and never the sheet moving. They live in `refs/`, **gitignored
   — reference is for looking at, never for shipping.**
@@ -79,11 +79,12 @@ all of them change what gets built:
    arthropod; mark each rule **portable** or **stack** the moment it is born. Generality
    designed early is the same "late and narrow" failure in better clothes.
 2. **The gate can still kill, and now it kills something else.** Under the capability
-   reading, 3 strikes would kill the project. Under the artifact reading, 3 strikes say
+   reading, a failed gate would kill the project. Under the artifact reading, it says
    *this grammar does not reach the commercial bar* — and the grammar still exists at a
    lower bar. **Declared cost:** this is exactly the shape the known gap "no stopping
    rule" takes here. A nice little grammar that never reaches the bar is the most
-   comfortable state possible, and nothing in the method detects it.
+   comfortable state possible, and nothing in the method detects it. Since 15/08 the only
+   thing standing against that is the date and the honesty of the verdict taken on it.
 3. **What remains at the end is the grammar repository**, not the gate sheet.
 
 **The three questions of `TASTE-LOOP.md` §4, answered in writing.**

@@ -1,0 +1,60 @@
+{
+  "canvas": {
+    "w": 64,
+    "h": 64,
+    "originX": 26,
+    "originY": 36
+  },
+  "tones": {
+    "perMaterial": 8
+  },
+  "frames": {
+    "walk": 8
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "curve": 1.25
+  },
+  "outline": {
+    "enabled": false,
+    "material": "hide",
+    "inner": true,
+    "rim": true
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.1,
+    "lift": 2.2
+  },
+  "texture": {
+    "speckle": 0.18
+  },
+  "playback": {
+    "msPerFrame": 75,
+    "scale": 3
+  },
+  "_anchors": {
+    "canvas.w": "64, twice the control. This sample is the direction my bias pulls toward, and it is here to be knocked down by looking rather than by argument (BACKLOG).",
+    "canvas.h": "square with canvas.w",
+    "canvas.originX": "canvas.w * 0.41: the hips sit back of centre because the chest, the arms and the head all reach forward of them",
+    "canvas.originY": "canvas.h * 0.56, so a body that hangs below the hips still lands inside the frame",
+    "tones.perMaterial": "8, above the knob's declared 3-6 range on purpose: this is the sample that spends everything, so the round can see what spending buys",
+    "frames.walk": "8, two per named phase, and a multiple of the gait's four phases so every key pose lands on a frame",
+    "light.x": "unit vector from the upper left, held identical across all four probe samples",
+    "light.curve": "1.25. Dark fur has almost no ramp to spare above the middle, so the curve stays close to linear or the animal turns grey.",
+    "light.y": "the y half of light.x's unit vector",
+    "outline.enabled": "off. The idiom he singled out had no outer line, and this run keeps that look - the edge is carried by outline.rim instead, which is what the silhouette locks measure.",
+    "outline.inner": "on, even with the outer outline off: this sample drops the silhouette line but still needs the joints, which is the pairing a gradient idiom lives or dies on",
+    "outline.rim": "ON. Without it this idiom fails the edge-contrast lock at 0.058, which is where the same idiom failed before. The rim is what lets a no-outline sample keep a readable silhouette.",
+    "outline.material": "the hide ramp: this body has no ink, and the darkest hide tone is what the rim reaches for at the shadow edge",
+    "body.scale": "1: these bodies are authored at 64 px directly rather than scaled up from the 48 px arthropod",
+    "gait.swing": "0.10 turn on a 23 px arm: about 14 px of hand travel, which is the stride of a knuckle walker - long arms take long steps",
+    "gait.lift": "2.2 px = chest height (2 * ry = 19) / 8.6, the eighth-of-the-body rule at this mass",
+    "texture.speckle": "0.18. Fur is the one surface in this project where per-pixel noise is the material rather than dirt - it is what a coat looks like without drawing a single hair.",
+    "playback.msPerFrame": "75 ms. 8 frames x 75 = the shared 600 ms cycle every sample in this project walks at.",
+    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size"
+  }
+}

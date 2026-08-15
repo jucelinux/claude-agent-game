@@ -5,6 +5,7 @@ import { probeD } from './probe/humanoid.ts'
 import { beetle, beetleWave } from './run3/beetle.ts'
 import { mantis } from './run3/mantis.ts'
 import { scorpion } from './run3/scorpion.ts'
+import { gorilla } from './run5/gorilla.ts'
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   fixture,
@@ -16,6 +17,7 @@ export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   'beetle-wave': beetleWave,
   mantis,
   scorpion,
+  gorilla,
 }
 
 /**
@@ -33,6 +35,7 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: 'beetle-wave', tunables: 'beetle' },
   { grammar: 'mantis', tunables: 'mantis' },
   { grammar: 'scorpion', tunables: 'scorpion' },
+  { grammar: 'gorilla', tunables: 'gorilla' },
 ]
 
 export function grammarByName(name: string): Grammar {
