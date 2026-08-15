@@ -6,10 +6,10 @@ export const TURN = Math.PI * 2
 export type Xform = { readonly x: number; readonly y: number; readonly a: number; readonly s: number }
 
 /** Per-bone deltas applied on top of the rest pose. */
-export type PoseDelta = { angle: number; x: number; y: number }
+export type PoseDelta = { angle: number; x: number; y: number; scale: number }
 export type Pose = ReadonlyMap<string, PoseDelta>
 
-export const ZERO_DELTA: PoseDelta = { angle: 0, x: 0, y: 0 }
+export const ZERO_DELTA: PoseDelta = { angle: 0, x: 0, y: 0, scale: 0 }
 
 /**
  * Resolve every bone to canvas space. Iteration follows declaration order, which is why
@@ -33,7 +33,8 @@ export function solve(skeleton: Skeleton, pose: Pose, root: Xform): Map<string, 
       x: parent.x + parent.s * (cos * lx - sin * ly),
       y: parent.y + parent.s * (sin * lx + cos * ly),
       a: parent.a + bone.angle + d.angle,
-      s: parent.s,
+      // A scale delta of -1 collapses the bone and everything hanging off it to nothing.
+      s: parent.s * Math.max(0, 1 + d.scale),
     })
   }
   return world

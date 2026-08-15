@@ -38,8 +38,9 @@ export function evaluate(gait: Gait, params: Params, t: number): Pose {
       throw new Error(`track ${track.bone}.${track.channel} has ${track.keys.length} keys for ${n} phases`)
     }
     const value = hermite(at, track.keys, i, u, h)
-    const amplitude = track.channel === 'angle' ? params.gait.swing : params.gait.lift
-    const delta = pose.get(track.bone) ?? { angle: 0, x: 0, y: 0 }
+    const amplitude =
+      track.channel === 'angle' ? params.gait.swing : track.channel === 'scale' ? 1 : params.gait.lift
+    const delta = pose.get(track.bone) ?? { angle: 0, x: 0, y: 0, scale: 0 }
     delta[track.channel] += value * amplitude
     pose.set(track.bone, delta)
   }

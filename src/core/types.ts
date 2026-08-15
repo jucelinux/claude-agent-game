@@ -67,7 +67,14 @@ export type Part = {
 /** A named instant of the cycle. The gait is a set of named phases, never a bare sine. */
 export type Phase = { readonly name: string; readonly at: number }
 
-export type Channel = 'angle' | 'x' | 'y'
+/**
+ * `scale` is the newest and it is what makes one body become another: a part at scale 0 is
+ * gone, a part at scale 1 is whole, and everything between is a thing arriving or leaving.
+ * Unlike the others it carries **no amplitude from the tunables** — a scale key is already
+ * a ratio and has no unit in the domain to be anchored against, where an angle is a
+ * fraction of a turn and an offset is pixels.
+ */
+export type Channel = 'angle' | 'x' | 'y' | 'scale'
 
 /**
  * One key per phase, in phase order, **normalized to [-1, 1]**. The amplitude that turns

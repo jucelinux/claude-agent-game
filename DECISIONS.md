@@ -120,3 +120,9 @@ turn — `TASTE-LOOP.md` §3.8. Recording is not propagating.
 - 15/08 · GATE · the end condition moves from three strikes to the date, 21/08 · his call, and it is right: a counter made the model reason about spending its last life, which pushes toward the conservative run exactly when the experiment needs the ambitious one
 - 15/08 · GATE · per-run readings continue and inform direction; they no longer kill · the signal about direction is worth keeping, the distortion is not
 - 15/08 · SUBJECT · a gorilla, proposed by the human · it lands on the model's own recorded strength — one heavy mass carrying the reading — and on its recorded weakness, since fur has no segmentation to hold a silhouette
+- 15/08 · SUBJECT · the gorilla reads and the weight reads, on his eye · "dá pra sentir seu peso caindo e a fidelidade com movimento" — the first time an axis other than form has landed
+- 15/08 · RUN 6 · a transformation, his proposal: the gorilla becomes a robot · it forces the mechanical vocabulary the model had just admitted it lacks, and a robot of ellipses would read as a soft toy
+- 15/08 · GRAMMAR · a transformation is a ping-pong cycle, not a one-way sequence · played once it snaps at the loop point; played both ways it is a genuine cycle and the mechanism is seen twice, with no engine change at all
+- 15/08 · GRAMMAR · mechanical is `rect` plus the inner-outline rule · the primitive has existed since round zero and had been used once; what was missing was the nerve to use it, not a new shape
+- 15/08 · GRAMMAR · a part arrives and leaves by **scale** on a bone of its own · plates hang off their own bones so metal can vanish without taking the limb underneath with it
+- 15/08 · KNOB · the transformation does not share the project's 600 ms cycle · the shared duration existed so walks could be compared, and this is not a walk
