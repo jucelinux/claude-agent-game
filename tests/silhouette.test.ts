@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { Grammar } from '../src/core/types.ts'
 import { execute, loadParams } from '../src/io/load.ts'
-import { grammarByName } from '../src/grammars/index.ts'
+import { PAIRS, grammarByName } from '../src/grammars/index.ts'
 import { measure } from '../src/core/metrics.ts'
 import { strip } from '../src/core/render.ts'
 import { GROUND_RGB } from '../src/core/color.ts'
+import { OWNER_OUTLINE } from '../src/core/raster.ts'
 import { GROUND } from '../src/viewer/page.ts'
 
 /**
@@ -85,4 +86,48 @@ describe('silhouette and value', () => {
     expect((m.silhouette[0] as { filled: number; largest: number }).filled).toBe(0)
     expect((m.silhouette[0] as { filled: number; largest: number }).largest).toBe(0)
   })
+})
+
+/**
+ * **If there is a line, the line owns the whole silhouette.**
+ *
+ * Born 15/08 from a defect that had been latent since round zero and needed two things to
+ * surface at once: an idiom that actually enables the outer line, and a pose that reaches
+ * the edge of the cell. The jump's absorb frame ran off the bottom of the canvas, so the
+ * body's own mid-tone fur formed the boundary there — 0.022 from the ground, against a
+ * floor of 0.10. Every idiom shipped before it turns the line off and carries the edge with
+ * `rim`, which pushes edge pixels to a ramp end and hid the hole by accident.
+ *
+ * The lock is conditional on the feature, not universal: a sample with no outer line is
+ * entitled to put its own pixels on the boundary, and several shipped ones do.
+ */
+describe('the outline owns the silhouette', () => {
+  const outlined = PAIRS.filter((p) => loadParams(p.tunables).outline.enabled)
+
+  it('there is at least one outlined grammar to check', () => {
+    // Otherwise this whole block passes by being empty, which is the shape of a lock that
+    // reports success because it never ran (`HARNESS.md` §5).
+    expect(outlined.length).toBeGreaterThan(0)
+  })
+
+  for (const pair of outlined) {
+    it(`${pair.grammar}: no painted part reaches the background or the cell edge`, () => {
+      const params = loadParams(pair.tunables)
+      const frames = strip(grammarByName(pair.grammar), params, 1)
+      for (const [i, frame] of frames.entries()) {
+        const { w, h, data } = frame.buf
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const at = y * w + x
+            if (data[at] === 0) continue
+            if (frame.owners[at] === OWNER_OUTLINE) continue
+            const exposed =
+              x === 0 || y === 0 || x === w - 1 || y === h - 1 ||
+              data[at - 1] === 0 || data[at + 1] === 0 || data[at - w] === 0 || data[at + w] === 0
+            expect(exposed, `${pair.grammar} frame ${i}: part pixel exposed at ${x},${y}`).toBe(false)
+          }
+        }
+      }
+    })
+  }
 })

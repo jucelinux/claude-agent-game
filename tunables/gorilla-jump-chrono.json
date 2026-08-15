@@ -1,0 +1,64 @@
+{
+  "canvas": {
+    "w": 64,
+    "h": 64,
+    "originX": 26,
+    "originY": 34
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 12
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "z": -0.2,
+    "curve": 1.1
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 0.88
+  },
+  "gait": {
+    "swing": 0.22,
+    "lift": 8,
+    "depth": 8
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "playback": {
+    "msPerFrame": 65,
+    "scale": 3
+  },
+  "_anchors": {
+    "canvas.w": "64, twice the control. This sample is the direction my bias pulls toward, and it is here to be knocked down by looking rather than by argument (BACKLOG). — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "canvas.h": "square with canvas.w — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "canvas.originX": "canvas.w * 0.41: the hips sit back of centre because the chest, the arms and the head all reach forward of them — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "canvas.originY": "canvas.h * 0.53. Was 40, and 40 was wrong: the arc measures y 11..63 across the cycle, so the body ran off the bottom of the cell at the absorb pose and no outline could be drawn under it. The arc is 53 px of a 64 px cell and fits comfortably - it was merely 6 px too low. At 34 it spans 5..57 with room for the ring on both sides. Found by the value lock the moment an idiom with an outline was built (15/08); the incumbent clipped identically and passed only because rim pushes clipped pixels to a ramp end.",
+    "tones.perMaterial": "5. One more than the control and three fewer than the incumbent. TASTE.md 1b names Chrono as the bar for silhouette and value separation, and separation is what a short ramp over a wide value range buys - the same eight tones spread over a narrow dark range is what it does not.",
+    "frames.walk": "12, and the grid is the reason: every named phase of the jump lands on a whole frame at twelfths (3/12, 5/12, 7/12, 9/12, 10/12). A phase between frames is a key pose nobody ever sees, and the export contract refuses it. — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "light.x": "unit vector from the upper left, held identical across all four probe samples",
+    "light.curve": "1.1, barely above linear. High curve compresses the dark end into a rim and spends the ramp on the lit half, which is the opposite of a bar whose whole claim is that the light side and the shadow side are two different values.",
+    "light.y": "the y half of light.x's unit vector",
+    "outline.enabled": "ON. Chrono outlines its sprites - that is how they hold at small size against a busy map.",
+    "outline.inner": "on. The joint line plus a five-tone ramp is the pairing this idiom lives on: value separates the planes, the line separates the parts.",
+    "outline.rim": "OFF, for the same reason as the control - a line and a rim are two answers to one question.",
+    "outline.material": "the ink ramp: a violet-black, so the line belongs to the same world as the cool shadows instead of sitting on top of the art as a neutral.",
+    "body.scale": "0.88. The body is ~40 px of a 64 px cell at scale 1, which leaves 24 px of total slack for a 13 px vertical arc plus the limbs that swing outside the standing silhouette. 0.88 buys the room; below ~0.8 the sprite stops matching the walk on a sheet, which is the comparison the round exists for. — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "gait.swing": "0.22 turn = 79 deg of range, against the walk 0.10. The attack found the rule and the jump obeys it: below about 36 deg no limb clears the torso outline, so a far limb behind the mass renders nothing and the pair reads as one. 0.22 is the smallest amplitude at which the far arm and far leg stay present through the whole cycle, measured rather than chosen - half the attack, because a jump throws its limbs and a slam swings them. — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "gait.lift": "8 px = a fifth of the standing body height (~36 px at this scale). A gorilla is not a floaty jumper; height past about a quarter of body height reads as a smaller, lighter animal, and weight is the axis this run is spending. — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "texture.speckle": "0. Chrono sprites have no noise; every pixel is placed. Noise is the incumbent idiom’s signature and it is the thing this probe most wants to see the back of.",
+    "playback.msPerFrame": "65 ms. 12 x 65 = 780 ms, deliberately longer than the walk’s shared 600 ms - a heavy body takes longer to crouch, leave and land than it takes to make one stride. DECISIONS 15/08 already broke the shared cycle for the same reason. — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "light.z": "-0.2, the most raking light in the repo. Near 0 the lamp grazes the form and the modelling comes back; the incumbent -0.35 puts the centre of every mass two thirds up its ramp, which is how a body ends up mid-toned everywhere at once.",
+    "gait.depth": "8 px, inert in this gait: the jump has no z track. Kept at the arm row separation (bone z is +/-9) so it means the right thing the moment one is added. — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither."
+  }
+}

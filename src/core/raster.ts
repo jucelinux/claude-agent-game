@@ -239,7 +239,21 @@ export function rimEdge(
   for (const [at, index] of writes) data[at] = index
 }
 
-/** One dark ring on the empty pixels that touch ink. A knob, not a constant. portable. */
+/**
+ * One dark ring on the empty pixels that touch ink. A knob, not a constant.
+ *
+ * **The ring is 8-connected, and the four-connected version was a hole in the harness.**
+ * A ring grown on orthogonal neighbours alone leaves the diagonal corners of every
+ * staircase open, so along any 45° edge the body still touches the background — and the
+ * value lock reported it honestly at 0.022 against a floor of 0.10 the moment an idiom
+ * with an outline was finally built. It had been wrong since round zero and nothing had
+ * caught it, because **both shipped idioms turn this function off and carry the silhouette
+ * with `rim` instead**, which pushes every edge pixel to a ramp end and incidentally fixes
+ * the value. Two answers in use, and each of them masking the defect in the third.
+ *
+ * The rule it now guarantees: **if there is a line, the line owns the whole silhouette.**
+ * Locked in `tests/silhouette.test.ts`. portable.
+ */
 export function outline(painter: Painter, index: number): void {
   const { w, h, data } = painter.buf
   const edge: number[] = []
@@ -247,11 +261,19 @@ export function outline(painter: Painter, index: number): void {
     for (let x = 0; x < w; x++) {
       const at = y * w + x
       if (data[at] !== 0) continue
-      const touches =
-        (x > 0 && data[at - 1] !== 0) ||
-        (x < w - 1 && data[at + 1] !== 0) ||
-        (y > 0 && data[at - w] !== 0) ||
-        (y < h - 1 && data[at + w] !== 0)
+      let touches = false
+      for (let dy = -1; dy <= 1 && !touches; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dx === 0 && dy === 0) continue
+          const nx = x + dx
+          const ny = y + dy
+          if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue
+          if (data[ny * w + nx] !== 0) {
+            touches = true
+            break
+          }
+        }
+      }
       if (touches) edge.push(at)
     }
   }

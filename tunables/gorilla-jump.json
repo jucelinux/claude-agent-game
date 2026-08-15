@@ -3,7 +3,7 @@
     "w": 64,
     "h": 64,
     "originX": 26,
-    "originY": 40
+    "originY": 34
   },
   "tones": {
     "perMaterial": 8
@@ -42,7 +42,7 @@
     "canvas.w": "64, twice the control. This sample is the direction my bias pulls toward, and it is here to be knocked down by looking rather than by argument (BACKLOG).",
     "canvas.h": "square with canvas.w",
     "canvas.originX": "canvas.w * 0.41: the hips sit back of centre because the chest, the arms and the head all reach forward of them",
-    "canvas.originY": "canvas.h * 0.63, lower than the walk by 4 px. The whole arc has to fit one 64 px cell, and the arc is asymmetric: the apex takes 8 px above the rest pose and the absorb takes 5 below it, so the rest pose sits below centre to buy the headroom where the jump actually needs it.",
+    "canvas.originY": "canvas.h * 0.53. Was 40, and 40 was wrong: the arc measures y 11..63 across the cycle, so the body ran off the bottom of the cell at the absorb pose and no outline could be drawn under it. The arc is 53 px of a 64 px cell and fits comfortably - it was merely 6 px too low. At 34 it spans 5..57 with room for the ring on both sides. Found by the value lock the moment an idiom with an outline was built (15/08); the incumbent clipped identically and passed only because rim pushes clipped pixels to a ramp end. Changed here too, and identically, or the ink probe would differ in two things.",
     "tones.perMaterial": "8, above the knob's declared 3-6 range on purpose: this is the sample that spends everything, so the round can see what spending buys",
     "frames.walk": "12, and the grid is the reason: every named phase of the jump lands on a whole frame at twelfths (3/12, 5/12, 7/12, 9/12, 10/12). A phase between frames is a key pose nobody ever sees, and the export contract refuses it.",
     "light.x": "unit vector from the upper left, held identical across all four probe samples",
