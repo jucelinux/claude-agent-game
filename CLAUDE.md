@@ -195,6 +195,33 @@ He is the tiebreaker and the one who sets the bar — not an inspector. Rules in
   is usually a harness probe** — "leaves follow a mathematical pattern, could you draw the
   pattern?" was this project's own founding premise applied one level deeper than the model
   had applied it, and it turned into a primitive.
+- **Language rule, added 15/08, at his request.** Report to him in **ASD-STE100 Simplified
+  Technical English**. If you write in Portuguese, use the simplified Portuguese of the
+  aeronautical standard. The rules to obey:
+  - Write short sentences. Use 20 words maximum in an instruction. Use 25 words maximum in
+    a description.
+  - Write in the active voice.
+  - Use one word for one meaning. Do not change the word to make the text more varied.
+  - Write one idea in one sentence.
+  - Do not use metaphor. Do not use idiom.
+  - Keep the articles. Do not remove words to make the text short.
+  - Use a list when you show steps or items.
+  - Use 6 sentences maximum in a paragraph.
+  - Technical names and technical verbs of this domain are permitted. Examples: z-buffer,
+    palette, ramp, primitive, gate, phase.
+
+  **This rule agrees with the ask format below.** That paragraph already says an ask must
+  use plain language. This rule makes the requirement exact instead of approximate.
+
+  **What does not change:** the numbers, the declared costs, and the misses. Simple language
+  is not less precision. If a result is bad, say that it is bad.
+
+  **What this rule does not do:** it does not make the text shorter. Simple sentences use
+  more space than dense sentences. A limit on length is a separate rule.
+
+  **Scope:** reports to him. The repository files keep their present style. He must ask
+  before that changes.
+
 - **Delegation line:** the model applies alone — clear margin, rungs 1–3 green. Waits for a
   batch — a tie, a direction call. Interrupts immediately — nothing, now that the gate has
   no strike counter.
