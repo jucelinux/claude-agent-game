@@ -138,7 +138,8 @@ proved the pattern works on a visual artifact.
    harder and testable: **can a fresh agent, given only this repository, build a small
    game?** If not, the product does not exist however well it works when I drive it.
 
-**The slice, chosen by him 15/08: a one-screen platformer.** A character, a floor, some
+**The slice, chosen by him 15/08, and it comes AFTER the drawing is finished: a one-screen
+platformer.** A character, a floor, some
 platforms, something to reach. It needs gravity, box-against-box collision, a jump and a
 fixed camera — and it reuses more of what exists than the alternatives, because the gorilla
 already jumps. **Build the engine only as far as that game needs it.** A game engine is
@@ -177,25 +178,33 @@ input sequence must replay to the same state, or an agent cannot verify a game a
 
 ---
 
-## 2. Build order, as of 15/08 — **re-cut when the product became an engine**
+## 2. Build order — **drawing capacity first, and the engine after it**
+
+_His rationale, 15/08, and it corrects an order I had written the wrong way round: **the
+greater the production capacity, the greater the diversity of games possible.** Drawing is
+upstream of the engine, not parallel to it. An engine with a thin asset pipeline makes thin
+games, and no amount of engine work fixes that. **No secondary track. The engine waits.**_
 
 1. ~~Round zero — deterministic core + perception channel~~ **done, 14/08.**
 2. ~~Vertical slice of a grammar~~ **done** — gorilla walk/jump/attack, tree.
-3. ~~The exporter~~ **dead, 15/08.** It answered "compatible outward", and that requirement
-   was replaced by "usable by agents other than this one". Exporting into another engine is
-   a bridge to a competitor.
-4. **The engine slice: a one-screen platformer.** In dependency order —
-   deterministic headless simulation with a fixed timestep · entities · box collision and
-   gravity · recorded input that replays identically · the animation state machine
-   (idle, walk, jump, attack) · the browser runtime, which is mostly the viewer that
-   already exists plus input.
-5. **The agent's perception of a *running game*.** The same pattern as the sprite channel,
-   one level up: a text readout of the simulation and a findings list — *the player never
-   reached the goal*, *the player fell through the floor at frame 143*, *this gap cannot be
-   cleared by any jump*. **This is the differentiator, not the platformer.**
-6. **Drawing subsystem, item 4: pattern inside a part.** Deferred on purpose. No commission
-   has failed for want of it yet, and building it now would be designing generality instead
-   of harvesting it (§5). It enters when a commission needs it.
+3. ~~The exporter~~ **dead, 15/08.**
+4. **Finish the drawing, and "finish" has a definition rather than a feeling:
+   commissions ship reliably across kinds.** That is exactly what gate v3 measures, and the
+   gate has never run. So the next step is **a commission batch**, not another feature —
+   because a miss is a specification and a feature chosen without one is a guess.
+   Known gaps, named so they can be recognised when a commission hits one, and **not** built
+   before it does:
+   - **pattern inside a part** — stripes, spots, scales, grain, brick. A part has one
+     material and one ramp today.
+   - **effects** — fire, smoke, sparks, an explosion. There is no mechanism at all.
+   - **facing** — one direction is rendered. Four or eight need rotation in depth.
+   - **generativity** — an L-system turns one tree into trees.
+5. **Then the engine slice: a one-screen platformer.** Deterministic headless simulation,
+   fixed timestep, entities, box collision, gravity, recorded input that replays
+   identically, the animation state machine, and the browser runtime — which is mostly the
+   viewer that already exists plus input.
+6. **The agent's perception of a *running game*.** The same pattern as the sprite channel,
+   one level up, and **the differentiator — not the platformer.**
 7. Judging apparatus — only if judging becomes the bottleneck.
 
 ## 3. Stack

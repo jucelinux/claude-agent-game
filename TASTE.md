@@ -96,6 +96,16 @@ _Fills from evidence. Every entry cites the artifact that produced it._
   **What raises the ceiling, then:** more budget than I expected to be allowed. That is a
   hypothesis with one observation, not a law — the next verdict can move it.
 
+- **[15/08 · two build orders in two turns, both corrected by him] I sequence toward the
+  newest stated goal instead of asking what it depends on.** He reframed the product as an
+  engine, and within one turn I had written a build order putting the engine first and
+  deferring the drawing subsystem — the only one with measured results and a running gate.
+  His correction was one sentence of dependency: production capacity is upstream of the
+  engine, because an engine with a thin asset pipeline makes thin games. **The pull is
+  toward the most recently spoken thing, and a stated goal is not the same as the next
+  step.** portable, and cheap to correct: before ordering work, name what each item is
+  blocked by, and let the graph do the ordering instead of the conversation.
+
 - **[15/08 · three gate designs, all corrected by him] I keep trying to mechanise the one
   judgment that is his.** Gate v1 hid the answer from him and had a logic hole. Gate v2
   needed five files he had to collect, and I asked for them three times without once saying
