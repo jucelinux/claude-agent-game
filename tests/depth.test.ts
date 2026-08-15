@@ -286,10 +286,13 @@ describe('shadow', () => {
     expect([...shadowed.buf.data]).not.toEqual([...none.buf.data])
   })
 
-  it('the shadow lands on the far side of the caster, and it moves when the lamp moves', () => {
-    // Calibrated in both directions. The lamp is directly above, so the disc in front must
-    // darken the receiver BELOW it and leave the receiver above it alone. Flip the lamp
-    // under the scene and the darkened band has to change rows.
+  it('the shadow lands on the far side of the caster, and vanishes when the lamp crosses over', () => {
+    // Calibrated in both directions, and the second direction is stronger than the first
+    // draft of this test expected. The caster sits ABOVE the receiver, so a lamp above
+    // throws its shadow down onto the receiver, and a lamp below throws it up into empty
+    // space. The correct assertion is therefore not "the band moves" but "the band exists
+    // and then does not" — the first version asserted movement, and failed because the
+    // engine was right and the test was wrong about the geometry.
     const rowsDarkened = (p: Params): number[] => {
       const off = sprite(scene(), { ...p, shadow: { ...p.shadow, strength: 0 } }, 1, 0)
       const on = sprite(scene(), p, 1, 0)
@@ -302,11 +305,34 @@ describe('shadow', () => {
     const fromAbove = rowsDarkened(lit())
     const fromBelow = rowsDarkened(lit({ light: { x: 0, y: 1, z: -0.35, curve: 1 } }))
     expect(fromAbove.length).toBeGreaterThan(0)
-    expect(fromBelow.length).toBeGreaterThan(0)
-    // The caster sits above the receiver's centre, so a lamp above throws the band lower
-    // than a lamp below does.
-    const mean = (rows: number[]): number => rows.reduce((a, b) => a + b, 0) / rows.length
-    expect(mean(fromAbove)).toBeGreaterThan(mean(fromBelow))
+    expect(fromBelow).toEqual([])
+    expect(Math.min(...fromAbove)).toBeGreaterThan(9)
+    // And every darkened row sits below the caster's own centre row, which is where a
+    // shadow thrown from above has to land. The caster's centre is at y = 16 - 7 = 9. The
+    // first draft asserted y > 16 and failed at 11, which was the test guessing the
+    // geometry instead of deriving it: the receiver is visible right beside the caster, so
+    // the band starts as soon as there is receiver to the side of it.
+  })
+
+  it('a convex part never shadows itself, at any radius and any bias', () => {
+    // **The null case the bias could not deliver.** Acne scales with curvature, so a lone
+    // sphere self-shadowed 198 px at radius 18 and went on self-shadowing at eight times
+    // the tolerance. Identity settles exactly what the tolerance was approximating: every
+    // primitive here is convex in depth, and a convex solid cannot cast onto itself under a
+    // directional light. The loop is over radius AND bias because the defect was a function
+    // of both, and the fix has to be a function of neither.
+    for (const rx of [6, 11, 18, 22]) {
+      for (const bias of [0.05, 0.25, 1.2]) {
+        const lone: Grammar = {
+          ...twoDiscs(0, 0),
+          parts: [{ name: 'A', bone: 'a', material: 'mass', shape: { kind: 'ellipse', cx: 0, cy: 0, rx, ry: rx } }],
+        }
+        const params = lit({ shadow: { steps: 8, bias, strength: 1 } })
+        const on = sprite(lone, params, 1, 0)
+        const off = sprite(lone, { ...params, shadow: { ...params.shadow, strength: 0 } }, 1, 0)
+        expect([...on.buf.data], `radius ${rx}, bias ${bias}`).toEqual([...off.buf.data])
+      }
+    }
   })
 
   it('a lamp aimed straight at the viewer casts nothing', () => {
@@ -340,5 +366,65 @@ describe('shadow', () => {
     for (let at = 0; at < on.buf.data.length; at++) {
       if (off.owners[at] === OWNER_OUTLINE) expect(on.buf.data[at]).toBe(off.buf.data[at])
     }
+  })
+})
+
+/**
+ * **The fill light.** A second, weaker lamp opposite the key, so the shadow half of a body
+ * keeps a step of form instead of landing on the floor of its ramp and staying there.
+ */
+describe('fill light', () => {
+  const disc = (): Grammar => {
+    const g = twoDiscs(0, 0)
+    return { ...g, parts: [{ name: 'A', bone: 'a', material: 'mass', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 11, ry: 11 } }] }
+  }
+  const withFill = (weight: number, x = 0.5): Params =>
+    bench({ light: { x: -0.6, y: -0.8, z: -0.35, curve: 1 }, fill: { x, y: 0.7, z: -0.2, weight } })
+
+  it('null case: at weight 0 the fill direction cannot change anything', () => {
+    // The cleanest available form of "the measured thing switched off": with the weight at
+    // zero, two opposite fill directions must produce the same bytes. If they do not, the
+    // weight is not gating the term and every sample authored before the fill existed is
+    // silently rendering differently.
+    const left = sprite(disc(), withFill(0, -0.9), 1, 0)
+    const right = sprite(disc(), withFill(0, 0.9), 1, 0)
+    expect([...left.buf.data]).toEqual([...right.buf.data])
+
+    // Not vacuous: with weight on, the same two directions disagree.
+    const litLeft = sprite(disc(), withFill(0.3, -0.9), 1, 0)
+    const litRight = sprite(disc(), withFill(0.3, 0.9), 1, 0)
+    expect([...litLeft.buf.data]).not.toEqual([...litRight.buf.data])
+  })
+
+  it('the fill lifts the shadow end of the ramp, and lifts it further as it strengthens', () => {
+    // The whole purpose in one assertion, calibrated by degree rather than by presence.
+    const darkestLevel = (p: Params): number => {
+      const frame = sprite(disc(), p, 1, 0)
+      const ramp = disc().palette.ramps[0]!.indices
+      let lowest = ramp.length
+      for (const v of frame.buf.data) {
+        if (v === 0) continue
+        const level = ramp.indexOf(v as number)
+        if (level >= 0 && level < lowest) lowest = level
+      }
+      return lowest
+    }
+    const none = darkestLevel(withFill(0))
+    const some = darkestLevel(withFill(0.35))
+    expect(none).toBe(0)
+    expect(some).toBeGreaterThan(none)
+  })
+
+  it('the fill costs value range, which is the trade it has to be worth', () => {
+    // Declared in the type and asserted here, so nobody has to take the comment's word for
+    // it: a fill compresses the ramp. His ink verdict says range is half of what makes a
+    // sprite read, so the knob spends the exact thing that verdict selected.
+    const spread = (p: Params): number => {
+      const frame = sprite(disc(), p, 1, 0)
+      const used = new Set<number>()
+      for (const v of frame.buf.data) if (v !== 0) used.add(v as number)
+      return used.size
+    }
+    expect(spread(withFill(0.6))).toBeLessThan(spread(withFill(0)))
   })
 })

@@ -1,0 +1,6 @@
+{
+  "grammar": "gorilla-jump-chrono",
+  "tunables": "gorilla-jump-chrono",
+  "seed": 1,
+  "overrides": { "shadow.strength": 0 }
+}

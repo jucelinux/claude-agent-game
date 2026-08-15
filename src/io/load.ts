@@ -45,6 +45,7 @@ const REQUIRED: readonly string[] = [
   'tones.perMaterial',
   'frames.walk',
   'light.x', 'light.y', 'light.z', 'light.curve',
+  'fill.x', 'fill.y', 'fill.z', 'fill.weight',
   'outline.enabled', 'outline.material', 'outline.inner', 'outline.rim',
   'body.scale',
   'gait.swing', 'gait.lift', 'gait.depth',

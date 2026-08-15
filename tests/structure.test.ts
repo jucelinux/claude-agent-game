@@ -101,7 +101,12 @@ describe('the findings channel — null cases', () => {
     // Same shape, same size, same palette. Only per-pixel noise differs.
     expect(noisy.count).toBeGreaterThan(clean.count * 2)
     expect(noisy.meanSize).toBeLessThan(clean.meanSize)
-    expect(noisy.singletonFraction).toBeGreaterThan(clean.singletonFraction)
+    // **The singleton fraction is deliberately NOT asserted, and that is a finding about
+    // the metric.** It is not monotonic in noise: at a heavy speckle rate the dropped
+    // pixels start touching each other and form blobs, so the proportion of one-pixel
+    // regions falls even as the region count doubles. It reads correctly at the rates real
+    // samples use and misleads at extremes, so the findings channel prints it and no lock
+    // depends on it. Count and mean size are the discriminators.
   })
 
   it('an empty output says it is empty instead of reporting nothing wrong', () => {

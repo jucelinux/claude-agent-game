@@ -50,6 +50,7 @@ export function paintPart(
   xf: Xform,
   ramp: readonly number[],
   light: { readonly x: number; readonly y: number; readonly z: number; readonly curve: number },
+  fill: { readonly x: number; readonly y: number; readonly z: number; readonly weight: number },
   partId: number,
   rng: Rng | null,
   speckle: number,
@@ -80,6 +81,14 @@ export function paintPart(
   const lx = (cos * light.x + sin * light.y) / lm
   const ly = (-sin * light.x + cos * light.y) / lm
   const lz = light.z / lm
+
+  // The fill goes through exactly the same rotation and normalization as the key, so the
+  // two are in one space and the blend below is a blend of like with like.
+  const fw = fill.weight
+  const fm = Math.hypot(fill.x, fill.y, fill.z) || 1
+  const fx = (cos * fill.x + sin * fill.y) / fm
+  const fy = (-sin * fill.x + cos * fill.y) / fm
+  const fz = fill.z / fm
 
   const { w: cw, h: ch, data } = painter.buf
   const { depth } = painter
@@ -133,7 +142,13 @@ export function paintPart(
       // distance-to-edge sweep it used to be — and the cost lands on `light.z`, which
       // decides how much ramp a body spends on merely facing the viewer.
       const dot = hit.nx * lx + hit.ny * ly + hit.nz * lz
-      const u = (dot + 1) / 2
+      // Two lamps, blended before the curve and before the quantisation. At weight 0 this
+      // reduces to the single-lamp expression exactly, which is the null case.
+      let u = (dot + 1) / 2
+      if (fw > 0) {
+        const dotFill = hit.nx * fx + hit.ny * fy + hit.nz * fz
+        u = u * (1 - fw) + ((dotFill + 1) / 2) * fw
+      }
       let level = Math.floor((light.curve === 1 ? u : Math.pow(u, 1 / light.curve)) * levels)
       if (level >= levels) level = levels - 1
       if (level < 0) level = 0
@@ -225,8 +240,15 @@ export function innerOutline(painter: Painter, index: number): void {
  * - **The edge is hard.** A pixel is lit or it is not, and an unlit one drops whole ramp
  *   steps. The ink verdict of 15/08 said regions with a boundary beat gradient; a soft
  *   falloff would spend the middle of a ramp that is already spent.
- * - **The bias is not optional.** Without it a curved surface marches along its own tangent
- *   and shadows itself, which is acne rather than shading.
+ * - **A part never shadows itself, and that is enforced by identity rather than by
+ *   tolerance.** Every primitive in this vocabulary is convex in depth, and a convex solid
+ *   cannot cast onto itself under a directional light — so a ray that lands back on the
+ *   part it started from has found acne, not an occluder. The first version guarded this
+ *   with a depth bias and it did not work: acne scales with a surface's curvature, so a
+ *   lone sphere self-shadowed 198 px at radius 18 and still self-shadowed at a bias eight
+ *   times larger. The owners buffer answers exactly what the bias was approximating.
+ * - **The bias still earns its place**, now for the case it can actually settle: two
+ *   different parts whose surfaces meet at nearly the same depth.
  *
  * portable.
  */
@@ -260,6 +282,7 @@ export function castShadow(
       const here = rampAt(data[at] as number)
       if (here === undefined || here.level === 0) continue
 
+      const self = painter.owners[at] as number
       let rx = x + 0.5
       let ry = y + 0.5
       let rz = depth[at] as number
@@ -271,7 +294,11 @@ export function castShadow(
         const ix = Math.floor(rx)
         const iy = Math.floor(ry)
         if (ix < 0 || iy < 0 || ix >= w || iy >= h) break
-        const d = depth[iy * w + ix] as number
+        const probe = iy * w + ix
+        // A convex part cannot cast onto itself. Skipping rather than breaking: the ray
+        // passes over its own body and may still meet a different part further along.
+        if ((painter.owners[probe] as number) === self) continue
+        const d = depth[probe] as number
         if (d < rz - bias) {
           blocked = true
           break

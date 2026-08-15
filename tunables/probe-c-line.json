@@ -61,12 +61,22 @@
     "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",
     "gait.depth": "canvas.w / 8 = 8 px. Backfilled with the depth solver; no track in this sample uses the z channel, so it is inert here. It is the body's half-width rather than 0 so that it already means something the day a depth track is added.",
     "shadow.steps": "8 px, and it is measured rather than chosen: a sweep at 6, 10, 16 and 24 returns the same shadow area from 6 onward. Past a few pixels the ray has left the body and there is nothing more to block it. 8 keeps a small margin over the saturation point.",
-    "shadow.bias": "0.4 px of depth. Measured both ways: at 0.75 the shadow covers 5.3% of the body and at 0.4 it covers 8.7%. The cost of the lower value is surface acne, which fragments the tone regions - the findings channel measured that cost at 230 regions to 239 on the tree, which is small enough to pay.",
-    "shadow.strength": "1 ramp step. On a five-tone ramp that is a fifth of the whole range, which is a readable value drop with a hard edge - the shape the ink verdict of 15/08 selected. 0 disables the pass."
+    "shadow.bias": "0.25 px of depth, and its job changed. It used to guard against a surface shadowing itself, and it could not: acne scales with curvature, so a lone sphere of radius 18 self-shadowed 198 px and still self-shadowed at eight times the tolerance. That case is now settled by identity - a convex part cannot cast onto itself - so the bias only arbitrates a tie between two DIFFERENT parts whose surfaces meet at nearly the same depth. A quarter of a pixel is enough for that, and acne measures zero at every radius and every bias.",
+    "shadow.strength": "1 ramp step. On a five-tone ramp that is a fifth of the whole range, which is a readable value drop with a hard edge - the shape the ink verdict of 15/08 selected. 0 disables the pass.",
+    "fill.x": "+0.5, opposite the key lamp on the horizontal. A fill placed on the same side as the key lifts the half that is already lit and does nothing for the half that needs it.",
+    "fill.y": "+0.7, from BELOW. This is bounce: light off the ground back up into the underside of a body. Every fill in painting and photography comes from lower than the key for that reason.",
+    "fill.z": "-0.2, barely on the viewer side. A fill that faces the viewer as hard as the key does flattens the form it exists to recover.",
+    "fill.weight": "0.15, and it is the measured edge rather than a taste. His ink verdict of 15/08 requires BOTH a wide value range and clustered tone regions, and this knob moves them in opposite directions. Swept at 0, 0.10, 0.13, 0.15, 0.17, 0.19 and 0.22: regions improve monotonically, and the tree loses 23% of its value range between 0.15 and 0.17 (0.654 down to 0.504). 0.15 is the largest weight that costs no range on either subject, and it still buys a 7% gain in region size."
   },
   "shadow": {
     "steps": 8,
-    "bias": 0.4,
+    "bias": 0.25,
     "strength": 1
+  },
+  "fill": {
+    "x": 0.5,
+    "y": 0.7,
+    "z": -0.2,
+    "weight": 0.15
   }
 }

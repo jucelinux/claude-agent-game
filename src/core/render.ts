@@ -45,7 +45,7 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     // The part's own depth rides on the bone's, scaled with it: a body that shrinks takes
     // its browridge along instead of leaving it floating where the head used to be.
     const xf = part.z === undefined ? bone : { ...bone, z: bone.z + bone.s * part.z }
-    paintPart(painter, part.shape, xf, ramp.indices, params.light, i, rng, params.texture.speckle, part.shift ?? 0)
+    paintPart(painter, part.shape, xf, ramp.indices, params.light, params.fill, i, rng, params.texture.speckle, part.shift ?? 0)
   }
 
   // **Shadow, before every edge treatment.** It needs the finished depth buffer, so it

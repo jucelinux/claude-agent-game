@@ -217,6 +217,28 @@ export type Params = {
    */
   readonly light: { readonly x: number; readonly y: number; readonly z: number; readonly curve: number }
   /**
+   * **The fill light: a second, weaker lamp that keeps the shadow side from going flat.**
+   *
+   * With one lamp, every surface turned away from it lands on the darkest tone of its ramp
+   * and stays there — so the shadow half of a body is one colour and carries no form at all.
+   * A fill is what a photographer puts opposite the key, and what a painter calls bounce.
+   *
+   * `weight` blends the two, and at 0 the render is byte-identical to a single lamp — which
+   * is the null case and the reason the field is a weight rather than a switch.
+   *
+   * **Declared cost.** A fill compresses the value range: it lifts the dark end and pulls
+   * the light end down. The ink verdict of 15/08 says a wide value range is half of what
+   * makes a sprite read, so this knob spends the exact thing that verdict selected. It is
+   * paid for only if the form it returns on the shadow side is worth more than the range it
+   * costs, and that trade is measured, not assumed.
+   *
+   * **Known limitation, and it points at a gap rather than a bug.** A real fill is a
+   * different *colour* from the key, usually cooler. A material here has one ramp, so a
+   * fill can only lift value and never shift hue. Colour temperature needs more than one
+   * ramp per part, which is a vocabulary the grammar does not have yet.
+   */
+  readonly fill: { readonly x: number; readonly y: number; readonly z: number; readonly weight: number }
+  /**
    * How the silhouette is made to read. `enabled` draws a line outside it; `rim` pushes the
    * sprite's own edge pixels to the ends of their ramps instead. They are the two answers
    * this round is comparing, and they are independent knobs so that "both" and "neither"
