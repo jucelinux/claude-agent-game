@@ -122,6 +122,13 @@ describe('viewer — the human channel', () => {
       const html = emit({ ...BASE, mode, cells: cellsFor() })
       expect(html.includes('id="nav"'), `${mode} is on slides`).toBe(false)
     }
+    // A comparison asked to become a slideshow is an error, not a quietly dropped option:
+    // the gate reading *is* six cells at once, and the self-test means nothing sequentially.
+    for (const mode of ['gate', 'selftest'] as const) {
+      expect(() => emit({ ...BASE, mode, slides: true, cells: cellsFor() })).toThrow()
+    }
+    // A history published as a file still gets slides — that is what history wants.
+    expect(emit({ ...BASE, mode: 'bench', slides: true, cells: cellsFor() })).toContain('id="nav"')
   })
 
   it('the ground is black, and the self-test keeps its grey on purpose', () => {

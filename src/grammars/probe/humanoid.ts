@@ -29,11 +29,16 @@ const CLOTH: Palette = {
     [18, 18, 30],
     [28, 28, 44],
     [40, 40, 60],
+    [92, 20, 34],
+    [148, 34, 42],
+    [198, 58, 48],
+    [236, 118, 74],
   ],
   ramps: [
     { material: 'cloth', indices: [1, 2, 3, 4] },
     { material: 'skin', indices: [5, 6, 7, 8] },
     { material: 'ink', indices: [9, 10, 11, 12] },
+    { material: 'sash', indices: [13, 14, 15, 16] },
   ],
 }
 
@@ -74,9 +79,18 @@ export const probeD: Grammar = {
     { name: 'legNU', bone: 'legNU', material: 'cloth', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 2.6 } },
     { name: 'legNL', bone: 'legNL', material: 'cloth', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 2.1 } },
     { name: 'torso', bone: 'torso', material: 'cloth', shape: { kind: 'ellipse', cx: 0, cy: -7, rx: 5, ry: 8 } },
-    { name: 'scarf0', bone: 'scarf0', material: 'cloth', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6, r: 2 } },
-    { name: 'scarf1', bone: 'scarf1', material: 'cloth', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 5, r: 1.6 } },
-    { name: 'scarf2', bone: 'scarf2', material: 'cloth', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 4, r: 1.2 } },
+    // The sash: its **own material**, and that is the rule rather than the colour.
+    // The human read it as "a buggy arm", and he was right about where and right about
+    // why: it was `cloth` — the same ramp as the torso and the upper arm — built from
+    // tapering capsules, which is the vocabulary of a limb, and it emerged at the neck
+    // where an arm belongs. Painting it red fixes this sprite. Giving an accessory its
+    // own material fixes the family, and it is what stops the next accessory from being
+    // read as anatomy. **portable.**
+    // The taper is inverted too: a limb narrows toward its end, a trailing cloth widens
+    // before it frays.
+    { name: 'sash0', bone: 'scarf0', material: 'sash', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6, r: 1.6 } },
+    { name: 'sash1', bone: 'scarf1', material: 'sash', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6, r: 2.2 } },
+    { name: 'sash2', bone: 'scarf2', material: 'sash', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 5, r: 1.5 } },
     { name: 'head', bone: 'head', material: 'skin', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 4.5, ry: 4.5 } },
     { name: 'mask', bone: 'head', material: 'cloth', shape: { kind: 'rect', x: -4.5, y: -4.5, w: 9, h: 4 } },
     { name: 'armNU', bone: 'armNU', material: 'cloth', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.2 } },

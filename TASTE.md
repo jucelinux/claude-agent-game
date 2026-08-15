@@ -29,6 +29,16 @@ Last distillation: none — the log does not exist yet._
 - `[declared]` **He declines the menu and names his own option.** Three availability
   options offered, none chosen, his own answer better than all three. That is §7 happening:
   translate, do not offer a menu.
+- **[derived · 15/08 · probe C, gallery #0004]** **The high-budget idiom impressed him
+  most** — 64 px, 8 tones per material, gradient and speckle, no outer outline. This is the
+  first line here that came from a verdict on a sample rather than from a declaration, and
+  it **outranks** every `[declared]` line it touches. It also lands on the sample the model
+  put in the probe expecting to knock it down.
+- **[derived · 15/08 · probe D]** **He reads a defect through what it resembles, not
+  through what it is:** "the sash plus the neck skin makes it look like a buggy arm". The
+  location was exact and the cause was one level below the words — same material as the
+  torso and the arm, and limb-shaped taper. Section 7's sensor role, working exactly as
+  described.
 - `[declared]` **He picks the medium, delegates the taste inside it, and asks to be told
   before it is applied.** Overrode the GIF recommendation with "let's go HTML", floated a
   game engine as a question rather than an instruction, then handed the call back. The
@@ -53,7 +63,7 @@ exist yet._
 | silhouette and value separation | Chrono Trigger — **target** | H, 14/08 |
 | animation weight and arc | Chrono Trigger — **target** | H, 14/08 |
 | drawn line, squash & stretch on a humanoid | Comix Zone — **declared overshoot** | H, 14/08 |
-| tone budget per material | **EMPTY** — becomes a knob, not a bar | — |
+| tone budget per material | **8** — no longer empty. Probe C, the deliberate overshoot of the declared 3–6 range, is the sample he singled out | H, 15/08, on a sample |
 
 **Why these three, in this order.** Stardew is the control: if I do not clear the control,
 round 1 already answers everything and nothing else matters. Chrono is the target because
@@ -69,15 +79,23 @@ Retired: nothing yet.
 
 ## 2a. The model's biases
 
-**Deliberately empty.** `INTAKE.md`: §2a and §2b fill from evidence, not from declaration.
-Inheriting the lines from another project is exactly the residue v0.6 exists to prevent —
-a cold session reads whatever is in the repo as a requirement.
+_Fills from evidence. Every entry cites the artifact that produced it._
 
-One conviction of this project is **already positioned against** a bias I expect to find
-here, and it is locked in `CLAUDE.md` §1 rather than here, because it came from a design
-choice and not from a measured incident: **deliberate emptiness** — large flat areas, flat
-first and accent after. It exists against the pull to polish. When it falls or is
-confirmed, the corresponding line is born here, with the artifact that demonstrated it.
+- **[15/08 · probe C, gallery #0004] The restraint conviction fell on its first contact
+  with a verdict — and the bias it was guarding against was never demonstrated.** The probe
+  shipped C as "the direction my bias pulls toward, here to be knocked down by looking";
+  the human looked and it is the sample he singled out. **The bias worth recording is not a
+  pull toward polish — it is a pull toward predicting that restraint wins**, which let me
+  write a sample's verdict into the backlog before anyone had seen it. A prediction dressed
+  as a bracket is still a prediction, and this one was wrong.
+  **What raises the ceiling, then:** more budget than I expected to be allowed. That is a
+  hypothesis with one observation, not a law — the next verdict can move it.
+
+The conviction it replaces — **deliberate emptiness**, large flat areas, flat first and
+accent after — stays recorded in `CLAUDE.md` §1 as a design choice made on day zero. It is
+now **contradicted at one point by one verdict**, which is exactly one point and one
+verdict: a pivot invalidates a batch, not a line (§8), and the cluster gets hunted before
+anything else here is rewritten.
 
 ---
 

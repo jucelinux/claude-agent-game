@@ -57,6 +57,8 @@ export type ViewSpec = {
   readonly notes?: readonly string[]
   /** Defaults to `GROUND`. The self-test overrides it, and its reason is on `GROUND`. */
   readonly ground?: string
+  /** One cell at a time with arrows. Defaults to on for `live`; forbidden for comparisons. */
+  readonly slides?: boolean
 }
 
 export function emit(spec: ViewSpec): string {
@@ -66,12 +68,15 @@ export function emit(spec: ViewSpec): string {
   const gate = spec.mode === 'gate'
   const live = spec.mode === 'live'
   /**
-   * **Slides, and only on the live page.** The gate is a comparison and must show all six
-   * cells at once; the self-test is four cells whose whole point is being seen together.
-   * The live page is the one place where history is long and one-at-a-time is the readable
-   * shape.
+   * **Slides are for history; grids are for comparisons.** The gate must show all six cells
+   * at once because that *is* the reading, and the self-test's four cells only mean
+   * anything side by side — so neither may ever be a slideshow, and asking is an error
+   * rather than a silently ignored option.
    */
-  const slides = live
+  const slides = spec.slides ?? live
+  if (slides && (gate || spec.mode === 'selftest')) {
+    throw new Error(`${spec.mode} is a comparison and cannot be a slideshow`)
+  }
   const ground = spec.ground ?? GROUND
 
   const cells = spec.cells.map((cell) => {
