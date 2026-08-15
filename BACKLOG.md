@@ -46,9 +46,8 @@ reading arrives.
     idiom on purpose. The prediction is that it fails visibly; if it does not fail,
     `TASTE.md` §2b is wrong and that is the round's finding.
 - **Probe needed?** Yes — it is the first round on this axis.
-- **Status, 14/08: the four samples exist and are rendering.** `node bin/view.ts
-  runs/probe-a.run.json runs/probe-b.run.json runs/probe-c.run.json runs/probe-d.run.json`
-  → `.out/probe.html`. All four kept in `gallery/`. **The round is not closed** — it closes
+- **Status, 15/08: the four samples exist, render, and are kept.** `node bin/serve.ts` puts
+  all four on the page as history, live run first. **The round is not closed** — it closes
   on the human's verdict, and the ink question below rides with it.
 - **This round's knobs, and where they landed.** Tones per material opened at 3/4/8 across
   A/B/C — the 3–6 range was declared and C deliberately overshoots it. Walk frames landed
@@ -87,16 +86,17 @@ reading arrives.
       **bench** (labels, `t`, pause, step) is mine; **gate** (no control, no label, no
       tooltip, nothing that names a cell) is his, and both are compiled from the same
       emitter so a cell can never be compared as a renderer: one blit path,
-      nearest-neighbour, integer ×4, and **one tick for the whole page**.
-- [x] **Null case for the viewer, both ways.** `selftest.html` shows a human what each
-      failure looks like; `tests/viewer-runtime.test.ts` runs the same inlined runtime
+      nearest-neighbour, integer scale, and **one clock for the whole page** — a cell may
+      declare a rate and a scale off it, never a timer of its own.
+- [x] **Null case for the viewer, both ways.** `/selftest` shows a human what each
+      failure looks like — **confirmed by him, all four cases, 14/08**; `tests/viewer-runtime.test.ts` runs the same inlined runtime
       headless against a fake DOM. Five defects planted, five caught — smoothing on,
       label leaked into the gate, empty payload, dead tick, index 0 painted opaque. All
       five flatter the sprite. That is the direction instrument defects come in.
 - [x] **The live bench** (`bin/serve.ts`, `node:http` only). The page is opened once and
       never rebuilt: a change re-executes in a fresh process — no module cache to lie —
-      and the frames swap **under a loop that never stops**, with the last 3 generations
-      beside the current one. Locked both ways: it fires when the output changes and stays
+      and the frames swap **under a loop that never stops**, with every kept generation
+      behind it. Locked both ways: it fires when the output changes and stays
       quiet when a watched file is rewritten byte-for-byte. Its failure mode is stale
       frames I believe are fresh, which reads as "the defect is fixed".
 - [x] **The export contract** (`src/export/contract.ts`), declared and locked before the
@@ -120,7 +120,7 @@ reading arrives.
       the human may know exactly which loop is mine and the reading still works.
 - [x] **Every generation kept** (`gallery/`), at the human's request, 14/08. One JSON per
       generation with a new hash — indexed frames, palette, the run that made them. Rebuilt
-      into one page by `bin/gallery.ts`, from the kept data and never from current code, so
+      served by `bin/serve.ts` from the kept data and never from current code, so
       a refactor that changes the render shows up as a difference instead of overwriting
       the past. The live bench keeps automatically on every swap; the suite is barred.
 - [ ] **Mark portable/stack on every grammar rule in the turn it is born.** Standing, never
@@ -144,7 +144,7 @@ without both is a rumour.
 | fixture baseline hash | `8d3118679a7194d2` | `npm run baseline` | 14/08 |
 | min pair distance, shipped tunables | 0.109 | `node bin/run.ts runs/fixture.run.json` | 14/08 |
 | locks green | 45 | `npm test` | 14/08 |
-| gate page, tells found by grep | 0 | `grep -cE "fixture\|label\|keydown\|button\|http\|seed" .out/gate.html` | 14/08 |
+| gate page, tells found by grep | 0 | `node bin/gate.ts runs/probe-b.run.json && grep -cE "fixture\|label\|keydown\|button\|http\|seed" sheet/gate.html` | 15/08 |
 
 ## The harness, as of 14/08
 
