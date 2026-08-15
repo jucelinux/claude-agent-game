@@ -55,3 +55,4 @@ turn — `TASTE-LOOP.md` §3.8. Recording is not propagating.
 - 14/08 · ARTIFACT · engine compatibility is an output contract, not an architecture · depending on one renderer would make the grammar unusable to every other engine, which is the opposite of the artifact reading
 - 14/08 · LOCK · the export contract is declared and locked before the exporter exists · fixed frame rect, pivot on the grid, named phases, anchors, indexed palette, whole-ms timing — the grammar cannot drift out of exportable while nobody is looking
 - 14/08 · LOOP · Pixi enters later as the consumer that proves the claim, never as a dependency · an example that loads the atlas turns "this serves game devs" from rhetoric into a run
+- 14/08 · LOOP · every ask states what to open, what to do, how long, what a pass looks like, and what each answer changes, in plain language · the human asked for it; an ask he has to decode gets rubber-stamped, and a rubber stamp arrives looking like data

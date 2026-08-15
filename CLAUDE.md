@@ -150,6 +150,13 @@ something a test resolves.
 - **Delegation line:** the model applies alone — clear margin, rungs 1–3 green, already
   settled in `TASTE.md`. Waits for a batch — a tie, a direction call. Interrupts
   immediately — a gate strike, and nothing else.
+- **The shape of every ask — his request, 14/08, and it binds.** When the model needs him,
+  it states, in plain language a fifteen-year-old would follow: **what to open · what to
+  do · how long it takes · what a pass looks like · what each possible answer changes.**
+  No method vocabulary inside the ask — rungs, null cases and margins are the model's
+  tooling, not his. **An ask he has to decode is an ask that gets rubber-stamped, and a
+  rubber stamp is worse than silence, because it arrives looking like data.** The method
+  spends his judgment; a badly shaped question spends it on translation instead.
 
 ---
 

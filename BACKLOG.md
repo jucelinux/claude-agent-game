@@ -153,17 +153,32 @@ own subject and **is not content**.
 
 ## Held for the human
 
-In a batch, binary, with samples attached.
+In a batch, with samples attached. **Every item carries the five lines of `CLAUDE.md` §4:
+what to open, what to do, how long, what a pass looks like, what each answer changes.**
+Written for him, so no method vocabulary crosses into this section.
 
-- [ ] **The five published loops: do they exist as files, or is capturing them work with no
-      owner yet?** Not a taste question — a constraint that flows from him to me. Their
-      canvas size and frame rate set what my cell has to be for the comparison to be
-      honest, and the gate cannot take its first reading without them. Asked 14/08.
-- [ ] **Is "ink" in the name aspiration or direction?** `claude-ink-2d` names ink, and ink
-      is Comix Zone — the overshoot I just declared unreachable, against Chrono Trigger as
-      the target. Binary: **(A)** the name is aspiration, the bar in `TASTE.md` §1b is
-      right; **(B)** drawn line is the real target, and §1b is wrong. If B, the probe
-      changes shape before it runs. Attach sample D when it exists.
+- [ ] **Check four things on the self-test page.** Asked 14/08.
+      · *Open:* `.out/selftest.html` in a browser, not in the editor.
+      · *Do:* look at four squares — the checkerboard must have hard edges; the ring's hole
+      must show the page's grey, not black; the "static" square must not move at all; the
+      "moving" square must step to the right.
+      · *Time:* 30 seconds.
+      · *Pass:* all four as described.
+      · *Answer changes:* if any is wrong, the thing I use to look at my own work is
+      broken, and everything I show him after that is suspect — in my favour.
+- [ ] **The five published game loops: do they exist as files?** Asked 14/08.
+      · *Do:* answer one of three — "I have the files" (and in what format), "I can capture
+      them, give me a few days", or "I can't".
+      · *Time:* one minute, no files needed today.
+      · *Answer changes:* the first two set the canvas size and frame rate my sample has to
+      match. The third means the sheet cannot be built and the way we measure the project
+      has to change — better known now than next week.
+- [ ] **Is "ink" in the name aspiration or direction?** Asked 14/08, waits for sample D.
+      · *Open:* four looping animations, sent together.
+      · *Do:* pick A or B. **(A)** the name is a wish, and the target stays Chrono Trigger.
+      **(B)** the drawn, varying line is what he actually wants, and the target is wrong.
+      · *Time:* two minutes.
+      · *Answer changes:* B rewrites `TASTE.md` §1b and reshapes the probe before it runs.
 
 ## Closed
 
