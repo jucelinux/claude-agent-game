@@ -69,6 +69,11 @@ that his judgment arrives well-fed, not that it arrives pre-empted.
 **A batch spans kinds, deliberately** — creature, prop, character, effect, environment.
 Breadth is the claim now, so a gate measured on one kind measures the wrong thing.
 
+**The gate stays on drawing for now — his call, 15/08.** Drawing is the only subsystem with
+a measured result, and swapping the reading would throw away the series that exists. **An
+engine gate is born with the first playable slice and not before**: a reading with nothing
+to read is how v1 and v2 both died.
+
 **Why three gates got this wrong, and what survives.** Gate v1 (find-the-impostor) died to a
 logic hole. Gate v2 (six loops ranked, five of them from shipped games) died because it
 needed **five files he had to go and collect**, and across a week they never arrived — and I
@@ -92,29 +97,58 @@ decision is his, held in his head, and it is allowed to be.**
 ## 1. The project
 
 - **Name:** claude-ink-2d _(chosen by the human, 14/08)_
-- **What it is:** an attempt to turn the model into a **draughtsman of game objects** — and
-  the tooling that makes that possible.
+- **What it is, as of 15/08:** **a game engine whose interface is a coding agent.** His
+  words: *"o GameMaker dos agentes"*, and *"uma engine de jogos que permita que o usuário
+  consiga construir seu jogo através de agentes de código"*.
 - **One-line pitch:** he cannot draw, a great many people cannot, and he can say exactly
-  what he wants in a game. If drawing can be delegated, the thing that proves it is
-  something another gamedev can install.
-- **The question under test, in his words (15/08):** *"Se o Claude fosse capaz de desenhar
-  de forma econômica, faria sentido entregar essa responsabilidade para ele?"*
-- **The failure condition:** it is not possible to turn the model into a draughtsman — and
-  **he is the one who calls it**, from judgment rather than from a threshold (15/08).
+  what he wants in a game. The thing that lets him have it is not a better artist — it is an
+  engine another agent can drive.
+- **The failure condition:** it is not possible to build a game through agents with this —
+  and **he calls it**, from judgment rather than from a threshold.
 
-**Three requirements, all three load-bearing, all three from him on 15/08.**
+**This reframing renames what exists; it does not discard it.** Every property the harness
+has was built so the model could draw without him watching, and each one turns out to be
+what *any* agent needs to build *anything* without a human in the loop:
 
-1. **Breadth.** A draughtsman handles many kinds of object and many kinds of animation. One
-   excellent gorilla is not the deliverable; the range is.
-2. **The validation loop is the central risk, and it is a *drawing* problem.** His words:
-   the no-images rule was never mainly about token economy — it is about **the most
-   effective way for the model to draw**, because *validating is part of the drawing
-   process*. Dozens of validation cycles per piece is where the cost and the quality both
-   live. **This makes the perception channel a first-class axis, not support tooling.**
-3. **It has to work outside this repo.** An engine that only runs here is not an artifact.
-   **Target chosen 15/08: web / Pixi first** — same language as the core, so it is the
-   cheapest route to a proof that actually runs. What ships in the end may be a library, an
-   SDK, or something else; that is decided by what turns out to be reusable, not now.
+| property | why an agent needs it | built for |
+|---|---|---|
+| everything is text and data | an agent writes text | the sprite grammar |
+| a deterministic core | an agent iterates and compares | round zero |
+| a perception channel with no human in it | an agent sees its own output | round zero |
+| a findings channel | an agent locates its own defect | 15/08 |
+| locks | an agent verifies without asking | every round |
+| every number anchored | an agent knows why a value is that value | `HARNESS.md` §2.7 |
+
+**So the harness is the product, and the sprite grammar is subsystem one** — the one that
+proved the pattern works on a visual artifact.
+
+**Three requirements, and the third one changed on 15/08.**
+
+1. **Breadth.** A draughtsman handles many kinds of object and many kinds of animation. That
+   requirement survives intact: the drawing gate still runs, and drawing is still where the
+   only measured results are.
+2. **The validation loop is the central risk, and it is a *making* problem.** His words: the
+   no-images rule is about the most effective way to work, because *validating is part of
+   making*. **This now generalises one level up.** An agent building a game has to perceive
+   the running game without playing it, which is the same problem as perceiving a sprite
+   without looking at it. Deterministic simulation, a text channel, a findings list.
+3. **~~It has to work outside this repo~~ → it has to work for agents other than this one.**
+   The exporter is dead: exporting to somebody else's engine was building a bridge to a
+   competitor, and it answered a requirement that has been replaced. What replaced it is
+   harder and testable: **can a fresh agent, given only this repository, build a small
+   game?** If not, the product does not exist however well it works when I drive it.
+
+**The slice, chosen by him 15/08: a one-screen platformer.** A character, a floor, some
+platforms, something to reach. It needs gravity, box-against-box collision, a jump and a
+fixed camera — and it reuses more of what exists than the alternatives, because the gorilla
+already jumps. **Build the engine only as far as that game needs it.** A game engine is
+enormous and the failure mode is a thin version of everything and a good version of nothing;
+the method's own answer is a vertical slice first (`TASTE-LOOP.md` §6).
+
+**The architectural rule, inherited and now load-bearing twice.** The engine's core is a
+**deterministic headless simulation**, and rendering is a consumer of it — exactly as
+`sprite()` is deterministic and the viewer is a consumer (`HARNESS.md` §2.1). A recorded
+input sequence must replay to the same state, or an agent cannot verify a game at all.
 
 **Binding details that survive the rewrite.** Each is a line in `DECISIONS.md`.
 
@@ -143,20 +177,26 @@ decision is his, held in his head, and it is allowed to be.**
 
 ---
 
-## 2. Build order, as of 15/08
+## 2. Build order, as of 15/08 — **re-cut when the product became an engine**
 
 1. ~~Round zero — deterministic core + perception channel~~ **done, 14/08.**
 2. ~~Vertical slice of a grammar~~ **done** — gorilla walk/jump/attack, tree.
-3. **The exporter, and it has moved to the front.** Indexed atlas PNG (zlib is stdlib) plus
-   the manifest `src/export/contract.ts` already locks, then a small Pixi loader that plays
-   it. It was deferred on the grounds that "exporting disposable probe art is inventory";
-   that reasoning died when *compatible outward* became a requirement instead of a wish.
-4. **The perception channel, as a measured axis.** Interventions are judged by their effect
-   on **cost to hit**, not by how nice the readout looks.
-5. **Commission batches**, which is the gate running.
-6. Judging apparatus — only if judging becomes the bottleneck. Trigger in `HARNESS.md`.
-
----
+3. ~~The exporter~~ **dead, 15/08.** It answered "compatible outward", and that requirement
+   was replaced by "usable by agents other than this one". Exporting into another engine is
+   a bridge to a competitor.
+4. **The engine slice: a one-screen platformer.** In dependency order —
+   deterministic headless simulation with a fixed timestep · entities · box collision and
+   gravity · recorded input that replays identically · the animation state machine
+   (idle, walk, jump, attack) · the browser runtime, which is mostly the viewer that
+   already exists plus input.
+5. **The agent's perception of a *running game*.** The same pattern as the sprite channel,
+   one level up: a text readout of the simulation and a findings list — *the player never
+   reached the goal*, *the player fell through the floor at frame 143*, *this gap cannot be
+   cleared by any jump*. **This is the differentiator, not the platformer.**
+6. **Drawing subsystem, item 4: pattern inside a part.** Deferred on purpose. No commission
+   has failed for want of it yet, and building it now would be designing generality instead
+   of harvesting it (§5). It enters when a commission needs it.
+7. Judging apparatus — only if judging becomes the bottleneck.
 
 ## 3. Stack
 
