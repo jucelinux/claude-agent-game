@@ -7,7 +7,7 @@
   "body": { "scale": 1.3 },
   "gait": { "swing": 0.09, "lift": 2 },
   "texture": { "speckle": 0.22 },
-  "playback": { "msPerFrame": 50, "scale": 3, "history": 3 },
+  "playback": { "msPerFrame": 50, "scale": 3 },
 
   "_anchors": {
     "canvas.w": "64, twice the control. This sample is the direction my bias pulls toward, and it is here to be knocked down by looking rather than by argument (BACKLOG).",
@@ -27,7 +27,6 @@
     "gait.lift": "2 px = 1.5 (the target's lift) x 1.3, the body scale",
     "texture.speckle": "0.22 = between a fifth and a quarter of painted pixels drop one tone. High enough to read as texture at 64 px, low enough not to be visible noise on a flat surface.",
     "playback.msPerFrame": "50 ms = 20 fps. 12 frames x 50 = the shared 600 ms cycle.",
-    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size",
-    "playback.history": "3 older generations kept beside the current one on the live page"
+    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size"
   }
 }

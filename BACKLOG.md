@@ -152,15 +152,16 @@ Four commands, and the second is the loop.
 
 | command | what it is |
 |---|---|
-| `npm test` | the locks. Determinism, baseline, tunables, both channels' null cases, the animation family |
-| `node bin/bench.ts [run] [--set path=value]` | one bench turn: author → look → name the defect. Contact sheet, 25% silhouette, counts, elapsed |
+| `node bin/serve.ts [runs…] [--set …]` | **the surface.** Open it once: the live run first, every kept generation behind it, `/selftest` for the viewer's null case |
+| `npm test` | the locks. Determinism, baseline, tunables, both channels' null cases, the animation family, the export contract, the live bench |
+| `node bin/bench.ts [run] [--set …]` | one bench turn in the terminal: contact sheet, 25% silhouette, counts, elapsed |
 | `node bin/run.ts <run.json>` | headless: state hash and metrics, no presentation layer |
-| `node bin/record.ts <out.json> [--set …]` | capture what the bench is showing into a replayable run file |
-| `node bin/serve.ts [runs…] [--set …]` | **the bench that stays open.** Open the URL once; edits re-execute and the frames swap under a running loop, with the last 3 generations beside it |
-| `node bin/view.ts [runs…] [--mode gate]` | the frozen pages → `.out/bench.html` or `.out/gate.html`. The gate is only ever a file |
-| `node bin/selftest.ts` | the viewer's null case, made visible → `.out/selftest.html` |
-| `node bin/keep.ts <run.json> [--note …]` | keep a generation in `gallery/` forever. New hashes only |
-| `node bin/gallery.ts` | the whole kept history on one page → `.out/gallery.html` |
+| `node bin/keep.ts <run.json> [--note …]` | keep a generation by hand. The live bench does it on every swap |
+| `node bin/record.ts <out.json> [--set …]` | capture what you are looking at into a replayable run file |
+| `node bin/gate.ts <run.json>` | the gate sheet → `sheet/gate.html`. **The one page that is still a file**, and gitignored |
+
+Nothing is written to `.out` any more, and nothing has to be regenerated to be looked at:
+the page is served, the history is on disk, and both are always current.
 
 Every tunable lives in `tunables/default.json` and is anchored there — the anchor is
 locked, not a comment. A grammar is data in `src/grammars/`; `fixture` is the harness's

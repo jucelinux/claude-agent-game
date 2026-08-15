@@ -7,7 +7,7 @@
   "body": { "scale": 0.7 },
   "gait": { "swing": 0.07, "lift": 1.2 },
   "texture": { "speckle": 0 },
-  "playback": { "msPerFrame": 150, "scale": 6, "history": 3 },
+  "playback": { "msPerFrame": 150, "scale": 6 },
 
   "_anchors": {
     "canvas.w": "32 = the Stardew cell. This sample is the control: if the control does not clear, the round already answered everything.",
@@ -27,7 +27,6 @@
     "gait.lift": "1.2 px = thorax height (2 * ry = 10) / 8, the same eighth-of-the-body rule used in every sample",
     "texture.speckle": "0: the control idiom spends nothing on texture",
     "playback.msPerFrame": "150 ms. 4 frames x 150 = a 600 ms cycle, and all four probe samples complete a cycle in 600 ms so the sheet never compares walking speed. 600 was chosen over 500 because it divides into whole milliseconds for 4, 8 and 12 frames, and the export contract has no room for a fractional frame duration.",
-    "playback.scale": "6, because 32 x 6 = 192 px on screen - the same cell size as every other sample, which is the only way two resolutions compare as idioms",
-    "playback.history": "3 older generations kept beside the current one on the live page"
+    "playback.scale": "6, because 32 x 6 = 192 px on screen - the same cell size as every other sample, which is the only way two resolutions compare as idioms"
   }
 }

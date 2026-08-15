@@ -7,7 +7,7 @@
   "body": { "scale": 1 },
   "gait": { "swing": 0.07, "lift": 2 },
   "texture": { "speckle": 0 },
-  "playback": { "msPerFrame": 75, "scale": 4, "history": 3 },
+  "playback": { "msPerFrame": 75, "scale": 4 },
 
   "_anchors": {
     "canvas.w": "48, the same canvas as the target sample. This sample is the declared overshoot, and it changes subject and idiom - it must not also change size, or the failure could be blamed on resolution.",
@@ -27,7 +27,6 @@
     "gait.lift": "2 px = torso height (2 * ry = 16) / 8, the same eighth-of-the-body rule as the arthropod",
     "texture.speckle": "0: a drawn-line idiom that also speckles is two idioms",
     "playback.msPerFrame": "75 ms. 8 frames x 75 = the shared 600 ms cycle.",
-    "playback.scale": "4, because 48 x 4 = 192 px on screen, the shared cell size",
-    "playback.history": "3 older generations kept beside the current one on the live page"
+    "playback.scale": "4, because 48 x 4 = 192 px on screen, the shared cell size"
   }
 }

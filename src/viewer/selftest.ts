@@ -1,18 +1,13 @@
 /**
  * The viewer's null case, **made visible instead of trusted** (`HARNESS.md` §5).
  *
- *   node bin/selftest.ts   -> .out/selftest.html
- *
- * Three cells whose answer I already know. If the page cannot separate them, its output
- * is worth less than no output — and note the direction of each failure: every one of them
- * makes the sheet *flatter* the sprite it is supposed to expose.
+ * It lives beside the live bench at `/selftest` rather than in a file, because an
+ * instrument you have to remember to regenerate is an instrument that stops being run.
  *
  * stack — these buffers are viewer fixtures, portable to nothing.
  */
-import { mkdirSync, writeFileSync } from 'node:fs'
-import type { RGB } from '../src/core/types.ts'
-import { emit } from '../src/viewer/page.ts'
-import { loadParams } from '../src/io/load.ts'
+import type { RGB } from '../core/types.ts'
+import type { ViewCell, ViewSpec } from './page.ts'
 
 const PALETTE: RGB[] = [
   [0, 0, 0], // 0 — transparent ground
@@ -48,11 +43,17 @@ function marker(offset: number): Uint8Array {
   return px
 }
 
-const params = loadParams('default')
-const html = emit({
+const CELLS: ViewCell[] = [
+  { w: SIZE, h: SIZE, palette: PALETTE, label: '1 checkerboard', frames: [checkerboard()], scale: 8 },
+  { w: SIZE, h: SIZE, palette: PALETTE, label: '2 ring', frames: [ring()], scale: 8 },
+  { w: SIZE, h: SIZE, palette: PALETTE, label: '3 static', frames: [marker(0), marker(0), marker(0), marker(0)], scale: 8 },
+  { w: SIZE, h: SIZE, palette: PALETTE, label: '4 moving', frames: [marker(0), marker(1), marker(2), marker(3)], scale: 8 },
+]
+
+export const SELFTEST: ViewSpec = {
   mode: 'selftest',
-  scale: params.playback.scale,
-  msPerFrame: params.playback.msPerFrame,
+  scale: 8,
+  msPerFrame: 150,
   title: 'claude-ink-2d · selftest',
   notes: [
     'Null case for the viewer. Look once, and know what each failure would mean.',
@@ -65,14 +66,5 @@ const html = emit({
     '4  moving — one pixel per frame. It must move, at the same rate cell 3 is standing still.',
     '   If 3 and 4 look alike, the tick is dead and the whole sheet is a still.',
   ],
-  cells: [
-    { w: SIZE, h: SIZE, palette: PALETTE, label: '1 checkerboard', frames: [checkerboard()] },
-    { w: SIZE, h: SIZE, palette: PALETTE, label: '2 ring', frames: [ring()] },
-    { w: SIZE, h: SIZE, palette: PALETTE, label: '3 static', frames: [marker(0), marker(0), marker(0), marker(0)] },
-    { w: SIZE, h: SIZE, palette: PALETTE, label: '4 moving', frames: [marker(0), marker(1), marker(2), marker(3)] },
-  ],
-})
-
-mkdirSync('.out', { recursive: true })
-writeFileSync('.out/selftest.html', html)
-process.stdout.write('.out/selftest.html\n')
+  cells: CELLS,
+}

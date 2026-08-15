@@ -7,7 +7,7 @@
   "body": { "scale": 1 },
   "gait": { "swing": 0.09, "lift": 1.5 },
   "texture": { "speckle": 0 },
-  "playback": { "msPerFrame": 75, "scale": 4, "history": 3 },
+  "playback": { "msPerFrame": 75, "scale": 4 },
 
   "_anchors": {
     "canvas.w": "48 = the size the arthropod grammar is authored at, and the Chrono-tier cell. This sample is the target.",
@@ -27,7 +27,6 @@
     "gait.lift": "1.5 px = thorax height (2 * ry = 10) / 6.7, one eighth of the body at this scale",
     "texture.speckle": "0: the target idiom spends its budget on value separation, not on noise",
     "playback.msPerFrame": "75 ms. 8 frames x 75 = the shared 600 ms cycle.",
-    "playback.scale": "4, because 48 x 4 = 192 px on screen, the shared cell size",
-    "playback.history": "3 older generations kept beside the current one on the live page"
+    "playback.scale": "4, because 48 x 4 = 192 px on screen, the shared cell size"
   }
 }

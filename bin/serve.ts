@@ -1,16 +1,19 @@
 /**
- * The bench that stays open.
+ * **The only surface.** One page, opened once, never regenerated as a file.
  *
  *   node bin/serve.ts [runs…] [--set path=value] [--port 5173]
  *
- * Open the URL once. Editing a grammar, a tunable or the core re-executes the run and
- * pushes the frames; the page swaps them **under a loop that never stops**, so the change
- * is seen in motion rather than in a reload. Every regeneration that actually changes the
- * output pushes the previous one into a history strip beside it — the last few variants,
- * side by side, all on the same tick. That is the harness accumulating instead of resetting.
+ *   /           the live run, and the whole kept history behind it
+ *   /selftest   the viewer's null case, always available
+ *   /frames.json, /events   what the page pulls and what wakes it up
  *
- * The gate never comes through here. A sheet that can change under the human mid-reading is
- * not a reading; his page stays a frozen file (`bin/view.ts --mode gate`).
+ * Editing a grammar, a tunable or the core re-executes the run in a **fresh process** — no
+ * module cache to serve stale frames — and the page swaps them under a loop that never
+ * stops. Every generation with a new hash is kept in `gallery/` on the way past, so the
+ * history on screen is the history on disk: nothing to remember to regenerate.
+ *
+ * The gate never comes through here (`bin/gate.ts` writes a frozen file): a sheet that can
+ * change under the human mid-reading is not a reading.
  *
  * `node:http` and `node:fs` only — nothing added to the stack.
  */
@@ -18,8 +21,9 @@ import { execFileSync } from 'node:child_process'
 import { watch } from 'node:fs'
 import { createServer } from 'node:http'
 import type { ServerResponse } from 'node:http'
-import { loadParams } from '../src/io/load.ts'
+import { cellOf, list } from '../src/io/gallery.ts'
 import { emit } from '../src/viewer/page.ts'
+import { SELFTEST } from '../src/viewer/selftest.ts'
 
 type Cell = { label?: string; [key: string]: unknown }
 type Payload = { scale: number; msPerFrame: number; cells: Cell[] }
@@ -27,11 +31,7 @@ type Payload = { scale: number; msPerFrame: number; cells: Cell[] }
 const argv = process.argv.slice(2)
 const portFlag = argv.indexOf('--port')
 const port = portFlag >= 0 ? Number(argv[portFlag + 1]) : 5173
-const noKeep = argv.includes('--no-keep')
-const forwarded = argv.filter((a, i) => i !== portFlag && i !== portFlag + 1 && a !== '--no-keep')
-
-const params = loadParams('default')
-const HISTORY = params.playback.history
+const forwarded = argv.filter((_, i) => i !== portFlag && i !== portFlag + 1)
 
 function compute(): Payload {
   const out = execFileSync(process.execPath, ['bin/payload.ts', ...forwarded], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
@@ -39,7 +39,6 @@ function compute(): Payload {
 }
 
 let current = compute()
-let history: Cell[][] = []
 
 function identity(payload: Payload): string {
   return payload.cells.map((c) => String(c['indices']).length + ':' + String(c['label'])).join('|')
@@ -54,18 +53,30 @@ function refresh(): boolean {
     return false
   }
   if (identity(next) === identity(current)) return false
-  history.unshift(current.cells)
-  history = history.slice(0, HISTORY)
   current = next
   return true
 }
 
-/** Newest first, then the history, each cell told how old it is. */
+/**
+ * The live run first, then everything ever kept, newest behind it. The thing being worked
+ * on stays at the top left and the past trails away from it — which is the shape of the
+ * only question the gate asks: **did it move?**
+ */
 function payload(): string {
-  const cells: Cell[] = [...current.cells]
-  history.forEach((generation, age) => {
-    for (const cell of generation) cells.push({ ...cell, label: `${cell.label ?? ''} · -${age + 1}` })
-  })
+  const kept = list().reverse().map(cellOf)
+  const cells: Cell[] = [
+    ...current.cells,
+    ...kept.map((cell) => ({
+      w: cell.w,
+      h: cell.h,
+      n: cell.frames.length,
+      palette: cell.palette,
+      indices: Buffer.concat(cell.frames.map((f) => Buffer.from(f))).toString('base64'),
+      label: cell.label,
+      scale: cell.scale,
+      msPerFrame: cell.msPerFrame,
+    })),
+  ]
   return JSON.stringify({ mode: 'live', scale: current.scale, msPerFrame: current.msPerFrame, cells })
 }
 
@@ -76,9 +87,10 @@ const shell = emit({
   scale: current.scale,
   msPerFrame: current.msPerFrame,
   cells: [],
-  title: 'claude-ink-2d · live',
-  notes: ['space pauses · left and right step a frame · newest run first, history to its right'],
+  title: 'claude-ink-2d',
+  notes: ['live run first, kept history behind it · space pauses · left and right step a frame'],
 })
+const selftest = emit(SELFTEST)
 
 const server = createServer((req, res) => {
   if (req.url === '/frames.json') {
@@ -94,13 +106,15 @@ const server = createServer((req, res) => {
     return
   }
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' })
-  res.end(shell)
+  res.end(req.url === '/selftest' ? selftest : shell)
 })
 
 server.listen(port, () => {
   const address = server.address()
   const bound = typeof address === 'object' && address !== null ? address.port : port
-  process.stdout.write(`http://localhost:${bound}  —  watching src, tunables, runs\n`)
+  process.stdout.write(`http://localhost:${bound}       the live run and every kept generation\n`)
+  process.stdout.write(`http://localhost:${bound}/selftest   the viewer's null case\n`)
+  process.stdout.write(`watching src, tunables, runs · ${list().length} generations kept\n`)
 })
 
 let pending: NodeJS.Timeout | null = null
@@ -109,17 +123,14 @@ function onChange(): void {
   pending = setTimeout(() => {
     pending = null
     if (!refresh()) return
-    // The moment the output changes is exactly the moment worth keeping — the live page
-    // already computed it, and a generation nobody kept cannot be compared to later.
-    // Except under test: a suite that writes to the history makes the history a rumour.
-    if (!noKeep) {
-      try {
-        execFileSync(process.execPath, ['bin/keep.ts', ...forwarded, '--note', 'live'], { encoding: 'utf8' })
-      } catch (error) {
-        process.stderr.write(`could not keep this generation: ${String(error).split('\n')[0]}\n`)
-      }
+    // The moment the output changes is the moment worth keeping: the page has it, and a
+    // generation nobody kept cannot be compared to later.
+    try {
+      execFileSync(process.execPath, ['bin/keep.ts', ...forwarded, '--note', 'live'], { encoding: 'utf8' })
+    } catch (error) {
+      process.stderr.write(`could not keep this generation: ${String(error).split('\n')[0]}\n`)
     }
-    process.stdout.write(`swapped  ${current.cells.map((c) => c['label']).join('  ')}\n`)
+    process.stdout.write(`swapped  ${current.cells.map((c) => c['label']).join('  ')}  ·  ${list().length} kept\n`)
     for (const res of listeners) res.write('data: change\n\n')
   }, 80)
 }
