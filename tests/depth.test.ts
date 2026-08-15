@@ -182,3 +182,29 @@ describe('depth', () => {
     expect(() => loadParams('default')).not.toThrow()
   })
 })
+
+describe('scale', () => {
+  it('a part collapsed to nothing paints nothing, not one pixel', () => {
+    // Calibrated both ways. The defect: at scale 0 the inverse scale is forced to 0, so
+    // every candidate pixel maps to the shape's centre and the centre is always inside —
+    // the part vanished everywhere except for a single stray pixel. It shipped with the
+    // scale channel in run 6 and hid among thirty-six parts; it surfaced when a falling
+    // leaf would not reach zero on its way off screen.
+    const collapse: number[] = [-1, -1]
+    const gone = twoDiscs(-5, 5, undefined)
+    const withScale: Grammar = {
+      ...gone,
+      gait: { ...gone.gait, tracks: [{ bone: 'a', channel: 'scale', keys: collapse }] },
+    }
+    const frame = sprite(withScale, bench(), 1, 0)
+    let ownedByA = 0
+    for (const owner of frame.owners) if (owner === A) ownedByA++
+    expect(ownedByA).toBe(0)
+
+    // And it is not vacuous: at full scale the same part owns a real area.
+    const whole = sprite(twoDiscs(-5, 5), bench(), 1, 0)
+    let wholeA = 0
+    for (const owner of whole.owners) if (owner === A) wholeA++
+    expect(wholeA).toBeGreaterThan(50)
+  })
+})

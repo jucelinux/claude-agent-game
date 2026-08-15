@@ -55,6 +55,14 @@ export function paintPart(
   const levels = ramp.length
   if (levels === 0) throw new Error('a ramp with no tones cannot paint')
 
+  // **A part scaled to nothing paints nothing.** Without this it painted exactly one pixel:
+  // at `s === 0` the inverse scale is forced to 0, so every candidate pixel maps to the
+  // shape's own centre, and a centre is always inside its shape. Born with the scale channel
+  // in run 6 and invisible there — one stray pixel per collapsed plate, among thirty-six
+  // parts. It surfaced only when a *falling leaf* refused to reach zero on the way out, which
+  // is the absence count catching the opposite of absence.
+  if (xf.s <= 0) return
+
   const a = xf.a * TURN
   const cos = Math.cos(a)
   const sin = Math.sin(a)

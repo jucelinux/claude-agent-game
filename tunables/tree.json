@@ -1,0 +1,64 @@
+{
+  "canvas": {
+    "w": 64,
+    "h": 64,
+    "originX": 32,
+    "originY": 55
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 16
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "z": -0.2,
+    "curve": 1.1
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 0.86
+  },
+  "gait": {
+    "swing": 0.28,
+    "lift": 26,
+    "depth": 7
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "playback": {
+    "msPerFrame": 75,
+    "scale": 3
+  },
+  "_anchors": {
+    "canvas.w": "64, the project cell, unchanged. A tree is a prop rather than a character and games often draw them larger, but the shared cell is the discipline this project runs on and a subject that only works with more room is a finding.",
+    "canvas.h": "square with canvas.w",
+    "canvas.originX": "canvas.w / 2. A tree is bilaterally symmetric about its trunk in a way no body here has been.",
+    "canvas.originY": "canvas.h * 0.86, the base of the trunk. Not flush with the bottom: a ground-standing prop wants to sit on the cell edge, and the outline needs a pixel below it to exist - the ring loses the argument nowhere else, so it wins here. Where the tree actually meets the ground is the pivot in the export manifest, not the cell edge.",
+    "tones.perMaterial": "5. One more than the control and three fewer than the incumbent. TASTE.md 1b names Chrono as the bar for silhouette and value separation, and separation is what a short ramp over a wide value range buys - the same eight tones spread over a narrow dark range is what it does not.",
+    "frames.walk": "16, and every phase lands on a whole frame at sixteenths (3/16, 5/16, 8/16, 11/16, 13/16). Sixteen rather than twelve because the wind carries three staggered leaf falls, and each needs enough frames to read as a fall rather than as a jump cut.",
+    "light.x": "unit vector from the upper left, held identical across all four probe samples",
+    "light.curve": "1.1, barely above linear. High curve compresses the dark end into a rim and spends the ramp on the lit half, which is the opposite of a bar whose whole claim is that the light side and the shadow side are two different values.",
+    "light.y": "the y half of light.x's unit vector",
+    "outline.enabled": "ON. Chrono outlines its sprites - that is how they hold at small size against a busy map.",
+    "outline.inner": "on. The joint line plus a five-tone ramp is the pairing this idiom lives on: value separates the planes, the line separates the parts.",
+    "outline.rim": "OFF, for the same reason as the control - a line and a rim are two answers to one question.",
+    "outline.material": "the ink ramp: a violet-black, so the line belongs to the same world as the cool shadows instead of sitting on top of the art as a neutral.",
+    "body.scale": "0.86. The subject is ~66 units from crown to root flare; at scale 1 it measured y 0..63 in a 64 px cell, filling it edge to edge with 322 border pixels and nowhere to put the outline ring. 0.86 brings it to 57 px and leaves ~3 px at top and bottom for the ring.",
+    "gait.swing": "0.28 turn = 101 deg. Set by the LARGEST motion in the gait, which is a falling leaf tumbling about 90 deg, not by the branches - they sway about 10 deg and their keys are authored at branch scale and scaled down in the grammar. Run 7 learned that an action needs a bigger amplitude than a walk; this is the same lesson inside a single gait, where two motions three times apart in size share one channel.",
+    "gait.lift": "26 px, again set by the leaf: it falls 26 px, roughly from the crown to the base of the trunk. The crown bob is about 1 px and is authored as a fortieth of it.",
+    "texture.speckle": "0. Chrono sprites have no noise; every pixel is placed. Noise is the incumbent idiom’s signature and it is the thing this probe most wants to see the back of.",
+    "playback.msPerFrame": "75 ms. 16 x 75 = 1200 ms, the longest cycle in the project. Wind is slower than a stride and a gust that resolves in 600 ms reads as a shudder.",
+    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "light.z": "-0.2, the most raking light in the repo. Near 0 the lamp grazes the form and the modelling comes back; the incumbent -0.35 puts the centre of every mass two thirds up its ramp, which is how a body ends up mid-toned everywhere at once.",
+    "gait.depth": "7 px = the cluster row separation. One of the three falling leaves drifts in depth so it passes behind a branch on the way down, which is the only thing in this sample that would have been inexpressible before run 7."
+  }
+}

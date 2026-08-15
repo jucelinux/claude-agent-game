@@ -9,6 +9,7 @@ import { gorilla } from './run5/gorilla.ts'
 import { gorillaMech } from './run6/mech.ts'
 import { gorillaAttack, gorillaJump } from './run7/actions.ts'
 import { gorillaJumpChrono, gorillaJumpStardew } from './run8/idioms.ts'
+import { tree } from './run9/tree.ts'
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   fixture,
@@ -26,6 +27,7 @@ export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   'gorilla-attack': gorillaAttack,
   'gorilla-jump-stardew': gorillaJumpStardew,
   'gorilla-jump-chrono': gorillaJumpChrono,
+  tree,
 }
 
 /**
@@ -49,6 +51,7 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: 'gorilla-attack', tunables: 'gorilla-attack' },
   { grammar: 'gorilla-jump-stardew', tunables: 'gorilla-jump-stardew' },
   { grammar: 'gorilla-jump-chrono', tunables: 'gorilla-jump-chrono' },
+  { grammar: 'tree', tunables: 'tree' },
 ]
 
 export function grammarByName(name: string): Grammar {

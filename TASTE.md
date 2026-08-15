@@ -29,11 +29,15 @@ Last distillation: none — the log does not exist yet._
 - `[declared]` **He declines the menu and names his own option.** Three availability
   options offered, none chosen, his own answer better than all three. That is §7 happening:
   translate, do not offer a menu.
-- **[derived · 15/08 · probe C, gallery #0004]** **The high-budget idiom impressed him
-  most** — 64 px, 8 tones per material, gradient and speckle, no outer outline. This is the
-  first line here that came from a verdict on a sample rather than from a declaration, and
-  it **outranks** every `[declared]` line it touches. It also lands on the sample the model
-  put in the probe expecting to knock it down.
+- **[derived · 15/08 · run 8, gallery #0020–#0022 · supersedes the probe C line]** **The
+  high-budget idiom won on a beetle and lost on a gorilla, and the axis was never the
+  budget.** Probe C — 8 tones, gradient, speckle, no line — was the sample he singled out on
+  14/08, and it held the house style for seven runs on that one verdict. Ranked against two
+  rivals on one animation it **tied for last**. What he ranked first was 5 tones over a wide
+  value range with a drawn line; what tied with the incumbent was 4 flat tones with a line.
+  **So neither factor alone buys anything: range without regions loses, regions without
+  range loses.** The retired line is kept here in words because its shape matters — one
+  verdict, one subject, generalised to every subject without a retest.
 - **[derived · 15/08 · probe D]** **He reads a defect through what it resembles, not
   through what it is:** "the sash plus the neck skin makes it look like a buggy arm". The
   location was exact and the cause was one level below the words — same material as the
@@ -63,7 +67,8 @@ exist yet._
 | silhouette and value separation | Chrono Trigger — **target** | H, 14/08 |
 | animation weight and arc | Chrono Trigger — **target** | H, 14/08 |
 | drawn line, squash & stretch on a humanoid | Comix Zone — **declared overshoot** | H, 14/08 |
-| tone budget per material | **8** — no longer empty. Probe C, the deliberate overshoot of the declared 3–6 range, is the sample he singled out | H, 15/08, on a sample |
+| tone budget per material | **5, in the Chrono idiom** — and the budget was never the axis. Run 8 ranked three inks on one animation: 8 tones with gradient and noise, and 4 tones flat with a line, **tied for last**; 5 tones over a wide range with a line won. Retires the 15/08 line that read "8, and more budget than I expected to be allowed" | H, 15/08, on run 8 |
+| ink: value range × region structure | **both, or neither counts.** The two losers each had one — the incumbent a wide range cut into 195 one-pixel-ish regions, the control 95 real regions inside a narrow flat range | H, 15/08, on run 8 |
 
 **Why these three, in this order.** Stardew is the control: if I do not clear the control,
 round 1 already answers everything and nothing else matters. Chrono is the target because
