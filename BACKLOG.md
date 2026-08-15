@@ -8,60 +8,58 @@ open (`TASTE-LOOP.md` §3b).
 
 ---
 
-## Gate — **the date is the gate**, as of 15/08 · one reading, 21/08
+## Gate — **v3, the commission test.** Adopted 15/08 · no date
 
-The reading is **my position among five fixed shipped loops**, and a run improves or it
-does not (`CLAUDE.md` gate block). **Two readings taken so far**, both against run 2, both
-negative — the table below. _(Corrected 15/08 at a cycle open: this block said "no reading
-taken yet" directly above a table of two. §3b.4.)_
+He names an object and an animation in one sentence. I deliver with no back-and-forth. He
+answers in one word, plus one word of *why* on a miss. Full definition in `CLAUDE.md`.
 
-| date | reading | improved? | strike? |
-|---|---|---|---|
-| 15/08 | run 3 (three-quarter, three creatures) against run 2 | **no** — "não superou, mas aprecio a tentativa" | **strike 1** |
-| 15/08 | run 4 (the beetle alone, three corrections, antennae up) against run 2 | **no** — "não vou dizer que superou, mas ficou boa também. Com mais algumas iterações, ficaria no mesmo patamar" | **strike 2** |
+**No batch given yet.** The table below is the running record; it is written in the same
+turn a reading arrives.
 
-**The count is retired, at his call on 15/08.** Two readings say the same thing and they
-still say it — run 3 and run 4 did not beat run 2 — but they inform direction rather than
-kill. **The kill is 21/08**: one honest verdict on the ceiling reached and on whether the
-artifact is worth publishing. Six days.
+| batch | commissions | shipped | hit rate | cycles per shipped piece |
+|---|---|---|---|---|
+| — | — | — | — | — |
 
-_Corrected 15/08 at a cycle open (§3b.4): a sentence here still read "two more readings
-without improvement end it", which is the retired counter wearing prose. Nothing but the
-date ends this. Where the plateau sits still decides **which verdict** the date gets — at
-run 2's level or below, the grammar does not reach the bar; above it, the ceiling was
-reached — but it no longer decides **when**._
+**Neither column kills anything** — his correction, 15/08. They are evidence for a judgment
+he holds himself and will not reduce to a metric. **A miss is a specification, not a
+strike:** its output is the name of the capability that was missing, which is what every
+miss in this project has actually produced (`CLAUDE.md`, gate block).
 
-**Unread, awaiting his eye:** run 5 (the gorilla walk) drew a verdict on weight but never a
-gate reading; run 6 (the transformation) was dropped by him on 15/08 in favour of run 7 and
-is kept in the history unread.
+**Retired:** gate v1 (find-the-impostor, logic hole) and gate v2 (six loops
+ranked against five shipped ones — the five files never arrived, and I asked three times
+without once explaining what they were). `refs/` is no longer needed by anything. And v3's own first draft, which tried to make a
+threshold do his deciding for him and lasted one turn. **The pattern is the finding: three
+gates, three ways of moving the judgment away from the only person who has it.**
 
-Full definition of the reading in `CLAUDE.md`'s gate block. Update **in the same turn** a
-reading arrives.
+**Prior verdicts, kept because they are still evidence** — they were readings of *movement*,
+not gate readings:
+
+| date | subject | his words |
+|---|---|---|
+| 15/08 | run 3 vs run 2 | "não superou, mas aprecio a tentativa" |
+| 15/08 | run 4 vs run 2 | "não vou dizer que superou... com mais algumas iterações, ficaria no mesmo patamar" |
+| 15/08 | run 5, the gorilla walk | "dá pra sentir seu peso caindo e a fidelidade com movimento" |
+| 15/08 | run 7, depth + jump + attack | "gostei muito... não sinto uma mudança visual, mas a movimentação e os detalhes estão melhores e mais fluídos" |
+| 15/08 | run 8, the ink probe | Chrono first; Stardew and the incumbent tied last |
+| 15/08 | run 9, the tree, first pass | "ficou horrível" |
 
 ---
 
-## Next round — **run 8, the ink probe.** Open 15/08, verdict pending.
+## Next round — **the exporter**, and it is a requirement now
 
-**First round on the ink axis, so it is a frontier probe (§3.0): three idioms, one
-animation, and the spread brackets.** His design. Body, skeleton, parts, gait, canvas,
-scale, frame count and every gait amplitude are frozen identical — whatever the three
-disagree about is the ink, because nothing else may vary.
-
-| | sample | budget | line | noise | light | gallery |
-|---|---|---|---|---|---|---|
-| **incumbent** | `gorilla-jump` | 8 tones | none, rim carries the edge | speckle 0.18 | soft, curve 1.25 | #0020 |
-| **control** | `gorilla-jump-stardew` | 4 tones | outer + inner | none | flat, curve 1.0 | #0021 |
-| **target** | `gorilla-jump-chrono` | 5 tones, wide range | outer + inner | none | raking, curve 1.1 | #0022 |
-
-- **What it tests:** his diagnosis that form and movement are ahead and the surface is
-  behind — and, underneath it, whether the incumbent idiom was ever right for a *complex*
-  body. It was adopted on one verdict on one insect and never retested across seven runs.
-- **The measurement, not yet a lock:** the same 667 body pixels split into **195** tone
-  regions under the incumbent and **95** under the control, with 46% of the incumbent's
-  regions a single pixel. Candidate round-zero instrument if this axis is confirmed;
-  deliberately not compiled yet (§6, do not build the judge before the artifact).
-- **My prediction, on the record so it can be scored:** the incumbent loses on this body,
-  Chrono wins. The previous prediction I recorded scored zero.
+- **Axis:** does the artifact leave this repo. Not a quality axis — a *existence* axis, and
+  it moved to the front of the build order when "compatible outward" stopped being a wish
+  (`CLAUDE.md` §1, 15/08).
+- **What ships:** an indexed atlas PNG (zlib is stdlib, no dependency) plus the manifest
+  `src/export/contract.ts` has locked since 14/08, plus a small **Pixi** page that loads it
+  and plays it. Pixi is the consumer that proves the claim, never an import of the core.
+- **Why it is not inventory any more:** the old deferral said exporting probe art is
+  inventory. True of a project whose deliverable was a grammar; false of one whose
+  deliverable is something a gamedev installs.
+- **What closes it:** the tree and the gorilla, exported, loaded by Pixi, playing — and the
+  contract locks still green against the real output rather than against a described one.
+- **Then, and only then, the first commission batch**, because a commission that cannot be
+  handed over is not a commission.
 
 ---
 
@@ -199,26 +197,12 @@ sample since — `outline.rim` is on in every shipped tunables file. §3b.4, and
       so the sheet never compares two renderers. Unbuilt: it cannot be null-cased without
       the files. Needed for the first gate reading.
 
-- [ ] 🔴 **THE GATE HAS NEVER FIRED, and `refs/` does not exist.** Found at the 15/08 cycle
-      open, and it outranks everything else in this file. `CLAUDE.md` defines the reading as
-      *six loops side by side, five of them from shipped games that he picks* — and those
-      five files have never been supplied, so the sheet the gate is defined against has
-      never been built. What the table above records as two readings were **his verdicts
-      comparing my run against my previous run**, which is a real signal about movement and
-      is not the gate: it measures me against myself, and the whole point of the reading is
-      that it measures me against published art.
-      **Consequence, stated flatly:** on 21/08 the project's only direction metric cannot
-      produce its verdict. Two things gate it and neither is mine to do first — the five
-      files, and then Image cells above (~1 session, and it cannot be null-cased before the
-      files exist). **Six days.** Raised to him 15/08.
-- [x] ~~The gate sheet builder — shuffle, mapping file I never read~~ → **dead with gate
-      v1.** Reading v2 needs no blindness, so it needs no shuffle and no hidden mapping:
-      the human may know exactly which loop is mine and the reading still works.
-- [x] **Every generation kept** (`gallery/`), at the human's request, 14/08. One JSON per
-      generation with a new hash — indexed frames, palette, the run that made them. Rebuilt
-      served by `bin/serve.ts` from the kept data and never from current code, so
-      a refactor that changes the render shows up as a difference instead of overwriting
-      the past. The live bench keeps automatically on every swap; the suite is barred.
+- [x] ~~🔴 THE GATE HAS NEVER FIRED, and `refs/` does not exist~~ → **dissolved 15/08**, not
+      solved: gate v2 was retired with the scope redefinition, so the five files it needed
+      are no longer needed by anything. **Kept visible on purpose** — it is the record of a
+      blocker I raised three times and explained zero times, and gate v3 exists in the shape
+      it does because of it.
+
 - [ ] **Mark portable/stack on every grammar rule in the turn it is born.** Standing, never
       ticked. Live since 14/08: `src/core/types.ts` and `src/core/skeleton.ts` carry
       `portable`, `src/grammars/fixture.ts` carries `stack`.
@@ -279,17 +263,8 @@ Written for him, so no method vocabulary crosses into this section.
       strike count. Both are in `CLAUDE.md`'s gate block. _(Ticked 15/08 at a cycle open —
       it had sat open in this file for a day after being settled twice. §3b.4.)_
 
-- [ ] 🔴 **The five reference loops — now the critical path, not a nicety.** Re-asked 15/08
-      with the finding above attached: `refs/` is empty, so the gate has never fired once.
-      · *Do:* drop five files in `refs/`. Any format that plays.
-      · *Time:* however long picking five good ones takes — but it is the only item in this
-      project with a deadline attached to it now.
-      · *Answer changes:* whether 21/08 has a reading at all. Without the files there is no
-      sheet, and without a sheet the date arrives with nothing but my own opinion of my own
-      work, which is the "decorated, not steered" state the method names as the failure.
-
-- [x] ~~**Run 7 — the jump, the attack, and the walk as control.**~~ → **Answered 15/08:**
-      liked, no visual change felt, movement and detail better. Control held; engine stays.
+- [x] ~~The five reference loops~~ → **no longer needed.** Gate v3 needs no reference files
+      at all; it needs one sentence of commission and one word of verdict.
 
 - [ ] 🟡 **Run 8 — one jump, three inks.** Asked 15/08. **This is the open round.**
       · *Open:* `node bin/serve.ts`. Top row, three cells, same jump in three inks.

@@ -20,7 +20,7 @@ Then run the **cycle open** — `TASTE-LOOP.md` §3b.
 ## The gate — version 3, **the commission test**
 
 _Adopted 15/08. Versions 1 and 2 are both retired **unrun**, and that pattern is the most
-important thing this section knows about itself — see "Why two gates never fired" below._
+important thing this section knows about itself — see "Why three gates got this wrong" below._
 
 **The reading.** He names an object and an animation **in one sentence**, the way anyone
 commissions an artist: *"a treasure chest that opens"*, *"a bat that flies"*, *"a torch
@@ -35,40 +35,57 @@ with one word.
   does not say which half missed. **Mitigation, and it costs him one word:** on a miss he
   says why in a word or two. That recovers the distinction without a second verdict.
 
-**Two numbers come out of every batch, and both are the gate:**
+**A miss is not a strike. A miss is a specification.** — his correction, 15/08, and it
+rewrites what this section is for. When a commission comes back short, the model's job is
+**not** to iterate the sample. It is to name **which capability was missing**, so it can be
+discussed and built. That is what every miss in this project has actually produced:
 
-| | what it is | what it means |
+| the miss | the capability it specified |
+|---|---|
+| far limbs read as a lighting error | depth was being faked by paint order → the z-buffer |
+| a limb absent in all twelve frames | a walk's amplitude cannot express an action |
+| "ficou horrível" on the tree | every primitive was convex → the lobed primitive |
+| the crown as a sponge | 28 parts in a 30×28 px space, past a recorded ceiling |
+
+**Two numbers are recorded every batch. They are evidence, never thresholds.**
+
+| | what it is | what it is for |
 |---|---|---|
-| **hit rate** | commissions that ship / commissions given | whether drawing is delegable at his bar |
-| **cost to hit** | my bench cycles per shipped piece, and his attention per piece | whether it is delegable *economically* |
+| **hit rate** | commissions that ship / commissions given | whether the range is widening |
+| **cost to hit** | model bench cycles per shipped piece, and his attention per piece | his stated central risk, instrumented |
 
-**What kills the project:** a hit rate that does not climb across batches. If, after
-several batches, most commissions still come back as misses, drawing is not delegable at
-this bar and the project has its answer. **Cost to hit is the second kill:** a hit rate
-that only climbs because each piece costs more cycles is not a draughtsman, it is a very
-patient apprentice.
+**Nobody is killed by a number. He decides when this project ends, and he will not have a
+simple metric for it** — his words, 15/08. Five misses in a row are a prompt to *design*,
+not a verdict to *quit*.
+
+**The residual risk, named rather than solved.** `TASTE-LOOP.md` §12 lists "no stopping
+rule" as a known gap, and its reasoning is that the party with the incentive to continue
+should not be the one deciding when to stop — which is the model, not him. A threshold was
+the wrong answer to that; the right one is **behavioural and lands on me**: misses get
+reported in his words and unsoftened, predictions get recorded before he looks and scored
+after, and the numbers above go in the record whether or not they flatter. The safeguard is
+that his judgment arrives well-fed, not that it arrives pre-empted.
 
 **A batch spans kinds, deliberately** — creature, prop, character, effect, environment.
 Breadth is the claim now, so a gate measured on one kind measures the wrong thing.
 
-**Why two gates never fired, and why this one can.** Gate v1 (find-the-impostor) died to a
+**Why three gates got this wrong, and what survives.** Gate v1 (find-the-impostor) died to a
 logic hole. Gate v2 (six loops ranked, five of them from shipped games) died because it
 needed **five files he had to go and collect**, and across a week they never arrived — and I
 raised it three times without once explaining plainly what they were, which is my failure
-and not his. **Two gates specified, two gates never run: the pattern is that I design
-readings whose setup cost falls on the human.** v3 costs him one sentence to commission and
+and not his. **And v3's first draft, an hour old, tried to make a threshold do his deciding for him.
+Three gates, three different ways of moving the judgment away from the only person who
+has it: a logic hole, then a setup cost dumped on him, then an automated kill.** v3 costs him one sentence to commission and
 one word to judge. That is the property that matters, and it outranks any elegance the
 retired ones had.
 
 **Every batch gets its reading written the same turn it arrives**, at the top of
 `BACKLOG.md`. `DECISIONS.md` records that a reading happened, never the tally.
 
-**No date.** The focus week's 21/08 deadline is retired with the conditions it belonged to
-(his call, 15/08 — *"abri mão das condições impostas anteriormente"*). The stopping rule is
-now the gate's own two numbers, which is stronger than a calendar because it can say *no*
-as well as *time is up*. **The known gap this reopens** (`TASTE-LOOP.md` §12: no stopping
-rule) is real and named: nothing now forces an end date, so the honest verdict has to come
-from the numbers refusing to move.
+**No date, and no numeric stopping rule.** The 21/08 deadline is retired with the
+conditions it belonged to (*"abri mão das condições impostas anteriormente"*), and the
+metric that briefly replaced it lasted one turn before he corrected it. **The stopping
+decision is his, held in his head, and it is allowed to be.**
 
 ---
 
@@ -82,7 +99,8 @@ from the numbers refusing to move.
   something another gamedev can install.
 - **The question under test, in his words (15/08):** *"Se o Claude fosse capaz de desenhar
   de forma econômica, faria sentido entregar essa responsabilidade para ele?"*
-- **The failure condition:** it is not possible to turn the model into a draughtsman.
+- **The failure condition:** it is not possible to turn the model into a draughtsman — and
+  **he is the one who calls it**, from judgment rather than from a threshold (15/08).
 
 **Three requirements, all three load-bearing, all three from him on 15/08.**
 

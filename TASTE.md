@@ -96,6 +96,18 @@ _Fills from evidence. Every entry cites the artifact that produced it._
   **What raises the ceiling, then:** more budget than I expected to be allowed. That is a
   hypothesis with one observation, not a law — the next verdict can move it.
 
+- **[15/08 · three gate designs, all corrected by him] I keep trying to mechanise the one
+  judgment that is his.** Gate v1 hid the answer from him and had a logic hole. Gate v2
+  needed five files he had to collect, and I asked for them three times without once saying
+  what they were. Gate v3's first draft — written an hour after v2 was retired for exactly
+  this — set a numeric kill condition, and he corrected it in one message: *"esse projeto
+  falha quando eu decidir que falha... não vou ter uma métrica simples"*. **Three designs,
+  three different mechanisms, one direction: the decision moving away from the person who
+  holds it.** The pull is not toward rigour, it is toward *not having to ask* — a threshold
+  is a way of never being told no. **portable, and it generalises past gates:** any place I
+  am designing a rule that would spare me a conversation, the rule is probably the wrong
+  artifact.
+
 - **[15/08 · run 7, his verdict on gallery #0017] I mistake the size of a change for its
   visibility.** The depth round replaced the shading of every pixel of every part — a
   distance-to-edge sweep became a real three-component lambert — and I wrote in advance that
