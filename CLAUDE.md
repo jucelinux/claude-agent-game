@@ -249,6 +249,10 @@ He is the tiebreaker and the one who sets the bar — not an inspector. Rules in
   delivered as a cloud; it is delivered as **a sky a cloud crosses**. The deliverable of any
   request is a **micro game** — a scene the thing lives in — on the shelf at
   `node bin/micro.ts --serve`, and he says explicitly when a new one starts.
+  - **The shelf is a webapp with one route per game** — `node bin/micro.ts` serves it on
+    5177, `/` is the shelf and `/<id>` is the game. Iterating on a game is edit, refresh,
+    look: every route renders from current code on every request, with no cache and no build
+    step.
   - **The shelf renders live from current code**, so every engine improvement reaches every
     micro game ever made. That is the opposite of the gallery's rule and deliberately so:
     the gallery is the record and freezes, the shelf is the product and moves.

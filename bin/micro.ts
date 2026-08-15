@@ -1,76 +1,102 @@
 /**
- * **The micro-game shelf.** His surface from 15/08 onward.
+ * **The micro-game webapp.** His surface from 15/08 onward.
  *
- *   node bin/micro.ts            -> dist/micro.html
- *   node bin/micro.ts --serve    -> http://localhost:5174, rebuilt on every save
+ *   node bin/micro.ts            -> http://localhost:5174
+ *   node bin/micro.ts --static   -> dist/micro/ as plain files
  *
- * One slide per micro game, oldest first, arrows to walk them. Everything renders **live**
- * from current code, so an engine improvement reaches every game ever made — which is the
- * opposite of the gallery's rule and deliberately so. The gallery is the record. This is
- * the product.
+ *   /            the shelf: every micro game ever made, oldest first
+ *   /<id>        one game, big, on its own route
+ *
+ * **Every route renders from current code on every request.** There is no cache and no
+ * build step, so iterating on a game is: edit, refresh, look. That is the opposite of the
+ * gallery, which freezes an entry so a refactor shows up as a difference — the gallery is
+ * the record and this is the product.
+ *
+ * `node:http` and `node:fs` only. Nothing added to the stack.
  */
 import { createServer } from 'node:http'
-import { mkdirSync, writeFileSync, watch } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { compose } from '../src/scene/compose.ts'
 import { MICRO_GAMES } from '../src/micro/registry.ts'
-import { emit } from '../src/viewer/page.ts'
-import type { ViewCell } from '../src/viewer/page.ts'
+import { gamePage, shelfPage } from '../src/micro/app.ts'
+import type { AppGame } from '../src/micro/app.ts'
 
-function build(): string {
-  const cells: ViewCell[] = MICRO_GAMES.map((game) => {
-    const composed = compose(game.scene)
-    const own = composed.cohesion.perSubject.reduce((a, s) => a + s.colours, 0)
-    const shared = composed.cohesion.perSubject.reduce((a, s) => a + s.shared, 0)
-    return {
+function buildGame(id: string): AppGame | undefined {
+  const game = MICRO_GAMES.find((g) => g.id === id)
+  if (game === undefined) return undefined
+  const composed = compose(game.scene)
+  const own = composed.cohesion.perSubject.reduce((a, s) => a + s.colours, 0)
+  const shared = composed.cohesion.perSubject.reduce((a, s) => a + s.shared, 0)
+  const cycle = composed.scene.frames * composed.scene.msPerFrame
+  return {
+    id: game.id,
+    title: game.title,
+    blurb: game.blurb,
+    date: game.date,
+    meta: [
+      `${composed.scene.w}×${composed.scene.h}`,
+      `×${composed.scene.scale}`,
+      `${composed.buffers.length} frames`,
+      `${cycle} ms cycle`,
+      `${composed.scene.placements.length} subjects`,
+      `${composed.cohesion.totalColours} colours`,
+      `${Math.round((100 * shared) / Math.max(1, own + shared))}% palette reuse`,
+      game.date,
+    ],
+    cell: {
       w: composed.scene.w,
       h: composed.scene.h,
-      frames: composed.buffers.map((b) => b.data),
-      palette: composed.palette.colors,
-      label: `${game.title} · ${game.blurb}`,
-      group: `${game.date} · ${game.title}`,
       scale: composed.scene.scale,
       msPerFrame: composed.scene.msPerFrame,
-      summary: [
-        `${game.id} · ${composed.scene.w}×${composed.scene.h} · ${composed.buffers.length} frames · ${composed.scene.frames * composed.scene.msPerFrame} ms cycle`,
-        `${composed.scene.placements.length} subjects · ${composed.cohesion.totalColours} colours · ${Math.round((100 * shared) / Math.max(1, own + shared))}% palette reuse`,
-      ],
-    }
-  })
-  return emit({
-    mode: 'bench',
-    slides: true,
-    scale: 3,
-    msPerFrame: 50,
-    cells,
-    title: 'claude-ink-2d · micro games',
-    notes: [
-      'One slide per iteration. Every object here belongs to a scene, never to a cell.',
-      'left and right walk the shelf · space pauses · , and . step one frame',
-    ],
-  })
+      frames: composed.buffers.map((b) => b.data),
+      palette: composed.palette.colors,
+    },
+  }
 }
 
-if (process.argv.includes('--serve')) {
-  const port = 5174
-  let html = build()
-  const server = createServer((_req, res) => {
-    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' })
-    res.end(html)
-  })
-  for (const dir of ['src', 'tunables']) {
-    watch(dir, { recursive: true }, () => {
-      try {
-        html = build()
-        process.stdout.write(`rebuilt  ${MICRO_GAMES.length} micro games\n`)
-      } catch (err) {
-        process.stderr.write(`build failed: ${String(err)}\n`)
-      }
-    })
+const buildAll = (): AppGame[] => MICRO_GAMES.map((g) => buildGame(g.id)).filter((g): g is AppGame => g !== undefined)
+
+if (process.argv.includes('--static')) {
+  const games = buildAll()
+  mkdirSync('dist/micro', { recursive: true })
+  writeFileSync('dist/micro/index.html', shelfPage(games))
+  for (const game of games) {
+    mkdirSync(`dist/micro/${game.id}`, { recursive: true })
+    writeFileSync(`dist/micro/${game.id}/index.html`, gamePage(game))
   }
-  server.listen(port, () => process.stdout.write(`micro games on http://localhost:${port}  ·  ${MICRO_GAMES.length} on the shelf\n`))
+  process.stdout.write(`dist/micro/  ${games.length} games, one route each\n`)
 } else {
-  const html = build()
-  mkdirSync('dist', { recursive: true })
-  writeFileSync('dist/micro.html', html)
-  process.stdout.write(`dist/micro.html  ${MICRO_GAMES.length} micro games, ${Math.round(Buffer.byteLength(html) / 1024)} KB\n`)
+  // Configurable, and it defaults high on purpose: 5174 was already taken on this machine
+  // by something that was not ours, and a server that silently fails to bind serves someone
+  // else's pages under our routes — which is exactly what happened the first time.
+  const flag = process.argv.indexOf('--port')
+  const port = flag >= 0 ? Number(process.argv[flag + 1]) : 5177
+  const server = createServer((req, res) => {
+    const path = (req.url ?? '/').split('?')[0]!.replace(/\/+$/, '')
+    const send = (html: string, code = 200): void => {
+      res.writeHead(code, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' })
+      res.end(html)
+    }
+    try {
+      if (path === '' || path === '/') return send(shelfPage(buildAll()))
+      const game = buildGame(path.slice(1))
+      // A miss goes back to the shelf rather than to a dead end: he navigates by refreshing,
+      // and a stale URL after an id changes should land somewhere useful.
+      if (game === undefined) return send(shelfPage(buildAll()), 404)
+      return send(gamePage(game))
+    } catch (err) {
+      return send(`<pre style="color:#e88;background:#131316;padding:32px;font:13px monospace">${String((err as Error).stack ?? err)}</pre>`, 500)
+    }
+  })
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      process.stderr.write(`port ${port} is already taken. Pass --port <n> — and do not assume the pages you see are ours.\n`)
+      process.exit(1)
+    }
+    throw err
+  })
+  server.listen(port, () => {
+    process.stdout.write(`micro games on http://localhost:${port}\n`)
+    for (const g of MICRO_GAMES) process.stdout.write(`  /${g.id.padEnd(20)} ${g.title}\n`)
+  })
 }
