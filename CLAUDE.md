@@ -22,16 +22,20 @@ collects the five references has seen them, so the sixth is theirs by eliminatio
   games that the human picks and may study as much as he likes, and one of mine. He puts
   them in order by one question: *which of these would I believe came from a game someone
   shipped?* First is the most believable, sixth the least. **The reading is my position.**
-- **Strike:** a reading whose position is **no better than the previous one**.
-  **Non-strike:** any improvement in position, which resets the count to zero.
-- **End condition — 3 strikes in a row**, and *where* the plateau sits says which end it is:
-  - **5th or 6th → the grammar does not reach the commercial bar.** Thesis dead.
-  - **1st to 4th → ceiling reached, and it is a good ceiling.** The project is finished and
-    where it stopped gets written down.
-- **It counts STRIKES: zero is the best state, not the worst.**
-- **First reading:** when a sample of the winning idiom has its locks green, **or 21/08,
-  whichever comes first.** The date is what removes my power to defer — "not yet" is always
-  the comfortable answer for the party that never gets tired.
+- **The end condition is the DATE, not a count — his call, 15/08.** On **21/08** there is
+  one reading: did the grammar reach the quality bar? Until then every run is an attempt
+  and none of them can kill the project.
+- **Why he is right, and it is not leniency.** A three-strike counter made the model reason
+  about *spending its last life*, which pushes toward the conservative run at exactly the
+  moment the experiment needs the ambitious one. A deadline removes that distortion without
+  removing the kill: 21/08 arrives whether or not anything has improved.
+- **What the change costs, so the retrospective cannot quietly skip it.** A deadline says
+  *time is up*; it never says *this is as good as it gets*. So the reading on 21/08 has to
+  be an honest verdict on the ceiling and on whether the artifact is worth publishing — his
+  words, and they are the actual end condition. A soft landing on that day is the failure
+  mode this project already names in §1.
+- **Every run still gets its own reading** — beat the previous ceiling or not — because
+  that is the only signal about *direction*. It informs; it no longer kills.
 - **Standing at 0 of 3 on 14/08.** The live count lives at the top of `BACKLOG.md` and is
   updated in the same turn a reading arrives; `DECISIONS.md` records that it changed, never
   by how much.

@@ -117,3 +117,6 @@ turn — `TASTE-LOOP.md` §3.8. Recording is not propagating.
 - 15/08 · GATE · run 4 did not beat run 2 either · strike 2 of 3, and his words matter more than the verdict: a few more iterations would reach the same level, which is parity, and parity scores a strike
 - 15/08 · LOOP · iterating the beetle is the wrong bet for the last reading · by his own account it converges on run 2 rather than past it, so spending the third reading there ends the thesis by arithmetic
 - 15/08 · OPEN · the antenna does not read as an antenna — "se essa estrutura conectada na cabeça é uma antena" · a straight 6 px stub at 0.9 radius is a spike; length, thinness and a bend are what name it, and that is a shape problem rather than an angle one
+- 15/08 · GATE · the end condition moves from three strikes to the date, 21/08 · his call, and it is right: a counter made the model reason about spending its last life, which pushes toward the conservative run exactly when the experiment needs the ambitious one
+- 15/08 · GATE · per-run readings continue and inform direction; they no longer kill · the signal about direction is worth keeping, the distortion is not
+- 15/08 · SUBJECT · a gorilla, proposed by the human · it lands on the model's own recorded strength — one heavy mass carrying the reading — and on its recorded weakness, since fur has no segmentation to hold a silhouette

@@ -8,7 +8,7 @@ open (`TASTE-LOOP.md` §3b).
 
 ---
 
-## Gate — **2 strikes of 3**, as of 15/08 · reading v2, interim form
+## Gate — **the date is the gate**, as of 15/08 · one reading, 21/08
 
 No reading taken yet. The reading is now **my position among five fixed shipped loops**,
 and a strike is a reading that does not improve on the previous one (`CLAUDE.md` gate
@@ -20,10 +20,10 @@ whichever comes first**.
 | 15/08 | run 3 (three-quarter, three creatures) against run 2 | **no** — "não superou, mas aprecio a tentativa" | **strike 1** |
 | 15/08 | run 4 (the beetle alone, three corrections, antennae up) against run 2 | **no** — "não vou dizer que superou, mas ficou boa também. Com mais algumas iterações, ficaria no mesmo patamar" | **strike 2** |
 
-**One reading left, and parity spends it.** "The same level after a few more iterations" is
-the sentence that decides the next round: a run that converges on run 2 scores a strike
-exactly like a run that falls short of it. There is no safe move left — only a run that
-exceeds resets the counter.
+**The count is retired, at his call on 15/08.** Two readings say the same thing and they
+still say it — run 3 and run 4 did not beat run 2 — but they inform direction rather than
+kill. **The kill is 21/08**: one honest verdict on the ceiling reached and on whether the
+artifact is worth publishing. Six days.
 
 Two more readings without improvement end it. Where the plateau sits decides which end:
 at run 2's level or below, the grammar does not reach the bar; above it, the ceiling was
