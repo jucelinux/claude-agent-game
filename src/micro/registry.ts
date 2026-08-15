@@ -21,6 +21,7 @@
  * mixing palettes, and the grammar has no notion of camera at all. So they are two games,
  * not one — which shows the defect instead of hiding it behind an arrangement.
  */
+
 import type { Scene } from '../scene/compose.ts'
 
 export type MicroGame = {
@@ -33,87 +34,39 @@ export type MicroGame = {
   readonly scene: Scene
 }
 
-/**
- * A mid backdrop, measured on 15/08 rather than picked: of four candidate skies only a mid
- * value clears every subject's edge contrast, because they were all tuned against the
- * viewer's grey and collectively span the whole value range.
- */
-const SKY: readonly [number, number, number] = [104, 116, 138]
-const EARTH: readonly (readonly [number, number, number])[] = [
-  [26, 27, 32],
-  [36, 38, 45],
-  [48, 51, 60],
-  [66, 71, 82],
-]
+
+
 
 /**
- * **Everything drawn in side view, at the size it was authored.**
+ * **The shelf was cleared on 15/08, at his instruction.** The two entries that opened it —
+ * `side-view` and `top-down` — were reorganisations of existing work rather than
+ * iterations, and the pending defects they carried (three absent parts on the mech, two on
+ * the beetle, eight subjects still in the ink he ranked last) go with them. His reasoning,
+ * and it is better than fixing them one by one: *"possivelmente elas irão emergir nessa
+ * nova forma de trabalho"* — a defect that matters will come back as a commission, and one
+ * that never comes back never mattered.
  *
- * The first scene shrank its subjects to fit a 248 px cell and he saw the cost immediately:
- * *"os objetos perderam resolução"*. Shrinking re-renders at a smaller `body.scale`, so the
- * detail is not scaled down, it is **never drawn**. This one keeps every subject at the
- * scale it was authored for and makes the room instead.
- */
-const sideView: Scene = {
-  name: 'side-view',
-  w: 264,
-  h: 112,
-  frames: 24,
-  msPerFrame: 50,
-  scale: 3,
-  ground: 96,
-  sky: SKY,
-  groundRamp: EARTH,
-  placements: [
-    { grammar: 'tree', tunables: 'tree', x: 42, footY: 95, scale: 1 },
-    { grammar: 'probe-d', tunables: 'probe-d', x: 108, footY: 97 },
-    { grammar: 'gorilla', tunables: 'gorilla', x: 152, footY: 97 },
-    { grammar: 'gorilla-mech', tunables: 'gorilla-mech', x: 200, footY: 97, msPerFrame: 75 },
-    { grammar: 'gorilla-jump-chrono', tunables: 'gorilla-jump-chrono', x: 244, footY: 97, msPerFrame: 50 },
-  ],
-}
-
-/**
- * **The arthropods, in the camera they were actually drawn in.**
+ * **Commission 1, his words, 15/08: a dense forest.**
  *
- * His finding, and it is the reason this is a second game and not a corner of the first:
- * these three were authored in three-quarter from above. A top-down world has no horizon,
- * so the ground starts at row 0 and there is no sky at all — which is the whole visual
- * difference between the two cameras, expressed as one number.
+ * - a forest, with **a diversity of trees of distinct shapes**
+ * - the **gorilla under his control** in the scene, walking left and right only
+ * - **loaded clouds and rain** happening in it
+ *
+ * One request, and it lands on three of the four gaps named that morning:
+ *
+ * | the ask | the capability it needs |
+ * |---|---|
+ * | trees of distinct shapes | generativity — one tree has to become trees |
+ * | a controlled gorilla | the engine: input, a loop, state, facing |
+ * | rain and cloud | effects, and there is no mechanism at all |
+ *
+ * **Rain is the structural one.** It is not a body, it is a **field**: this grammar is bones
+ * and parts, so two hundred drops would be two hundred parts. Fire, smoke, sparks and rain
+ * are all fields — a function of position and time rather than a transformed solid — and
+ * that is a new class of primitive rather than another shape.
+ *
+ * **And the scene stops being a frame strip.** A gorilla he steers cannot be pre-rendered,
+ * so the browser has to run a loop: input, state, draw. That is the engine slice arriving
+ * because content demanded it, which is the right way round.
  */
-const topDown: Scene = {
-  name: 'top-down',
-  w: 176,
-  h: 96,
-  frames: 24,
-  msPerFrame: 50,
-  scale: 3,
-  ground: 0,
-  sky: SKY,
-  groundRamp: EARTH,
-  placements: [
-    { grammar: 'beetle', tunables: 'beetle', x: 40, footY: 58 },
-    { grammar: 'mantis', tunables: 'mantis', x: 92, footY: 74 },
-    { grammar: 'scorpion', tunables: 'scorpion', x: 140, footY: 90 },
-  ],
-}
-
-/** Oldest first: the list is a record of iterations and reads in the order they happened. */
-export const MICRO_GAMES: readonly MicroGame[] = [
-  {
-    id: 'side-view',
-    title: 'Side view',
-    blurb:
-      'Every subject drawn from the side, standing on one floor, at the size it was authored. Replaces the first scene, whose subjects were shrunk to fit and lost the detail that shrinking never draws.',
-    date: '2026-08-15',
-    scene: sideView,
-  },
-  {
-    id: 'top-down',
-    title: 'Top down',
-    blurb:
-      'The arthropods, separated out because they were authored from above and the rest was authored from the side. His reading of the first scene, and it names a capability the grammar does not have: camera is a property of a set, and nothing here declares one.',
-    date: '2026-08-15',
-    scene: topDown,
-  },
-]
+export const MICRO_GAMES: readonly MicroGame[] = []
