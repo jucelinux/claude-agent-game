@@ -101,8 +101,23 @@ anything else here is rewritten.
 
 ## 2b. The model's capability surface
 
-**Deliberately empty.** Every entry cites the artifact that demonstrated it;
-self-assessment does not count (`TASTE-LOOP.md` §4). Nothing has been produced yet.
+_Every entry cites the artifact that demonstrated it; self-assessment does not count
+(`TASTE-LOOP.md` §4)._
+
+- **[15/08 · run 3 · gallery #0009–#0011] Articulation density is the ceiling, not
+  perspective.** Three creatures in the same new view, one grammar, one pass. The beetle
+  reads: eighteen parts, and the reading is carried by **one heavy mass** with limbs hung
+  off it. The mantis and the scorpion do not: the mantis lost its silhouette, and the
+  scorpion was wrong at every scale at once — leg proportion, missing pincers, fat segments,
+  a tail with a floppiness the human called unnatural. Perspective was not what defeated
+  them; **part count in a shape I had not solved yet** was.
+  **What raises the ceiling:** fewer parts, and a body whose *mass* does the reading. What
+  lowers it: more articulation as a substitute for form. **portable** — this is a fact about
+  the model, and the next project inherits it.
+- **[15/08 · run 3, the human's cross-cutting note] Depth read as a lighting error, and he
+  saw it before I did.** Far limbs were painted in a dark *material*; the light in the
+  picture could not explain them. A fact about how I reach for shortcuts: **I encode meaning
+  by switching vocabulary when the correct move is a step within one.** portable.
 
 Two **hypotheses** recorded on 14/08, so they can be refuted rather than rewritten later.
 They are not §2b entries and must not be treated as such until a sample supports them:

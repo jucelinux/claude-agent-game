@@ -34,6 +34,7 @@ export function paintPart(
   partId: number,
   rng: Rng | null,
   speckle: number,
+  shift = 0,
 ): void {
   const levels = ramp.length
   if (levels === 0) throw new Error('a ramp with no tones cannot paint')
@@ -92,6 +93,13 @@ export function paintPart(
       if (level >= levels) level = levels - 1
       if (level < 0) level = 0
       if (rng !== null && speckle > 0 && rng() < speckle && level > 0) level -= 1
+      // Depth, applied after the shading and before the clamp: the part keeps its form and
+      // only moves along its own ramp.
+      if (shift !== 0) {
+        level += shift
+        if (level >= levels) level = levels - 1
+        if (level < 0) level = 0
+      }
 
       const at = y * cw + x
       data[at] = ramp[level] as number

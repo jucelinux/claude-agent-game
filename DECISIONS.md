@@ -105,3 +105,9 @@ turn — `TASTE-LOOP.md` §3.8. Recording is not propagating.
 - 15/08 · GRAMMAR · from three-quarter the far limb row keeps half its length, not seven tenths · at 0.7 the far legs read as a second creature standing behind the first; what reaches the eye from that side is tips
 - 15/08 · GRAMMAR · a rim light is narrow, not half the silhouette · the first rule lit every edge leaning toward the light, which flattened the volume it existed to give
 - 15/08 · LOOP · the model breaks CLAUDE.md section 5 knowingly this round: three body plans is generalising before one sample has passed the bar · the human asked for the stretch, and the break is recorded rather than quiet
+- 15/08 · GATE · first reading taken: run 3 did not beat run 2 · strike 1 of 3, and the counter moved in BACKLOG the same turn
+- 15/08 · GRAMMAR · depth is a step along a material's own ramp, never a different material · the human saw the far limbs as a lighting error before the model did, and he was right: the same lamp lights both sides
+- 15/08 · GRAMMAR · far-side limbs keep 0.85 of their length, after 0.7 and 0.5 were both wrong by eye · foreshortening at this angle is gentle, and a limb half its twin's length is a limb from another animal
+- 15/08 · GRAMMAR · each leg station carries its own rest angle instead of a linear fan · a beetle's hind pair points at its rear; an even fan gives a beetle three pairs of middle legs
+- 15/08 · TASTE · TASTE.md section 2b opens with two entries, both from run 3 · articulation density is the ceiling rather than perspective, and the model reaches for a change of vocabulary where a step within one is correct
+- 15/08 · LOOP · the mantis and the scorpion are retired rather than repaired · the model does not believe one pass reaches run 2's level with them, and saying so is worth more than a second attempt that hides the same finding

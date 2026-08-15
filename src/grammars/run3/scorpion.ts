@@ -45,8 +45,8 @@ const AMBER: Palette = {
 
 const AT = [7, 3, -1, -5] as const
 
-const NEAR: Row = { side: 'N', at: AT, offset: 5, femur: 7, tibia: 6, width: 1.5, material: 'shell', splay: 0.04, lean: 0.055, parent: 'body' }
-const FARROW: Row = { side: 'F', at: AT, offset: -6, femur: 7, tibia: 6, width: 1.5, material: 'ink', splay: 0.5, lean: -0.055, parent: 'body' }
+const NEAR: Row = { side: 'N', at: AT, offset: 5, femur: 7, tibia: 6, width: 1.5, material: 'shell', splay: 0.04, fan: [-0.08, -0.03, 0.03, 0.09], parent: 'body' }
+const FARROW: Row = { side: 'F', at: AT, offset: -6, femur: 7, tibia: 6, width: 1.5, material: 'shell', shift: -2, splay: 0.5, fan: [0.08, 0.03, -0.03, -0.09], parent: 'body' }
 
 /** Six segments, each lagging the one in front by a quarter cycle. */
 const TAIL = [0, 1, 2, 3, 4, 5]

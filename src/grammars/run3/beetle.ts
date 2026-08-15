@@ -42,9 +42,39 @@ const SHELL: Palette = {
 
 const AT = [8, 3, -2] as const
 
-const NEAR: Row = { side: 'N', at: AT, offset: 6, femur: 8, tibia: 6.5, width: 1.9, material: 'shell', splay: 0.03, lean: 0.05, parent: 'body' }
-// The far row sits on the body's top edge and only its tips clear the shell.
-const FARROW: Row = { side: 'F', at: AT, offset: -7, femur: 8, tibia: 6.5, width: 1.9, material: 'ink', splay: 0.5, lean: -0.05, parent: 'body' }
+/**
+ * Front pair reach forward, middle pair sit square, **hind pair point at the rear** — the
+ * human's first correction, and it is what a beetle actually looks like standing still. The
+ * first pass fanned all three evenly, which gave a beetle three pairs of middle legs.
+ */
+const FAN = [-0.055, 0.01, 0.105] as const
+
+const NEAR: Row = { side: 'N', at: AT, offset: 6, femur: 8, tibia: 6.5, width: 1.9, material: 'shell', splay: 0.03, fan: FAN, parent: 'body' }
+// Same lamp, same shell: the far row is two steps down its own ramp, not a darker substance.
+const FARROW: Row = { side: 'F', at: AT, offset: -6.5, femur: 8, tibia: 6.5, width: 1.9, material: 'shell', shift: -2, splay: 0.5, fan: FAN.map((f) => -f), parent: 'body' }
+
+/**
+ * Two gaits, and this round exists to choose between them by eye.
+ *
+ * **Tripod** — three legs planted, three swinging, always. It is what a beetle does at
+ * speed and it is what the arthropod grammar already knew.
+ *
+ * **Wave** — front pair, then middle, then hind, a quarter cycle apart. The human watched
+ * video and read a wave, and he is describing the metachronal gait insects fall into when
+ * they walk slowly. One note for him rather than an argument: the literature usually has
+ * the wave running back to front; the direction here is one number, so flipping it and
+ * looking again costs nothing.
+ */
+const TRIPOD = [
+  ...legTracks(['hipN0', 'hipN2', 'hipF1'], 1),
+  ...legTracks(['hipN1', 'hipF0', 'hipF2'], -1),
+]
+
+const WAVE = [
+  ...legTracks(['hipN0', 'hipF0'], 1, 1, 0.7, 0),
+  ...legTracks(['hipN1', 'hipF1'], 1, 1, 0.7, 1),
+  ...legTracks(['hipN2', 'hipF2'], 1, 1, 0.7, 2),
+]
 
 export const beetle: Grammar = {
   name: 'beetle',
@@ -79,8 +109,15 @@ export const beetle: Grammar = {
       { bone: 'body', channel: 'y', keys: [0, -1, 0, -1] },
       { bone: 'antL', channel: 'angle', keys: [0.3, 0.1, -0.3, -0.1] },
       { bone: 'antR', channel: 'angle', keys: [-0.25, 0, 0.3, 0] },
-      ...legTracks(['hipN0', 'hipN2', 'hipF1'], 1),
-      ...legTracks(['hipN1', 'hipF0', 'hipF2'], -1),
+      ...TRIPOD,
     ],
   },
+}
+
+
+/** The same beetle, walking as a wave instead of a tripod. */
+export const beetleWave: Grammar = {
+  ...beetle,
+  name: 'beetle-wave',
+  gait: { ...beetle.gait, name: 'metachronal-walk', tracks: [...beetle.gait.tracks.filter((t) => !t.bone.startsWith('hip') && !t.bone.startsWith('tib')), ...WAVE] },
 }

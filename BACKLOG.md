@@ -8,16 +8,20 @@ open (`TASTE-LOOP.md` §3b).
 
 ---
 
-## Gate — 0 strikes of 3, as of 14/08 · reading **v2, approved by the human 14/08**
+## Gate — **1 strike of 3**, as of 15/08 · reading v2, interim form
 
 No reading taken yet. The reading is now **my position among five fixed shipped loops**,
 and a strike is a reading that does not improve on the previous one (`CLAUDE.md` gate
 block). First reading: when a sample of the winning idiom has its locks green, **or 21/08,
 whichever comes first**.
 
-| date | position | improved? | strike? |
+| date | reading | improved? | strike? |
 |---|---|---|---|
-| — | none yet | — | — |
+| 15/08 | run 3 (three-quarter, three creatures) against run 2 | **no** — "não superou, mas aprecio a tentativa" | **strike 1** |
+
+Two more readings without improvement end it. Where the plateau sits decides which end:
+at run 2's level or below, the grammar does not reach the bar; above it, the ceiling was
+reached and the project is finished.
 
 Full definition of the reading in `CLAUDE.md`'s gate block. Update **in the same turn** a
 reading arrives.

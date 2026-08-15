@@ -53,6 +53,15 @@ export type Part = {
   readonly bone: string
   readonly material: string
   readonly shape: Shape
+  /**
+   * Steps to slide this part along its material's ramp, negative for darker. **This is how
+   * depth is expressed.** The first three-quarter pass painted the far limbs in the ink
+   * material, which is a different colour entirely — the human caught it immediately: the
+   * far legs were darker in a way the light in the picture could not explain. A limb on the
+   * far side is lit by the same lamp; it is one or two steps down the same ramp, never a
+   * different substance. portable.
+   */
+  readonly shift?: number
 }
 
 /** A named instant of the cycle. The gait is a set of named phases, never a bare sine. */

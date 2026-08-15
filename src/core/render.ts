@@ -37,7 +37,7 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     }
     const xf = world.get(part.bone)
     if (xf === undefined) throw new Error(`part "${part.name}" is bound to unknown bone "${part.bone}"`)
-    paintPart(painter, part.shape, xf, ramp.indices, params.light, i, rng, params.texture.speckle)
+    paintPart(painter, part.shape, xf, ramp.indices, params.light, i, rng, params.texture.speckle, part.shift ?? 0)
   }
 
   if (params.outline.rim) {

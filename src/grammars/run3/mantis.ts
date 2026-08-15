@@ -42,8 +42,8 @@ const GREEN: Palette = {
 
 const AT = [2, -6] as const
 
-const NEAR: Row = { side: 'N', at: AT, offset: 4, femur: 9, tibia: 8, width: 1.5, material: 'shell', splay: 0.05, lean: 0.07, parent: 'body' }
-const FARROW: Row = { side: 'F', at: AT, offset: -5, femur: 9, tibia: 8, width: 1.5, material: 'ink', splay: 0.5, lean: -0.07, parent: 'body' }
+const NEAR: Row = { side: 'N', at: AT, offset: 4, femur: 9, tibia: 8, width: 1.5, material: 'shell', splay: 0.05, fan: [-0.07, 0.07], parent: 'body' }
+const FARROW: Row = { side: 'F', at: AT, offset: -5, femur: 9, tibia: 8, width: 1.5, material: 'shell', shift: -2, splay: 0.5, fan: [0.07, -0.07], parent: 'body' }
 
 export const mantis: Grammar = {
   name: 'mantis',

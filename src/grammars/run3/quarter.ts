@@ -19,12 +19,15 @@
 import type { Bone, Part, Track } from '../../core/types.ts'
 
 /**
- * How much of its near-side length a far-side limb keeps. **Half**, and the first attempt
- * at 0.7 was wrong for a reason worth writing down: from three-quarter, the far row is
- * mostly *behind the body*. What reaches the eye is the tips, not the limbs — a far leg
- * drawn at 70% reads as a second creature standing behind the first.
+ * How much of its near-side length a far-side limb keeps.
+ *
+ * Two wrong answers before this one, and both were caught by eye rather than by number.
+ * 0.7 read as a second creature standing behind the first; 0.5 read as **disproportionately
+ * small**, which is what the human said and he was right — foreshortening at this angle is
+ * gentle, and a limb half the length of its twin is a limb from a different animal.
+ * 0.85 is the shortening a body tilted about twenty degrees actually produces.
  */
-export const FAR = 0.5
+export const FAR = 0.85
 
 export type Row = {
   readonly side: 'N' | 'F'
@@ -42,8 +45,14 @@ export type Row = {
    * other above it.
    */
   readonly splay: number
-  /** Per-station fan, signed: the front leg reaches forward and the back one trails. */
-  readonly lean: number
+  /**
+   * Rest offset per station, front to back, **explicit rather than a linear fan**. A beetle's
+   * hind legs point at its rear; the front pair reach forward; the middle pair sit square.
+   * A single lean number spreads them evenly and gets all three wrong at once.
+   */
+  readonly fan: readonly number[]
+  /** Steps down this row's ramp. Depth is a ramp shift, never a different material. */
+  readonly shift?: number
   readonly parent: string
 }
 
@@ -51,7 +60,7 @@ export function legBones(row: Row): Bone[] {
   const bones: Bone[] = []
   const scale = row.side === 'F' ? FAR : 1
   for (let i = 0; i < row.at.length; i++) {
-    const lean = (i - (row.at.length - 1) / 2) * row.lean
+    const lean = row.fan[i] as number
     bones.push({
       name: `hip${row.side}${i}`,
       parent: row.parent,
@@ -64,7 +73,7 @@ export function legBones(row: Row): Bone[] {
       parent: `hip${row.side}${i}`,
       x: 0,
       y: row.femur * scale,
-      angle: -0.08 + lean * 0.6,
+      angle: -0.08 + lean * 0.5,
     })
   }
   return bones
@@ -78,12 +87,14 @@ export function legParts(row: Row): Part[] {
       name: `femur${row.side}${i}`,
       bone: `hip${row.side}${i}`,
       material: row.material,
+      shift: row.shift ?? 0,
       shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: row.femur * scale, r: row.width * scale },
     })
     parts.push({
       name: `tibia${row.side}${i}`,
       bone: `tib${row.side}${i}`,
       material: row.material,
+      shift: row.shift ?? 0,
       shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: row.tibia * scale, r: row.width * 0.72 * scale },
     })
   }
@@ -95,11 +106,13 @@ export function legParts(row: Row): Part[] {
  * is the diagonal pair. Both are real gaits, and naming which one a creature uses is the
  * difference between animating a body and animating a set of sticks.
  */
-export function legTracks(group: readonly string[], phase: 1 | -1, reach = 1, knee = 0.7): Track[] {
+export function legTracks(group: readonly string[], phase: 1 | -1, reach = 1, knee = 0.7, rotate = 0): Track[] {
+  const spin = (keys: readonly number[]): number[] =>
+    keys.map((_, i) => keys[((i - rotate) % keys.length + keys.length) % keys.length] as number)
   const tracks: Track[] = []
   for (const hip of group) {
-    tracks.push({ bone: hip, channel: 'angle', keys: [reach * phase, 0, -reach * phase, 0] })
-    tracks.push({ bone: `tib${hip.slice(3)}`, channel: 'angle', keys: [0, -knee * phase, 0, knee * phase] })
+    tracks.push({ bone: hip, channel: 'angle', keys: spin([reach * phase, 0, -reach * phase, 0]) })
+    tracks.push({ bone: `tib${hip.slice(3)}`, channel: 'angle', keys: spin([0, -knee * phase, 0, knee * phase]) })
   }
   return tracks
 }
