@@ -11,6 +11,7 @@
  * and an empty pixel must never print the same character, or the instrument flatters.
  */
 import type { IndexedBuffer, Palette } from '../core/types.ts'
+import { luminance } from '../core/color.ts'
 
 /** Nine visible steps, dark to light. Index 0 of the string is reserved for background. */
 export const CHARS = ' .:-=+*#%@'
@@ -18,7 +19,7 @@ export const CHARS = ' .:-=+*#%@'
 export function luminanceOf(palette: Palette, index: number): number {
   const rgb = palette.colors[index]
   if (rgb === undefined) throw new Error(`palette "${palette.name}" has no colour at index ${index}`)
-  return (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255
+  return luminance(rgb)
 }
 
 export function charFor(palette: Palette, index: number): string {

@@ -28,6 +28,24 @@ reading arrives.
 
 **Exactly one.**
 
+- **Axis:** silhouette and value separation. **Open since 15/08, verdict pending.**
+- **The question:** the idiom he singled out has no outer line and its edge dissolves into
+  the ground — measured, not felt: a boundary pixel 0.058 away in luminance. Two materially
+  different answers, both rendered, both kept:
+  - **LINE** (`runs/probe-c-line.run.json`, gallery #0007) — a dark ring outside the shape.
+    Uniform by construction: min and mean edge contrast are both 0.381.
+  - **VALUE** (`runs/probe-c-value.run.json`, gallery #0008) — no line at all; the sprite's
+    own edge pixels go to the ends of their ramps, lightest into the light and darkest away
+    from it. Min 0.131, mean 0.380 — it swings, which is the point.
+- **What closes it:** his verdict on the pair. Both already clear rungs 1–3.
+- **Assumption on the record:** the `ink` question was not answered, and I declared in
+  advance that silence means **(A)** — the name is aspiration, Chrono stays the target.
+  If that is wrong, this round changes shape.
+
+---
+
+## Previous round — frontier probe, closed 15/08
+
 - **Axis:** sprite idiom. First round on the axis → **frontier probe** (§3.0).
 - **Bar:** `TASTE.md` §1b — Stardew as control, Chrono Trigger as target, Comix Zone as
   declared overshoot.
@@ -70,10 +88,14 @@ reading arrives.
       characters = painted pixels, so a dark outline can never collapse into background);
       the 25% reduction separates two frames I know differ; an authored part that never
       reaches the buffer is caught by the count while the sheet still reads as a body.
-- [ ] **Silhouette lock at 25%** — the instrument exists and is null-cased
-      (`silhouette()`); the lock itself waits for a sample worth locking. Round 1.
-- [ ] **Value lock** — convert to greyscale, the ramps stay separated. The luminance dump
-      is the instrument; the assertion waits for the real palette. Round 1.
+- [x] **Silhouette lock at 25%** — `tests/silhouette.test.ts`. Reduce, threshold, and what
+      survives must still be **one body**: the share held by the largest connected blob,
+      because coverage alone would pass a cloud of dust.
+- [x] **Value lock** — edge contrast against the ground, in luminance, per frame. Calibrated
+      on the sample that failed by eye: the high-budget idiom had a boundary pixel **0.058**
+      from the ground, which is a pixel nobody can see. Floor is 0.10 min, 0.25 mean; both
+      answers of the silhouette round clear it. The ground the lock measures against is
+      pinned by test to the ground the eye sees.
 - [x] **Animation family lock** — `tests/animation.test.ts`. Margin **0.02 of the canvas**
       (≈ one leg, 46 px of 2304), calibrated in both directions: a twitch of 0.0009 passes
       byte-inequality and fails the margin. Part rotation orients the part; moving the root

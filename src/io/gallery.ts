@@ -54,8 +54,21 @@ export type GalleryEntry = {
    * makes the title of an unlabelled run be *what changed in it*.
    */
   readonly topic: string
+  /**
+   * Which lane this generation belongs to, and the two lanes are the human's design,
+   * 15/08. **progression** is the arc — dummy, insect, and each new attempt at beating the
+   * previous ceiling — read left to right so the evolution is one glance. **requests** is
+   * what he asked for; the ninja lives there because it came from a reference of his.
+   * Keeping them apart is what stops his asks from being read as my progress.
+   */
+  readonly track: 'progression' | 'requests'
   readonly note?: string
 }
+
+export const TRACKS = {
+  progression: 'progression — the arc, oldest first: each one an attempt at the previous ceiling',
+  requests: 'requests — what he asked for, and what came of it',
+} as const
 
 /** Flatten to dotted paths so two generations can be compared leaf by leaf. */
 function flatten(value: unknown, prefix = ''): Map<string, string> {
@@ -94,6 +107,7 @@ export function entryFrom(
   date: string,
   note?: string,
   topic?: string,
+  track: 'progression' | 'requests' = 'progression',
 ): GalleryEntry {
   const { _anchors, ...params } = result.params as unknown as Record<string, unknown>
   void _anchors
@@ -103,6 +117,7 @@ export function entryFrom(
     params,
     summary,
     topic: topic ?? (summary[0] as string),
+    track,
     n,
     date,
     grammar: result.spec.grammar,
@@ -154,12 +169,12 @@ export function cellOf(entry: GalleryEntry): ViewCell {
     frames,
     palette: entry.palette,
     label: `#${String(entry.n).padStart(4, '0')} · ${entry.grammar}${entry.note === undefined ? '' : ` · ${entry.note}`}`,
-    group: `${entry.date} · ${entry.topic ?? 'untitled run'}`,
+    group: TRACKS[entry.track ?? 'progression'],
     scale: entry.scale,
     msPerFrame: entry.msPerFrame,
     summary: [
+      `${entry.date} · ${entry.topic ?? 'untitled run'}`,
       `${entry.w}×${entry.h} · ${entry.frames} frames · ${entry.msPerFrame} ms/frame · ${entry.frames * entry.msPerFrame} ms cycle`,
-      '',
       ...(entry.summary ?? []),
     ],
   }

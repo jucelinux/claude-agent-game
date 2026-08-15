@@ -1,5 +1,5 @@
 import type { Grammar, IndexedBuffer, Params } from './types.ts'
-import { createPainter, innerOutline, outline, paintPart, OWNER_EMPTY } from './raster.ts'
+import { createPainter, innerOutline, outline, paintPart, rimEdge, OWNER_EMPTY } from './raster.ts'
 import { solve } from './skeleton.ts'
 import { evaluate } from './gait.ts'
 import { mulberry32 } from './rng.ts'
@@ -38,6 +38,19 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     const xf = world.get(part.bone)
     if (xf === undefined) throw new Error(`part "${part.name}" is bound to unknown bone "${part.bone}"`)
     paintPart(painter, part.shape, xf, ramp.indices, params.light, i, rng, params.texture.speckle)
+  }
+
+  if (params.outline.rim) {
+    // Before the outer line, so a sample carrying both still ends up with the line outside.
+    rimEdge(
+      painter,
+      (owner) => {
+        const part = grammar.parts[owner]
+        if (part === undefined) return undefined
+        return grammar.palette.ramps.find((r) => r.material === part.material)?.indices
+      },
+      params.light,
+    )
   }
 
   if (params.outline.inner || params.outline.enabled) {

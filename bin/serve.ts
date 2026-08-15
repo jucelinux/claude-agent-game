@@ -61,7 +61,11 @@ function refresh(): boolean {
  * only question the gate asks: **did it move?**
  */
 function payload(): string {
-  const kept = list().reverse().map(cellOf)
+  const entries = list()
+  const kept = [
+    ...entries.filter((e) => (e.track ?? 'progression') === 'progression'),
+    ...entries.filter((e) => e.track === 'requests'),
+  ].map(cellOf)
   const cells: Cell[] = [
     ...current.cells,
     ...kept.map((cell) => ({

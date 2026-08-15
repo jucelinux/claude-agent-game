@@ -136,6 +136,46 @@ export function innerOutline(painter: Painter, index: number): void {
   for (const at of behind) data[at] = index
 }
 
+/**
+ * **The silhouette edge, done with value instead of line.**
+ *
+ * Every pixel of the sprite that touches the background is pushed to an end of *its own*
+ * material's ramp: the lightest tone where the edge faces the light, the darkest where it
+ * faces away. That is a rim light and an occlusion edge, and together they are how art with
+ * no outline still reads as a shape.
+ *
+ * The outward direction is taken from the empty neighbours — no normals needed at this
+ * stage, because at the silhouette the empty side *is* the outside. portable.
+ */
+export function rimEdge(
+  painter: Painter,
+  rampOf: (owner: number) => readonly number[] | undefined,
+  light: { readonly x: number; readonly y: number },
+): void {
+  const { w, h, data } = painter.buf
+  const { owners } = painter
+  const writes: [number, number][] = []
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const at = y * w + x
+      if (data[at] === 0) continue
+      let ox = 0
+      let oy = 0
+      if (x === 0 || data[at - 1] === 0) ox -= 1
+      if (x === w - 1 || data[at + 1] === 0) ox += 1
+      if (y === 0 || data[at - w] === 0) oy -= 1
+      if (y === h - 1 || data[at + w] === 0) oy += 1
+      if (ox === 0 && oy === 0) continue
+      const ramp = rampOf(owners[at] as number)
+      if (ramp === undefined || ramp.length < 2) continue
+      const m = Math.hypot(ox, oy)
+      const lit = (ox / m) * light.x + (oy / m) * light.y
+      writes.push([at, (lit > 0 ? ramp[ramp.length - 1] : ramp[0]) as number])
+    }
+  }
+  for (const [at, index] of writes) data[at] = index
+}
+
 /** One dark ring on the empty pixels that touch ink. A knob, not a constant. portable. */
 export function outline(painter: Painter, index: number): void {
   const { w, h, data } = painter.buf

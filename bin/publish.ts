@@ -26,10 +26,13 @@ const html = emit({
   slides: true,
   scale: 4,
   msPerFrame: 100,
-  cells: entries.reverse().map(cellOf),
+  cells: [
+    ...entries.filter((e) => (e.track ?? 'progression') === 'progression'),
+    ...entries.filter((e) => e.track === 'requests'),
+  ].map(cellOf),
   title: 'claude-ink-2d',
   notes: [
-    `claude-ink-2d — a sprite and animation grammar for articulated bodies. ${entries.length} kept generations, newest first.`,
+    `claude-ink-2d — a sprite and animation grammar for articulated bodies. ${entries.length} kept generations in two lanes.`,
     'left and right walk the history · space pauses · , and . step one frame',
   ],
 })

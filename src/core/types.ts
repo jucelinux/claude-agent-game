@@ -101,7 +101,19 @@ export type Params = {
    * where the silhouette goes to die. Above 1 the dark end compresses into a rim.
    */
   readonly light: { readonly x: number; readonly y: number; readonly curve: number }
-  readonly outline: { readonly enabled: boolean; readonly material: string; readonly inner: boolean }
+  /**
+   * How the silhouette is made to read. `enabled` draws a line outside it; `rim` pushes the
+   * sprite's own edge pixels to the ends of their ramps instead. They are the two answers
+   * this round is comparing, and they are independent knobs so that "both" and "neither"
+   * are also expressible — a round that can only express its two hypotheses is a round
+   * that cannot be surprised.
+   */
+  readonly outline: {
+    readonly enabled: boolean
+    readonly material: string
+    readonly inner: boolean
+    readonly rim: boolean
+  }
   readonly body: { readonly scale: number }
   /** Amplitudes applied to the grammar's normalized track keys. */
   readonly gait: { readonly swing: number; readonly lift: number }
