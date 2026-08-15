@@ -12,6 +12,7 @@
 import { parse } from './args.ts'
 import { execute, saveRun } from '../src/io/load.ts'
 import { dumpStrip, silhouetteStrip } from '../src/perception/lum.ts'
+import { report } from '../src/perception/structure.ts'
 
 const started = process.hrtime.bigint()
 const { spec, rest } = parse(process.argv.slice(2))
@@ -22,6 +23,9 @@ const header = result.frames.map((f) => `t=${f.t.toFixed(3)}`.padEnd(result.para
 process.stdout.write(`${header}\n`)
 process.stdout.write(`${dumpStrip(buffers, result.grammar.palette)}\n\n`)
 process.stdout.write(`silhouette, 25%:\n${silhouetteStrip(buffers)}\n\n`)
+
+// The findings channel: what is wrong with the parts, not what the frame looks like.
+process.stdout.write(`findings:\n${report(result.frames, result.grammar)}\n\n`)
 
 const m = result.metrics
 process.stdout.write(`hash            ${result.hash}\n`)
