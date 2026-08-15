@@ -198,3 +198,51 @@ export function shipped(entries: readonly GalleryEntry[] = list()): GalleryEntry
   }
   return [...latest.values()].sort((a, b) => (a.run === b.run ? a.n - b.n : a.run - b.run))
 }
+
+/**
+ * Keep a **scene** — many subjects composed into one world — through the same path a sprite
+ * takes. A scene is not a `RunResult`: it has no single grammar, no single tunables file and
+ * no state hash of its own, so it gets its identity from the composition instead.
+ */
+export function entryFromScene(
+  composed: { scene: { name: string; w: number; h: number; msPerFrame: number; scale: number }; palette: { colors: readonly RGB[] }; buffers: readonly { data: Uint8Array }[] },
+  n: number,
+  date: string,
+  note: string,
+  topic: string,
+  run: number,
+  element: string,
+  summary: readonly string[],
+): GalleryEntry {
+  const bytes = Buffer.concat(composed.buffers.map((b) => Buffer.from(b.data)))
+  return {
+    params: {},
+    summary: [...summary, ...(note === '' ? [] : [note])],
+    topic,
+    run,
+    element,
+    n,
+    date,
+    grammar: composed.scene.name,
+    tunables: 'scene',
+    seed: 1,
+    overrides: {},
+    hash: hashOf(bytes),
+    w: composed.scene.w,
+    h: composed.scene.h,
+    frames: composed.buffers.length,
+    msPerFrame: composed.scene.msPerFrame,
+    scale: composed.scene.scale,
+    palette: [...composed.palette.colors],
+    indices: bytes.toString('base64'),
+  }
+}
+
+function hashOf(bytes: Buffer): string {
+  let h = 0xcbf29ce484222325n
+  for (const b of bytes) {
+    h ^= BigInt(b)
+    h = (h * 0x100000001b3n) & 0xffffffffffffffffn
+  }
+  return h.toString(16).padStart(16, '0')
+}
