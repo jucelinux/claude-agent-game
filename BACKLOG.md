@@ -19,10 +19,6 @@ whichever comes first**.
 |---|---|---|---|
 | — | none yet | — | — |
 
-| date | reading | strike? |
-|---|---|---|
-| — | none yet | — |
-
 Full definition of the reading in `CLAUDE.md`'s gate block. Update **in the same turn** a
 reading arrives.
 
@@ -50,9 +46,16 @@ reading arrives.
     idiom on purpose. The prediction is that it fails visibly; if it does not fail,
     `TASTE.md` §2b is wrong and that is the round's finding.
 - **Probe needed?** Yes — it is the first round on this axis.
-- **This round's knobs, with anchors:** tones per material = **4**, anchored to the
-  opening conviction (knob 3–6). Walk frames = **4**, anchored to the Stardew idiom, which
-  is the control. Height comes out of the idiom, it is not an independent knob this round.
+- **Status, 14/08: the four samples exist and are rendering.** `node bin/view.ts
+  runs/probe-a.run.json runs/probe-b.run.json runs/probe-c.run.json runs/probe-d.run.json`
+  → `.out/probe.html`. All four kept in `gallery/`. **The round is not closed** — it closes
+  on the human's verdict, and the ink question below rides with it.
+- **This round's knobs, and where they landed.** Tones per material opened at 3/4/8 across
+  A/B/C — the 3–6 range was declared and C deliberately overshoots it. Walk frames landed
+  at 4/8/12/8, forced to multiples of the gait's four named phases by a defect found while
+  looking. Every sample shares a **600 ms cycle** so the sheet never compares walking speed.
+  Two knobs were *born* this round and are now open: **`outline.inner`** and
+  **`light.curve`**.
 
 ---
 
@@ -109,11 +112,17 @@ reading arrives.
       and neighbours. This is where a game engine finally earns its place. Trigger: after
       the gate has taken a reading, never before — it adds a variable the published loops
       do not have, and the error would flatter mine.
-- [ ] **Image cells** — his five published loops decoded into the *same* blit path as
-      mine. Unbuilt: it cannot be null-cased without the files. Round 1.
-- [ ] **The gate sheet builder** — shuffles with a seed he picks, writes
-      `sheet/mapping.<seed>.json`, which I never read. Round 1, and blocked on the loops
-      being his to supply.
+- [ ] **Image cells** — his five reference loops decoded into the *same* blit path as mine,
+      so the sheet never compares two renderers. Unbuilt: it cannot be null-cased without
+      the files. Needed for the first gate reading.
+- [x] ~~The gate sheet builder — shuffle, mapping file I never read~~ → **dead with gate
+      v1.** Reading v2 needs no blindness, so it needs no shuffle and no hidden mapping:
+      the human may know exactly which loop is mine and the reading still works.
+- [x] **Every generation kept** (`gallery/`), at the human's request, 14/08. One JSON per
+      generation with a new hash — indexed frames, palette, the run that made them. Rebuilt
+      into one page by `bin/gallery.ts`, from the kept data and never from current code, so
+      a refactor that changes the render shows up as a difference instead of overwriting
+      the past. The live bench keeps automatically on every swap; the suite is barred.
 - [ ] **Mark portable/stack on every grammar rule in the turn it is born.** Standing, never
       ticked. Live since 14/08: `src/core/types.ts` and `src/core/skeleton.ts` carry
       `portable`, `src/grammars/fixture.ts` carries `stack`.
