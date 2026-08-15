@@ -244,6 +244,20 @@ He is the tiebreaker and the one who sets the bar — not an inspector. Rules in
   is usually a harness probe** — "leaves follow a mathematical pattern, could you draw the
   pattern?" was this project's own founding premise applied one level deeper than the model
   had applied it, and it turned into a primitive.
+- **Delivery format, changed by him 15/08, and it binds every future ask.** *"Tudo que eu
+  lhe pedir daqui pra frente nasce como um objeto que pertence a um jogo."* A cloud is not
+  delivered as a cloud; it is delivered as **a sky a cloud crosses**. The deliverable of any
+  request is a **micro game** — a scene the thing lives in — on the shelf at
+  `node bin/micro.ts --serve`, and he says explicitly when a new one starts.
+  - **The shelf renders live from current code**, so every engine improvement reaches every
+    micro game ever made. That is the opposite of the gallery's rule and deliberately so:
+    the gallery is the record and freezes, the shelf is the product and moves.
+  - **Nothing is ever removed from the shelf.** He revisits it.
+  - `dist/history-2026-08-15.html` is the frozen snapshot of everything up to the change.
+  - **Three tracks feed it**, his words: improve the drawing system, improve the engine's
+    components, and improve the *creation methodology* — how the agent guides a person
+    building their game. He expects the third one late, around the end of the following week.
+
 - **Language rule, added 15/08, at his request.** Report to him in **ASD-STE100 Simplified
   Technical English**. If you write in Portuguese, use the simplified Portuguese of the
   aeronautical standard. The rules to obey:
