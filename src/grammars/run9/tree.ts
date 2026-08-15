@@ -135,48 +135,55 @@ const SKELETON: Bone[] = [
  * which is also what the reference actually is, rather than what a description of it sounds
  * like. Ten parts instead of twenty-eight.
  */
-function clump(bone: string, s: number, ax: number, ay: number): Part[] {
+function clump(bone: string, s: number, ax: number, ay: number, phase: number): Part[] {
   return [
-    { name: `${bone}A`, bone, material: LEAF, z: -5, shape: { kind: 'ellipse', cx: ax, cy: ay, rx: 5.2 * s, ry: 4 * s, rz: 5 } },
-    { name: `${bone}B`, bone, material: LEAF, z: -7, shape: { kind: 'ellipse', cx: ax + 3.6 * s, cy: ay + 2.6 * s, rx: 3.6 * s, ry: 2.9 * s, rz: 4 } },
+    { name: `${bone}A`, bone, material: LEAF, z: -5, shape: { kind: 'lobed', cx: ax, cy: ay, rx: 7.6 * s, ry: 6 * s, rz: 6, lobes: 6, depth: 0.26, phase } },
+    { name: `${bone}B`, bone, material: LEAF, z: -8, shape: { kind: 'lobed', cx: ax + 3.4 * s, cy: ay + 3 * s, rx: 4.6 * s, ry: 3.8 * s, rz: 4, lobes: 5, depth: 0.3, phase: phase + 1.1 } },
   ]
 }
 
 const PARTS: Part[] = [
-  // Roots flare first: they are behind the trunk in depth, so the trunk's mass wins where
-  // they meet and they read as splaying out from under it.
-  { name: 'rootL', bone: 'trunk0', material: BARK, z: 3, shift: -1, shape: { kind: 'capsule', x0: 0, y0: -1, x1: -6, y1: 3, r: 2.4 } },
-  { name: 'rootR', bone: 'trunk0', material: BARK, z: 3, shift: -1, shape: { kind: 'capsule', x0: 0, y0: -1, x1: 6, y1: 3, r: 2.2 } },
+  // **The roots are in FRONT of the trunk now.** Behind it, the trunk's own mass won every
+  // pixel they shared and the flare never appeared — correct occlusion, wrong composition,
+  // which is the same mistake as the crown one level down.
+  { name: 'rootL', bone: 'trunk0', material: BARK, z: -2, shift: -1, shape: { kind: 'capsule', x0: 1, y0: -3, x1: -7, y1: 4, r: 2.8 } },
+  { name: 'rootR', bone: 'trunk0', material: BARK, z: -2, shift: -1, shape: { kind: 'capsule', x0: -1, y0: -3, x1: 7, y1: 4, r: 2.6 } },
 
-  { name: 'trunkBase', bone: 'trunk0', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 2, x1: 0, y1: -15, r: 4.6 } },
-  { name: 'trunkMid', bone: 'trunk1', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -13, r: 3.6 } },
-  { name: 'trunkTop', bone: 'trunk2', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -6, r: 2.9 } },
+  // Thicker, and **shifted a step down its ramp**. The bark ramp runs warm-dark to cool-light,
+  // and on a column only 14 px wide the lit half was half the trunk — so the tree's spine read
+  // as pale grey-green when the reference's is the darkest thing in the picture. The cheat
+  // knob is exactly the right tool: the form is correct, the value was not. **The shift came
+  // back off after measuring**: curve 0.75 alone drops the trunk to a dark maroon body with a
+  // narrow lit edge, and stacking a step on top of it killed the highlight the reference is
+  // built on. Two fixes for one defect is one fix too many.
+  { name: 'trunkBase', bone: 'trunk0', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 2, x1: 0, y1: -15, r: 5.4 } },
+  { name: 'trunkMid', bone: 'trunk1', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -13, r: 4.2 } },
+  { name: 'trunkTop', bone: 'trunk2', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -6, r: 3.2 } },
 
-  // The two sub-branches sit at -4.5: nearer than lobe A at -3 and further than lobe B at
-  // -6, so foliage weaves over and under them. At the bone's own depth both rendered zero
-  // pixels — correct occlusion, and a part that is never seen is a part that is not there.
-  { name: 'brL', bone: 'branchL', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 2 } },
-  { name: 'brLt', bone: 'branchLt', material: BARK, z: -4.5, shape: { kind: 'capsule', x0: 0, y0: 0, x1: -2, y1: -8, r: 1.4 } },
-  { name: 'brR', bone: 'branchR', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 1.9 } },
-  { name: 'brRt', bone: 'branchRt', material: BARK, z: -4.5, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 2, y1: -8, r: 1.35 } },
-  { name: 'brC', bone: 'branchC', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -11, r: 1.8 } },
-  { name: 'brCt', bone: 'branchCt', material: BARK, z: -4.5, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -7, r: 1.3 } },
+  { name: 'brL', bone: 'branchL', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 2.2 } },
+  { name: 'brLt', bone: 'branchLt', material: BARK, z: -4.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: -2, y1: -8, r: 1.5 } },
+  { name: 'brR', bone: 'branchR', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 2.1 } },
+  { name: 'brRt', bone: 'branchRt', material: BARK, z: -4.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 2, y1: -8, r: 1.45 } },
+  { name: 'brC', bone: 'branchC', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -11, r: 2 } },
+  { name: 'brCt', bone: 'branchCt', material: BARK, z: -4.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -7, r: 1.4 } },
 
-  // The three masses that ARE the crown. They carry the whole silhouette, they sit behind
-  // everything green, and the reference's character lives here — the dark is not a backing,
-  // it is half the drawing.
-  { name: 'massL', bone: 'branchLt', material: BARK, z: 5, shift: -1, shape: { kind: 'ellipse', cx: -5, cy: -2, rx: 13, ry: 9, rz: 8 } },
-  { name: 'massC', bone: 'branchCt', material: BARK, z: 5, shift: -1, shape: { kind: 'ellipse', cx: 0, cy: -5, rx: 12.5, ry: 9.5, rz: 8 } },
-  { name: 'massR', bone: 'branchRt', material: BARK, z: 5, shift: -1, shape: { kind: 'ellipse', cx: 5, cy: -2, rx: 13, ry: 9, rz: 8 } },
+  // **The shadow masses sit INSIDE the foliage now, not around it.** In the last pass they
+  // owned the crown's whole outline and the green sat on them like spots — a mushroom cap.
+  // The reference is the other way up: the leaves are the outline and the dark shows in the
+  // gaps *between* them. Smaller than the green union on purpose, so nothing dark reaches the
+  // silhouette except where two clumps part.
+  { name: 'massL', bone: 'branchLt', material: BARK, z: 4, shift: -1, shape: { kind: 'lobed', cx: -4, cy: -1, rx: 9.5, ry: 7, rz: 8, lobes: 7, depth: 0.2, phase: 0.4 } },
+  { name: 'massC', bone: 'branchCt', material: BARK, z: 4, shift: -1, shape: { kind: 'lobed', cx: 0, cy: -4, rx: 9, ry: 7.5, rz: 8, lobes: 7, depth: 0.2, phase: 2.1 } },
+  { name: 'massR', bone: 'branchRt', material: BARK, z: 4, shift: -1, shape: { kind: 'lobed', cx: 4, cy: -1, rx: 9.5, ry: 7, rz: 8, lobes: 7, depth: 0.2, phase: 1.3 } },
 
-  // Seven clumps of two lobes each, spread so the shadow reads between them.
-  ...clump('cLo', 0.95, -2, 0),
-  ...clump('cLm', 1.05, -2, -1),
-  ...clump('cLt', 0.9, -2, -1),
-  ...clump('cC', 1.1, -2, -1),
-  ...clump('cRt', 0.9, -2, -1),
-  ...clump('cRm', 1.0, -2, 0),
-  ...clump('cRo', 0.95, -2, 0),
+  // Seven clumps, each with its own phase so no two stamp alike. These own the silhouette.
+  ...clump('cLo', 0.95, -2, 0, 0),
+  ...clump('cLm', 1.05, -2, -1, 0.9),
+  ...clump('cLt', 0.9, -2, -1, 1.8),
+  ...clump('cC', 1.15, -2, -1, 2.7),
+  ...clump('cRt', 0.9, -2, -1, 3.6),
+  ...clump('cRm', 1.0, -2, 0, 4.5),
+  ...clump('cRo', 0.95, -2, 0, 5.4),
 
   { name: 'fall0', bone: 'fall0', material: LEAF, shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 2.3, ry: 1.4, rz: 1.2 } },
   { name: 'fall1', bone: 'fall1', material: LEAF, shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 2.1, ry: 1.3, rz: 1.2 } },

@@ -304,6 +304,12 @@ function localBounds(shape: Shape): readonly [number, number, number, number] {
       ]
     case 'rect':
       return [shape.x - 1, shape.y - 1, shape.x + shape.w + 1, shape.y + shape.h + 1]
+    case 'lobed': {
+      // The bumps reach (1 + depth) of each radius, so the box has to allow for the crests.
+      const kx = shape.rx * (1 + shape.depth) + 1
+      const ky = shape.ry * (1 + shape.depth) + 1
+      return [shape.cx - kx, shape.cy - ky, shape.cx + kx, shape.cy + ky]
+    }
   }
 }
 
@@ -339,6 +345,24 @@ function sample(shape: Shape, px: number, py: number): Local {
       if (d2 > shape.r * shape.r) return MISS
       const dz = -Math.sqrt(shape.r * shape.r - d2)
       return normalize(dx, dy, dz, dz)
+    }
+    case 'lobed': {
+      // Same test as the ellipse, with the boundary moved: instead of comparing the
+      // normalized radius against 1, compare it against a radius that waves. Everything
+      // downstream — the depth bulge, the normal, the shading — then works exactly as it
+      // does for an ellipse, which is why a ragged silhouette cost fifteen lines and not a
+      // second renderer.
+      const ux = (px - shape.cx) / shape.rx
+      const uy = (py - shape.cy) / shape.ry
+      const d2 = ux * ux + uy * uy
+      if (d2 === 0) return { inside: true, nx: 0, ny: 0, nz: -1, dz: -(shape.rz ?? Math.min(shape.rx, shape.ry)) }
+      const boundary = 1 + shape.depth * Math.cos(shape.lobes * Math.atan2(uy, ux) + (shape.phase ?? 0))
+      if (boundary <= 0) return MISS
+      const t = Math.sqrt(d2) / boundary
+      if (t > 1) return MISS
+      const rz = shape.rz ?? Math.min(shape.rx, shape.ry)
+      const uz = -Math.sqrt(1 - t * t)
+      return normalize(ux / shape.rx, uy / shape.ry, rz === 0 ? -1 : uz / rz, uz * rz)
     }
     case 'rect': {
       // A **rounded** box, and the rounding is the point: a mathematically flat face takes

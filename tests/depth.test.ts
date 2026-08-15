@@ -208,3 +208,45 @@ describe('scale', () => {
     expect(wholeA).toBeGreaterThan(50)
   })
 })
+
+describe('the lobed primitive', () => {
+  const disc = (kind: 'ellipse' | 'lobed', depth: number): Grammar => ({
+    ...twoDiscs(0, 0),
+    parts: [
+      {
+        name: 'A',
+        bone: 'a',
+        material: 'mass',
+        shape:
+          kind === 'ellipse'
+            ? { kind: 'ellipse', cx: 0, cy: 0, rx: 9, ry: 9 }
+            : { kind: 'lobed', cx: 0, cy: 0, rx: 9, ry: 9, lobes: 6, depth, phase: 0 },
+      },
+    ],
+  })
+
+  it('null case: at depth 0 it is pixel-identical to the ellipse it generalises', () => {
+    // The measured thing switched off (`HARNESS.md` §5). A new shape that quietly shades or
+    // bounds itself differently from the primitive it extends would make every comparison
+    // between an old sample and a new one meaningless, and the difference would be read as
+    // art. Byte equality is the right rule here precisely because it is *not* a margin: at
+    // depth 0 the formula reduces to the ellipse exactly, so anything but identity is a bug.
+    const round = sprite(disc('ellipse', 0), bench(), 1, 0)
+    const flat = sprite(disc('lobed', 0), bench(), 1, 0)
+    expect([...flat.buf.data]).toEqual([...round.buf.data])
+  })
+
+  it('and it is not vacuous: depth actually ripples the boundary', () => {
+    const round = sprite(disc('ellipse', 0), bench(), 1, 0)
+    const bumpy = sprite(disc('lobed', 0.3), bench(), 1, 0)
+    expect([...bumpy.buf.data]).not.toEqual([...round.buf.data])
+
+    // Six lobes at depth 0.3 on a radius of 9 swing the boundary by ±2.7 px, so the ragged
+    // shape must differ from the smooth one by a real area rather than by a few stray pixels.
+    let differing = 0
+    for (let at = 0; at < round.buf.data.length; at++) {
+      if (round.buf.data[at] !== bumpy.buf.data[at]) differing++
+    }
+    expect(differing).toBeGreaterThan(40)
+  })
+})

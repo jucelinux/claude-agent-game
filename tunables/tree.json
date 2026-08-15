@@ -15,7 +15,7 @@
     "x": -0.6,
     "y": -0.8,
     "z": -0.2,
-    "curve": 1.1
+    "curve": 0.75
   },
   "outline": {
     "enabled": true,
@@ -46,7 +46,7 @@
     "tones.perMaterial": "5. One more than the control and three fewer than the incumbent. TASTE.md 1b names Chrono as the bar for silhouette and value separation, and separation is what a short ramp over a wide value range buys - the same eight tones spread over a narrow dark range is what it does not.",
     "frames.walk": "16, and every phase lands on a whole frame at sixteenths (3/16, 5/16, 8/16, 11/16, 13/16). Sixteen rather than twelve because the wind carries three staggered leaf falls, and each needs enough frames to read as a fall rather than as a jump cut.",
     "light.x": "unit vector from the upper left, held identical across all four probe samples",
-    "light.curve": "1.1, barely above linear. High curve compresses the dark end into a rim and spends the ramp on the lit half, which is the opposite of a bar whose whole claim is that the light side and the shadow side are two different values.",
+    "light.curve": "0.75, BELOW linear, and the first sample in the project to go under 1. Above 1 the ramp is spent on the lit half; this tree needs the opposite, because its subject is a dark body with a narrow bright edge. At 1.1 a 14 px trunk was half pale grey-green and read as the lightest thing in the picture, where the reference trunk is the darkest. Under 1 the light end compresses into a stripe.",
     "light.y": "the y half of light.x's unit vector",
     "outline.enabled": "ON. Chrono outlines its sprites - that is how they hold at small size against a busy map.",
     "outline.inner": "on. The joint line plus a five-tone ramp is the pairing this idiom lives on: value separates the planes, the line separates the parts.",

@@ -69,6 +69,33 @@ export type Shape =
   | { readonly kind: 'capsule'; readonly x0: number; readonly y0: number; readonly x1: number; readonly y1: number; readonly r: number }
   /** `d` is the full depth of the box; it defaults to the smaller of `w` and `h`. */
   | { readonly kind: 'rect'; readonly x: number; readonly y: number; readonly w: number; readonly h: number; readonly d?: number }
+  /**
+   * **An ellipse whose radius waves as it goes round: `r(θ) = R · (1 + depth · cos(lobes·θ + phase))`.**
+   *
+   * The first new primitive since round zero, and it exists because run 9 proved the
+   * vocabulary had a hole rather than a tuning problem. Every other shape here is **convex**,
+   * and the union of convex solids is smooth — so a body whose form lives in a *ragged
+   * boundary* (foliage, a cloud, a rock, a flame, torn cloth) could not be built at all. It
+   * was not that a tree was hard; it was that a tree was inexpressible, and two rounds of
+   * moving ellipses around could never have found that out.
+   *
+   * `lobes` is how many bumps go round, `depth` is how far they swing as a fraction of the
+   * radius, `phase` rotates the pattern so neighbouring clumps do not stamp identically.
+   * Closed form in θ — no noise, no seed, nothing to make deterministic after the fact.
+   * portable, and it is the most portable thing in this file: silhouette is where every
+   * organic subject lives.
+   */
+  | {
+      readonly kind: 'lobed'
+      readonly cx: number
+      readonly cy: number
+      readonly rx: number
+      readonly ry: number
+      readonly rz?: number
+      readonly lobes: number
+      readonly depth: number
+      readonly phase?: number
+    }
 
 export type Part = {
   readonly name: string
