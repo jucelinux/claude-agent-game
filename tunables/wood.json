@@ -1,0 +1,82 @@
+{
+  "canvas": {
+    "w": 80,
+    "h": 80,
+    "originX": 40,
+    "originY": 68
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 16
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "z": -0.2,
+    "curve": 0.75
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.28,
+    "lift": 26,
+    "depth": 7
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "playback": {
+    "msPerFrame": 75,
+    "scale": 3
+  },
+  "_anchors": {
+    "canvas.w": "80, wider than the project cell. A wood is authored per tree and composited, and the widest tree here spreads 22 units of branch on each side of its trunk. The scene decides the final size; this cell only has to hold one tree with room for its outline.",
+    "canvas.h": "square with canvas.w. The tallest tree in the wood is 34 units of trunk plus its crown.",
+    "canvas.originX": "canvas.w / 2. A tree is bilaterally symmetric about its trunk.",
+    "canvas.originY": "canvas.h - 12, the base of the trunk. Derived rather than guessed: the widest tree has a girth of 6.5 and its trunk capsule starts 2 units below the origin, so the mass reaches 8.5 below it and the outline ring needs one more. At 74 every one of the nine clipped the bottom edge and the outline lock said so.",
+    "tones.perMaterial": "5. One more than the control and three fewer than the incumbent. TASTE.md 1b names Chrono as the bar for silhouette and value separation, and separation is what a short ramp over a wide value range buys - the same eight tones spread over a narrow dark range is what it does not.",
+    "frames.walk": "16, and every phase lands on a whole frame at sixteenths (3/16, 5/16, 8/16, 11/16, 13/16). Sixteen rather than twelve because the wind carries three staggered leaf falls, and each needs enough frames to read as a fall rather than as a jump cut.",
+    "light.x": "unit vector from the upper left, held identical across all four probe samples",
+    "light.curve": "0.75, BELOW linear, and the first sample in the project to go under 1. Above 1 the ramp is spent on the lit half; this tree needs the opposite, because its subject is a dark body with a narrow bright edge. At 1.1 a 14 px trunk was half pale grey-green and read as the lightest thing in the picture, where the reference trunk is the darkest. Under 1 the light end compresses into a stripe.",
+    "light.y": "the y half of light.x's unit vector",
+    "outline.enabled": "ON. Chrono outlines its sprites - that is how they hold at small size against a busy map.",
+    "outline.inner": "on. The joint line plus a five-tone ramp is the pairing this idiom lives on: value separates the planes, the line separates the parts.",
+    "outline.rim": "OFF, for the same reason as the control - a line and a rim are two answers to one question.",
+    "outline.material": "the ink ramp: a violet-black, so the line belongs to the same world as the cool shadows instead of sitting on top of the art as a neutral.",
+    "body.scale": "1. A wood varies its trees by ARGUMENT and never by scale: shrinking a tree to make it look distant would re-render it with less detail, which is the defect he named on the first scene.",
+    "gait.swing": "0.28 turn = 101 deg. Set by the LARGEST motion in the gait, which is a falling leaf tumbling about 90 deg, not by the branches - they sway about 10 deg and their keys are authored at branch scale and scaled down in the grammar. Run 7 learned that an action needs a bigger amplitude than a walk; this is the same lesson inside a single gait, where two motions three times apart in size share one channel.",
+    "gait.lift": "26 px, again set by the leaf: it falls 26 px, roughly from the crown to the base of the trunk. The crown bob is about 1 px and is authored as a fortieth of it.",
+    "texture.speckle": "0. Chrono sprites have no noise; every pixel is placed. Noise is the incumbent idiom’s signature and it is the thing this probe most wants to see the back of.",
+    "playback.msPerFrame": "75 ms. 16 x 75 = 1200 ms, the longest cycle in the project. Wind is slower than a stride and a gust that resolves in 600 ms reads as a shudder.",
+    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size — held identical to gorilla-jump. This is a probe on the ink axis, so everything that is not ink is frozen: a sample that differs in two things measures neither.",
+    "light.z": "-0.2, the most raking light in the repo. Near 0 the lamp grazes the form and the modelling comes back; the incumbent -0.35 puts the centre of every mass two thirds up its ramp, which is how a body ends up mid-toned everywhere at once.",
+    "gait.depth": "7 px = the cluster row separation. One of the three falling leaves drifts in depth so it passes behind a branch on the way down, which is the only thing in this sample that would have been inexpressible before run 7.",
+    "shadow.steps": "8 px, and it is measured rather than chosen: a sweep at 6, 10, 16 and 24 returns the same shadow area from 6 onward. Past a few pixels the ray has left the body and there is nothing more to block it. 8 keeps a small margin over the saturation point.",
+    "shadow.bias": "0.25 px of depth, and its job changed. It used to guard against a surface shadowing itself, and it could not: acne scales with curvature, so a lone sphere of radius 18 self-shadowed 198 px and still self-shadowed at eight times the tolerance. That case is now settled by identity - a convex part cannot cast onto itself - so the bias only arbitrates a tie between two DIFFERENT parts whose surfaces meet at nearly the same depth. A quarter of a pixel is enough for that, and acne measures zero at every radius and every bias.",
+    "shadow.strength": "1 ramp step. On a five-tone ramp that is a fifth of the whole range, which is a readable value drop with a hard edge - the shape the ink verdict of 15/08 selected. 0 disables the pass.",
+    "fill.x": "+0.5, opposite the key lamp on the horizontal. A fill placed on the same side as the key lifts the half that is already lit and does nothing for the half that needs it.",
+    "fill.y": "+0.7, from BELOW. This is bounce: light off the ground back up into the underside of a body. Every fill in painting and photography comes from lower than the key for that reason.",
+    "fill.z": "-0.2, barely on the viewer side. A fill that faces the viewer as hard as the key does flattens the form it exists to recover.",
+    "fill.weight": "0.15, and it is the measured edge rather than a taste. His ink verdict of 15/08 requires BOTH a wide value range and clustered tone regions, and this knob moves them in opposite directions. Swept at 0, 0.10, 0.13, 0.15, 0.17, 0.19 and 0.22: regions improve monotonically, and the tree loses 23% of its value range between 0.15 and 0.17 (0.654 down to 0.504). 0.15 is the largest weight that costs no range on either subject, and it still buys a 7% gain in region size."
+  },
+  "shadow": {
+    "steps": 8,
+    "bias": 0.25,
+    "strength": 1
+  },
+  "fill": {
+    "x": 0.5,
+    "y": 0.7,
+    "z": -0.2,
+    "weight": 0.15
+  }
+}
