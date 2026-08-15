@@ -1,0 +1,60 @@
+{
+  "canvas": {
+    "w": 64,
+    "h": 64,
+    "originX": 30,
+    "originY": 32
+  },
+  "tones": {
+    "perMaterial": 8
+  },
+  "frames": {
+    "walk": 8
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "curve": 1.15
+  },
+  "outline": {
+    "enabled": false,
+    "material": "ink",
+    "inner": true,
+    "rim": true
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.085,
+    "lift": 1.4
+  },
+  "texture": {
+    "speckle": 0.12
+  },
+  "playback": {
+    "msPerFrame": 75,
+    "scale": 3
+  },
+  "_anchors": {
+    "canvas.w": "64, twice the control. This sample is the direction my bias pulls toward, and it is here to be knocked down by looking rather than by argument (BACKLOG).",
+    "canvas.h": "square with canvas.w",
+    "canvas.originX": "canvas.w * 0.47, a touch back of centre: the head reaches forward and the body has to keep its tail inside the frame",
+    "canvas.originY": "canvas.h / 2. In three-quarter the body sits on the axis and both leg rows hang off it, one down-screen and one up.",
+    "tones.perMaterial": "8, above the knob's declared 3-6 range on purpose: this is the sample that spends everything, so the round can see what spending buys",
+    "frames.walk": "8, two per named phase, and a multiple of the gait's four phases so every key pose lands on a frame",
+    "light.x": "unit vector from the upper left, held identical across all four probe samples",
+    "light.curve": "1.15. 1.6 was tried first and blew the shell out to its lightest tone across most of the body: with eight tones there is already enough ramp, and a strong curve spends all of it on the lit half.",
+    "light.y": "the y half of light.x's unit vector",
+    "outline.enabled": "off. The idiom he singled out had no outer line, and this run keeps that look - the edge is carried by outline.rim instead, which is what the silhouette locks measure.",
+    "outline.inner": "on, even with the outer outline off: this sample drops the silhouette line but still needs the joints, which is the pairing a gradient idiom lives or dies on",
+    "outline.rim": "ON. Without it this idiom fails the edge-contrast lock at 0.058, which is where the same idiom failed before. The rim is what lets a no-outline sample keep a readable silhouette.",
+    "outline.material": "unused while outline.enabled is false; kept so the file has one shape across all samples",
+    "body.scale": "1: these bodies are authored at 64 px directly rather than scaled up from the 48 px arthropod",
+    "gait.swing": "0.085 turn on a 9 px femur: a long-legged walker takes a longer step, and the mantis is all leg",
+    "gait.lift": "the eighth-of-the-body rule, at this creature's body height",
+    "texture.speckle": "0.12, half the previous idiom's. At 64 px with a curved shell, heavy speckle reads as dirt rather than as chitin.",
+    "playback.msPerFrame": "75 ms. 8 frames x 75 = the shared 600 ms cycle every sample in this project walks at.",
+    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size"
+  }
+}

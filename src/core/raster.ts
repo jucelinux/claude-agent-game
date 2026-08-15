@@ -170,7 +170,12 @@ export function rimEdge(
       if (ramp === undefined || ramp.length < 2) continue
       const m = Math.hypot(ox, oy)
       const lit = (ox / m) * light.x + (oy / m) * light.y
-      writes.push([at, (lit > 0 ? ramp[ramp.length - 1] : ramp[0]) as number])
+      // A rim is **narrow**. The first version lit every edge pixel whose normal leaned at
+      // all toward the light, which is half the silhouette, and half a silhouette in the
+      // lightest tone is not a rim — it is a glow, and it flattened the body it was meant
+      // to give volume to. Only a face turned decisively into the light gets the highlight;
+      // everything else takes the dark end, which is what keeps the edge readable.
+      writes.push([at, (lit > 0.45 ? ramp[ramp.length - 1] : ramp[0]) as number])
     }
   }
   for (const [at, index] of writes) data[at] = index

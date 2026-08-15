@@ -1,0 +1,86 @@
+/**
+ * Run 3, element 1 — **the beetle**, three-quarter view.
+ *
+ * The articulation problem it owns: **volume**. A beetle is mostly one heavy dome, so
+ * nothing here is carried by pose or by limb reach — if the body does not read as a curved
+ * hard shell seen from above, there is nothing else to look at. The elytra are two plates
+ * with a seam down the middle, and the seam is not drawn: it falls out of the render rule
+ * that darkens whatever a part sits in front of.
+ *
+ * stack — every measurement. portable — plates as parts, and the seam as a consequence.
+ */
+import type { Grammar, Palette } from '../../core/types.ts'
+import { PHASES, legBones, legParts, legTracks } from './quarter.ts'
+import type { Row } from './quarter.ts'
+
+const SHELL: Palette = {
+  name: 'beetle',
+  colors: [
+    [0, 0, 0],
+    [14, 18, 16],
+    [24, 32, 26],
+    [36, 48, 38],
+    [50, 66, 50],
+    [66, 86, 62],
+    [86, 108, 74],
+    [110, 134, 92],
+    [140, 166, 116],
+    [8, 9, 10],
+    [14, 16, 18],
+    [20, 23, 26],
+    [28, 32, 36],
+    [36, 41, 46],
+    [46, 52, 58],
+    [58, 64, 72],
+    [72, 80, 88],
+  ],
+  ramps: [
+    { material: 'shell', indices: [1, 2, 3, 4, 5, 6, 7, 8] },
+    { material: 'ink', indices: [9, 10, 11, 12, 13, 14, 15, 16] },
+  ],
+}
+
+const AT = [8, 3, -2] as const
+
+const NEAR: Row = { side: 'N', at: AT, offset: 6, femur: 8, tibia: 6.5, width: 1.9, material: 'shell', splay: 0.03, lean: 0.05, parent: 'body' }
+// The far row sits on the body's top edge and only its tips clear the shell.
+const FARROW: Row = { side: 'F', at: AT, offset: -7, femur: 8, tibia: 6.5, width: 1.9, material: 'ink', splay: 0.5, lean: -0.05, parent: 'body' }
+
+export const beetle: Grammar = {
+  name: 'beetle',
+  palette: SHELL,
+  skeleton: {
+    bones: [
+      { name: 'body', parent: null, x: 0, y: 0, angle: 0 },
+      { name: 'head', parent: 'body', x: 13, y: 0, angle: 0 },
+      { name: 'antL', parent: 'head', x: 3, y: -2, angle: -0.16 },
+      { name: 'antR', parent: 'head', x: 3, y: 2, angle: 0.16 },
+      ...legBones(FARROW),
+      ...legBones(NEAR),
+    ],
+  },
+  parts: [
+    ...legParts(FARROW),
+    // The dome first, then the two plates on top of it: the seam is the render rule
+    // darkening the plate behind, not a line anybody drew.
+    { name: 'abdomen', bone: 'body', material: 'shell', shape: { kind: 'ellipse', cx: -5, cy: 0, rx: 12, ry: 8.5 } },
+    { name: 'elytronF', bone: 'body', material: 'shell', shape: { kind: 'ellipse', cx: -5, cy: -3.6, rx: 10, ry: 4.6 } },
+    { name: 'elytronN', bone: 'body', material: 'shell', shape: { kind: 'ellipse', cx: -5, cy: 3.6, rx: 10, ry: 4.6 } },
+    { name: 'thorax', bone: 'body', material: 'shell', shape: { kind: 'ellipse', cx: 7, cy: 0, rx: 6.5, ry: 6 } },
+    { name: 'head', bone: 'head', material: 'shell', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 4.4, ry: 4 } },
+    { name: 'antL', bone: 'antL', material: 'ink', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6, r: 0.9 } },
+    { name: 'antR', bone: 'antR', material: 'ink', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6, r: 0.9 } },
+    ...legParts(NEAR),
+  ],
+  gait: {
+    name: 'tripod-walk',
+    phases: [...PHASES],
+    tracks: [
+      { bone: 'body', channel: 'y', keys: [0, -1, 0, -1] },
+      { bone: 'antL', channel: 'angle', keys: [0.3, 0.1, -0.3, -0.1] },
+      { bone: 'antR', channel: 'angle', keys: [-0.25, 0, 0.3, 0] },
+      ...legTracks(['hipN0', 'hipN2', 'hipF1'], 1),
+      ...legTracks(['hipN1', 'hipF0', 'hipF2'], -1),
+    ],
+  },
+}

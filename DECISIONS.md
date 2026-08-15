@@ -100,3 +100,8 @@ turn — `TASTE-LOOP.md` §3.8. Recording is not propagating.
 - 15/08 · CHANNEL · the history keeps every version, the page shows the latest per element · that is how "the humanoid must be the most recent version" is satisfied without deleting the version before it
 - 15/08 · LOOP · the silhouette round does not count as a run · it fixed a measurable defect and raised nothing; the human's test is "did it beat the ceiling", and a correctness fix answers a different question
 - 15/08 · LOOP · the model proposes the theme of each run and the human approves or replaces it · his reasoning, and it is better than the model's: a theme he picks may be one the model cannot draw, and then the reading measures the brief instead of the ceiling
+- 15/08 · CHANNEL · the dummy leaves the page, at his call · it is the harness fixture and was never content; putting it on the judging page was the model's choice and it duplicated the arc
+- 15/08 · RUN 3 · theme: three-quarter view, three creatures, one grammar · a side view resolves a walk and never passes for published art, because nothing the bar games ship is drawn from the side
+- 15/08 · GRAMMAR · from three-quarter the far limb row keeps half its length, not seven tenths · at 0.7 the far legs read as a second creature standing behind the first; what reaches the eye from that side is tips
+- 15/08 · GRAMMAR · a rim light is narrow, not half the silhouette · the first rule lit every edge leaning toward the light, which flattened the volume it existed to give
+- 15/08 · LOOP · the model breaks CLAUDE.md section 5 knowingly this round: three body plans is generalising before one sample has passed the bar · the human asked for the stretch, and the break is recorded rather than quiet
