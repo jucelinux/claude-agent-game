@@ -40,9 +40,43 @@ reading arrives.
 
 ---
 
-## Next round
+## Next round — **run 8, the ink probe.** Open 15/08, verdict pending.
 
-**Exactly one.** _(Rewritten 15/08 at a cycle open: this section still named the
+**First round on the ink axis, so it is a frontier probe (§3.0): three idioms, one
+animation, and the spread brackets.** His design. Body, skeleton, parts, gait, canvas,
+scale, frame count and every gait amplitude are frozen identical — whatever the three
+disagree about is the ink, because nothing else may vary.
+
+| | sample | budget | line | noise | light | gallery |
+|---|---|---|---|---|---|---|
+| **incumbent** | `gorilla-jump` | 8 tones | none, rim carries the edge | speckle 0.18 | soft, curve 1.25 | #0020 |
+| **control** | `gorilla-jump-stardew` | 4 tones | outer + inner | none | flat, curve 1.0 | #0021 |
+| **target** | `gorilla-jump-chrono` | 5 tones, wide range | outer + inner | none | raking, curve 1.1 | #0022 |
+
+- **What it tests:** his diagnosis that form and movement are ahead and the surface is
+  behind — and, underneath it, whether the incumbent idiom was ever right for a *complex*
+  body. It was adopted on one verdict on one insect and never retested across seven runs.
+- **The measurement, not yet a lock:** the same 667 body pixels split into **195** tone
+  regions under the incumbent and **95** under the control, with 46% of the incumbent's
+  regions a single pixel. Candidate round-zero instrument if this axis is confirmed;
+  deliberately not compiled yet (§6, do not build the judge before the artifact).
+- **My prediction, on the record so it can be scored:** the incumbent loses on this body,
+  Chrono wins. The previous prediction I recorded scored zero.
+
+---
+
+## Previous round — run 7, closed 15/08
+
+Depth solver, jump and attack. **His verdict:** *"gostei muito... não sinto uma mudança
+visual, mas a movimentação e os detalhes estão melhores e mais fluídos"*. The walk control
+held, so the engine stays and nothing was rolled back — and the "no visual change" half
+scored a prediction of mine at zero (`TASTE.md` §2a).
+
+---
+
+## Superseded — the silhouette/value pair
+
+_(Rewritten 15/08 at a cycle open: this section still named the
 silhouette/value pair as "next", three runs after it was settled by being built into every
 sample since — `outline.rim` is on in every shipped tunables file. §3b.4, and it is the
 "backlog describes a dead product" failure in §10 caught one step early.)_
@@ -254,7 +288,20 @@ Written for him, so no method vocabulary crosses into this section.
       sheet, and without a sheet the date arrives with nothing but my own opinion of my own
       work, which is the "decorated, not steered" state the method names as the failure.
 
-- [ ] **Run 7 — the jump, the attack, and the walk as control.** Asked 15/08.
+- [x] ~~**Run 7 — the jump, the attack, and the walk as control.**~~ → **Answered 15/08:**
+      liked, no visual change felt, movement and detail better. Control held; engine stays.
+
+- [ ] 🟡 **Run 8 — one jump, three inks.** Asked 15/08. **This is the open round.**
+      · *Open:* `node bin/serve.ts`. Top row, three cells, same jump in three inks.
+      · *Do:* put them in order, best first, and say one sentence about the worst one.
+      · *Time:* two minutes.
+      · *A pass looks like:* one of them clearly looks more like a game you have played.
+      · *Answer changes:* which ink every future sample is authored in, including a
+      re-render of the walk and the attack. If the incumbent wins, my reading of your
+      "a tinta precisa aprimorar" was wrong and I go hunting the real cause among the four
+      others I listed — palette range, speckle, light direction, or missing cast shadow.
+
+- [ ] **Run 7 — the jump, the attack, and the walk as control.** SUPERSEDED, kept for the record. Asked 15/08.
       · *Open:* `node bin/serve.ts`. Three loops, top row, labelled jump / attack / walk.
       · *Do:* say which of the three you believe least, and one sentence on why.
       · *Time:* two minutes.
