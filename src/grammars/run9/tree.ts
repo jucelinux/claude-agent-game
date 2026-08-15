@@ -83,8 +83,11 @@ const PALETTE: Palette = {
  * and the wind keys below are written at branch scale and scaled down here, which keeps
  * them readable as what they are.
  */
-const SWAY = 0.2
-const BOB = 0.04
+// **0.09, down from 0.2 — his note: the tree should move more discreetly.** A canopy in
+// wind mostly shimmers; a canopy that visibly leans is a canopy in a storm, and the storm
+// was reading as the tree being waved by hand.
+const SWAY = 0.09
+const BOB = 0.025
 const sway = (...keys: number[]): number[] => keys.map((k) => k * SWAY)
 const bob = (...keys: number[]): number[] => keys.map((k) => k * BOB)
 
@@ -95,22 +98,26 @@ const SKELETON: Bone[] = [
   { name: 'trunk1', parent: 'trunk0', x: 1.5, y: -15, z: 0, angle: 0.008 },
   { name: 'trunk2', parent: 'trunk1', x: -1, y: -13, z: 0, angle: -0.01 },
 
-  { name: 'branchL', parent: 'trunk2', x: -2, y: -4, z: 2, angle: -0.075 },
+  { name: 'branchL', parent: 'trunk2', x: -3, y: -4, z: 2, angle: -0.088 },
   { name: 'branchLt', parent: 'branchL', x: 0, y: -10, z: 0, angle: -0.03 },
-  { name: 'branchR', parent: 'trunk2', x: 2, y: -4, z: -2, angle: 0.07 },
+  { name: 'branchR', parent: 'trunk2', x: 3, y: -4, z: -2, angle: 0.082 },
   { name: 'branchRt', parent: 'branchR', x: 0, y: -10, z: 0, angle: 0.03 },
   { name: 'branchC', parent: 'trunk2', x: 0, y: -5, z: 0, angle: 0.005 },
   { name: 'branchCt', parent: 'branchC', x: 0, y: -11, z: 0, angle: 0 },
 
-  // Seven clusters, each on its own bone so foliage can flutter faster than the limb it
-  // rides on — which is most of what separates a tree in wind from a tree being waved.
-  { name: 'cLo', parent: 'branchL', x: -8, y: -4, z: 3, angle: 0 },
-  { name: 'cLm', parent: 'branchLt', x: -6, y: -4, z: -1, angle: 0 },
-  { name: 'cLt', parent: 'branchLt', x: -1, y: -9, z: 1, angle: 0 },
-  { name: 'cC', parent: 'branchCt', x: 0, y: -5, z: -3, angle: 0 },
-  { name: 'cRt', parent: 'branchRt', x: 1, y: -9, z: 2, angle: 0 },
-  { name: 'cRm', parent: 'branchRt', x: 6, y: -4, z: -2, angle: 0 },
-  { name: 'cRo', parent: 'branchR', x: 8, y: -4, z: 4, angle: 0 },
+  // **Eleven clumps, up from seven, spread wider.** His note: more leaves. A canopy is dense
+  // — the gaps between foliage should be holes in a mass, not space between objects.
+  { name: 'cLo', parent: 'branchL', x: -11, y: -2, z: 3, angle: 0 },
+  { name: 'cLx', parent: 'branchL', x: -7, y: -9, z: -1, angle: 0 },
+  { name: 'cLm', parent: 'branchLt', x: -9, y: -4, z: -1, angle: 0 },
+  { name: 'cLt', parent: 'branchLt', x: -3, y: -10, z: 1, angle: 0 },
+  { name: 'cCl', parent: 'branchCt', x: -5, y: -3, z: -3, angle: 0 },
+  { name: 'cC', parent: 'branchCt', x: 0, y: -8, z: -3, angle: 0 },
+  { name: 'cCr', parent: 'branchCt', x: 5, y: -3, z: -2, angle: 0 },
+  { name: 'cRt', parent: 'branchRt', x: 3, y: -10, z: 2, angle: 0 },
+  { name: 'cRm', parent: 'branchRt', x: 9, y: -4, z: -2, angle: 0 },
+  { name: 'cRx', parent: 'branchR', x: 7, y: -9, z: 1, angle: 0 },
+  { name: 'cRo', parent: 'branchR', x: 11, y: -2, z: 4, angle: 0 },
 
   // The three that come off. Parented to the root so their fall is in the tree's space and
   // not in a swaying branch's — a detached leaf stops caring what the branch is doing.
@@ -137,8 +144,8 @@ const SKELETON: Bone[] = [
  */
 function clump(bone: string, s: number, ax: number, ay: number, phase: number): Part[] {
   return [
-    { name: `${bone}A`, bone, material: LEAF, z: -5, shape: { kind: 'lobed', cx: ax, cy: ay, rx: 7.6 * s, ry: 6 * s, rz: 6, lobes: 6, depth: 0.26, phase } },
-    { name: `${bone}B`, bone, material: LEAF, z: -8, shape: { kind: 'lobed', cx: ax + 3.4 * s, cy: ay + 3 * s, rx: 4.6 * s, ry: 3.8 * s, rz: 4, lobes: 5, depth: 0.3, phase: phase + 1.1 } },
+    { name: `${bone}A`, bone, material: LEAF, z: -5, shape: { kind: 'lobed', cx: ax, cy: ay, rx: 9.6 * s, ry: 7.6 * s, rz: 7, lobes: 5, depth: 0.3, phase, octaves: 3 } },
+    { name: `${bone}B`, bone, material: LEAF, z: -8, shape: { kind: 'lobed', cx: ax + 4 * s, cy: ay + 3.4 * s, rx: 5.8 * s, ry: 4.8 * s, rz: 5, lobes: 4, depth: 0.32, phase: phase + 1.1, octaves: 3 } },
   ]
 }
 
@@ -161,29 +168,38 @@ const PARTS: Part[] = [
   { name: 'trunkTop', bone: 'trunk2', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -6, r: 3.2 } },
 
   { name: 'brL', bone: 'branchL', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 2.2 } },
-  { name: 'brLt', bone: 'branchLt', material: BARK, z: -4.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: -2, y1: -8, r: 1.5 } },
+  { name: 'brLt', bone: 'branchLt', material: BARK, z: -9.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: -2, y1: -8, r: 1.5 } },
   { name: 'brR', bone: 'branchR', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 2.1 } },
-  { name: 'brRt', bone: 'branchRt', material: BARK, z: -4.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 2, y1: -8, r: 1.45 } },
-  { name: 'brC', bone: 'branchC', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -11, r: 2 } },
-  { name: 'brCt', bone: 'branchCt', material: BARK, z: -4.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -7, r: 1.4 } },
+  { name: 'brRt', bone: 'branchRt', material: BARK, z: -9.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 2, y1: -8, r: 1.45 } },
+  // brCt is gone for the same reason as massC: at eleven clumps the centre of the canopy is
+  // the densest place on the tree, and a sub-branch buried there rendered nothing. The bone
+  // stays — it carries three clumps — which is the point of bones and parts being separate.
+  { name: 'brC', bone: 'branchC', material: BARK, z: -9, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -11, r: 2 } },
 
   // **The shadow masses sit INSIDE the foliage now, not around it.** In the last pass they
   // owned the crown's whole outline and the green sat on them like spots — a mushroom cap.
   // The reference is the other way up: the leaves are the outline and the dark shows in the
   // gaps *between* them. Smaller than the green union on purpose, so nothing dark reaches the
   // silhouette except where two clumps part.
-  { name: 'massL', bone: 'branchLt', material: BARK, z: 4, shift: -1, shape: { kind: 'lobed', cx: -4, cy: -1, rx: 9.5, ry: 7, rz: 8, lobes: 7, depth: 0.2, phase: 0.4 } },
-  { name: 'massC', bone: 'branchCt', material: BARK, z: 4, shift: -1, shape: { kind: 'lobed', cx: 0, cy: -4, rx: 9, ry: 7.5, rz: 8, lobes: 7, depth: 0.2, phase: 2.1 } },
-  { name: 'massR', bone: 'branchRt', material: BARK, z: 4, shift: -1, shape: { kind: 'lobed', cx: 4, cy: -1, rx: 9.5, ry: 7, rz: 8, lobes: 7, depth: 0.2, phase: 1.3 } },
+  { name: 'massL', bone: 'branchLt', material: BARK, z: 4, shift: -1, shape: { kind: 'lobed', cx: -7, cy: -1, rx: 11, ry: 8, rz: 9, lobes: 7, depth: 0.2, phase: 0.4, octaves: 2 } },
+  { name: 'massR', bone: 'branchRt', material: BARK, z: 4, shift: -1, shape: { kind: 'lobed', cx: 7, cy: -1, rx: 11, ry: 8, rz: 9, lobes: 7, depth: 0.2, phase: 1.3, octaves: 2 } },
+  // massC was here and rendered 0 px once the canopy went to eleven clumps: fully covered,
+  // so it was doing nothing but existing. Deleted rather than nudged — the absence count's
+  // job is to find parts that are not earning their keep, not only parts that broke.
+  { name: 'massB', bone: 'trunk2', material: BARK, z: 4, shift: -1, shape: { kind: 'lobed', cx: 0, cy: -13, rx: 13, ry: 7, rz: 9, lobes: 6, depth: 0.18, phase: 3.4, octaves: 2 } },
 
-  // Seven clumps, each with its own phase so no two stamp alike. These own the silhouette.
+  // Eleven clumps, each with its own phase so no two stamp alike. These own the silhouette.
   ...clump('cLo', 0.95, -2, 0, 0),
-  ...clump('cLm', 1.05, -2, -1, 0.9),
-  ...clump('cLt', 0.9, -2, -1, 1.8),
-  ...clump('cC', 1.15, -2, -1, 2.7),
-  ...clump('cRt', 0.9, -2, -1, 3.6),
-  ...clump('cRm', 1.0, -2, 0, 4.5),
-  ...clump('cRo', 0.95, -2, 0, 5.4),
+  ...clump('cLx', 0.9, -2, -1, 0.57),
+  ...clump('cLm', 1.05, -2, -1, 1.14),
+  ...clump('cLt', 0.92, -2, -1, 1.71),
+  ...clump('cCl', 1.0, -2, -1, 2.28),
+  ...clump('cC', 1.12, -2, -1, 2.85),
+  ...clump('cCr', 1.0, -2, -1, 3.42),
+  ...clump('cRt', 0.92, -2, -1, 3.99),
+  ...clump('cRm', 1.05, -2, 0, 4.56),
+  ...clump('cRx', 0.9, -2, -1, 5.13),
+  ...clump('cRo', 0.95, -2, 0, 5.7),
 
   { name: 'fall0', bone: 'fall0', material: LEAF, shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 2.3, ry: 1.4, rz: 1.2 } },
   { name: 'fall1', bone: 'fall1', material: LEAF, shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 2.1, ry: 1.3, rz: 1.2 } },
@@ -235,6 +251,10 @@ const WIND: Track[] = [
   { bone: 'cRt', channel: 'angle', keys: sway(-0.22, -0.02, 0.32, 1, 1.26, 0.34) },
   { bone: 'cRm', channel: 'angle', keys: sway(-0.14, 0.06, 0.42, 1.18, 1.05, 0.22) },
   { bone: 'cRo', channel: 'angle', keys: sway(-0.19, 0.01, 0.36, 1.08, 1.18, 0.31) },
+  { bone: 'cLx', channel: 'angle', keys: sway(-0.21, -0.01, 0.33, 1.02, 1.24, 0.33) },
+  { bone: 'cCl', channel: 'angle', keys: sway(-0.17, 0.03, 0.39, 1.12, 1.12, 0.26) },
+  { bone: 'cCr', channel: 'angle', keys: sway(-0.2, 0, 0.34, 1.06, 1.22, 0.32) },
+  { bone: 'cRx', channel: 'angle', keys: sway(-0.15, 0.05, 0.41, 1.16, 1.08, 0.23) },
 
   // A crown lifts as well as leans — without it the foliage slides sideways like a curtain.
   { bone: 'trunk2', channel: 'y', keys: bob(0, -0.2, -0.6, -0.5, -0.15, 0.1) },

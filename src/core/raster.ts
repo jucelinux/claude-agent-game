@@ -3,6 +3,9 @@ import type { Xform } from './skeleton.ts'
 import { TURN } from './skeleton.ts'
 import type { Rng } from './rng.ts'
 
+/** The most irrational rotation: what you use when two periodic things must never agree. */
+const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
+
 export const OWNER_EMPTY = -1
 export const OWNER_OUTLINE = -2
 
@@ -356,7 +359,20 @@ function sample(shape: Shape, px: number, py: number): Local {
       const uy = (py - shape.cy) / shape.ry
       const d2 = ux * ux + uy * uy
       if (d2 === 0) return { inside: true, nx: 0, ny: 0, nz: -1, dz: -(shape.rz ?? Math.min(shape.rx, shape.ry)) }
-      const boundary = 1 + shape.depth * Math.cos(shape.lobes * Math.atan2(uy, ux) + (shape.phase ?? 0))
+      const theta = Math.atan2(uy, ux)
+      // Summed octaves, amplitude halving and frequency doubling — fractional Brownian
+      // motion evaluated on a circle, in closed form because the "noise" is a cosine.
+      const octaves = Math.max(1, Math.round(shape.octaves ?? 1))
+      let norm = 0
+      for (let o = 0, a = 1; o < octaves; o++, a *= 0.5) norm += a
+      let boundary = 1
+      let amp = shape.depth / norm
+      let freq = shape.lobes
+      for (let o = 0; o < octaves; o++) {
+        boundary += amp * Math.cos(freq * theta + (shape.phase ?? 0) + o * GOLDEN_ANGLE)
+        amp *= 0.5
+        freq *= 2
+      }
       if (boundary <= 0) return MISS
       const t = Math.sqrt(d2) / boundary
       if (t > 1) return MISS

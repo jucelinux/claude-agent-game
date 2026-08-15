@@ -95,6 +95,24 @@ export type Shape =
       readonly lobes: number
       readonly depth: number
       readonly phase?: number
+      /**
+       * **How many octaves of bump, each half the size and twice the frequency of the last.**
+       * One octave is a single wave around the rim — a flower, a cog, a simple blob. Real
+       * foliage, coastline, rock and cloud are *self-similar*: big lobes carrying smaller
+       * lobes carrying smaller still, which is a summed series and not a shape.
+       *
+       * `depth` stays the total swing whatever this is set to — the amplitudes are
+       * normalized — so the two knobs are orthogonal: `depth` is how ragged, `octaves` is at
+       * how many scales. That separation is the whole reason to have it, because otherwise
+       * adding detail silently changes the size.
+       *
+       * Octaves are offset from each other by the **golden angle**, the most irrational
+       * rotation there is, so no two of them ever line up and produce a false symmetry. It
+       * is the same constant that governs where a plant actually puts its leaves, which is a
+       * coincidence worth exactly nothing mathematically and is nevertheless the right
+       * number for "make these not agree".
+       */
+      readonly octaves?: number
     }
 
 export type Part = {
