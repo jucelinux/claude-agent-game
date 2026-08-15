@@ -103,6 +103,6 @@ export type Params = {
   /** Probability a painted pixel drops one tone. 0 disables the injected RNG entirely. */
   readonly texture: { readonly speckle: number }
   /** Read by the viewer, never by the core. Lives here so it is anchored like any number. */
-  readonly playback: { readonly msPerFrame: number; readonly scale: number }
+  readonly playback: { readonly msPerFrame: number; readonly scale: number; readonly history: number }
   readonly _anchors: Readonly<Record<string, string>>
 }

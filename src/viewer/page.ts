@@ -25,7 +25,12 @@ export type ViewCell = {
 }
 
 export type ViewSpec = {
-  readonly mode: 'bench' | 'gate' | 'selftest'
+  /**
+   * `live` is the served page and the **only** one allowed to touch the network: it is
+   * mine, it stays open, and the frames are swapped under a loop that never stops.
+   * The gate is never live — a sheet that can change under him is not a reading.
+   */
+  readonly mode: 'bench' | 'gate' | 'selftest' | 'live'
   /** Integer only: pixel art at a fractional scale is judged through mud. */
   readonly scale: number
   readonly msPerFrame: number
@@ -39,6 +44,7 @@ export function emit(spec: ViewSpec): string {
     throw new Error(`scale must be a positive integer, is ${spec.scale}`)
   }
   const gate = spec.mode === 'gate'
+  const live = spec.mode === 'live'
 
   const cells = spec.cells.map((cell) => {
     const per = cell.w * cell.h
@@ -90,11 +96,25 @@ ${gate ? '' : '  .label { color: #2a2a2a }\n  .notes { max-width: 68ch; color: #
 ${notes.length > 0 ? `<div class="notes">${notes.map(escapeText).join('\n')}</div>` : ''}
 <div id="stage"></div>
 <script>
-${runtime({ controls: spec.mode === 'bench', labels: !gate })}
-start(${escapeScript(JSON.stringify(data))});
-</script>
+${runtime({ controls: spec.mode === 'bench' || live, labels: !gate, swap: live })}
+${live ? 'var page = start' : 'start'}(${escapeScript(JSON.stringify(data))});
+${live ? BOOTSTRAP : ''}</script>
 `
 }
+
+/**
+ * Live only. The page is opened once and never rebuilt: on a change the server pings, the
+ * frames are pulled and swapped **under a running loop**, so the difference is seen in
+ * motion instead of in a reload. This is the one page allowed to reach the network, and
+ * `bin/view.ts` cannot write it to a file.
+ */
+const BOOTSTRAP = `
+function pull() {
+  fetch('/frames.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) { page.swap(d); });
+}
+pull();
+new EventSource('/events').onmessage = function () { pull(); };
+`
 
 /**
  * The runtime, inlined. Written to be read: if this loop ever grows a second clock or a
@@ -104,10 +124,19 @@ start(${escapeScript(JSON.stringify(data))});
  * switched off in it. A disabled control is one typo away from an enabled one, and the
  * things they would enable are judging a still and naming the impostor.
  */
-const runtime = ({ controls, labels }: { controls: boolean; labels: boolean }): string => `
+const runtime = ({ controls, labels, swap }: { controls: boolean; labels: boolean; swap: boolean }): string => `
 function start(D) {
   var stage = document.getElementById('stage');
-  var cells = D.cells.map(function (c) {
+  var cells = [];
+  var ms = D.msPerFrame;
+  var frame = 0, paused = false;
+
+  // Rebuilding the cells never touches the frame counter or the accumulator. That is the
+  // whole trick of the live page: the loop does not restart, so a change is seen in motion.
+  function build(D) {
+  stage.innerHTML = '';
+  ms = D.msPerFrame;
+  cells = D.cells.map(function (c) {
     var wrap = document.createElement('div');
     wrap.className = 'cell';
 
@@ -155,6 +184,7 @@ ${
 
     return { n: c.n, images: images, off: off, octx: octx, ctx: ctx, view: view${labels ? ', tag: tag, name: c.label' : ''} };
   });
+  }
 
   function draw(frame) {
     for (var i = 0; i < cells.length; i++) {
@@ -172,19 +202,20 @@ ${
   }
 
   // One accumulator, one frame counter, every cell. No cell owns a clock.
-  var last = null, acc = 0, frame = 0, paused = false;
+  var last = null, acc = 0;
   function tick(now) {
     if (last === null) last = now;
     acc += now - last;
     last = now;
     if (!paused) {
-      while (acc >= D.msPerFrame) { acc -= D.msPerFrame; frame++; }
+      while (acc >= ms) { acc -= ms; frame++; }
     } else {
       acc = 0;
     }
     draw(frame);
     requestAnimationFrame(tick);
   }
+  build(D);
   requestAnimationFrame(tick);
 ${
   controls
@@ -196,7 +227,7 @@ ${
   });
 `
     : ''
-}}
+}${swap ? '\n  return { swap: build };\n' : ''}}
 `
 
 function escapeText(text: string): string {

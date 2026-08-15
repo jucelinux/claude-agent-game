@@ -84,6 +84,25 @@ reading arrives.
       headless against a fake DOM. Five defects planted, five caught — smoothing on,
       label leaked into the gate, empty payload, dead tick, index 0 painted opaque. All
       five flatter the sprite. That is the direction instrument defects come in.
+- [x] **The live bench** (`bin/serve.ts`, `node:http` only). The page is opened once and
+      never rebuilt: a change re-executes in a fresh process — no module cache to lie —
+      and the frames swap **under a loop that never stops**, with the last 3 generations
+      beside the current one. Locked both ways: it fires when the output changes and stays
+      quiet when a watched file is rewritten byte-for-byte. Its failure mode is stale
+      frames I believe are fresh, which reads as "the defect is fixed".
+- [x] **The export contract** (`src/export/contract.ts`), declared and locked before the
+      exporter exists: fixed frame rect, pivot on the grid, named phases pointing at real
+      frames, anchors, palette ≤ 256 with index 0 transparent, whole-millisecond timing.
+      Compatibility with engines is an **output contract, not an architecture** — depending
+      on one renderer would make the artifact less portable, not more.
+- [ ] **The exporter** — indexed atlas PNG (zlib is stdlib) + the manifest, and a ~40-line
+      example loading it in Pixi, and later Godot. Pixi as the **consumer that proves the
+      claim**, never as a dependency. At the vertical slice: exporting disposable probe art
+      is inventory.
+- [ ] **The "sprite in situ" axis** — the loop inside a real scene, with camera, parallax
+      and neighbours. This is where a game engine finally earns its place. Trigger: after
+      the gate has taken a reading, never before — it adds a variable the published loops
+      do not have, and the error would flatter mine.
 - [ ] **Image cells** — his five published loops decoded into the *same* blit path as
       mine. Unbuilt: it cannot be null-cased without the files. Round 1.
 - [ ] **The gate sheet builder** — shuffles with a seed he picks, writes
@@ -109,7 +128,7 @@ without both is a rumour.
 | full cycle: record → replay → compare | 1.0 s | `node bin/record.ts /tmp/c.run.json && node bin/run.ts /tmp/c.run.json && npm test` | 14/08 |
 | fixture baseline hash | `8d3118679a7194d2` | `npm run baseline` | 14/08 |
 | min pair distance, shipped tunables | 0.109 | `node bin/run.ts runs/fixture.run.json` | 14/08 |
-| locks green | 34 | `npm test` | 14/08 |
+| locks green | 45 | `npm test` | 14/08 |
 | gate page, tells found by grep | 0 | `grep -cE "fixture\|label\|keydown\|button\|http\|seed" .out/gate.html` | 14/08 |
 
 ## The harness, as of 14/08
@@ -122,7 +141,8 @@ Four commands, and the second is the loop.
 | `node bin/bench.ts [run] [--set path=value]` | one bench turn: author → look → name the defect. Contact sheet, 25% silhouette, counts, elapsed |
 | `node bin/run.ts <run.json>` | headless: state hash and metrics, no presentation layer |
 | `node bin/record.ts <out.json> [--set …]` | capture what the bench is showing into a replayable run file |
-| `node bin/view.ts [runs…] [--mode gate]` | the human's channel → `.out/bench.html` or `.out/gate.html` |
+| `node bin/serve.ts [runs…] [--set …]` | **the bench that stays open.** Open the URL once; edits re-execute and the frames swap under a running loop, with the last 3 generations beside it |
+| `node bin/view.ts [runs…] [--mode gate]` | the frozen pages → `.out/bench.html` or `.out/gate.html`. The gate is only ever a file |
 | `node bin/selftest.ts` | the viewer's null case, made visible → `.out/selftest.html` |
 
 Every tunable lives in `tunables/default.json` and is anchored there — the anchor is

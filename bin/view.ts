@@ -12,8 +12,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { parse } from './args.ts'
-import { execute } from '../src/io/load.ts'
-import type { ViewCell } from '../src/viewer/page.ts'
+import { buildCells } from '../src/viewer/cells.ts'
 import { emit } from '../src/viewer/page.ts'
 
 const argv = process.argv.slice(2)
@@ -21,27 +20,19 @@ const runs = argv.filter((a) => a.endsWith('.json'))
 const flags = argv.filter((a) => !a.endsWith('.json'))
 
 const { rest } = parse(flags)
+// Only two modes reach a file. `live` is served, never written: a page on disk that
+// expects a server behind it is a page that lies the day the server is not running.
 const mode = rest['mode'] === 'gate' ? 'gate' : 'bench'
 const out = typeof rest['out'] === 'string' ? rest['out'] : `.out/${mode}.html`
 
 const specs = runs.length > 0 ? runs.map((r) => parse([r, ...flags]).spec) : [parse(flags).spec]
-const results = specs.map((spec) => execute(spec))
-const first = results[0]
-if (first === undefined) throw new Error('nothing to view')
-
-const cells: ViewCell[] = results.map((result, i) => ({
-  w: result.params.canvas.w,
-  h: result.params.canvas.h,
-  frames: result.frames.map((f) => f.buf.data),
-  palette: result.grammar.palette.colors,
-  label: `${result.spec.grammar}${runs[i] !== undefined ? ` · ${runs[i]}` : ''} · ${result.hash}`,
-}))
+const data = buildCells(specs)
 
 const html = emit({
   mode,
-  scale: first.params.playback.scale,
-  msPerFrame: first.params.playback.msPerFrame,
-  cells,
+  scale: data.scale,
+  msPerFrame: data.msPerFrame,
+  cells: data.cells,
   title: `claude-ink-2d · ${mode}`,
   notes:
     mode === 'bench'
@@ -51,5 +42,5 @@ const html = emit({
 
 mkdirSync(dirname(out), { recursive: true })
 writeFileSync(out, html)
-process.stdout.write(`${out}  ${cells.length} cell(s), ${first.params.playback.msPerFrame} ms/frame, x${first.params.playback.scale}\n`)
-for (const result of results) process.stdout.write(`  ${result.spec.grammar}  ${result.hash}\n`)
+process.stdout.write(`${out}  ${data.cells.length} cell(s), ${data.msPerFrame} ms/frame, x${data.scale}\n`)
+for (const hash of data.hashes) process.stdout.write(`  ${hash}\n`)

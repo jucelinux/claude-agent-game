@@ -86,9 +86,27 @@ describe('viewer — the human channel', () => {
   })
 
   it('self-contained: no network in the path', () => {
-    const html = emit({ ...BASE, mode: 'bench', cells: cellsFor() })
-    for (const external of ['<link', 'src=', 'http://', 'https://', 'fetch(', 'XMLHttpRequest', '@import']) {
-      expect(html.includes(external), `page reaches out through "${external}"`).toBe(false)
+    // Every page that reaches a file. `live` is the one exception and it is served, never
+    // written — a file on disk that expects a server behind it lies the day it is opened
+    // without one.
+    for (const mode of ['bench', 'gate', 'selftest'] as const) {
+      const html = emit({ ...BASE, mode, cells: cellsFor() })
+      for (const external of ['<link', 'src=', 'http://', 'https://', 'fetch(', 'EventSource', 'XMLHttpRequest', '@import']) {
+        expect(html.includes(external), `${mode} page reaches out through "${external}"`).toBe(false)
+      }
+    }
+  })
+
+  it('live is the served page, and the gate is never live', () => {
+    const live = emit({ ...BASE, mode: 'live', cells: [] })
+    expect(live).toContain('fetch(')
+    expect(live).toContain('EventSource')
+    // Swapping frames must not restart the loop, or a change is judged from a standstill.
+    expect(live).toContain('page.swap')
+    // And the swap machinery is compiled out of every page that is not live. A page that
+    // knows how to replace its frames is one line away from a sheet that changes under him.
+    for (const mode of ['bench', 'gate', 'selftest'] as const) {
+      expect(emit({ ...BASE, mode, cells: cellsFor() }).includes('swap'), `${mode} can swap`).toBe(false)
     }
   })
 

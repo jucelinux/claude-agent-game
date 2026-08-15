@@ -49,3 +49,9 @@ turn — `TASTE-LOOP.md` §3.8. Recording is not propagating.
 - 14/08 · STACK · no game engine; "the sprite in situ" becomes its own axis after the gate · an engine smooths and reintroduces a clock at the point of comparison, and the error has a direction — it flatters the model's own cell
 - 14/08 · KNOB · playback at 125 ms per frame and integer scale x4 · 8 fps is the Stardew control's walk; a fractional scale is judged through mud and 1:1 through a microscope
 - 14/08 · INSTRUMENT · the viewer's runtime runs headless against a fake DOM, and the visible null case ships beside it · five defects planted, five caught, all five flattering
+- 14/08 · CHANNEL · the bench is served and stays open; frames swap under a loop that never stops · a page rebuilt per run is judged from a standstill, and the reload is where the comparison dies
+- 14/08 · CHANNEL · the live page recomputes in a fresh process, never in-process · a module cache would serve stale frames while the page claims they are new
+- 14/08 · GATE · the gate is only ever a frozen file, never served · a sheet that can change under him mid-reading is not a reading
+- 14/08 · ARTIFACT · engine compatibility is an output contract, not an architecture · depending on one renderer would make the grammar unusable to every other engine, which is the opposite of the artifact reading
+- 14/08 · LOCK · the export contract is declared and locked before the exporter exists · fixed frame rect, pivot on the grid, named phases, anchors, indexed palette, whole-ms timing — the grammar cannot drift out of exportable while nobody is looking
+- 14/08 · LOOP · Pixi enters later as the consumer that proves the claim, never as a dependency · an example that loads the atlas turns "this serves game devs" from rhetoric into a run
