@@ -14,6 +14,15 @@ Then run the **cycle open** — `TASTE-LOOP.md` §3b.
 
 **The gate — the project's only direction metric.**
 
+> **SUSPENDED 14/08 — the reading below is unsound and must not be run.** The human found
+> the hole: whoever collects the five published loops has *seen* the five, so the sixth is
+> theirs by elimination. Assembling the sheet does not preserve his blindness, it destroys
+> it — and the second half of the same problem is that he is about to start judging rounds,
+> which teaches him my hand and kills any find-the-impostor reading for good. Replacement
+> proposed and **held for his verdict** (`BACKLOG.md` → Held for the human). Until he
+> rules, the gate takes no reading and the strike count stays where it is. A cold session
+> reading this block must stop here.
+
 - **The reading:** a sheet of **animated loops**, 6 in all — 5 from published games, 1
   mine, shuffled by script with the mapping in a file I do not read. The human knows there
   is exactly one impostor and points at it. The reading is **correctness + time to point**.

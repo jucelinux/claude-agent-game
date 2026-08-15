@@ -8,10 +8,13 @@ open (`TASTE-LOOP.md` §3b).
 
 ---
 
-## Gate — 0 strikes of 3, as of 14/08
+## Gate — 0 strikes of 3, as of 14/08 · **reading SUSPENDED, replacement held for the human**
 
-No reading taken. The first one comes in round 1 proper, after the probe settles the
-idiom. Zero strikes is the best state.
+No reading taken, and none can be taken: the find-the-impostor design is unsound
+(`CLAUDE.md` gate block, `DECISIONS.md` 14/08, `TASTE-LOOP-LEARNING.md` Case 01). The
+replacement — rank mine against five fixed shipped loops — is in **Held for the human**
+below. The count stays at 0 of 3 and does not move while the gate is suspended: a
+suspended gate scores nothing, in either direction.
 
 | date | reading | strike? |
 |---|---|---|
@@ -157,22 +160,40 @@ In a batch, with samples attached. **Every item carries the five lines of `CLAUD
 what to open, what to do, how long, what a pass looks like, what each answer changes.**
 Written for him, so no method vocabulary crosses into this section.
 
-- [ ] **Check four things on the self-test page.** Asked 14/08.
-      · *Open:* `.out/selftest.html` in a browser, not in the editor.
-      · *Do:* look at four squares — the checkerboard must have hard edges; the ring's hole
-      must show the page's grey, not black; the "static" square must not move at all; the
-      "moving" square must step to the right.
-      · *Time:* 30 seconds.
-      · *Pass:* all four as described.
-      · *Answer changes:* if any is wrong, the thing I use to look at my own work is
-      broken, and everything I show him after that is suspect — in my favour.
-- [ ] **The five published game loops: do they exist as files?** Asked 14/08.
-      · *Do:* answer one of three — "I have the files" (and in what format), "I can capture
-      them, give me a few days", or "I can't".
-      · *Time:* one minute, no files needed today.
-      · *Answer changes:* the first two set the canvas size and frame rate my sample has to
-      match. The third means the sheet cannot be built and the way we measure the project
-      has to change — better known now than next week.
+- [x] ~~Check four things on the self-test page~~ → **all four confirmed by the human,
+      14/08.** The viewer's null case now has the one link the headless locks cannot cover.
+- [ ] **Approve, change or reject the new gate reading.** Asked 14/08, and nothing takes a
+      reading until he answers.
+      · *Read:* the proposal below.
+      · *Do:* say yes, or change a number, or name a different reading.
+      · *Time:* five minutes, and it is the highest-value five minutes in the project.
+      · *Answer changes:* everything downstream. Without a reading nothing can kill this,
+      and a project that cannot fail is being decorated.
+
+      **The reading, proposed:** six animated loops side by side, on the same tick — **five
+      from shipped games, which he picks himself and may study as much as he likes**, and
+      one of mine. He puts them in order by one question: *which of these would I believe
+      came from a game someone shipped?* First is the most believable, sixth the least.
+      · **Strike:** mine lands 5th or 6th.
+      · **Non-strike:** mine lands 1st to 4th.
+      · **Death:** three strikes in a row. The counter does not move.
+      · **Stop — ceiling reached:** three readings in a row at the same position with no
+      improvement. Not death: the grammar is finished, and where it stopped gets written
+      down (`TASTE-LOOP-LEARNING.md` P2).
+      · **Why it replaces the old one:** it needs no blindness at all, so it survives both
+      the hole he found and the fact that he is about to learn my hand by judging rounds.
+      · **What it costs:** he can be charitable to me in a way that pointing at an impostor
+      never allowed. Two guards — the five references are **fixed once and reused for every
+      reading**, so a movement in rank is my art moving and never the sheet moving; and
+      4th place still means beating two shipped loops.
+- [ ] **The five reference loops, once he approves the reading.** Asked 14/08.
+      · *Do:* pick five walking loops from games he rates, at the level he wants me held
+      to, and drop the files in `refs/`. Any format that plays.
+      · *Time:* however long picking five good ones takes; there is no rush and no probe
+      blocked on it.
+      · *Answer changes:* their size and frame rate set what my cell has to be for the
+      comparison to be honest. Picking weak references lowers the bar permanently, since
+      the same five are reused for every reading.
 - [ ] **Is "ink" in the name aspiration or direction?** Asked 14/08, waits for sample D.
       · *Open:* four looping animations, sent together.
       · *Do:* pick A or B. **(A)** the name is a wish, and the target stays Chrono Trigger.
