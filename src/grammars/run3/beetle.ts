@@ -50,7 +50,16 @@ const AT = [8, 3, -2] as const
 const FAN = [-0.055, 0.01, 0.105] as const
 
 const NEAR: Row = { side: 'N', at: AT, offset: 6, femur: 8, tibia: 6.5, width: 1.9, material: 'shell', splay: 0.03, fan: FAN, parent: 'body' }
-// Same lamp, same shell: the far row is two steps down its own ramp, not a darker substance.
+/**
+ * Same lamp, same shell: the far row is two steps down its own ramp, not a darker substance.
+ *
+ * It rises over the back, and **it stays that way because he approved it that way** — the
+ * version he called very good is this one. Hanging the row downward was tried for one
+ * commit on my own reading and reverted: from three-quarter the body is tall enough that a
+ * downward far row disappears behind it entirely, six painted pixels out of forty, and
+ * trading a row he liked for a row nobody can see is not a fix. The observation is his to
+ * rule on, not mine to act on.
+ */
 const FARROW: Row = { side: 'F', at: AT, offset: -6.5, femur: 8, tibia: 6.5, width: 1.9, material: 'shell', shift: -2, splay: 0.5, fan: FAN.map((f) => -f), parent: 'body' }
 
 /**
@@ -83,8 +92,13 @@ export const beetle: Grammar = {
     bones: [
       { name: 'body', parent: null, x: 0, y: 0, angle: 0 },
       { name: 'head', parent: 'body', x: 13, y: 0, angle: 0 },
-      { name: 'antL', parent: 'head', x: 3, y: -2, angle: -0.16 },
-      { name: 'antR', parent: 'head', x: 3, y: 2, angle: 0.16 },
+      // **Forward and up.** They pointed at the floor, and the reason is a sign: a capsule
+      // grows down-screen at angle zero, so anything meant to rise has to sit past a half
+      // turn. Everything else on this body hangs downward and inherited the habit.
+      // From three-quarter the far antenna carries more of the lift and the near one more
+      // of the reach, which is what keeps them from reading as one thick line.
+      { name: 'antL', parent: 'head', x: 3, y: -2, angle: 0.645 },
+      { name: 'antR', parent: 'head', x: 3, y: 2, angle: 0.695 },
       ...legBones(FARROW),
       ...legBones(NEAR),
     ],
