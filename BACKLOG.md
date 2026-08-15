@@ -8,13 +8,16 @@ open (`TASTE-LOOP.md` §3b).
 
 ---
 
-## Gate — 0 strikes of 3, as of 14/08 · **reading SUSPENDED, replacement held for the human**
+## Gate — 0 strikes of 3, as of 14/08 · reading **v2, approved by the human 14/08**
 
-No reading taken, and none can be taken: the find-the-impostor design is unsound
-(`CLAUDE.md` gate block, `DECISIONS.md` 14/08, `TASTE-LOOP-LEARNING.md` Case 01). The
-replacement — rank mine against five fixed shipped loops — is in **Held for the human**
-below. The count stays at 0 of 3 and does not move while the gate is suspended: a
-suspended gate scores nothing, in either direction.
+No reading taken yet. The reading is now **my position among five fixed shipped loops**,
+and a strike is a reading that does not improve on the previous one (`CLAUDE.md` gate
+block). First reading: when a sample of the winning idiom has its locks green, **or 21/08,
+whichever comes first**.
+
+| date | position | improved? | strike? |
+|---|---|---|---|
+| — | none yet | — | — |
 
 | date | reading | strike? |
 |---|---|---|
@@ -147,6 +150,8 @@ Four commands, and the second is the loop.
 | `node bin/serve.ts [runs…] [--set …]` | **the bench that stays open.** Open the URL once; edits re-execute and the frames swap under a running loop, with the last 3 generations beside it |
 | `node bin/view.ts [runs…] [--mode gate]` | the frozen pages → `.out/bench.html` or `.out/gate.html`. The gate is only ever a file |
 | `node bin/selftest.ts` | the viewer's null case, made visible → `.out/selftest.html` |
+| `node bin/keep.ts <run.json> [--note …]` | keep a generation in `gallery/` forever. New hashes only |
+| `node bin/gallery.ts` | the whole kept history on one page → `.out/gallery.html` |
 
 Every tunable lives in `tunables/default.json` and is anchored there — the anchor is
 locked, not a comment. A grammar is data in `src/grammars/`; `fixture` is the harness's

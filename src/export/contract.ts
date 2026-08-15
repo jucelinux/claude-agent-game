@@ -102,6 +102,12 @@ export function validate(m: Manifest): string[] {
     if (phase.at <= previous) bad.push(`phase "${phase.name}" is out of order`)
     previous = phase.at
     if (phase.frame < 0 || phase.frame >= m.frames.length) bad.push(`phase "${phase.name}" points at no frame`)
+    // A phase between two frames is a pose nobody ever sees, and a manifest that rounds it
+    // to the nearest frame lies to whoever syncs a footstep to it.
+    const exact = phase.at * m.frames.length
+    if (Math.abs(exact - Math.round(exact)) > 1e-9) {
+      bad.push(`phase "${phase.name}" at ${phase.at} lands between frames of a ${m.frames.length}-frame cycle`)
+    }
   }
 
   const anchors = new Set<string>()

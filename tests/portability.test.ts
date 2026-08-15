@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { loadParams } from '../src/io/load.ts'
 import { strip } from '../src/core/render.ts'
 import { fixture } from '../src/grammars/fixture.ts'
-import { GRAMMARS } from '../src/grammars/index.ts'
+import { GRAMMARS, PAIRS } from '../src/grammars/index.ts'
 import { describe as manifestOf, validate } from '../src/export/contract.ts'
 import type { Manifest } from '../src/export/contract.ts'
 
@@ -15,10 +15,24 @@ import type { Manifest } from '../src/export/contract.ts'
 describe('export contract', () => {
   const params = loadParams('default')
 
-  it('every declared grammar satisfies the contract', () => {
-    for (const [name, grammar] of Object.entries(GRAMMARS)) {
-      expect(validate(manifestOf(grammar, params)), `grammar "${name}"`).toEqual([])
+  it('every declared grammar satisfies the contract, against its own tunables', () => {
+    for (const pair of PAIRS) {
+      const grammar = GRAMMARS[pair.grammar]
+      expect(grammar, `grammar "${pair.grammar}" is paired but not declared`).toBeDefined()
+      expect(validate(manifestOf(grammar!, loadParams(pair.tunables))), `${pair.grammar}`).toEqual([])
     }
+    // And the pairing covers everything: a grammar with no tunables of its own would be
+    // validated against somebody else's tone budget, which reports violations that do not
+    // exist and hides the ones that do.
+    expect(PAIRS.map((p) => p.grammar).sort()).toEqual(Object.keys(GRAMMARS).sort())
+  })
+
+  it('a phase that lands between frames is caught', () => {
+    // The defect this lock was born from: five frames against four named phases shows one
+    // key pose and interpolates past three, while the manifest rounds and claims otherwise.
+    const good = manifestOf(fixture, params)
+    const off = { ...good, frames: good.frames.slice(0, 3) }
+    expect(validate(off).some((v) => v.includes('lands between frames'))).toBe(true)
   })
 
   it('every frame is the same rect: an atlas has one cell size, not one per frame', () => {

@@ -14,37 +14,47 @@ Then run the **cycle open** — `TASTE-LOOP.md` §3b.
 
 **The gate — the project's only direction metric.**
 
-> **SUSPENDED 14/08 — the reading below is unsound and must not be run.** The human found
-> the hole: whoever collects the five published loops has *seen* the five, so the sixth is
-> theirs by elimination. Assembling the sheet does not preserve his blindness, it destroys
-> it — and the second half of the same problem is that he is about to start judging rounds,
-> which teaches him my hand and kills any find-the-impostor reading for good. Replacement
-> proposed and **held for his verdict** (`BACKLOG.md` → Held for the human). Until he
-> rules, the gate takes no reading and the strike count stays where it is. A cold session
-> reading this block must stop here.
+_Version 2, adopted 14/08. Version 1 — find-the-impostor — was retired unrun: whoever
+collects the five references has seen them, so the sixth is theirs by elimination
+(`TASTE-LOOP-LEARNING.md` Case 01)._
 
-- **The reading:** a sheet of **animated loops**, 6 in all — 5 from published games, 1
-  mine, shuffled by script with the mapping in a file I do not read. The human knows there
-  is exactly one impostor and points at it. The reading is **correctness + time to point**.
-- **Strike:** a correct call in under ~10 seconds.
-  **Non-strike:** a wrong call, hesitation past ~10 s, or "I don't know".
-- **Death condition:** 3 consecutive strikes kill the thesis.
+- **The reading:** six **animated loops** side by side on one clock — five from shipped
+  games that the human picks and may study as much as he likes, and one of mine. He puts
+  them in order by one question: *which of these would I believe came from a game someone
+  shipped?* First is the most believable, sixth the least. **The reading is my position.**
+- **Strike:** a reading whose position is **no better than the previous one**.
+  **Non-strike:** any improvement in position, which resets the count to zero.
+- **End condition — 3 strikes in a row**, and *where* the plateau sits says which end it is:
+  - **5th or 6th → the grammar does not reach the commercial bar.** Thesis dead.
+  - **1st to 4th → ceiling reached, and it is a good ceiling.** The project is finished and
+    where it stopped gets written down.
 - **It counts STRIKES: zero is the best state, not the worst.**
-- **First reading:** round 1 proper, after the frontier probe settles the idiom. The probe
-  gets no reading — disposable samples are not the thesis.
+- **First reading:** when a sample of the winning idiom has its locks green, **or 21/08,
+  whichever comes first.** The date is what removes my power to defer — "not yet" is always
+  the comfortable answer for the party that never gets tired.
 - **Standing at 0 of 3 on 14/08.** The live count lives at the top of `BACKLOG.md` and is
-  updated in the same turn the reading arrives; `DECISIONS.md` records that it changed,
-  never by how much.
+  updated in the same turn a reading arrives; `DECISIONS.md` records that it changed, never
+  by how much.
+- **The five references are fixed once and reused for every reading**, so a change in
+  position is my art moving and never the sheet moving. They live in `refs/`, **gitignored
+  — reference is for looking at, never for shipping.**
 
 **Why animated and not still, and why that is load-bearing.** A still sprite of mine
 passes for good far more often than a sprite of mine walking. A gate on stills lies in my
 favour on exactly the axis the project exists to test. If the core changes, the gate
 changes with it — and a replacement that cannot kill is not a replacement.
 
-**Why find-the-impostor and not "is this good?".** This project's human declared that
-visual creative direction is his largest gap (§4). Discrimination is far cheaper than
-generation: someone who does not yet draw can still point at the forgery. The gate
-extracts judgment without demanding direction, and that is why it has this shape.
+**Why a ranking and not "find the impostor".** Discrimination is still what is being
+measured — the human declared visual direction as his largest gap (§4), and ordering six
+loops demands no more direction than pointing did. What changed is that a ranking needs no
+blindness: it survives him collecting the references himself, and it survives him learning
+my hand over dozens of rounds, which judging rounds guarantees he will. Its one weakness is
+that ordering leaves room for charity where pointing did not; the fixed reference set and
+the bottom-two threshold are what keep charity from mattering.
+
+**Why the plateau and not a bad first reading.** Landing 6th early means *not there yet*,
+not *cannot get there*. Measuring movement instead of absolute position means early
+readings are free, which is what lets the gate start before it is comfortable.
 
 ---
 
@@ -152,10 +162,15 @@ something a test resolves.
   FREQUENCY of batches, not their size** — size stays bounded by attributability (§3.6),
   which does not move with the calendar. Seven changes in one batch are still an
   unattributable reaction even with the human available every day.
-- **The week is a de facto stopping rule, at project scope.** The method has none (§12,
-  known gap). This one arrived free, via the calendar, and is worth recording as a
-  candidate in `TASTE-LOOP-LEARNING.md` — an external deadline is the cheapest substitute
-  for the missing rule, and the model has no fatigue to produce one on its own.
+- **The week is the stopping rule, at project scope, and he set its terms on 14/08:** one
+  week aimed at the quality ceiling, ending in a **retrospective round** with an honest
+  reading of the ceiling actually reached and whether the artifact is worth publishing. The
+  method has no stopping rule (§12, known gap); this one arrived via the calendar, and the
+  gate's plateau counter is the instrumented half of it (`TASTE-LOOP-LEARNING.md` P1, P2).
+- **He asked to be shown where the model can produce something exceptional, so he can push
+  on it.** That request has a specific shape here: `TASTE.md` §2b accepts no entry without
+  a demonstrating artifact, so the answer is only ever a sample, never a paragraph. Probing
+  the ceiling is therefore a *rendering* obligation, not a claim.
 - **Delegation line:** the model applies alone — clear margin, rungs 1–3 green, already
   settled in `TASTE.md`. Waits for a batch — a tie, a direction call. Interrupts
   immediately — a gate strike, and nothing else.

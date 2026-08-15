@@ -19,12 +19,17 @@ export function buildCells(specs: readonly RunSpec[]): PageData {
     scale: first.params.playback.scale,
     msPerFrame: first.params.playback.msPerFrame,
     hashes: results.map((r) => r.hash),
+    // Each cell carries its own scale and rate so that different resolutions arrive the
+    // same size on screen and different frame counts finish a cycle together. Both come
+    // from that sample's own tunables — nothing here is chosen at view time.
     cells: results.map((result) => ({
       w: result.params.canvas.w,
       h: result.params.canvas.h,
       frames: result.frames.map((f) => f.buf.data),
       palette: result.grammar.palette.colors,
       label: `${result.spec.grammar} · ${result.hash}`,
+      scale: result.params.playback.scale,
+      msPerFrame: result.params.playback.msPerFrame,
     })),
   }
 }
@@ -42,6 +47,8 @@ export function toJson(data: PageData, mode: 'live'): string {
       palette: cell.palette,
       indices: Buffer.concat(cell.frames.map((f) => Buffer.from(f))).toString('base64'),
       label: cell.label,
+      scale: cell.scale,
+      msPerFrame: cell.msPerFrame,
     })),
   })
 }

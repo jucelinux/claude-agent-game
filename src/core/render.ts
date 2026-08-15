@@ -1,5 +1,5 @@
 import type { Grammar, IndexedBuffer, Params } from './types.ts'
-import { createPainter, outline, paintPart, OWNER_EMPTY } from './raster.ts'
+import { createPainter, innerOutline, outline, paintPart, OWNER_EMPTY } from './raster.ts'
 import { solve } from './skeleton.ts'
 import { evaluate } from './gait.ts'
 import { mulberry32 } from './rng.ts'
@@ -40,12 +40,15 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     paintPart(painter, part.shape, xf, ramp.indices, params.light, i, rng, params.texture.speckle)
   }
 
-  if (params.outline.enabled) {
+  if (params.outline.inner || params.outline.enabled) {
     const ramp = grammar.palette.ramps.find((r) => r.material === params.outline.material)
     if (ramp === undefined) {
       throw new Error(`outline wants material "${params.outline.material}", absent from palette "${grammar.palette.name}"`)
     }
-    outline(painter, ramp.indices[0] as number)
+    // The inner line sits one step above the outer one, so the silhouette stays the darkest
+    // thing on screen. With a single-tone ramp they collapse, and that is the ramp's fault.
+    if (params.outline.inner) innerOutline(painter, (ramp.indices[1] ?? ramp.indices[0]) as number)
+    if (params.outline.enabled) outline(painter, ramp.indices[0] as number)
   }
 
   return { t, buf: painter.buf, owners: painter.owners }

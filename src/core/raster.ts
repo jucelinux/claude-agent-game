@@ -30,7 +30,7 @@ export function paintPart(
   shape: Shape,
   xf: Xform,
   ramp: readonly number[],
-  light: { readonly x: number; readonly y: number },
+  light: { readonly x: number; readonly y: number; readonly curve: number },
   partId: number,
   rng: Rng | null,
   speckle: number,
@@ -84,9 +84,11 @@ export function paintPart(
       const hit = sample(shape, px, py)
       if (!hit.inside) continue
 
-      // Brightness: outward normal against the direction the light comes from.
+      // Brightness: outward normal against the direction the light comes from, bent by the
+      // ramp curve before it is quantised. A linear map is physics; a ramp is a decision.
       const dot = hit.nx * lx + hit.ny * ly
-      let level = Math.floor(((dot + 1) / 2) * levels)
+      const u = (dot + 1) / 2
+      let level = Math.floor((light.curve === 1 ? u : Math.pow(u, 1 / light.curve)) * levels)
       if (level >= levels) level = levels - 1
       if (level < 0) level = 0
       if (rng !== null && speckle > 0 && rng() < speckle && level > 0) level -= 1
@@ -96,6 +98,42 @@ export function paintPart(
       painter.owners[at] = partId
     }
   }
+}
+
+/**
+ * A dark line **inside** the silhouette, wherever two parts meet.
+ *
+ * Born from a defect family, not from a plan: three separate occurrences of the same
+ * failure — abdomen against thorax, thorax against head, legs against the body's shaded
+ * side — all of them two parts of one material touching and rendering as one mass. Shading
+ * cannot separate them, because shading is continuous across the seam. The third
+ * occurrence is where the method says stop patching and generalise (`TASTE-LOOP.md` §3.8),
+ * and three hand-placed seam parts became this.
+ *
+ * The pixel that darkens is the one **behind** — lower paint order — so the part in front
+ * keeps its whole shape and the one behind recedes. That is depth, and it is free.
+ *
+ * portable, and it is the round's first real grammar rule.
+ */
+export function innerOutline(painter: Painter, index: number): void {
+  const { w, h, data } = painter.buf
+  const { owners } = painter
+  // Collected first, applied after: a line drawn during the scan would seed the next one.
+  const behind: number[] = []
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const at = y * w + x
+      const owner = owners[at] as number
+      if (owner < 0) continue
+      const touchesInFront =
+        (x > 0 && (owners[at - 1] as number) > owner) ||
+        (x < w - 1 && (owners[at + 1] as number) > owner) ||
+        (y > 0 && (owners[at - w] as number) > owner) ||
+        (y < h - 1 && (owners[at + w] as number) > owner)
+      if (touchesInFront) behind.push(at)
+    }
+  }
+  for (const at of behind) data[at] = index
 }
 
 /** One dark ring on the empty pixels that touch ink. A knob, not a constant. portable. */

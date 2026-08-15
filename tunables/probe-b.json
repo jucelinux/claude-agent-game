@@ -1,0 +1,33 @@
+{
+  "canvas": { "w": 48, "h": 48, "originX": 24, "originY": 26 },
+  "tones": { "perMaterial": 4 },
+  "frames": { "walk": 8 },
+  "light": { "x": -0.6, "y": -0.8, "curve": 1.8 },
+  "outline": { "enabled": true, "material": "ink", "inner": true },
+  "body": { "scale": 1 },
+  "gait": { "swing": 0.09, "lift": 1.5 },
+  "texture": { "speckle": 0 },
+  "playback": { "msPerFrame": 75, "scale": 4, "history": 3 },
+
+  "_anchors": {
+    "canvas.w": "48 = the size the arthropod grammar is authored at, and the Chrono-tier cell. This sample is the target.",
+    "canvas.h": "square with canvas.w",
+    "canvas.originX": "canvas.w / 2",
+    "canvas.originY": "canvas.h * 0.54, placing the thorax so antennae and feet both clear the frame at scale 1",
+    "tones.perMaterial": "4, the opening conviction of BACKLOG round 1. Value separation, not tone count, is what this idiom bets on.",
+    "frames.walk": "8, twice the control: two frames per named phase, which is what buys the anticipation the Chrono bar is set on. 5 was tried first and was wrong - with phases at 0, 1/4, 1/2 and 3/4, a 5-frame cycle shows exactly one of the four key poses and interpolates past the rest.",
+    "light.x": "unit vector from the upper left, held identical across all four probe samples",
+    "light.curve": "1.8. Measured by looking: at 1.0 the lower-right half of the body was a single dark mass with the legs lost inside it.",
+    "light.y": "the y half of light.x's unit vector",
+    "outline.enabled": "on: selective darkening is the Chrono-tier reading of an outline",
+    "outline.inner": "on: value separation is the whole claim of this idiom, and the line between two touching parts is where value separation is decided",
+    "outline.material": "the ink ramp's darkest tone",
+    "body.scale": "1 = identity; the grammar is authored at this size",
+    "gait.swing": "0.09 turn, from the 7 px femur: about 4 px of foot travel, the stride 48 px can carry",
+    "gait.lift": "1.5 px = thorax height (2 * ry = 10) / 6.7, one eighth of the body at this scale",
+    "texture.speckle": "0: the target idiom spends its budget on value separation, not on noise",
+    "playback.msPerFrame": "75 ms. 8 frames x 75 = the shared 600 ms cycle.",
+    "playback.scale": "4, because 48 x 4 = 192 px on screen, the shared cell size",
+    "playback.history": "3 older generations kept beside the current one on the live page"
+  }
+}

@@ -94,9 +94,14 @@ export type Params = {
   readonly canvas: { readonly w: number; readonly h: number; readonly originX: number; readonly originY: number }
   readonly tones: { readonly perMaterial: number }
   readonly frames: { readonly walk: number }
-  /** Direction the light comes **from**, in canvas space (y grows down). Unit vector. */
-  readonly light: { readonly x: number; readonly y: number }
-  readonly outline: { readonly enabled: boolean; readonly material: string }
+  /**
+   * Direction the light comes **from**, in canvas space (y grows down), and the curve that
+   * maps brightness onto the ramp. `curve` of 1 is linear, which is the physical answer and
+   * the wrong one: it spends half the sprite on the shadow side, and the shadow side is
+   * where the silhouette goes to die. Above 1 the dark end compresses into a rim.
+   */
+  readonly light: { readonly x: number; readonly y: number; readonly curve: number }
+  readonly outline: { readonly enabled: boolean; readonly material: string; readonly inner: boolean }
   readonly body: { readonly scale: number }
   /** Amplitudes applied to the grammar's normalized track keys. */
   readonly gait: { readonly swing: number; readonly lift: number }

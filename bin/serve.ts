@@ -27,7 +27,8 @@ type Payload = { scale: number; msPerFrame: number; cells: Cell[] }
 const argv = process.argv.slice(2)
 const portFlag = argv.indexOf('--port')
 const port = portFlag >= 0 ? Number(argv[portFlag + 1]) : 5173
-const forwarded = argv.filter((_, i) => i !== portFlag && i !== portFlag + 1)
+const noKeep = argv.includes('--no-keep')
+const forwarded = argv.filter((a, i) => i !== portFlag && i !== portFlag + 1 && a !== '--no-keep')
 
 const params = loadParams('default')
 const HISTORY = params.playback.history
@@ -108,6 +109,16 @@ function onChange(): void {
   pending = setTimeout(() => {
     pending = null
     if (!refresh()) return
+    // The moment the output changes is exactly the moment worth keeping — the live page
+    // already computed it, and a generation nobody kept cannot be compared to later.
+    // Except under test: a suite that writes to the history makes the history a rumour.
+    if (!noKeep) {
+      try {
+        execFileSync(process.execPath, ['bin/keep.ts', ...forwarded, '--note', 'live'], { encoding: 'utf8' })
+      } catch (error) {
+        process.stderr.write(`could not keep this generation: ${String(error).split('\n')[0]}\n`)
+      }
+    }
     process.stdout.write(`swapped  ${current.cells.map((c) => c['label']).join('  ')}\n`)
     for (const res of listeners) res.write('data: change\n\n')
   }, 80)

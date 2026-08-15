@@ -22,6 +22,12 @@ export type ViewCell = {
   readonly palette: readonly RGB[]
   /** bench/selftest only — dropped from the payload in gate mode. */
   readonly label?: string
+  /** Integer, defaults to the page's. A 32 px cell at ×6 and a 64 px cell at ×3 arrive on
+   * screen the same size, which is the only way two resolutions compare as *idioms*. */
+  readonly scale?: number
+  /** Defaults to the page's. See the note on the runtime: a cell may own a **rate**, never
+   * a clock — a 4-frame walk and an 8-frame walk have to finish a cycle together. */
+  readonly msPerFrame?: number
 }
 
 export type ViewSpec = {
@@ -61,13 +67,28 @@ export function emit(spec: ViewSpec): string {
     }
     // In gate mode a label is a tell, and a tell is the end of the reading.
     if (!gate && cell.label !== undefined) payload['label'] = cell.label
+    if (cell.scale !== undefined) {
+      if (!Number.isInteger(cell.scale) || cell.scale < 1) throw new Error(`cell scale must be a positive integer, is ${cell.scale}`)
+      payload['scale'] = cell.scale
+    }
+    if (cell.msPerFrame !== undefined) {
+      if (!Number.isInteger(cell.msPerFrame) || cell.msPerFrame < 1) throw new Error(`cell msPerFrame must be a positive integer, is ${cell.msPerFrame}`)
+      payload['msPerFrame'] = cell.msPerFrame
+    }
     return payload
   })
 
   const data = {
     mode: spec.mode,
     scale: spec.scale,
-    // Timing is a property of the page, never of a cell: one tick, or nobody is comparable.
+    /**
+     * **One clock for the page; a cell may declare a rate against it.** The first version
+     * of this forbade a cell any timing at all, and that was too blunt: comparing a
+     * 4-frame walk with an 8-frame walk requires both to finish a cycle in the same wall
+     * time, or the sheet is also comparing walking speed. What must never come back is a
+     * cell owning a *timer* — one accumulator drives the page, and a cell's rate is a
+     * declared number read off it.
+     */
     msPerFrame: spec.msPerFrame,
     cells,
   }
@@ -129,7 +150,7 @@ function start(D) {
   var stage = document.getElementById('stage');
   var cells = [];
   var ms = D.msPerFrame;
-  var frame = 0, paused = false;
+  var elapsed = 0, paused = false;
 
   // Rebuilding the cells never touches the frame counter or the accumulator. That is the
   // whole trick of the live page: the loop does not restart, so a change is seen in motion.
@@ -140,9 +161,10 @@ function start(D) {
     var wrap = document.createElement('div');
     wrap.className = 'cell';
 
+    var scale = c.scale || D.scale;
     var view = document.createElement('canvas');
-    view.width = c.w * D.scale;
-    view.height = c.h * D.scale;
+    view.width = c.w * scale;
+    view.height = c.h * scale;
     var ctx = view.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
@@ -182,14 +204,14 @@ ${
     : ''
 }    stage.appendChild(wrap);
 
-    return { n: c.n, images: images, off: off, octx: octx, ctx: ctx, view: view${labels ? ', tag: tag, name: c.label' : ''} };
+    return { n: c.n, ms: c.msPerFrame || D.msPerFrame, images: images, off: off, octx: octx, ctx: ctx, view: view${labels ? ', tag: tag, name: c.label' : ''} };
   });
   }
 
-  function draw(frame) {
+  function draw(elapsed) {
     for (var i = 0; i < cells.length; i++) {
       var cell = cells[i];
-      var k = frame % cell.n;
+      var k = Math.floor(elapsed / cell.ms) % cell.n;
       cell.octx.putImageData(cell.images[k], 0, 0);
       cell.ctx.clearRect(0, 0, cell.view.width, cell.view.height);
       cell.ctx.drawImage(cell.off, 0, 0, cell.view.width, cell.view.height);
@@ -201,18 +223,13 @@ ${
 }    }
   }
 
-  // One accumulator, one frame counter, every cell. No cell owns a clock.
-  var last = null, acc = 0;
+  // One accumulator for the whole page. A cell reads its own frame off this one number.
+  var last = null;
   function tick(now) {
     if (last === null) last = now;
-    acc += now - last;
+    if (!paused) elapsed += now - last;
     last = now;
-    if (!paused) {
-      while (acc >= ms) { acc -= ms; frame++; }
-    } else {
-      acc = 0;
-    }
-    draw(frame);
+    draw(elapsed);
     requestAnimationFrame(tick);
   }
   build(D);
@@ -222,8 +239,8 @@ ${
     ? `
   document.addEventListener('keydown', function (e) {
     if (e.key === ' ') { paused = !paused; e.preventDefault(); }
-    else if (e.key === 'ArrowRight') { paused = true; frame++; draw(frame); }
-    else if (e.key === 'ArrowLeft') { paused = true; frame = frame > 0 ? frame - 1 : 0; draw(frame); }
+    else if (e.key === 'ArrowRight') { paused = true; elapsed += ms; draw(elapsed); }
+    else if (e.key === 'ArrowLeft') { paused = true; elapsed = elapsed > ms ? elapsed - ms : 0; draw(elapsed); }
   });
 `
     : ''

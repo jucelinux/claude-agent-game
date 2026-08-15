@@ -37,7 +37,8 @@ async function until(count: number, ms = 6000): Promise<{ cells: { label?: strin
 
 beforeAll(async () => {
   copyFileSync(`${ROOT}tunables/default.json`, PATH)
-  server = spawn(process.execPath, ['bin/serve.ts', '--tunables', NAME, '--port', '0'], { cwd: ROOT })
+  // --no-keep: the suite must not write generations into the kept history.
+  server = spawn(process.execPath, ['bin/serve.ts', '--tunables', NAME, '--port', '0', '--no-keep'], { cwd: ROOT })
   base = await new Promise<string>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('the server never announced a port')), 15000)
     server.stdout.on('data', (chunk: Buffer) => {
