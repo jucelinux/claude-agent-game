@@ -35,6 +35,7 @@ export function buildCells(specs: readonly RunSpec[]): PageData {
         '',
         'live — this is what the code renders right now, not a kept generation',
       ],
+      group: 'live · what the code renders right now',
     })),
   }
 }
@@ -55,6 +56,7 @@ export function toJson(data: PageData, mode: 'live'): string {
       scale: cell.scale,
       msPerFrame: cell.msPerFrame,
       summary: cell.summary,
+      group: cell.group,
     })),
   })
 }

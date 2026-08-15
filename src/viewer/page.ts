@@ -30,17 +30,23 @@ export type ViewCell = {
   readonly msPerFrame?: number
   /** What this generation was about. Derived from what changed, never narrated. */
   readonly summary?: readonly string[]
+  /**
+   * **A slide is a run, not a sprite.** Cells sharing a group land on the same slide, so
+   * one arrow press moves a whole run — the humanoid and every insect variation together —
+   * instead of stepping through them one at a time and comparing from memory.
+   */
+  readonly group?: string
 }
 
 /**
- * Black, at the human's request, 14/08. One thing to know about it: index 0 is transparent,
- * so the page's ground *is* the sprite's background, and the darkest ink tones here sit at
- * RGB 10–26. Against black they are nearly invisible, which quietly hides whatever happens
- * in the darkest step of a ramp. The self-test deliberately keeps a mid grey for exactly
- * that reason — a page whose ground can swallow a defect cannot be the page that proves
- * defects are visible.
+ * Mid grey. Black was tried at the human's request on 14/08 and reverted by him on 15/08
+ * once he had looked at it — the reason it does not work is worth keeping written down,
+ * because it applies to any dark ground anyone proposes later: **index 0 is transparent, so
+ * the page's ground is the sprite's background.** The darkest ink tones in these palettes
+ * sit at RGB 10–26; against black they are invisible, and what disappears with them is the
+ * outline — the exact thing the silhouette is judged on.
  */
-export const GROUND = '#000000'
+export const GROUND = '#6b6b6b'
 
 export type ViewSpec = {
   /**
@@ -103,6 +109,7 @@ export function emit(spec: ViewSpec): string {
       payload['msPerFrame'] = cell.msPerFrame
     }
     if (!gate && cell.summary !== undefined) payload['summary'] = cell.summary
+    if (!gate && cell.group !== undefined) payload['group'] = cell.group
     return payload
   })
 
@@ -151,7 +158,7 @@ ${notes.length > 0 ? `<div class="notes">${notes.map(escapeText).join('\n')}</di
 <div id="stage"></div>
 ${slides ? '<div id="nav"></div>\n<div id="caption"></div>' : ''}
 <script>
-${runtime({ controls: spec.mode === 'bench' || live, labels: !gate && !slides, swap: live, slides })}
+${runtime({ controls: spec.mode === 'bench' || live, labels: !gate, swap: live, slides })}
 ${live ? 'var page = start' : 'start'}(${escapeScript(JSON.stringify(data))});
 ${live ? BOOTSTRAP : ''}</script>
 `
@@ -168,7 +175,11 @@ function pull() {
   fetch('/frames.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) { page.swap(d); });
 }
 pull();
-new EventSource('/events').onmessage = function () { pull(); };
+new EventSource('/events').onmessage = function (e) {
+  // A frame change swaps under the running loop; only a change to the page itself is
+  // worth a reload, because a reload restarts the animation.
+  if (e.data === 'reload') { location.reload(); } else { pull(); }
+};
 `
 
 /**
@@ -194,7 +205,7 @@ function start(D) {
   var stage = document.getElementById('stage');
   var cells = [];
   var ms = D.msPerFrame;
-  var elapsed = 0, paused = false, slide = 0;
+  var elapsed = 0, paused = false, slide = 0, groups = [];
 
   // Rebuilding the cells never touches the frame counter or the accumulator. That is the
   // whole trick of the live page: the loop does not restart, so a change is seen in motion.
@@ -248,11 +259,19 @@ ${
     : ''
 }    stage.appendChild(wrap);
 
-    return { n: c.n, ms: c.msPerFrame || D.msPerFrame, images: images, off: off, octx: octx, ctx: ctx, view: view, wrap: wrap, name: ${labels || slides ? 'c.label' : 'null'}, summary: ${slides ? 'c.summary' : 'null'}${labels ? ', tag: tag' : ''} };
+    return { n: c.n, ms: c.msPerFrame || D.msPerFrame, images: images, off: off, octx: octx, ctx: ctx, view: view, wrap: wrap, group: ${slides ? "(c.group || '')" : "''"}, name: ${labels || slides ? 'c.label' : 'null'}, summary: ${slides ? 'c.summary' : 'null'}${labels ? ', tag: tag' : ''} };
   });
 ${
   slides
-    ? `  if (slide >= cells.length) slide = 0;
+    ? `  groups = [];
+  for (var g = 0; g < cells.length; g++) {
+    if (groups.length === 0 || groups[groups.length - 1].name !== cells[g].group) {
+      groups.push({ name: cells[g].group, items: [] });
+    }
+    groups[groups.length - 1].items.push(g);
+    cells[g].slide = groups.length - 1;
+  }
+  if (slide >= groups.length) slide = 0;
   show(slide);
 `
     : ''
@@ -260,16 +279,16 @@ ${
 ${
   slides
     ? `
-  // One at a time. The history is long and getting longer; a wall of cells is a wall.
+  // One run at a time. The history only grows; a wall of every generation is a wall.
   function show(i) {
-    if (cells.length === 0) return;
-    slide = ((i % cells.length) + cells.length) % cells.length;
-    for (var k = 0; k < cells.length; k++) cells[k].wrap.style.display = k === slide ? 'flex' : 'none';
+    if (groups.length === 0) return;
+    slide = ((i % groups.length) + groups.length) % groups.length;
+    for (var k = 0; k < cells.length; k++) cells[k].wrap.style.display = cells[k].slide === slide ? 'flex' : 'none';
     var nav = document.getElementById('nav');
     nav.textContent = '';
     var back = document.createElement('span'); back.textContent = '\\u2039';
     back.onclick = function () { show(slide - 1); };
-    var count = document.createElement('div'); count.textContent = (slide + 1) + ' / ' + cells.length;
+    var count = document.createElement('div'); count.textContent = (slide + 1) + ' / ' + groups.length;
     var next = document.createElement('span'); next.textContent = '\\u203a';
     next.onclick = function () { show(slide + 1); };
     nav.appendChild(back); nav.appendChild(count); nav.appendChild(next);
@@ -277,11 +296,14 @@ ${
     var caption = document.getElementById('caption');
     caption.textContent = '';
     var head = document.createElement('b');
-    head.textContent = cells[slide].name || '';
+    head.textContent = groups[slide].name || '';
     caption.appendChild(head);
-    var lines = cells[slide].summary || [];
-    for (var s = 0; s < lines.length; s++) {
-      caption.appendChild(document.createTextNode('\\n' + lines[s]));
+    var items = groups[slide].items;
+    for (var q = 0; q < items.length; q++) {
+      var cell = cells[items[q]];
+      var lines = cell.summary || [];
+      if (items.length > 1) caption.appendChild(document.createTextNode('\\n\\n' + (cell.name || '')));
+      for (var s = 0; s < lines.length; s++) caption.appendChild(document.createTextNode('\\n' + lines[s]));
     }
     draw(elapsed);
   }
@@ -290,7 +312,7 @@ ${
 }
   function draw(elapsed) {
     for (var i = 0; i < cells.length; i++) {
-${slides ? '      if (i !== slide) continue;\n' : ''}      var cell = cells[i];
+${slides ? '      if (cells[i].slide !== slide) continue;\n' : ''}      var cell = cells[i];
       var k = Math.floor(elapsed / cell.ms) % cell.n;
       cell.octx.putImageData(cell.images[k], 0, 0);
       cell.ctx.clearRect(0, 0, cell.view.width, cell.view.height);

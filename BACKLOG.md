@@ -156,7 +156,8 @@ Four commands, and the second is the loop.
 | `npm test` | the locks. Determinism, baseline, tunables, both channels' null cases, the animation family, the export contract, the live bench |
 | `node bin/bench.ts [run] [--set …]` | one bench turn in the terminal: contact sheet, 25% silhouette, counts, elapsed |
 | `node bin/run.ts <run.json>` | headless: state hash and metrics, no presentation layer |
-| `node bin/keep.ts <run.json> [--note …]` | keep a generation by hand. The live bench does it on every swap |
+| `node bin/keep.ts <run.json> [--topic …] [--note …]` | keep a generation by hand. The live bench does it on every swap |
+| `node bin/publish.ts` | the whole history as one static file → `dist/index.html`, deployable by dropping the folder |
 | `node bin/record.ts <out.json> [--set …]` | capture what you are looking at into a replayable run file |
 | `node bin/gate.ts <run.json>` | the gate sheet → `sheet/gate.html`. **The one page that is still a file**, and gitignored |
 

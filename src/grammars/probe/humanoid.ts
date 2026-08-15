@@ -94,7 +94,12 @@ export const probeD: Grammar = {
     { name: 'head', bone: 'head', material: 'skin', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 4.5, ry: 4.5 } },
     { name: 'mask', bone: 'head', material: 'cloth', shape: { kind: 'rect', x: -4.5, y: -4.5, w: 9, h: 4 } },
     { name: 'armNU', bone: 'armNU', material: 'cloth', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.2 } },
-    { name: 'armNL', bone: 'armNL', material: 'skin', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6, r: 1.8 } },
+    // Wrapped, not bare. He saw it as "a segment on the back in skin colour" hanging off the
+    // sash: on a side view the near forearm swings behind the torso, and bare skin back
+    // there reads as a stray body part. Skin now appears in exactly one place — the face
+    // below the mask — which is the only place a ninja shows any. portable: **a material
+    // that appears in two unrelated places is a material doing two jobs.**
+    { name: 'armNL', bone: 'armNL', material: 'cloth', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6, r: 1.8 } },
   ],
   gait: {
     name: 'walk',

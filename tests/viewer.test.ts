@@ -131,13 +131,25 @@ describe('viewer — the human channel', () => {
     expect(emit({ ...BASE, mode: 'bench', slides: true, cells: cellsFor() })).toContain('id="nav"')
   })
 
-  it('the ground is black, and the self-test keeps its grey on purpose', () => {
-    expect(emit({ ...BASE, mode: 'live', cells: [] })).toContain('background: #000000')
-    expect(emit({ ...BASE, mode: 'gate', cells: cellsFor() })).toContain('background: #000000')
-    // A black ground hides the darkest ink against transparency, which is exactly the
-    // failure the ring case exists to catch. The page that proves defects show cannot be
-    // the page whose ground swallows one.
+  it('the ground is a mid grey, on every page, for a reason worth keeping', () => {
+    // Black was tried and reverted by the human after looking. Index 0 is transparent, so
+    // the ground *is* the sprite's background: against black the darkest ink vanishes, and
+    // what vanishes with it is the outline — the thing a silhouette is judged on.
+    for (const mode of ['live', 'gate', 'bench'] as const) {
+      expect(emit({ ...BASE, mode, cells: mode === 'live' ? [] : cellsFor() })).toContain('background: #6b6b6b')
+    }
     expect(emit({ ...SELFTEST })).toContain('background: #6b6b6b')
+  })
+
+  it('a slide is a run: cells sharing a group land together', () => {
+    const one = { ...(cellsFor()[0] as ViewCell), group: 'the probe' }
+    const two = { ...(cellsFor()[0] as ViewCell), group: 'the probe' }
+    const three = { ...(cellsFor()[0] as ViewCell), group: 'round zero' }
+    const payload = payloadOf(emit({ ...BASE, mode: 'bench', slides: true, cells: [one, two, three] }))
+    expect(payload.cells.map((c) => c['group'])).toEqual(['the probe', 'the probe', 'round zero'])
+    // The gate never groups, because it never slides.
+    const gate = payloadOf(emit({ ...BASE, mode: 'gate', cells: [one] }))
+    expect(gate.cells.every((c) => !('group' in c))).toBe(true)
   })
 
   it('index 0 is transparent, so no cell carries a ground the others do not', () => {

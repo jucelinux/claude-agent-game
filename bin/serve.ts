@@ -22,8 +22,6 @@ import { watch } from 'node:fs'
 import { createServer } from 'node:http'
 import type { ServerResponse } from 'node:http'
 import { cellOf, list } from '../src/io/gallery.ts'
-import { emit } from '../src/viewer/page.ts'
-import { SELFTEST } from '../src/viewer/selftest.ts'
 
 type Cell = { label?: string; [key: string]: unknown }
 type Payload = { scale: number; msPerFrame: number; cells: Cell[] }
@@ -76,6 +74,7 @@ function payload(): string {
       scale: cell.scale,
       msPerFrame: cell.msPerFrame,
       summary: cell.summary,
+      group: cell.group,
     })),
   ]
   return JSON.stringify({ mode: 'live', scale: current.scale, msPerFrame: current.msPerFrame, cells })
@@ -83,15 +82,19 @@ function payload(): string {
 
 const listeners = new Set<ServerResponse>()
 
-const shell = emit({
-  mode: 'live',
-  scale: current.scale,
-  msPerFrame: current.msPerFrame,
-  cells: [],
-  title: 'claude-ink-2d',
-  notes: ['left and right arrows walk the history · space pauses · , and . step one frame'],
-})
-const selftest = emit(SELFTEST)
+/**
+ * The shell comes from a fresh process too, so **editing the viewer needs no restart**.
+ * When a change alters the shell the page is told to reload; when it only alters the
+ * frames the page swaps them under a running loop. The distinction matters: a reload
+ * restarts the animation, and judging motion from a standstill is what the live bench
+ * exists to avoid, so it must never happen for a change that did not need it.
+ */
+function buildShell(mode: 'live' | 'selftest'): string {
+  return execFileSync(process.execPath, ['bin/shell.ts', '--mode', mode], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 })
+}
+
+let shell = buildShell('live')
+let selftest = buildShell('selftest')
 
 const server = createServer((req, res) => {
   if (req.url === '/frames.json') {
@@ -123,7 +126,24 @@ function onChange(): void {
   if (pending !== null) clearTimeout(pending)
   pending = setTimeout(() => {
     pending = null
-    if (!refresh()) return
+    let reload = false
+    try {
+      const next = buildShell('live')
+      const nextSelftest = buildShell('selftest')
+      reload = next !== shell || nextSelftest !== selftest
+      shell = next
+      selftest = nextSelftest
+    } catch (error) {
+      process.stderr.write(`\n${String(error).split('\n').slice(0, 6).join('\n')}\n`)
+      return
+    }
+    const framesMoved = refresh()
+    if (reload) {
+      process.stdout.write('viewer changed — reloading the page\n')
+      for (const res of listeners) res.write('data: reload\n\n')
+      if (!framesMoved) return
+    }
+    if (!framesMoved) return
     // The moment the output changes is the moment worth keeping: the page has it, and a
     // generation nobody kept cannot be compared to later.
     try {

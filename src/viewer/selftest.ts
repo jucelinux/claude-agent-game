@@ -55,12 +55,8 @@ export const SELFTEST: ViewSpec = {
   scale: 8,
   msPerFrame: 150,
   title: 'claude-ink-2d · selftest',
-  // The one page that keeps a mid grey while everything else went black. Reason on GROUND:
-  // a ground that can swallow a dark defect cannot be the page that proves defects show.
-  ground: '#6b6b6b',
   notes: [
     'Null case for the viewer. Look once, and know what each failure would mean.',
-    'This page stays grey while the rest went black — a black ground would hide case 2.',
     '',
     '1  checkerboard — must be hard 1 px squares, blown up to crisp blocks. If it is soft or',
     '   grey-ish, smoothing is on, and smoothing makes my sprite look better than it is.',

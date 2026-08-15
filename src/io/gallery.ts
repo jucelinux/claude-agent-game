@@ -47,6 +47,13 @@ export type GalleryEntry = {
   readonly params: Readonly<Record<string, unknown>>
   /** What this generation was about: **derived** from what changed, never narrated. */
   readonly summary: readonly string[]
+  /**
+   * The run this generation belongs to. Entries sharing a topic are one slide, so a run is
+   * seen whole — the humanoid beside every insect variation — instead of one sprite at a
+   * time compared from memory. Defaults to the first line of the derived summary, which
+   * makes the title of an unlabelled run be *what changed in it*.
+   */
+  readonly topic: string
   readonly note?: string
 }
 
@@ -81,13 +88,21 @@ export function summarise(params: Record<string, unknown>, previous: GalleryEntr
   return lines.length === 0 ? ['no tunable moved — the change was in the grammar itself'] : lines
 }
 
-export function entryFrom(result: RunResult, n: number, date: string, note?: string): GalleryEntry {
+export function entryFrom(
+  result: RunResult,
+  n: number,
+  date: string,
+  note?: string,
+  topic?: string,
+): GalleryEntry {
   const { _anchors, ...params } = result.params as unknown as Record<string, unknown>
   void _anchors
   const previous = list().filter((e) => e.grammar === result.spec.grammar).pop()
+  const summary = summarise(params, previous)
   return {
     params,
-    summary: summarise(params, previous),
+    summary,
+    topic: topic ?? (summary[0] as string),
     n,
     date,
     grammar: result.spec.grammar,
@@ -138,7 +153,8 @@ export function cellOf(entry: GalleryEntry): ViewCell {
     h: entry.h,
     frames,
     palette: entry.palette,
-    label: `#${String(entry.n).padStart(4, '0')} · ${entry.grammar} · ${entry.date} · ${entry.hash}${entry.note === undefined ? '' : ` · ${entry.note}`}`,
+    label: `#${String(entry.n).padStart(4, '0')} · ${entry.grammar}${entry.note === undefined ? '' : ` · ${entry.note}`}`,
+    group: `${entry.date} · ${entry.topic ?? 'untitled run'}`,
     scale: entry.scale,
     msPerFrame: entry.msPerFrame,
     summary: [
