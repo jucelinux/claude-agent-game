@@ -91,6 +91,29 @@ _Fills from evidence. Every entry cites the artifact that produced it._
   **What raises the ceiling, then:** more budget than I expected to be allowed. That is a
   hypothesis with one observation, not a law — the next verdict can move it.
 
+- **[15/08 · run 7, his verdict on gallery #0017] I mistake the size of a change for its
+  visibility.** The depth round replaced the shading of every pixel of every part — a
+  distance-to-edge sweep became a real three-component lambert — and I wrote in advance that
+  the walk "WILL look different". His report: *"não sinto uma mudança visual"*. What he did
+  see was **detail and fluidity**, which is the occlusion half of the round and not the
+  lighting half. **The bias is not optimism about quality, it is treating engineering
+  magnitude as a proxy for perceptual magnitude** — and those are different quantities that
+  happen to share my sense of how much work something was. **portable, and the correction is
+  cheap:** the eye is the only instrument that reports visibility, so a change to *look*
+  gets predicted out loud before he sees it, and the prediction gets scored. This one scored
+  zero, and it is the second time §2a has caught me writing a verdict before anyone looked.
+
+- **[15/08 · run 7, gallery #0018–#0019] I carry a working sample's numbers into a
+  different problem and treat them as facts about the body.** Both new actions were
+  authored at the walk's `gait.swing` of 0.1, and both came back with a limb absent in
+  every frame — because 0.1 turn is a *walk's* range, and I had stopped reading it as a
+  knob at all. The tell is worth more than the fix: the number had an anchor, the anchor
+  was about the walk, and I still spent it on a jump without re-deriving it. **portable, and
+  it generalises past this project: a parameter that survives one round gets promoted to a
+  constant in my head unless something trips.** What tripped it was the absence lock, not
+  looking — the defect was invisible in the picture, because a limb that is not there
+  leaves no trace to see.
+
 The conviction it replaces — **deliberate emptiness**, large flat areas, flat first and
 accent after — stays recorded in `CLAUDE.md` §1 as a design choice made on day zero. It is
 now **contradicted at one point by one verdict**, which is exactly one point and one
@@ -118,6 +141,18 @@ _Every entry cites the artifact that demonstrated it; self-assessment does not c
   saw it before I did.** Far limbs were painted in a dark *material*; the light in the
   picture could not explain them. A fact about how I reach for shortcuts: **I encode meaning
   by switching vocabulary when the correct move is a step within one.** portable.
+
+- **[15/08 · run 7, gallery #0017 against #0015] Depth was never the ceiling; *simulating*
+  depth was — and I spent six runs improving the simulation.** Every hand-tuned number the
+  project has argued about on this axis — the far limb's ramp shift, the 0.85 foreshortening
+  found after 0.7 and 0.5 were wrong by eye, the seam rule keyed to paint order — was a
+  patch on one missing quantity. The human named the shape of the fix before I did, twice:
+  once as *"the far legs are darker in a way the light cannot explain"*, once as the whole
+  proposal for this round. **What raises the ceiling: computing the quantity the patches
+  were approximating.** What lowers it: another calibrated constant on the same axis, which
+  is what I would have produced. **portable** — the next project inherits the question
+  *"which hand-tuned family is standing in for one quantity nobody has computed?"*, not the
+  z-buffer.
 
 Two **hypotheses** recorded on 14/08, so they can be refuted rather than rewritten later.
 They are not §2b entries and must not be treated as such until a sample supports them:

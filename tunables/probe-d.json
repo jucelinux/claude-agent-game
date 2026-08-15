@@ -1,14 +1,43 @@
 {
-  "canvas": { "w": 48, "h": 48, "originX": 24, "originY": 24 },
-  "tones": { "perMaterial": 4 },
-  "frames": { "walk": 8 },
-  "light": { "x": -0.6, "y": -0.8, "curve": 1.8 },
-  "outline": { "enabled": true, "material": "ink", "inner": true, "rim": false },
-  "body": { "scale": 1 },
-  "gait": { "swing": 0.07, "lift": 2 },
-  "texture": { "speckle": 0 },
-  "playback": { "msPerFrame": 75, "scale": 4 },
-
+  "canvas": {
+    "w": 48,
+    "h": 48,
+    "originX": 24,
+    "originY": 24
+  },
+  "tones": {
+    "perMaterial": 4
+  },
+  "frames": {
+    "walk": 8
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "z": -0.35,
+    "curve": 1.8
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.07,
+    "lift": 2,
+    "depth": 6
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "playback": {
+    "msPerFrame": 75,
+    "scale": 4
+  },
   "_anchors": {
     "canvas.w": "48, the same canvas as the target sample. This sample is the declared overshoot, and it changes subject and idiom - it must not also change size, or the failure could be blamed on resolution.",
     "canvas.h": "square with canvas.w",
@@ -28,6 +57,8 @@
     "gait.lift": "2 px = torso height (2 * ry = 16) / 8, the same eighth-of-the-body rule as the arthropod",
     "texture.speckle": "0: a drawn-line idiom that also speckles is two idioms",
     "playback.msPerFrame": "75 ms. 8 frames x 75 = the shared 600 ms cycle.",
-    "playback.scale": "4, because 48 x 4 = 192 px on screen, the shared cell size"
+    "playback.scale": "4, because 48 x 4 = 192 px on screen, the shared cell size",
+    "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",
+    "gait.depth": "canvas.w / 8 = 6 px. Backfilled with the depth solver; no track in this sample uses the z channel, so it is inert here. It is the body's half-width rather than 0 so that it already means something the day a depth track is added."
   }
 }

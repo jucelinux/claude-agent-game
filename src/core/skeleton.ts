@@ -2,14 +2,14 @@ import type { Skeleton } from './types.ts'
 
 export const TURN = Math.PI * 2
 
-/** A rigid transform: position, angle in turns, uniform scale. */
-export type Xform = { readonly x: number; readonly y: number; readonly a: number; readonly s: number }
+/** A rigid transform: position, depth, angle in turns, uniform scale. */
+export type Xform = { readonly x: number; readonly y: number; readonly z: number; readonly a: number; readonly s: number }
 
 /** Per-bone deltas applied on top of the rest pose. */
-export type PoseDelta = { angle: number; x: number; y: number; scale: number }
+export type PoseDelta = { angle: number; x: number; y: number; z: number; scale: number }
 export type Pose = ReadonlyMap<string, PoseDelta>
 
-export const ZERO_DELTA: PoseDelta = { angle: 0, x: 0, y: 0, scale: 0 }
+export const ZERO_DELTA: PoseDelta = { angle: 0, x: 0, y: 0, z: 0, scale: 0 }
 
 /**
  * Resolve every bone to canvas space. Iteration follows declaration order, which is why
@@ -32,6 +32,10 @@ export function solve(skeleton: Skeleton, pose: Pose, root: Xform): Map<string, 
     world.set(bone.name, {
       x: parent.x + parent.s * (cos * lx - sin * ly),
       y: parent.y + parent.s * (sin * lx + cos * ly),
+      // Depth accumulates but never rotates: this is 2.5D, and the angle lives in the
+      // screen plane only. A limb swings across the picture and travels in depth as two
+      // independent facts, which is exactly how a punch is authored.
+      z: parent.z + parent.s * ((bone.z ?? 0) + d.z),
       a: parent.a + bone.angle + d.angle,
       // A scale delta of -1 collapses the bone and everything hanging off it to nothing.
       s: parent.s * Math.max(0, 1 + d.scale),

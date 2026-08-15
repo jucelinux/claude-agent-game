@@ -1,14 +1,43 @@
 {
-  "canvas": { "w": 32, "h": 32, "originX": 16, "originY": 18 },
-  "tones": { "perMaterial": 3 },
-  "frames": { "walk": 4 },
-  "light": { "x": -0.6, "y": -0.8, "curve": 1.9 },
-  "outline": { "enabled": true, "material": "ink", "inner": true, "rim": false },
-  "body": { "scale": 0.7 },
-  "gait": { "swing": 0.07, "lift": 1.2 },
-  "texture": { "speckle": 0 },
-  "playback": { "msPerFrame": 150, "scale": 6 },
-
+  "canvas": {
+    "w": 32,
+    "h": 32,
+    "originX": 16,
+    "originY": 18
+  },
+  "tones": {
+    "perMaterial": 3
+  },
+  "frames": {
+    "walk": 4
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "z": -0.35,
+    "curve": 1.9
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 0.7
+  },
+  "gait": {
+    "swing": 0.07,
+    "lift": 1.2,
+    "depth": 4
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "playback": {
+    "msPerFrame": 150,
+    "scale": 6
+  },
   "_anchors": {
     "canvas.w": "32 = the Stardew cell. This sample is the control: if the control does not clear, the round already answered everything.",
     "canvas.h": "square with canvas.w",
@@ -28,6 +57,8 @@
     "gait.lift": "1.2 px = thorax height (2 * ry = 10) / 8, the same eighth-of-the-body rule used in every sample",
     "texture.speckle": "0: the control idiom spends nothing on texture",
     "playback.msPerFrame": "150 ms. 4 frames x 150 = a 600 ms cycle, and all four probe samples complete a cycle in 600 ms so the sheet never compares walking speed. 600 was chosen over 500 because it divides into whole milliseconds for 4, 8 and 12 frames, and the export contract has no room for a fractional frame duration.",
-    "playback.scale": "6, because 32 x 6 = 192 px on screen - the same cell size as every other sample, which is the only way two resolutions compare as idioms"
+    "playback.scale": "6, because 32 x 6 = 192 px on screen - the same cell size as every other sample, which is the only way two resolutions compare as idioms",
+    "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",
+    "gait.depth": "canvas.w / 8 = 4 px. Backfilled with the depth solver; no track in this sample uses the z channel, so it is inert here. It is the body's half-width rather than 0 so that it already means something the day a depth track is added."
   }
 }

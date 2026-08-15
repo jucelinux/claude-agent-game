@@ -7,6 +7,7 @@ import { mantis } from './run3/mantis.ts'
 import { scorpion } from './run3/scorpion.ts'
 import { gorilla } from './run5/gorilla.ts'
 import { gorillaMech } from './run6/mech.ts'
+import { gorillaAttack, gorillaJump } from './run7/actions.ts'
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   fixture,
@@ -20,6 +21,8 @@ export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   scorpion,
   gorilla,
   'gorilla-mech': gorillaMech,
+  'gorilla-jump': gorillaJump,
+  'gorilla-attack': gorillaAttack,
 }
 
 /**
@@ -39,6 +42,8 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: 'scorpion', tunables: 'scorpion' },
   { grammar: 'gorilla', tunables: 'gorilla' },
   { grammar: 'gorilla-mech', tunables: 'gorilla-mech' },
+  { grammar: 'gorilla-jump', tunables: 'gorilla-jump' },
+  { grammar: 'gorilla-attack', tunables: 'gorilla-attack' },
 ]
 
 export function grammarByName(name: string): Grammar {

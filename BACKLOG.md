@@ -10,10 +10,10 @@ open (`TASTE-LOOP.md` §3b).
 
 ## Gate — **the date is the gate**, as of 15/08 · one reading, 21/08
 
-No reading taken yet. The reading is now **my position among five fixed shipped loops**,
-and a strike is a reading that does not improve on the previous one (`CLAUDE.md` gate
-block). First reading: when a sample of the winning idiom has its locks green, **or 21/08,
-whichever comes first**.
+The reading is **my position among five fixed shipped loops**, and a run improves or it
+does not (`CLAUDE.md` gate block). **Two readings taken so far**, both against run 2, both
+negative — the table below. _(Corrected 15/08 at a cycle open: this block said "no reading
+taken yet" directly above a table of two. §3b.4.)_
 
 | date | reading | improved? | strike? |
 |---|---|---|---|
@@ -25,9 +25,15 @@ still say it — run 3 and run 4 did not beat run 2 — but they inform directio
 kill. **The kill is 21/08**: one honest verdict on the ceiling reached and on whether the
 artifact is worth publishing. Six days.
 
-Two more readings without improvement end it. Where the plateau sits decides which end:
-at run 2's level or below, the grammar does not reach the bar; above it, the ceiling was
-reached and the project is finished.
+_Corrected 15/08 at a cycle open (§3b.4): a sentence here still read "two more readings
+without improvement end it", which is the retired counter wearing prose. Nothing but the
+date ends this. Where the plateau sits still decides **which verdict** the date gets — at
+run 2's level or below, the grammar does not reach the bar; above it, the ceiling was
+reached — but it no longer decides **when**._
+
+**Unread, awaiting his eye:** run 5 (the gorilla walk) drew a verdict on weight but never a
+gate reading; run 6 (the transformation) was dropped by him on 15/08 in favour of run 7 and
+is kept in the history unread.
 
 Full definition of the reading in `CLAUDE.md`'s gate block. Update **in the same turn** a
 reading arrives.
@@ -36,21 +42,29 @@ reading arrives.
 
 ## Next round
 
-**Exactly one.**
+**Exactly one.** _(Rewritten 15/08 at a cycle open: this section still named the
+silhouette/value pair as "next", three runs after it was settled by being built into every
+sample since — `outline.rim` is on in every shipped tunables file. §3b.4, and it is the
+"backlog describes a dead product" failure in §10 caught one step early.)_
 
-- **Axis:** silhouette and value separation. **Open since 15/08, verdict pending.**
-- **The question:** the idiom he singled out has no outer line and its edge dissolves into
-  the ground — measured, not felt: a boundary pixel 0.058 away in luminance. Two materially
-  different answers, both rendered, both kept:
-  - **LINE** (`runs/probe-c-line.run.json`, gallery #0007) — a dark ring outside the shape.
-    Uniform by construction: min and mean edge contrast are both 0.381.
-  - **VALUE** (`runs/probe-c-value.run.json`, gallery #0008) — no line at all; the sprite's
-    own edge pixels go to the ends of their ramps, lightest into the light and darkest away
-    from it. Min 0.131, mean 0.380 — it swings, which is the point.
-- **What closes it:** his verdict on the pair. Both already clear rungs 1–3.
-- **Assumption on the record:** the `ink` question was not answered, and I declared in
-  advance that silence means **(A)** — the name is aspiration, Chrono stays the target.
-  If that is wrong, this round changes shape.
+- **Axis:** **weight and impact outside a walk cycle**, on the body that already landed.
+- **The change underneath it:** depth is solved rather than authored (`DECISIONS.md`,
+  15/08). 2.5D — a z-buffer, no projection divide, so nothing moves on screen and only
+  occlusion changes. **Locked in `tests/depth.test.ts`, seven assertions, both null cases.**
+- **The three samples, and the third one is the control:**
+  - **JUMP** (`runs/gorilla-jump.run.json`, gallery #0018) — six phases on a 12-frame grid,
+    three frames of crouch and one from contact to the bottom of the absorb.
+  - **ATTACK** (`runs/gorilla-attack.run.json`, gallery #0019) — five phases; the near fist
+    travels from behind the torso to clear in front of it inside one cycle, which is the
+    thing no paint order could express.
+  - **WALK** (`runs/gorilla.run.json`, gallery #0017) — **run 5's gait, unchanged**,
+    re-rendered through the solver. One variable. Without it, a bad reading cannot be
+    attributed to the engine rather than to the two new actions.
+- **What closes it:** his verdict, below. All three clear rungs 1–3.
+- **Open, named rather than fixed:** the light still lands from the upper left, so the
+  gorilla's face is the darkest region on a body that faces right. Pre-existing, unchanged
+  by this round, and it is a knob (`light.x`) rather than a defect — but it is the first
+  thing to try if the head reads badly.
 
 ---
 
@@ -112,8 +126,11 @@ reading arrives.
       translates every pixel exactly; the gait's four phases are named and ordered.
 - [x] **Absence lock** — pixel ownership per part, reported by `measure()` and asserted per
       grammar. Against absence, count; looking does not catch it.
-- [x] **Latency of one bench turn.** 90 ms wall, 9 ms of it render. Under the ~100 ms
-      reference — no work owed. Re-measure when the arthropod's part count lands.
+- [x] **Latency of one bench turn.** Re-measured 15/08 on the heaviest sample in the repo:
+      120 ms wall, 32 ms of it render, for 12 frames of 64×64. That is 10 ms over the
+      ~100 ms reference in absolute terms and roughly **three times faster per pixel** than
+      the 14/08 figure, which was 4 frames of 48×48. No work owed; re-measure if a sample
+      ever needs more than ~16 frames.
 - [x] **The human's channel.** A self-contained HTML page, no dependency, no network.
       **bench** (labels, `t`, pause, step) is mine; **gate** (no control, no label, no
       tooltip, nothing that names a cell) is his, and both are compiled from the same
@@ -147,6 +164,19 @@ reading arrives.
 - [ ] **Image cells** — his five reference loops decoded into the *same* blit path as mine,
       so the sheet never compares two renderers. Unbuilt: it cannot be null-cased without
       the files. Needed for the first gate reading.
+
+- [ ] 🔴 **THE GATE HAS NEVER FIRED, and `refs/` does not exist.** Found at the 15/08 cycle
+      open, and it outranks everything else in this file. `CLAUDE.md` defines the reading as
+      *six loops side by side, five of them from shipped games that he picks* — and those
+      five files have never been supplied, so the sheet the gate is defined against has
+      never been built. What the table above records as two readings were **his verdicts
+      comparing my run against my previous run**, which is a real signal about movement and
+      is not the gate: it measures me against myself, and the whole point of the reading is
+      that it measures me against published art.
+      **Consequence, stated flatly:** on 21/08 the project's only direction metric cannot
+      produce its verdict. Two things gate it and neither is mine to do first — the five
+      files, and then Image cells above (~1 session, and it cannot be null-cased before the
+      files exist). **Six days.** Raised to him 15/08.
 - [x] ~~The gate sheet builder — shuffle, mapping file I never read~~ → **dead with gate
       v1.** Reading v2 needs no blindness, so it needs no shuffle and no hidden mapping:
       the human may know exactly which loop is mine and the reading still works.
@@ -170,12 +200,12 @@ without both is a rumour.
 
 | what | value | command | date |
 |---|---|---|---|
-| one bench turn, wall clock | 90 ms | `node bin/bench.ts` | 14/08 |
-| render only, 4 frames of 48×48 | 9 ms | `node bin/bench.ts` (the `elapsed` line) | 14/08 |
+| one bench turn, wall clock | 120 ms | `node bin/bench.ts runs/gorilla-attack.run.json` | 15/08 |
+| render only, 12 frames of 64×64 | 32 ms | `node bin/bench.ts runs/gorilla-attack.run.json` (the `elapsed` line) | 15/08 |
 | full cycle: record → replay → compare | 1.0 s | `node bin/record.ts /tmp/c.run.json && node bin/run.ts /tmp/c.run.json && npm test` | 14/08 |
-| fixture baseline hash | `8d3118679a7194d2` | `npm run baseline` | 14/08 |
-| min pair distance, shipped tunables | 0.109 | `node bin/run.ts runs/fixture.run.json` | 14/08 |
-| locks green | 45 | `npm test` | 14/08 |
+| fixture baseline hash | `a542197e4c49b27d` | `npm run baseline` | 15/08 |
+| min pair distance, shipped tunables | 0.106 | `node bin/run.ts runs/fixture.run.json` | 15/08 |
+| locks green | 60 | `npm test` | 15/08 |
 | gate page, tells found by grep | 0 | `node bin/gate.ts runs/probe-b.run.json && grep -cE "fixture\|label\|keydown\|button\|http\|seed" sheet/gate.html` | 15/08 |
 
 ## The harness, as of 14/08
@@ -210,8 +240,29 @@ Written for him, so no method vocabulary crosses into this section.
 
 - [x] ~~Check four things on the self-test page~~ → **all four confirmed by the human,
       14/08.** The viewer's null case now has the one link the headless locks cannot cover.
-- [ ] **Approve, change or reject the new gate reading.** Asked 14/08, and nothing takes a
-      reading until he answers.
+- [x] ~~**Approve, change or reject the new gate reading.**~~ → **Answered.** Adopted 14/08
+      as written below, then amended by him on 15/08: the end condition is the date, not a
+      strike count. Both are in `CLAUDE.md`'s gate block. _(Ticked 15/08 at a cycle open —
+      it had sat open in this file for a day after being settled twice. §3b.4.)_
+
+- [ ] 🔴 **The five reference loops — now the critical path, not a nicety.** Re-asked 15/08
+      with the finding above attached: `refs/` is empty, so the gate has never fired once.
+      · *Do:* drop five files in `refs/`. Any format that plays.
+      · *Time:* however long picking five good ones takes — but it is the only item in this
+      project with a deadline attached to it now.
+      · *Answer changes:* whether 21/08 has a reading at all. Without the files there is no
+      sheet, and without a sheet the date arrives with nothing but my own opinion of my own
+      work, which is the "decorated, not steered" state the method names as the failure.
+
+- [ ] **Run 7 — the jump, the attack, and the walk as control.** Asked 15/08.
+      · *Open:* `node bin/serve.ts`. Three loops, top row, labelled jump / attack / walk.
+      · *Do:* say which of the three you believe least, and one sentence on why.
+      · *Time:* two minutes.
+      · *A pass looks like:* the jump feels heavy landing, and the attack feels like it hits
+      something rather than waving.
+      · *Answer changes:* the walk is run 5's animation with nothing altered, so if the walk
+      looks worse than you remember, the new engine did that and I roll it back. If the walk
+      holds and an action is weak, the action is weak and the engine stays.
       · *Read:* the proposal below.
       · *Do:* say yes, or change a number, or name a different reading.
       · *Time:* five minutes, and it is the highest-value five minutes in the project.

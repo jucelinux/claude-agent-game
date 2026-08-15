@@ -6,20 +6,36 @@ import type { Rng } from './rng.ts'
 export const OWNER_EMPTY = -1
 export const OWNER_OUTLINE = -2
 
-/** The buffer plus, per pixel, **who put it there**. Ownership is what makes absence countable. */
+/**
+ * The buffer plus, per pixel, **who put it there** and **how far away it is**.
+ *
+ * Ownership is what makes absence countable. Depth is what makes order computable: before
+ * it, "in front" was the part's index in the parts list, which is a constant, while the
+ * pose it was describing is a function of `t`. Three defect families came out of that one
+ * mismatch — the far limb read as a lighting error, two parts of one material fused into a
+ * mass, and foreshortening had to be guessed. The fix is one array. portable.
+ */
 export type Painter = {
   readonly buf: IndexedBuffer
   readonly owners: Int16Array
+  /** Depth of the winning surface per pixel; `+Infinity` where nothing has been painted. */
+  readonly depth: Float32Array
 }
 
 export function createPainter(w: number, h: number): Painter {
   return {
     buf: { w, h, data: new Uint8Array(w * h) },
     owners: new Int16Array(w * h).fill(OWNER_EMPTY),
+    depth: new Float32Array(w * h).fill(Infinity),
   }
 }
 
-type Local = { readonly inside: boolean; readonly nx: number; readonly ny: number }
+/**
+ * A hit, in the shape's own space. `nz` completes the normal — the shading stops being a
+ * distance-to-edge trick and becomes a real dot product — and `dz` is how far the surface
+ * sits from the bone's plane, negative toward the viewer.
+ */
+type Local = { readonly inside: boolean; readonly nx: number; readonly ny: number; readonly nz: number; readonly dz: number }
 
 /**
  * Paint one part. The shape stays in bone space and the **pixel** is transformed into it,
@@ -30,7 +46,7 @@ export function paintPart(
   shape: Shape,
   xf: Xform,
   ramp: readonly number[],
-  light: { readonly x: number; readonly y: number; readonly curve: number },
+  light: { readonly x: number; readonly y: number; readonly z: number; readonly curve: number },
   partId: number,
   rng: Rng | null,
   speckle: number,
@@ -44,11 +60,18 @@ export function paintPart(
   const sin = Math.sin(a)
   const inv = xf.s === 0 ? 0 : 1 / xf.s
 
-  // Light, rotated into bone space: the shading test then never leaves local space.
-  const lx = cos * light.x + sin * light.y
-  const ly = -sin * light.x + cos * light.y
+  // Light, normalized here rather than in the data: the tunables then carry a *direction*,
+  // which is a thing with an anchor, instead of a unit vector, which is a thing with
+  // arithmetic in it (`HARNESS.md` §2.7).
+  const lm = Math.hypot(light.x, light.y, light.z) || 1
+  // Rotated into bone space — the x/y half only. Depth does not rotate, because the bone
+  // angle lives in the screen plane; that is what 2.5D means here.
+  const lx = (cos * light.x + sin * light.y) / lm
+  const ly = (-sin * light.x + cos * light.y) / lm
+  const lz = light.z / lm
 
   const { w: cw, h: ch, data } = painter.buf
+  const { depth } = painter
   const [bx0, by0, bx1, by1] = localBounds(shape)
 
   // World AABB from the four transformed corners of the local bounds.
@@ -85,25 +108,36 @@ export function paintPart(
       const hit = sample(shape, px, py)
       if (!hit.inside) continue
 
+      const at = y * cw + x
+      // **The depth test, and the reason this file changed.** `<=` rather than `<` is
+      // deliberate: with every bone left on one plane, nearest-wins degenerates exactly
+      // into paint order — which is the behaviour being replaced, and therefore the null
+      // case that proves the solver is what is doing the work (`HARNESS.md` §5).
+      const z = xf.z + xf.s * hit.dz
+      if (z > (depth[at] as number)) continue
+
       // Brightness: outward normal against the direction the light comes from, bent by the
       // ramp curve before it is quantised. A linear map is physics; a ramp is a decision.
-      const dot = hit.nx * lx + hit.ny * ly
+      // The normal has three components now, so this is a real lambert term instead of the
+      // distance-to-edge sweep it used to be — and the cost lands on `light.z`, which
+      // decides how much ramp a body spends on merely facing the viewer.
+      const dot = hit.nx * lx + hit.ny * ly + hit.nz * lz
       const u = (dot + 1) / 2
       let level = Math.floor((light.curve === 1 ? u : Math.pow(u, 1 / light.curve)) * levels)
       if (level >= levels) level = levels - 1
       if (level < 0) level = 0
       if (rng !== null && speckle > 0 && rng() < speckle && level > 0) level -= 1
-      // Depth, applied after the shading and before the clamp: the part keeps its form and
-      // only moves along its own ramp.
+      // The cheat, applied after the shading and before the clamp: the part keeps its form
+      // and only moves along its own ramp.
       if (shift !== 0) {
         level += shift
         if (level >= levels) level = levels - 1
         if (level < 0) level = 0
       }
 
-      const at = y * cw + x
       data[at] = ramp[level] as number
       painter.owners[at] = partId
+      depth[at] = z
     }
   }
 }
@@ -118,26 +152,42 @@ export function paintPart(
  * occurrence is where the method says stop patching and generalise (`TASTE-LOOP.md` §3.8),
  * and three hand-placed seam parts became this.
  *
- * The pixel that darkens is the one **behind** — lower paint order — so the part in front
- * keeps its whole shape and the one behind recedes. That is depth, and it is free.
+ * **The rule's intent has not changed; its predicate has become true.** It always said "the
+ * pixel that darkens is the one *behind*", and it always tested paint order, because paint
+ * order was the only thing that knew. Now depth knows, so the rule asks it. That matters
+ * beyond tidiness: paint order is fixed for the whole cycle while the pose is a function of
+ * `t`, so a limb swinging in front of a mass it was declared behind used to get the seam
+ * drawn on the wrong side of itself. Nothing shipped had a pose extreme enough to show it,
+ * which is the most dangerous kind of latent defect — the one whose absence from the output
+ * is luck rather than correctness.
  *
- * portable, and it is the round's first real grammar rule.
+ * There is deliberately **no depth threshold**. The seam condition stays "two different
+ * parts touch"; depth only decides which of the two recedes. A threshold would have been a
+ * knob with no anchor in the domain, and it would have fired along every curved part's own
+ * silhouette, where depth falls away steeply on one part alone.
+ *
+ * portable.
  */
 export function innerOutline(painter: Painter, index: number): void {
   const { w, h, data } = painter.buf
-  const { owners } = painter
+  const { owners, depth } = painter
   // Collected first, applied after: a line drawn during the scan would seed the next one.
   const behind: number[] = []
+  const inFront = (n: number, owner: number, z: number): boolean => {
+    const other = owners[n] as number
+    return other >= 0 && other !== owner && (depth[n] as number) < z
+  }
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const at = y * w + x
       const owner = owners[at] as number
       if (owner < 0) continue
+      const z = depth[at] as number
       const touchesInFront =
-        (x > 0 && (owners[at - 1] as number) > owner) ||
-        (x < w - 1 && (owners[at + 1] as number) > owner) ||
-        (y > 0 && (owners[at - w] as number) > owner) ||
-        (y < h - 1 && (owners[at + w] as number) > owner)
+        (x > 0 && inFront(at - 1, owner, z)) ||
+        (x < w - 1 && inFront(at + 1, owner, z)) ||
+        (y > 0 && inFront(at - w, owner, z)) ||
+        (y < h - 1 && inFront(at + w, owner, z))
       if (touchesInFront) behind.push(at)
     }
   }
@@ -227,15 +277,27 @@ function localBounds(shape: Shape): readonly [number, number, number, number] {
   }
 }
 
+/**
+ * Every branch is the solid the primitive was always the shadow of. The 2D hit test is
+ * unchanged in each case — what is new is the third coordinate that falls out of the test
+ * it already performed, which is why depth cost a line per shape and not a rewrite.
+ */
 function sample(shape: Shape, px: number, py: number): Local {
   switch (shape.kind) {
     case 'ellipse': {
+      // An ellipsoid. `rz` defaults to the smaller screen radius: a body authored without
+      // an opinion about its depth is round rather than a slab, and round is the safer
+      // default for a limb.
       const ux = (px - shape.cx) / shape.rx
       const uy = (py - shape.cy) / shape.ry
-      if (ux * ux + uy * uy > 1) return MISS
-      return normalize(ux / shape.rx, uy / shape.ry)
+      const d2 = ux * ux + uy * uy
+      if (d2 > 1) return MISS
+      const rz = shape.rz ?? Math.min(shape.rx, shape.ry)
+      const uz = -Math.sqrt(1 - d2)
+      return normalize(ux / shape.rx, uy / shape.ry, rz === 0 ? -1 : uz / rz, uz * rz)
     }
     case 'capsule': {
+      // Already a sphere swept along a segment; `r` was a depth radius all along.
       const ax = shape.x1 - shape.x0
       const ay = shape.y1 - shape.y0
       const len2 = ax * ax + ay * ay
@@ -243,21 +305,35 @@ function sample(shape: Shape, px: number, py: number): Local {
       u = u < 0 ? 0 : u > 1 ? 1 : u
       const dx = px - (shape.x0 + ax * u)
       const dy = py - (shape.y0 + ay * u)
-      if (dx * dx + dy * dy > shape.r * shape.r) return MISS
-      return normalize(dx, dy)
+      const d2 = dx * dx + dy * dy
+      if (d2 > shape.r * shape.r) return MISS
+      const dz = -Math.sqrt(shape.r * shape.r - d2)
+      return normalize(dx, dy, dz, dz)
     }
     case 'rect': {
+      // A **rounded** box, and the rounding is the point: a mathematically flat face takes
+      // one tone across its whole width, which is a panel with no bevel and reads as a
+      // sticker. The face stays flat in the middle — `m` is 0 at the centre, so the normal
+      // is straight at the viewer — and turns outward only as it approaches the border.
       if (px < shape.x || px > shape.x + shape.w || py < shape.y || py > shape.y + shape.h) return MISS
-      return normalize((px - (shape.x + shape.w / 2)) / shape.w, (py - (shape.y + shape.h / 2)) / shape.h)
+      const hw = shape.w / 2
+      const hh = shape.h / 2
+      const hd = (shape.d ?? Math.min(shape.w, shape.h)) / 2
+      const ux = hw === 0 ? 0 : (px - (shape.x + hw)) / hw
+      const uy = hh === 0 ? 0 : (py - (shape.y + hh)) / hh
+      const m = Math.max(Math.abs(ux), Math.abs(uy))
+      const dz = -hd * Math.sqrt(Math.max(0, 1 - m * m))
+      return normalize(ux * m, uy * m, hd === 0 ? -1 : dz / hd, dz)
     }
   }
 }
 
-const MISS: Local = { inside: false, nx: 0, ny: 0 }
+const MISS: Local = { inside: false, nx: 0, ny: 0, nz: 0, dz: 0 }
 
-function normalize(nx: number, ny: number): Local {
-  const m = Math.hypot(nx, ny)
-  // A pixel exactly on the centre has no normal; face it at the light's plane.
-  if (m === 0) return { inside: true, nx: 0, ny: -1 }
-  return { inside: true, nx: nx / m, ny: ny / m }
+function normalize(nx: number, ny: number, nz: number, dz: number): Local {
+  const m = Math.hypot(nx, ny, nz)
+  // A pixel with no gradient at all faces the viewer — which is what the centre of a solid
+  // does, and it needed a special case only while the normal was missing its third axis.
+  if (m === 0) return { inside: true, nx: 0, ny: 0, nz: -1, dz }
+  return { inside: true, nx: nx / m, ny: ny / m, nz: nz / m, dz }
 }

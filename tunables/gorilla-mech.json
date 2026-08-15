@@ -14,6 +14,7 @@
   "light": {
     "x": -0.6,
     "y": -0.8,
+    "z": -0.35,
     "curve": 1.25
   },
   "outline": {
@@ -27,7 +28,8 @@
   },
   "gait": {
     "swing": 0.1,
-    "lift": 2.6
+    "lift": 2.6,
+    "depth": 8
   },
   "texture": {
     "speckle": 0.18
@@ -55,6 +57,8 @@
     "gait.lift": "2.6 px: the chest travels further here than in the walk, because standing up out of a knuckle stance is a bigger move than taking a step",
     "texture.speckle": "0.18. Fur is the one surface in this project where per-pixel noise is the material rather than dirt - it is what a coat looks like without drawing a single hair.",
     "playback.msPerFrame": "110 ms. 16 x 110 = a 1760 ms cycle, and this is the first sample in the project that does NOT share the 600 ms walk cycle - the shared duration existed so walks could be compared, and this is not a walk.",
-    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size"
+    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size",
+    "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",
+    "gait.depth": "canvas.w / 8 = 8 px. Backfilled with the depth solver; no track in this sample uses the z channel, so it is inert here. It is the body's half-width rather than 0 so that it already means something the day a depth track is added."
   }
 }

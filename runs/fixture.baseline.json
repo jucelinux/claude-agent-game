@@ -1,12 +1,12 @@
 {
   "note": "Regenerate with the command below. A baseline without its command and date is a rumour.",
   "command": "npm run baseline",
-  "date": "2026-08-14",
+  "date": "2026-08-15",
   "spec": {
     "grammar": "fixture",
     "tunables": "default",
     "seed": 1,
     "overrides": {}
   },
-  "hash": "8d3118679a7194d2"
+  "hash": "a542197e4c49b27d"
 }

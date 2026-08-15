@@ -1,14 +1,43 @@
 {
-  "canvas": { "w": 48, "h": 48, "originX": 24, "originY": 22 },
-  "tones": { "perMaterial": 4 },
-  "frames": { "walk": 4 },
-  "light": { "x": -0.6, "y": -0.8, "curve": 1 },
-  "outline": { "enabled": true, "material": "ink", "inner": false, "rim": false },
-  "body": { "scale": 1 },
-  "gait": { "swing": 0.08, "lift": 1.5 },
-  "texture": { "speckle": 0 },
-  "playback": { "msPerFrame": 125, "scale": 4 },
-
+  "canvas": {
+    "w": 48,
+    "h": 48,
+    "originX": 24,
+    "originY": 22
+  },
+  "tones": {
+    "perMaterial": 4
+  },
+  "frames": {
+    "walk": 4
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "z": -0.35,
+    "curve": 1
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": false,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.08,
+    "lift": 1.5,
+    "depth": 6
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "playback": {
+    "msPerFrame": 125,
+    "scale": 4
+  },
   "_anchors": {
     "canvas.w": "48 = 3x the 16px cell of the Stardew idiom (BACKLOG round 1, control). Height comes out of the idiom, it is not an independent knob this round.",
     "canvas.h": "square with canvas.w",
@@ -28,6 +57,8 @@
     "gait.lift": "trunk height (2 * ry = 18px) / 12 = 1.5",
     "texture.speckle": "0 = the injected RNG is never called. Sample C (high-budget idiom) is where it turns on.",
     "playback.msPerFrame": "125 ms = 8 fps. frames.walk (4) at 8 fps is a 0.5 s cycle, which is the Stardew control's walk; the '~1 s' sample of CLAUDE.md section 1 is the clip, and it loops twice inside it. The core never reads this number - it is the page's tick, and the first number a timing round will move.",
-    "playback.scale": "4 = integer nearest-neighbour. 48 px at x4 is a 192 px cell: readable at arm's length, and no fractional scale to judge through."
+    "playback.scale": "4 = integer nearest-neighbour. 48 px at x4 is a 192 px cell: readable at arm's length, and no fractional scale to judge through.",
+    "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",
+    "gait.depth": "canvas.w / 8 = 6 px. Backfilled with the depth solver; no track in this sample uses the z channel, so it is inert here. It is the body's half-width rather than 0 so that it already means something the day a depth track is added."
   }
 }

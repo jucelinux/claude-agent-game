@@ -33,9 +33,37 @@ export type RunResult = {
   readonly metrics: Metrics
 }
 
+/**
+ * Every leaf the core reads, by dotted path. The tunables are JSON behind a cast, so the
+ * compiler has nothing to say about them: adding `light.z` to the renderer and forgetting
+ * it in one of twelve files produces `NaN`, and `NaN` paints a silent empty sprite rather
+ * than throwing. That is precisely the failure shape `HARNESS.md` §5 warns about — an
+ * instrument that flatters — so the check is here and it is loud.
+ */
+const REQUIRED: readonly string[] = [
+  'canvas.w', 'canvas.h', 'canvas.originX', 'canvas.originY',
+  'tones.perMaterial',
+  'frames.walk',
+  'light.x', 'light.y', 'light.z', 'light.curve',
+  'outline.enabled', 'outline.material', 'outline.inner', 'outline.rim',
+  'body.scale',
+  'gait.swing', 'gait.lift', 'gait.depth',
+  'texture.speckle',
+  'playback.msPerFrame', 'playback.scale',
+]
+
 export function loadParams(name: string): Params {
   const text = readFileSync(new URL(`tunables/${name}.json`, ROOT_URL), 'utf8')
-  return JSON.parse(text) as Params
+  const raw = JSON.parse(text) as Record<string, Record<string, unknown>>
+  const missing = REQUIRED.filter((path) => {
+    const [group, leaf] = path.split('.') as [string, string]
+    const value = raw[group]?.[leaf]
+    return value === undefined || (typeof value === 'number' && !Number.isFinite(value))
+  })
+  if (missing.length > 0) {
+    throw new Error(`tunables "${name}" is missing or has non-finite: ${missing.join(', ')}`)
+  }
+  return raw as unknown as Params
 }
 
 export function loadRun(path: string): RunSpec {

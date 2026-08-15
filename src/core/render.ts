@@ -10,6 +10,8 @@ export type Frame = {
   readonly buf: IndexedBuffer
   /** Part index per pixel, or OWNER_EMPTY / OWNER_OUTLINE. */
   readonly owners: Int16Array
+  /** Depth of the winning surface per pixel; `+Infinity` where nothing was painted. */
+  readonly depth: Float32Array
 }
 
 /**
@@ -21,6 +23,9 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
   const world = solve(grammar.skeleton, pose, {
     x: params.canvas.originX,
     y: params.canvas.originY,
+    // The root sits on the centre plane; a body's depth is authored per bone, relative to
+    // it, so the whole sprite can never drift toward or away from the viewer by accident.
+    z: 0,
     a: 0,
     s: params.body.scale,
   })
@@ -35,8 +40,11 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     if (ramp === undefined) {
       throw new Error(`part "${part.name}" wants material "${part.material}", absent from palette "${grammar.palette.name}"`)
     }
-    const xf = world.get(part.bone)
-    if (xf === undefined) throw new Error(`part "${part.name}" is bound to unknown bone "${part.bone}"`)
+    const bone = world.get(part.bone)
+    if (bone === undefined) throw new Error(`part "${part.name}" is bound to unknown bone "${part.bone}"`)
+    // The part's own depth rides on the bone's, scaled with it: a body that shrinks takes
+    // its browridge along instead of leaving it floating where the head used to be.
+    const xf = part.z === undefined ? bone : { ...bone, z: bone.z + bone.s * part.z }
     paintPart(painter, part.shape, xf, ramp.indices, params.light, i, rng, params.texture.speckle, part.shift ?? 0)
   }
 
@@ -64,7 +72,7 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     if (params.outline.enabled) outline(painter, ramp.indices[0] as number)
   }
 
-  return { t, buf: painter.buf, owners: painter.owners }
+  return { t, buf: painter.buf, owners: painter.owners, depth: painter.depth }
 }
 
 /** One walk cycle, `params.frames.walk` frames evenly spaced over t in [0, 1). */
