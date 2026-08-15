@@ -1,5 +1,5 @@
 import type { Grammar, IndexedBuffer, Params } from './types.ts'
-import { createPainter, innerOutline, outline, paintPart, rimEdge, OWNER_EMPTY } from './raster.ts'
+import { castShadow, createPainter, innerOutline, outline, paintPart, rimEdge, OWNER_EMPTY } from './raster.ts'
 import { solve } from './skeleton.ts'
 import { evaluate } from './gait.ts'
 import { mulberry32 } from './rng.ts'
@@ -47,6 +47,18 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     const xf = part.z === undefined ? bone : { ...bone, z: bone.z + bone.s * part.z }
     paintPart(painter, part.shape, xf, ramp.indices, params.light, i, rng, params.texture.speckle, part.shift ?? 0)
   }
+
+  // **Shadow, before every edge treatment.** It needs the finished depth buffer, so it
+  // cannot run inside the part loop; and it must run before the rim and the outline, because
+  // those own the silhouette and a shadow has no business overwriting an edge.
+  const rampAt = (index: number): { ramp: readonly number[]; level: number } | undefined => {
+    for (const ramp of grammar.palette.ramps) {
+      const level = ramp.indices.indexOf(index)
+      if (level >= 0) return { ramp: ramp.indices, level }
+    }
+    return undefined
+  }
+  castShadow(painter, rampAt, params.light, params.shadow.steps, params.shadow.bias, params.shadow.strength)
 
   if (params.outline.rim) {
     // Before the outer line, so a sample carrying both still ends up with the line outside.

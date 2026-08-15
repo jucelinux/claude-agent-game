@@ -2,6 +2,7 @@ import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { ROOT, loadParams } from '../src/io/load.ts'
 import { sprite, strip } from '../src/core/render.ts'
+import { OWNER_OUTLINE } from '../src/core/raster.ts'
 import type { Grammar, Params } from '../src/core/types.ts'
 
 /**
@@ -248,5 +249,96 @@ describe('the lobed primitive', () => {
       if (round.buf.data[at] !== bumpy.buf.data[at]) differing++
     }
     expect(differing).toBeGreaterThan(40)
+  })
+})
+
+/**
+ * **The shadow pass.** The second use of the depth buffer, and the first one that changes
+ * the picture — run 7 built the buffer, used it to decide paint order, and threw it away,
+ * which is why that round bought correctness and no visible change.
+ */
+describe('shadow', () => {
+  /** A caster in front, a receiver behind, and nothing else in the scene. */
+  const scene = (): Grammar => {
+    const g = twoDiscs(-9, 0)
+    return {
+      ...g,
+      parts: [
+        { name: 'A', bone: 'a', material: 'mass', shape: { kind: 'ellipse', cx: 0, cy: -7, rx: 4, ry: 4 } },
+        { name: 'B', bone: 'b', material: 'mass', shape: { kind: 'ellipse', cx: 0, cy: 2, rx: 10, ry: 10 } },
+      ],
+    }
+  }
+  const lit = (patch: Partial<Params> = {}): Params =>
+    bench({ shadow: { steps: 12, bias: 0.4, strength: 1 }, light: { x: 0, y: -1, z: -0.35, curve: 1 }, ...patch })
+
+  it('null case: strength 0 and steps 0 each leave the frame byte-identical', () => {
+    // The measured thing switched off (`HARNESS.md` §5). Two separate disables, because a
+    // pass guarded on one of them and not the other would still run half the time.
+    const none = sprite(scene(), lit({ shadow: { steps: 0, bias: 0.4, strength: 0 } }), 1, 0)
+    const noStrength = sprite(scene(), lit({ shadow: { steps: 12, bias: 0.4, strength: 0 } }), 1, 0)
+    const noSteps = sprite(scene(), lit({ shadow: { steps: 0, bias: 0.4, strength: 1 } }), 1, 0)
+    expect([...noStrength.buf.data]).toEqual([...none.buf.data])
+    expect([...noSteps.buf.data]).toEqual([...none.buf.data])
+
+    // And it is not vacuous: with the pass on, the same scene is not the same picture.
+    const shadowed = sprite(scene(), lit(), 1, 0)
+    expect([...shadowed.buf.data]).not.toEqual([...none.buf.data])
+  })
+
+  it('the shadow lands on the far side of the caster, and it moves when the lamp moves', () => {
+    // Calibrated in both directions. The lamp is directly above, so the disc in front must
+    // darken the receiver BELOW it and leave the receiver above it alone. Flip the lamp
+    // under the scene and the darkened band has to change rows.
+    const rowsDarkened = (p: Params): number[] => {
+      const off = sprite(scene(), { ...p, shadow: { ...p.shadow, strength: 0 } }, 1, 0)
+      const on = sprite(scene(), p, 1, 0)
+      const rows = new Set<number>()
+      for (let at = 0; at < on.buf.data.length; at++) {
+        if (on.buf.data[at] !== off.buf.data[at]) rows.add(Math.floor(at / on.buf.w))
+      }
+      return [...rows].sort((a, b) => a - b)
+    }
+    const fromAbove = rowsDarkened(lit())
+    const fromBelow = rowsDarkened(lit({ light: { x: 0, y: 1, z: -0.35, curve: 1 } }))
+    expect(fromAbove.length).toBeGreaterThan(0)
+    expect(fromBelow.length).toBeGreaterThan(0)
+    // The caster sits above the receiver's centre, so a lamp above throws the band lower
+    // than a lamp below does.
+    const mean = (rows: number[]): number => rows.reduce((a, b) => a + b, 0) / rows.length
+    expect(mean(fromAbove)).toBeGreaterThan(mean(fromBelow))
+  })
+
+  it('a lamp aimed straight at the viewer casts nothing', () => {
+    // There is no screen direction to march in. The guard exists so the pass does not
+    // divide by zero and silently paint the body its darkest tone.
+    const none = sprite(scene(), lit({ shadow: { steps: 12, bias: 0.4, strength: 0 } }), 1, 0)
+    const head = sprite(scene(), lit({ light: { x: 0, y: 0, z: -1, curve: 1 } }), 1, 0)
+    expect([...head.buf.data]).toEqual([...sprite(scene(), lit({ light: { x: 0, y: 0, z: -1, curve: 1 }, shadow: { steps: 0, bias: 0.4, strength: 0 } }), 1, 0).buf.data])
+    expect(none.buf.data.length).toBeGreaterThan(0)
+  })
+
+  it('a pixel already at the darkest tone does not wrap around to the lightest', () => {
+    // The clamp is the whole guard. Strength far past the ramp length must bottom out, and
+    // an off-by-one here would turn every shadow into a highlight.
+    const hard = sprite(scene(), lit({ shadow: { steps: 12, bias: 0.4, strength: 99 } }), 1, 0)
+    const ramp = scene().palette.ramps[0]!.indices
+    const darkest = ramp[0] as number
+    for (let at = 0; at < hard.buf.data.length; at++) {
+      if (hard.buf.data[at] === 0) continue
+      expect(ramp).toContain(hard.buf.data[at] as number)
+    }
+    expect([...hard.buf.data].some((v) => v === darkest)).toBe(true)
+  })
+
+  it('the shadow never repaints the outline ring', () => {
+    // It runs before the edge treatments on purpose: the ring owns the silhouette, and a
+    // shadow crossing it would put a hole in the one thing that holds the shape together.
+    const params = lit({ outline: { enabled: true, material: 'ink', inner: false, rim: false } })
+    const on = sprite(scene(), params, 1, 0)
+    const off = sprite(scene(), { ...params, shadow: { ...params.shadow, strength: 0 } }, 1, 0)
+    for (let at = 0; at < on.buf.data.length; at++) {
+      if (off.owners[at] === OWNER_OUTLINE) expect(on.buf.data[at]).toBe(off.buf.data[at])
+    }
   })
 })

@@ -223,7 +223,7 @@ without both is a rumour.
 | full cycle: record → replay → compare | 1.0 s | `node bin/record.ts /tmp/c.run.json && node bin/run.ts /tmp/c.run.json && npm test` | 14/08 |
 | fixture baseline hash | `a542197e4c49b27d` | `npm run baseline` | 15/08 |
 | min pair distance, shipped tunables | 0.106 | `node bin/run.ts runs/fixture.run.json` | 15/08 |
-| locks green | 80 | `npm test` | 15/08 |
+| locks green | 85 | `npm test` | 15/08 |
 | gate page, tells found by grep | 0 | `node bin/gate.ts runs/probe-b.run.json && grep -cE "fixture\|label\|keydown\|button\|http\|seed" sheet/gate.html` | 15/08 |
 
 ## The harness, as of 14/08

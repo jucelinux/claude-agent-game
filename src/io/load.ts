@@ -49,6 +49,7 @@ const REQUIRED: readonly string[] = [
   'body.scale',
   'gait.swing', 'gait.lift', 'gait.depth',
   'texture.speckle',
+  'shadow.steps', 'shadow.bias', 'shadow.strength',
   'playback.msPerFrame', 'playback.scale',
 ]
 

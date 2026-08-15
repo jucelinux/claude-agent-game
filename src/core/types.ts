@@ -237,6 +237,30 @@ export type Params = {
   readonly gait: { readonly swing: number; readonly lift: number; readonly depth: number }
   /** Probability a painted pixel drops one tone. 0 disables the injected RNG entirely. */
   readonly texture: { readonly speckle: number }
+  /**
+   * **Shadow cast by the body onto itself**, marched through the depth buffer.
+   *
+   * The buffer was built in run 7 and then thrown away after it had decided paint order.
+   * This is the second use of it, and it is the one that changes the picture: an arm that
+   * darkens the chest behind it is the difference between shaded shapes and a drawing.
+   *
+   * There is deliberately **no ground shadow here**. A sprite has no ground; the game has
+   * one. That is the same rule the jump obeys — the sprite carries the pose and the game
+   * carries the world — and putting a floor inside a 64 px cell would bake a decision that
+   * belongs to whoever places the sprite.
+   *
+   * `strength` is in **ramp steps**, not in opacity, and the edge is hard. That follows the
+   * ink verdict of 15/08: regions with a boundary beat gradient. A soft falloff would add
+   * intermediate tones to the middle of a ramp that is already spent.
+   */
+  readonly shadow: {
+    /** How far light can be blocked, in screen pixels. 0 disables the pass. */
+    readonly steps: number
+    /** Depth tolerance, so a curved surface does not shadow itself along its own tangent. */
+    readonly bias: number
+    /** Ramp steps to drop where light is blocked. 0 disables the pass. */
+    readonly strength: number
+  }
   /** Read by the viewer, never by the core. Lives here so it is anchored like any number. */
   readonly playback: { readonly msPerFrame: number; readonly scale: number }
   readonly _anchors: Readonly<Record<string, string>>

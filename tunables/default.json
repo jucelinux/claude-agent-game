@@ -59,6 +59,14 @@
     "playback.msPerFrame": "125 ms = 8 fps. frames.walk (4) at 8 fps is a 0.5 s cycle, which is the Stardew control's walk; the '~1 s' sample of CLAUDE.md section 1 is the clip, and it loops twice inside it. The core never reads this number - it is the page's tick, and the first number a timing round will move.",
     "playback.scale": "4 = integer nearest-neighbour. 48 px at x4 is a 192 px cell: readable at arm's length, and no fractional scale to judge through.",
     "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",
-    "gait.depth": "canvas.w / 8 = 6 px. Backfilled with the depth solver; no track in this sample uses the z channel, so it is inert here. It is the body's half-width rather than 0 so that it already means something the day a depth track is added."
+    "gait.depth": "canvas.w / 8 = 6 px. Backfilled with the depth solver; no track in this sample uses the z channel, so it is inert here. It is the body's half-width rather than 0 so that it already means something the day a depth track is added.",
+    "shadow.steps": "8 px, and it is measured rather than chosen: a sweep at 6, 10, 16 and 24 returns the same shadow area from 6 onward. Past a few pixels the ray has left the body and there is nothing more to block it. 8 keeps a small margin over the saturation point.",
+    "shadow.bias": "0.4 px of depth. Measured both ways: at 0.75 the shadow covers 5.3% of the body and at 0.4 it covers 8.7%. The cost of the lower value is surface acne, which fragments the tone regions - the findings channel measured that cost at 230 regions to 239 on the tree, which is small enough to pay.",
+    "shadow.strength": "1 ramp step. On a five-tone ramp that is a fifth of the whole range, which is a readable value drop with a hard edge - the shape the ink verdict of 15/08 selected. 0 disables the pass."
+  },
+  "shadow": {
+    "steps": 8,
+    "bias": 0.4,
+    "strength": 1
   }
 }

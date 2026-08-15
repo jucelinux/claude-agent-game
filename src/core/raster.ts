@@ -206,6 +206,86 @@ export function innerOutline(painter: Painter, index: number): void {
 }
 
 /**
+ * **Shadow, marched through the depth buffer toward the lamp.**
+ *
+ * For each painted pixel, walk one screen pixel at a time in the direction the light comes
+ * from. The ray carries its own depth. If the buffer at any step holds a surface nearer to
+ * the viewer than the ray, something stands between this pixel and the lamp, and the pixel
+ * loses light.
+ *
+ * **This is the second use of the depth buffer and the first one that changes the picture.**
+ * Run 7 built it to decide who is in front, and then discarded it — which is why that round
+ * bought correctness and no visible change. The arm darkens the chest. The browridge darkens
+ * the eye. The crest darkens the skull.
+ *
+ * Three properties worth keeping:
+ *
+ * - **The step is one screen pixel**, not one unit of the light vector, so `steps` is a
+ *   distance in pixels and can be anchored to something in the body.
+ * - **The edge is hard.** A pixel is lit or it is not, and an unlit one drops whole ramp
+ *   steps. The ink verdict of 15/08 said regions with a boundary beat gradient; a soft
+ *   falloff would spend the middle of a ramp that is already spent.
+ * - **The bias is not optional.** Without it a curved surface marches along its own tangent
+ *   and shadows itself, which is acne rather than shading.
+ *
+ * portable.
+ */
+export function castShadow(
+  painter: Painter,
+  rampAt: (index: number) => { ramp: readonly number[]; level: number } | undefined,
+  light: { readonly x: number; readonly y: number; readonly z: number },
+  steps: number,
+  bias: number,
+  strength: number,
+): void {
+  if (steps <= 0 || strength <= 0) return
+  const flat = Math.hypot(light.x, light.y)
+  // A lamp aimed straight down the barrel casts nothing: every ray leaves the screen at
+  // once and there is no direction to march in.
+  if (flat === 0) return
+
+  const { w, h, data } = painter.buf
+  const { depth } = painter
+  // One screen pixel per step, with the depth change that goes with it. Dividing all three
+  // by the *screen* length rather than the vector length is what makes a step one pixel.
+  const sx = light.x / flat
+  const sy = light.y / flat
+  const sz = light.z / flat
+
+  const writes: [number, number][] = []
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const at = y * w + x
+      if (data[at] === 0) continue
+      const here = rampAt(data[at] as number)
+      if (here === undefined || here.level === 0) continue
+
+      let rx = x + 0.5
+      let ry = y + 0.5
+      let rz = depth[at] as number
+      let blocked = false
+      for (let s = 0; s < steps; s++) {
+        rx += sx
+        ry += sy
+        rz += sz
+        const ix = Math.floor(rx)
+        const iy = Math.floor(ry)
+        if (ix < 0 || iy < 0 || ix >= w || iy >= h) break
+        const d = depth[iy * w + ix] as number
+        if (d < rz - bias) {
+          blocked = true
+          break
+        }
+      }
+      if (!blocked) continue
+      const level = Math.max(0, here.level - strength)
+      writes.push([at, here.ramp[level] as number])
+    }
+  }
+  for (const [at, index] of writes) data[at] = index
+}
+
+/**
  * **The silhouette edge, done with value instead of line.**
  *
  * Every pixel of the sprite that touches the background is pushed to an end of *its own*

@@ -59,6 +59,14 @@
     "playback.msPerFrame": "50 ms. 12 x 50 = 600 ms, the project’s shared cycle. The attack is the one action fast enough to keep it.",
     "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size",
     "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",
-    "gait.depth": "16 px = the arm row separation (9) plus the chest’s own depth radius (9.5), rounded down. At this amplitude a key of +0.6 puts the near fist behind the chest’s front surface and a key of -0.5 puts it clear in front of every part on the body - the two ends of the travel the round exists to show."
+    "gait.depth": "16 px = the arm row separation (9) plus the chest’s own depth radius (9.5), rounded down. At this amplitude a key of +0.6 puts the near fist behind the chest’s front surface and a key of -0.5 puts it clear in front of every part on the body - the two ends of the travel the round exists to show.",
+    "shadow.steps": "8 px, and it is measured rather than chosen: a sweep at 6, 10, 16 and 24 returns the same shadow area from 6 onward. Past a few pixels the ray has left the body and there is nothing more to block it. 8 keeps a small margin over the saturation point.",
+    "shadow.bias": "0.4 px of depth. Measured both ways: at 0.75 the shadow covers 5.3% of the body and at 0.4 it covers 8.7%. The cost of the lower value is surface acne, which fragments the tone regions - the findings channel measured that cost at 230 regions to 239 on the tree, which is small enough to pay.",
+    "shadow.strength": "1 ramp step. On a five-tone ramp that is a fifth of the whole range, which is a readable value drop with a hard edge - the shape the ink verdict of 15/08 selected. 0 disables the pass."
+  },
+  "shadow": {
+    "steps": 8,
+    "bias": 0.4,
+    "strength": 1
   }
 }
