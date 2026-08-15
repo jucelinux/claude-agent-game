@@ -65,12 +65,15 @@ export function paintPart(
   // in run 6 and invisible there — one stray pixel per collapsed plate, among thirty-six
   // parts. It surfaced only when a *falling leaf* refused to reach zero on the way out, which
   // is the absence count catching the opposite of absence.
-  if (xf.s <= 0) return
+  if (xf.sx <= 0 || xf.sy <= 0) return
 
   const a = xf.a * TURN
   const cos = Math.cos(a)
   const sin = Math.sin(a)
-  const inv = xf.s === 0 ? 0 : 1 / xf.s
+  // Two inverses now: the squash is applied in screen axes after the rotation, so undoing
+  // it means dividing each world axis by its own scale *before* un-rotating.
+  const invX = 1 / xf.sx
+  const invY = 1 / xf.sy
 
   // Light, normalized here rather than in the data: the tunables then carry a *direction*,
   // which is a thing with an anchor, instead of a unit vector, which is a thing with
@@ -105,8 +108,8 @@ export function paintPart(
     [bx0, by1],
     [bx1, by1],
   ] as const) {
-    const wx = xf.x + xf.s * (cos * px - sin * py)
-    const wy = xf.y + xf.s * (sin * px + cos * py)
+    const wx = xf.x + xf.sx * (cos * px - sin * py)
+    const wy = xf.y + xf.sy * (sin * px + cos * py)
     if (wx < minX) minX = wx
     if (wx > maxX) maxX = wx
     if (wy < minY) minY = wy
@@ -120,10 +123,10 @@ export function paintPart(
 
   for (let y = y0; y <= y1; y++) {
     for (let x = x0; x <= x1; x++) {
-      const dx = x + 0.5 - xf.x
-      const dy = y + 0.5 - xf.y
-      const px = (cos * dx + sin * dy) * inv
-      const py = (-sin * dx + cos * dy) * inv
+      const ux = (x + 0.5 - xf.x) * invX
+      const uy = (y + 0.5 - xf.y) * invY
+      const px = cos * ux + sin * uy
+      const py = -sin * ux + cos * uy
 
       const hit = sample(shape, px, py)
       if (!hit.inside) continue
@@ -133,7 +136,7 @@ export function paintPart(
       // deliberate: with every bone left on one plane, nearest-wins degenerates exactly
       // into paint order — which is the behaviour being replaced, and therefore the null
       // case that proves the solver is what is doing the work (`HARNESS.md` §5).
-      const z = xf.z + xf.s * hit.dz
+      const z = xf.z + xf.sz * hit.dz
       if (z > (depth[at] as number)) continue
 
       // Brightness: outward normal against the direction the light comes from, bent by the
@@ -405,13 +408,16 @@ function localBounds(shape: Shape): readonly [number, number, number, number] {
   switch (shape.kind) {
     case 'ellipse':
       return [shape.cx - shape.rx - 1, shape.cy - shape.ry - 1, shape.cx + shape.rx + 1, shape.cy + shape.ry + 1]
-    case 'capsule':
+    case 'capsule': {
+      // The box has to allow for the fatter of the two ends.
+      const rmax = Math.max(shape.r, shape.r1 ?? shape.r)
       return [
-        Math.min(shape.x0, shape.x1) - shape.r - 1,
-        Math.min(shape.y0, shape.y1) - shape.r - 1,
-        Math.max(shape.x0, shape.x1) + shape.r + 1,
-        Math.max(shape.y0, shape.y1) + shape.r + 1,
+        Math.min(shape.x0, shape.x1) - rmax - 1,
+        Math.min(shape.y0, shape.y1) - rmax - 1,
+        Math.max(shape.x0, shape.x1) + rmax + 1,
+        Math.max(shape.y0, shape.y1) + rmax + 1,
       ]
+    }
     case 'rect':
       return [shape.x - 1, shape.y - 1, shape.x + shape.w + 1, shape.y + shape.h + 1]
     case 'lobed': {
@@ -443,17 +449,27 @@ function sample(shape: Shape, px: number, py: number): Local {
       return normalize(ux / shape.rx, uy / shape.ry, rz === 0 ? -1 : uz / rz, uz * rz)
     }
     case 'capsule': {
-      // Already a sphere swept along a segment; `r` was a depth radius all along.
+      // Already a sphere swept along a segment; `r` was a depth radius all along. With a
+      // taper the swept radius varies, so the nearest sphere is no longer the perpendicular
+      // projection — it slides along the axis by the taper's slope. Minimising
+      //   |q - u*ba|² - (r + u*Δr)²
+      // over u is one quadratic, and at Δr = 0 every term below collapses back to the plain
+      // projection, which is why the untapered case stays byte-identical.
       const ax = shape.x1 - shape.x0
       const ay = shape.y1 - shape.y0
       const len2 = ax * ax + ay * ay
-      let u = len2 === 0 ? 0 : ((px - shape.x0) * ax + (py - shape.y0) * ay) / len2
+      const dr = (shape.r1 ?? shape.r) - shape.r
+      const qx = px - shape.x0
+      const qy = py - shape.y0
+      const denom = len2 - dr * dr
+      let u = denom === 0 ? 0 : (qx * ax + qy * ay + shape.r * dr) / denom
       u = u < 0 ? 0 : u > 1 ? 1 : u
-      const dx = px - (shape.x0 + ax * u)
-      const dy = py - (shape.y0 + ay * u)
+      const dx = qx - ax * u
+      const dy = qy - ay * u
       const d2 = dx * dx + dy * dy
-      if (d2 > shape.r * shape.r) return MISS
-      const dz = -Math.sqrt(shape.r * shape.r - d2)
+      const ru = shape.r + dr * u
+      if (ru <= 0 || d2 > ru * ru) return MISS
+      const dz = -Math.sqrt(ru * ru - d2)
       return normalize(dx, dy, dz, dz)
     }
     case 'lobed': {

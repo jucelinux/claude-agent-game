@@ -65,8 +65,26 @@ export type Skeleton = { readonly bones: readonly Bone[] }
 export type Shape =
   /** `rz` is the depth radius; it defaults to the smaller of `rx` and `ry`. */
   | { readonly kind: 'ellipse'; readonly cx: number; readonly cy: number; readonly rx: number; readonly ry: number; readonly rz?: number }
-  /** A sphere of radius `r` swept along the segment: `r` is the depth radius too. */
-  | { readonly kind: 'capsule'; readonly x0: number; readonly y0: number; readonly x1: number; readonly y1: number; readonly r: number }
+  /**
+   * A sphere of radius `r` swept along the segment: `r` is the depth radius too.
+   *
+   * `r1` tapers it — the sphere's radius runs linearly from `r` at the start to `r1` at the
+   * end, which makes a round cone. Omit it and the two are equal, which is the null case and
+   * renders byte-identical to every capsule authored before taper existed.
+   *
+   * It exists because a limb, a horn, a tail, a branch and a blade all narrow, and the only
+   * way to say so was to stack capsules of decreasing radius — three parts to describe one
+   * shape, each one a seam the render then had to reconcile.
+   */
+  | {
+      readonly kind: 'capsule'
+      readonly x0: number
+      readonly y0: number
+      readonly x1: number
+      readonly y1: number
+      readonly r: number
+      readonly r1?: number
+    }
   /** `d` is the full depth of the box; it defaults to the smaller of `w` and `h`. */
   | { readonly kind: 'rect'; readonly x: number; readonly y: number; readonly w: number; readonly h: number; readonly d?: number }
   /**
@@ -159,14 +177,24 @@ export type Phase = { readonly name: string; readonly at: number }
  * has no unit in the domain to be anchored against, where an angle is a fraction of a turn
  * and an offset is pixels.
  *
- * `z` is the newest, and it is the one that buys an action rather than a look: a limb that
+ * `scaleX` and `scaleY` are squash and stretch. They scale in **screen axes**, applied
+ * after the rotation, so a body flattens downward whatever angle its limbs happen to be at
+ * — which is what a landing does and what a per-limb scale could never express. Like
+ * `scale` they carry no amplitude from the tunables, because a ratio has no unit.
+ *
+ * **Declared approximation.** Shading is computed before the squash and painted onto the
+ * squashed shape, so a stretched body keeps the shading of an unstretched one. The exact
+ * answer is an inverse-transpose on the normal; the approximation is the one 2D animation
+ * has always used, and at the ratios squash actually runs the two are indistinguishable.
+ *
+ * `z` buys an action rather than a look: a limb that
  * travels in depth passes in front of the mass it was behind, and the solver resolves that
  * without anybody choosing a paint order. A punch is the case that needs it — a fist is
  * behind the shoulder at the wind-up and in front of the chest at the strike, and no
  * static ordering expresses both. Its amplitude is `gait.depth`, in pixels, like `x`
  * and `y`. portable.
  */
-export type Channel = 'angle' | 'x' | 'y' | 'z' | 'scale'
+export type Channel = 'angle' | 'x' | 'y' | 'z' | 'scale' | 'scaleX' | 'scaleY'
 
 /**
  * One key per phase, in phase order, **normalized to [-1, 1]**. The amplitude that turns

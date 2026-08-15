@@ -428,3 +428,104 @@ describe('fill light', () => {
     expect(spread(withFill(0.6))).toBeLessThan(spread(withFill(0)))
   })
 })
+
+describe('taper and squash', () => {
+  const rod = (r1?: number): Grammar => ({
+    ...twoDiscs(0, 0),
+    parts: [{ name: 'A', bone: 'a', material: 'mass', shape: { kind: 'capsule', x0: 0, y0: -10, x1: 0, y1: 10, r: 5, ...(r1 === undefined ? {} : { r1 }) } }],
+  })
+  const widthAt = (g: Grammar, p: Params, row: number): number => {
+    const f = sprite(g, p, 1, 0)
+    let n = 0
+    for (let x = 0; x < f.buf.w; x++) if (f.buf.data[row * f.buf.w + x] !== 0) n++
+    return n
+  }
+
+  it('null case: a taper equal to the radius is the capsule that existed before it', () => {
+    // Every capsule in the repository predates the taper field. If these two differ by one
+    // byte, nine runs of authored art silently changed meaning.
+    const plain = sprite(rod(), bench(), 1, 0)
+    const equal = sprite(rod(5), bench(), 1, 0)
+    expect([...equal.buf.data]).toEqual([...plain.buf.data])
+  })
+
+  it('taper narrows one end and widens the other, and it is the end it says', () => {
+    // Calibrated in both directions on the same rod. The segment runs from y0 = -10 to
+    // y1 = +10 in bone space, so row 6 is the `r` end and row 26 is the `r1` end.
+    const top = 6
+    const bottom = 26
+    const even = rod(5)
+    const narrow = rod(1.5)
+    const wide = rod(9)
+    expect(widthAt(narrow, bench(), bottom)).toBeLessThan(widthAt(even, bench(), bottom))
+    expect(widthAt(wide, bench(), bottom)).toBeGreaterThan(widthAt(even, bench(), bottom))
+    // And the far end is left alone: a taper is not a scale.
+    expect(widthAt(narrow, bench(), top)).toBe(widthAt(even, bench(), top))
+  })
+
+  const squashed = (sx: number, sy: number): Grammar => {
+    const g = twoDiscs(0, 0)
+    return {
+      ...g,
+      parts: [{ name: 'A', bone: 'a', material: 'mass', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 8, ry: 8 } }],
+      gait: {
+        ...g.gait,
+        tracks: [
+          { bone: 'a', channel: 'scaleX', keys: [sx, sx] },
+          { bone: 'a', channel: 'scaleY', keys: [sy, sy] },
+        ],
+      },
+    }
+  }
+  const box = (g: Grammar): { w: number; h: number } => {
+    const f = sprite(g, bench(), 1, 0)
+    let x0 = 99, x1 = -1, y0 = 99, y1 = -1
+    for (let y = 0; y < f.buf.h; y++) {
+      for (let x = 0; x < f.buf.w; x++) {
+        if (f.buf.data[y * f.buf.w + x] === 0) continue
+        if (x < x0) x0 = x
+        if (x > x1) x1 = x
+        if (y < y0) y0 = y
+        if (y > y1) y1 = y
+      }
+    }
+    return { w: x1 - x0 + 1, h: y1 - y0 + 1 }
+  }
+
+  it('null case: squash at zero is the uniform transform that existed before it', () => {
+    const none = sprite(twoDiscs(0, 0), bench(), 1, 0)
+    const zeroed = sprite(
+      { ...twoDiscs(0, 0), gait: { ...twoDiscs(0, 0).gait, tracks: [{ bone: 'a', channel: 'scaleX', keys: [0, 0] }, { bone: 'a', channel: 'scaleY', keys: [0, 0] }] } },
+      bench(), 1, 0,
+    )
+    expect([...zeroed.buf.data]).toEqual([...none.buf.data])
+  })
+
+  it('squash flattens and stretch lengthens, on the axis named and not the other', () => {
+    // A landing squashes: wider and shorter. A launch stretches: taller and narrower. Both
+    // directions on both axes, because a transform that scaled both together would pass a
+    // one-sided assertion and be a uniform scale wearing two names.
+    const rest = box(squashed(0, 0))
+    const flat = box(squashed(0.35, -0.35))
+    const tall = box(squashed(-0.3, 0.4))
+    expect(flat.w).toBeGreaterThan(rest.w)
+    expect(flat.h).toBeLessThan(rest.h)
+    expect(tall.w).toBeLessThan(rest.w)
+    expect(tall.h).toBeGreaterThan(rest.h)
+  })
+
+  it('squash is a screen effect and never moves anything in depth', () => {
+    // The reason `sz` is separate. Flattening a body on screen must not change which of its
+    // parts is in front, or a landing would reorder the limbs while it lands.
+    const g = twoDiscs(-5, 5)
+    const flat: Grammar = {
+      ...g,
+      gait: { ...g.gait, tracks: [{ bone: 'a', channel: 'scaleY', keys: [-0.4, -0.4] }, { bone: 'b', channel: 'scaleY', keys: [-0.4, -0.4] }] },
+    }
+    const before = sprite(g, bench(), 1, 0)
+    const after = sprite(flat, bench(), 1, 0)
+    const ownerAt = (f: typeof before, row: number): number => f.owners[row * f.buf.w + 16] as number
+    expect(ownerAt(before, 16)).toBe(A)
+    expect(ownerAt(after, 16)).toBe(A)
+  })
+})

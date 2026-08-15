@@ -89,11 +89,13 @@ export const gorilla: Grammar = {
    * takes past what the light would do. Occlusion is correct; legibility is a decision.
    */
   parts: [
-    { name: 'armFU', bone: 'armFU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 12, r: 3.4 }, shift: -2 },
-    { name: 'armFL', bone: 'armFL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 10, r: 2.9 }, shift: -2 },
+    // Every limb tapers now: thick at the joint it hangs from, narrow at the one it ends
+    // in. A gorilla's forearm is not a cylinder and neither is anything else on a body.
+    { name: 'armFU', bone: 'armFU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 12, r: 3.4, r1: 2.9 }, shift: -2 },
+    { name: 'armFL', bone: 'armFL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 10, r: 2.9, r1: 2.6 }, shift: -2 },
     { name: 'fistF', bone: 'armFL', material: 'hide', shape: { kind: 'ellipse', cx: 0, cy: 11, rx: 2.8, ry: 2.4, rz: 3.2 }, shift: -1 },
-    { name: 'legFU', bone: 'legFU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 3.6 }, shift: -2 },
-    { name: 'legFL', bone: 'legFL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.9 }, shift: -2 },
+    { name: 'legFU', bone: 'legFU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 3.6, r1: 3 }, shift: -2 },
+    { name: 'legFL', bone: 'legFL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.9, r1: 2.5 }, shift: -2 },
     { name: 'footF', bone: 'legFL', material: 'hide', shape: { kind: 'ellipse', cx: 1.5, cy: 7.5, rx: 3.4, ry: 2, rz: 3.2 }, shift: -1 },
 
     // The two masses, and everything else hangs off them.
@@ -114,11 +116,11 @@ export const gorilla: Grammar = {
     { name: 'brow', bone: 'head', material: 'hide', shape: { kind: 'capsule', x0: 2, y0: -1.5, x1: 4.5, y1: -0.5, r: 1.6 }, z: -2.6 },
     { name: 'muzzle', bone: 'head', material: 'hide', shape: { kind: 'ellipse', cx: 4.6, cy: 1.6, rx: 3, ry: 2.6 }, z: -0.8 },
 
-    { name: 'legNU', bone: 'legNU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 4 } },
-    { name: 'legNL', bone: 'legNL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 3.2 } },
+    { name: 'legNU', bone: 'legNU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 4, r1: 3.3 } },
+    { name: 'legNL', bone: 'legNL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 3.2, r1: 2.8 } },
     { name: 'footN', bone: 'legNL', material: 'hide', shape: { kind: 'ellipse', cx: 1.5, cy: 7.5, rx: 3.6, ry: 2.2, rz: 3.4 } },
-    { name: 'armNU', bone: 'armNU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 13, r: 3.8 } },
-    { name: 'armNL', bone: 'armNL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 10, r: 3.2 } },
+    { name: 'armNU', bone: 'armNU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 13, r: 3.8, r1: 3.2 } },
+    { name: 'armNL', bone: 'armNL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 10, r: 3.2, r1: 2.8 } },
     // Knuckles stand proud of the forearm, or a knuckle-walker has no hands.
     { name: 'fistN', bone: 'armNL', material: 'hide', shape: { kind: 'ellipse', cx: 0, cy: 11, rx: 3, ry: 2.6, rz: 3.5 } },
   ],

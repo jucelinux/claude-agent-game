@@ -2,14 +2,28 @@ import type { Skeleton } from './types.ts'
 
 export const TURN = Math.PI * 2
 
-/** A rigid transform: position, depth, angle in turns, uniform scale. */
-export type Xform = { readonly x: number; readonly y: number; readonly z: number; readonly a: number; readonly s: number }
+/**
+ * A transform: position, depth, angle in turns, and scale.
+ *
+ * Scale is three numbers because squash is not uniform. `sx` and `sy` are screen axes and
+ * carry the squash; `sz` is depth and carries only the uniform part, because flattening a
+ * body on screen does not change how far away it is. portable.
+ */
+export type Xform = {
+  readonly x: number
+  readonly y: number
+  readonly z: number
+  readonly a: number
+  readonly sx: number
+  readonly sy: number
+  readonly sz: number
+}
 
 /** Per-bone deltas applied on top of the rest pose. */
-export type PoseDelta = { angle: number; x: number; y: number; z: number; scale: number }
+export type PoseDelta = { angle: number; x: number; y: number; z: number; scale: number; scaleX: number; scaleY: number }
 export type Pose = ReadonlyMap<string, PoseDelta>
 
-export const ZERO_DELTA: PoseDelta = { angle: 0, x: 0, y: 0, z: 0, scale: 0 }
+export const ZERO_DELTA: PoseDelta = { angle: 0, x: 0, y: 0, z: 0, scale: 0, scaleX: 0, scaleY: 0 }
 
 /**
  * Resolve every bone to canvas space. Iteration follows declaration order, which is why
@@ -29,16 +43,19 @@ export function solve(skeleton: Skeleton, pose: Pose, root: Xform): Map<string, 
     const pa = parent.a * TURN
     const cos = Math.cos(pa)
     const sin = Math.sin(pa)
+    // A scale delta of -1 collapses the bone and everything hanging off it to nothing.
+    const uniform = Math.max(0, 1 + d.scale)
     world.set(bone.name, {
-      x: parent.x + parent.s * (cos * lx - sin * ly),
-      y: parent.y + parent.s * (sin * lx + cos * ly),
+      x: parent.x + parent.sx * (cos * lx - sin * ly),
+      y: parent.y + parent.sy * (sin * lx + cos * ly),
       // Depth accumulates but never rotates: this is 2.5D, and the angle lives in the
       // screen plane only. A limb swings across the picture and travels in depth as two
       // independent facts, which is exactly how a punch is authored.
-      z: parent.z + parent.s * ((bone.z ?? 0) + d.z),
+      z: parent.z + parent.sz * ((bone.z ?? 0) + d.z),
       a: parent.a + bone.angle + d.angle,
-      // A scale delta of -1 collapses the bone and everything hanging off it to nothing.
-      s: parent.s * Math.max(0, 1 + d.scale),
+      sx: parent.sx * uniform * Math.max(0, 1 + d.scaleX),
+      sy: parent.sy * uniform * Math.max(0, 1 + d.scaleY),
+      sz: parent.sz * uniform,
     })
   }
   return world

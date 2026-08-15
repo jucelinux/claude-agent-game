@@ -27,7 +27,9 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     // it, so the whole sprite can never drift toward or away from the viewer by accident.
     z: 0,
     a: 0,
-    s: params.body.scale,
+    sx: params.body.scale,
+    sy: params.body.scale,
+    sz: params.body.scale,
   })
 
   const painter = createPainter(params.canvas.w, params.canvas.h)
@@ -44,7 +46,7 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     if (bone === undefined) throw new Error(`part "${part.name}" is bound to unknown bone "${part.bone}"`)
     // The part's own depth rides on the bone's, scaled with it: a body that shrinks takes
     // its browridge along instead of leaving it floating where the head used to be.
-    const xf = part.z === undefined ? bone : { ...bone, z: bone.z + bone.s * part.z }
+    const xf = part.z === undefined ? bone : { ...bone, z: bone.z + bone.sz * part.z }
     paintPart(painter, part.shape, xf, ramp.indices, params.light, params.fill, i, rng, params.texture.speckle, part.shift ?? 0)
   }
 

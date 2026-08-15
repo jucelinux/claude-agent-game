@@ -74,6 +74,13 @@ const JUMP: Gait = {
     // The far arm swings wider and lags, for the same reason the far leg is staggered.
     { bone: 'armFU', channel: 'angle', keys: [0, -0.62, 0.5, 0.42, -0.2, -0.05] },
     { bone: 'armFL', channel: 'angle', keys: [0, 0.22, -0.15, 0.1, 0.32, 0.2] },
+
+    // **Squash and stretch, on the root, so the whole body carries it.** Run 7 wanted this
+    // and worked around its absence: there was only a uniform scale then, and a uniform
+    // scale makes a body smaller rather than flatter. The keys are small on purpose — past
+    // about a tenth the animal stops being an animal and becomes rubber.
+    { bone: 'hips', channel: 'scaleX', keys: [0, 0.06, -0.05, -0.03, 0.1, 0.07] },
+    { bone: 'hips', channel: 'scaleY', keys: [0, -0.08, 0.09, 0.05, -0.12, -0.09] },
   ],
 }
 

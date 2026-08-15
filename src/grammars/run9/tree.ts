@@ -163,18 +163,22 @@ const PARTS: Part[] = [
   // back off after measuring**: curve 0.75 alone drops the trunk to a dark maroon body with a
   // narrow lit edge, and stacking a step on top of it killed the highlight the reference is
   // built on. Two fixes for one defect is one fix too many.
-  { name: 'trunkBase', bone: 'trunk0', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 2, x1: 0, y1: -15, r: 5.4 } },
-  { name: 'trunkMid', bone: 'trunk1', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -13, r: 4.2 } },
-  { name: 'trunkTop', bone: 'trunk2', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -6, r: 3.2 } },
+  // **Tapered, all of them.** A trunk narrows and so does every branch, and until taper
+  // existed the only way to say so was to stack capsules of decreasing radius and let the
+  // seam show. Each segment now ends at the radius the next one begins with, so the three
+  // trunk pieces read as one cone with a bend in it rather than as three cylinders.
+  { name: 'trunkBase', bone: 'trunk0', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 2, x1: 0, y1: -15, r: 5.4, r1: 4.2 } },
+  { name: 'trunkMid', bone: 'trunk1', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -13, r: 4.2, r1: 3.2 } },
+  { name: 'trunkTop', bone: 'trunk2', material: BARK, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -6, r: 3.2, r1: 2.4 } },
 
-  { name: 'brL', bone: 'branchL', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 2.2 } },
-  { name: 'brLt', bone: 'branchLt', material: BARK, z: -9.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: -2, y1: -8, r: 1.5 } },
-  { name: 'brR', bone: 'branchR', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 2.1 } },
-  { name: 'brRt', bone: 'branchRt', material: BARK, z: -9.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 2, y1: -8, r: 1.45 } },
+  { name: 'brL', bone: 'branchL', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 2.2, r1: 1.5 } },
+  { name: 'brLt', bone: 'branchLt', material: BARK, z: -9.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: -2, y1: -8, r: 1.5, r1: 0.7 } },
+  { name: 'brR', bone: 'branchR', material: BARK, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -10, r: 2.1, r1: 1.45 } },
+  { name: 'brRt', bone: 'branchRt', material: BARK, z: -9.5, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 2, y1: -8, r: 1.45, r1: 0.7 } },
   // brCt is gone for the same reason as massC: at eleven clumps the centre of the canopy is
   // the densest place on the tree, and a sub-branch buried there rendered nothing. The bone
   // stays — it carries three clumps — which is the point of bones and parts being separate.
-  { name: 'brC', bone: 'branchC', material: BARK, z: -9, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -11, r: 2 } },
+  { name: 'brC', bone: 'branchC', material: BARK, z: -9, shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: -11, r: 2, r1: 1.4 } },
 
   // **The shadow masses sit INSIDE the foliage now, not around it.** In the last pass they
   // owned the crown's whole outline and the green sat on them like spots — a mushroom cap.

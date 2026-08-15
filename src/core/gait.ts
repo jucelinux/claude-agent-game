@@ -41,12 +41,12 @@ export function evaluate(gait: Gait, params: Params, t: number): Pose {
     const amplitude =
       track.channel === 'angle'
         ? params.gait.swing
-        : track.channel === 'scale'
+        : track.channel === 'scale' || track.channel === 'scaleX' || track.channel === 'scaleY'
           ? 1
           : track.channel === 'z'
             ? params.gait.depth
             : params.gait.lift
-    const delta = pose.get(track.bone) ?? { angle: 0, x: 0, y: 0, z: 0, scale: 0 }
+    const delta = pose.get(track.bone) ?? { angle: 0, x: 0, y: 0, z: 0, scale: 0, scaleX: 0, scaleY: 0 }
     delta[track.channel] += value * amplitude
     pose.set(track.bone, delta)
   }
