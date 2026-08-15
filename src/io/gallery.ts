@@ -55,20 +55,22 @@ export type GalleryEntry = {
    */
   readonly topic: string
   /**
-   * Which lane this generation belongs to, and the two lanes are the human's design,
-   * 15/08. **progression** is the arc — dummy, insect, and each new attempt at beating the
-   * previous ceiling — read left to right so the evolution is one glance. **requests** is
-   * what he asked for; the ninja lives there because it came from a reference of his.
-   * Keeping them apart is what stops his asks from being read as my progress.
+   * **A slide is a run, a run is a batch, and the batch is deliberate.** His structure,
+   * stated flatly on 15/08 after I had built two other things instead: run 1 is the dummy,
+   * run 2 is the four elements, run 3 will be the next three. Run 0 means kept but not
+   * shipped — work that exists in the history and does not appear on the page, because it
+   * was not part of any batch he was asked to judge.
    */
-  readonly track: 'progression' | 'requests'
+  readonly run: number
+  /**
+   * Which element of the run this is — a stable id, so a re-worked element replaces its
+   * older self on the page instead of crowding beside it. The history keeps every version;
+   * **the page shows the latest one per element**, which is how "the humanoid should be the
+   * most recent version" is satisfied without deleting the version before it.
+   */
+  readonly element: string
   readonly note?: string
 }
-
-export const TRACKS = {
-  progression: 'progression — the arc, oldest first: each one an attempt at the previous ceiling',
-  requests: 'requests — what he asked for, and what came of it',
-} as const
 
 /** Flatten to dotted paths so two generations can be compared leaf by leaf. */
 function flatten(value: unknown, prefix = ''): Map<string, string> {
@@ -107,7 +109,8 @@ export function entryFrom(
   date: string,
   note?: string,
   topic?: string,
-  track: 'progression' | 'requests' = 'progression',
+  run = 0,
+  element = '',
 ): GalleryEntry {
   const { _anchors, ...params } = result.params as unknown as Record<string, unknown>
   void _anchors
@@ -117,7 +120,8 @@ export function entryFrom(
     params,
     summary,
     topic: topic ?? (summary[0] as string),
-    track,
+    run,
+    element: element === '' ? result.spec.grammar : element,
     n,
     date,
     grammar: result.spec.grammar,
@@ -168,14 +172,29 @@ export function cellOf(entry: GalleryEntry): ViewCell {
     h: entry.h,
     frames,
     palette: entry.palette,
-    label: `#${String(entry.n).padStart(4, '0')} · ${entry.grammar}${entry.note === undefined ? '' : ` · ${entry.note}`}`,
-    group: TRACKS[entry.track ?? 'progression'],
+    label: `${entry.element}${entry.note === undefined ? '' : ` · ${entry.note}`}`,
+    group: `run ${entry.run} · ${entry.topic}`,
     scale: entry.scale,
     msPerFrame: entry.msPerFrame,
     summary: [
-      `${entry.date} · ${entry.topic ?? 'untitled run'}`,
-      `${entry.w}×${entry.h} · ${entry.frames} frames · ${entry.msPerFrame} ms/frame · ${entry.frames * entry.msPerFrame} ms cycle`,
-      ...(entry.summary ?? []),
+      `${entry.element} · ${entry.w}×${entry.h} · ${entry.frames} frames · ${entry.msPerFrame} ms/frame · ${entry.frames * entry.msPerFrame} ms cycle · #${String(entry.n).padStart(4, '0')}`,
     ],
   }
+}
+
+
+/**
+ * What the page shows: every **shipped** run in order, and inside each run the latest
+ * version of every element. History keeps all of it; the page shows the current shape of
+ * each batch, which is what a verdict is given on.
+ */
+export function shipped(entries: readonly GalleryEntry[] = list()): GalleryEntry[] {
+  const latest = new Map<string, GalleryEntry>()
+  for (const entry of entries) {
+    if ((entry.run ?? 0) < 1) continue
+    const key = `${entry.run}/${entry.element}`
+    const held = latest.get(key)
+    if (held === undefined || entry.n > held.n) latest.set(key, entry)
+  }
+  return [...latest.values()].sort((a, b) => (a.run === b.run ? a.n - b.n : a.run - b.run))
 }

@@ -12,7 +12,7 @@
  * gate sheet (it will carry reference art, and reference is for looking at).
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { cellOf, list } from '../src/io/gallery.ts'
+import { cellOf, list, shipped } from '../src/io/gallery.ts'
 import { emit } from '../src/viewer/page.ts'
 
 const entries = list()
@@ -26,13 +26,10 @@ const html = emit({
   slides: true,
   scale: 4,
   msPerFrame: 100,
-  cells: [
-    ...entries.filter((e) => (e.track ?? 'progression') === 'progression'),
-    ...entries.filter((e) => e.track === 'requests'),
-  ].map(cellOf),
+  cells: shipped(entries).map(cellOf),
   title: 'claude-ink-2d',
   notes: [
-    `claude-ink-2d — a sprite and animation grammar for articulated bodies. ${entries.length} kept generations in two lanes.`,
+    `claude-ink-2d — a sprite and animation grammar for articulated bodies. One slide per run.`,
     'left and right walk the history · space pauses · , and . step one frame',
   ],
 })

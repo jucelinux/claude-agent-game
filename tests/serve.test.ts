@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { copyFileSync, mkdtempSync, readdirSync, rmSync, writeFileSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -63,7 +63,7 @@ afterAll(() => {
 })
 
 describe('the live bench', () => {
-  it('serves the page, the self-test, and the frames behind them', async () => {
+  it('serves the page and the self-test, and shows nothing that was never shipped', async () => {
     const html = await fetch(base).then((r) => r.text())
     expect(html).toContain('EventSource')
     expect(html).toContain('page.swap')
@@ -73,30 +73,29 @@ describe('the live bench', () => {
     expect(selftest).toContain('checkerboard')
     expect(selftest).not.toContain('EventSource')
 
-    const first = await payload()
-    expect(first.cells.length).toBe(1) // live only: the throwaway gallery starts empty
-    expect(first.cells[0]!.label).toMatch(/^fixture · [0-9a-f]{16}$/)
+    // An empty gallery is an empty page. There is no live cell: work reaches this page by
+    // being kept into a run, and by nothing else.
+    expect((await payload()).cells.length).toBe(0)
   })
 
-  it('a change swaps the frames, is kept, and joins the history on the page', async () => {
-    const before = (await payload()).cells[0]!.label
-    writeFileSync(PATH, readFileSync(PATH, 'utf8').replace('"swing": 0.08', '"swing": 0.13'))
-
-    const after = await until((p) => p.cells.length === 2)
-    expect(after.cells.length, 'the watcher never fired').toBe(2)
-    expect(after.cells[0]!.label).not.toBe(before)
-    // The history is on disk, not in the server's memory: it survives a restart, and it is
-    // what makes "did it move?" answerable weeks later.
+  it('keeping a run puts it on the page, without a restart', async () => {
+    execFileSync(process.execPath, ['bin/keep.ts', 'runs/fixture.run.json', '--run', '1', '--element', 'dummy', '--topic', 'a test run'], {
+      cwd: ROOT,
+      env: { ...process.env, INK_GALLERY: gallery },
+      encoding: 'utf8',
+    })
+    const after = await until((p) => p.cells.length === 1)
+    expect(after.cells.length, 'the watcher never fired').toBe(1)
+    expect(after.cells[0]!.label).toContain('dummy')
     expect(readdirSync(gallery).filter((f) => f.endsWith('.json')).length).toBe(1)
-    expect(after.cells[1]!.label).toContain('fixture')
   }, 25000)
 
-  it('a change that does not change the output does not pretend it did', async () => {
-    // Rewriting a watched file byte-for-byte fires the watcher; if the page swapped on
-    // that, every "it changed" it ever reports would be worth nothing — and the history
-    // would fill with duplicates of the same generation.
+  it('editing a tunable no longer changes the page, and that is the point', async () => {
+    // The page is his: it shows runs. Work in progress lives in the terminal bench, which
+    // is mine. Auto-keeping every edit is what turned this page into a wall of
+    // micro-generations nobody had asked to judge.
     const before = await payload()
-    writeFileSync(PATH, readFileSync(PATH, 'utf8'))
+    writeFileSync(PATH, readFileSync(PATH, 'utf8').replace('"swing": 0.08', '"swing": 0.13'))
     await new Promise((resolve) => setTimeout(resolve, 1500))
     const after = await payload()
 

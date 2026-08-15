@@ -16,14 +16,15 @@ const flags = argv.filter((a) => !a.endsWith('.json'))
 const { rest } = parse(flags)
 const note = typeof rest['note'] === 'string' ? rest['note'] : undefined
 const topic = typeof rest['topic'] === 'string' ? rest['topic'] : undefined
-const track = rest['track'] === 'requests' ? 'requests' : 'progression'
+const run = typeof rest['run'] === 'string' ? Number(rest['run']) : 0
+const element = typeof rest['element'] === 'string' ? rest['element'] : ''
 const date = new Date().toISOString().slice(0, 10)
 
 const specs = runs.length > 0 ? runs.map((r) => parse([r, ...flags]).spec) : [parse(flags).spec]
 let n = nextNumber()
 for (const spec of specs) {
   const result = execute(spec)
-  const path = keep(entryFrom(result, n, date, note, topic, track))
+  const path = keep(entryFrom(result, n, date, note, topic, run, element))
   if (path === null) {
     process.stdout.write(`already kept  ${spec.grammar}  ${result.hash}\n`)
   } else {

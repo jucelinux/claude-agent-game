@@ -3,7 +3,7 @@
  *
  *   node bin/shell.ts [--mode live|selftest]
  *
- * Same reason as `bin/payload.ts`: the server holds its modules for its whole life, so a
+ * The server holds its modules for its whole life, so a
  * shell built in-process meant every edit to the viewer needed a restart. Built out here,
  * editing `src/viewer/page.ts` reloads the tab instead.
  */
