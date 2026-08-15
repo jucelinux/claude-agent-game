@@ -23,6 +23,7 @@
  */
 
 import type { Scene } from '../scene/compose.ts'
+import { forestScene } from './forest-scene.ts'
 
 export type MicroGame = {
   /** Stable, and it never changes: he navigates by it. */
@@ -69,4 +70,13 @@ export type MicroGame = {
  * so the browser has to run a loop: input, state, draw. That is the engine slice arriving
  * because content demanded it, which is the right way round.
  */
-export const MICRO_GAMES: readonly MicroGame[] = []
+export const MICRO_GAMES: readonly MicroGame[] = [
+  {
+    id: 'forest',
+    title: 'The forest',
+    blurb:
+      'Nine trees from one grammar, none of them alike. Loaded clouds drifting over them and rain falling through. Three mechanisms: makeTree turns run 9 into a function, the lobed primitive built for foliage pays a second time as cloud, and the rain is a field — the first thing here that is not a body.',
+    date: '2026-08-15',
+    scene: forestScene,
+  },
+]

@@ -11,6 +11,7 @@ import { gorillaAttack, gorillaJump } from './run7/actions.ts'
 import { gorillaJumpChrono, gorillaJumpStardew } from './run8/idioms.ts'
 import { tree } from './run9/tree.ts'
 import { FOREST } from './run12/forest.ts'
+import { CLOUDS } from './run12/cloud.ts'
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   fixture,
@@ -30,6 +31,7 @@ export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   'gorilla-jump-chrono': gorillaJumpChrono,
   tree,
   ...Object.fromEntries(FOREST.map((g) => [g.name, g])),
+  ...Object.fromEntries(CLOUDS.map((g) => [g.name, g])),
 }
 
 /**
@@ -55,6 +57,7 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: 'gorilla-jump-chrono', tunables: 'gorilla-jump-chrono' },
   { grammar: 'tree', tunables: 'tree' },
   ...FOREST.map((g) => ({ grammar: g.name, tunables: 'wood' })),
+  ...CLOUDS.map((g) => ({ grammar: g.name, tunables: 'sky' })),
 ]
 
 export function grammarByName(name: string): Grammar {

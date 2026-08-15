@@ -50,6 +50,12 @@ export type Placement = {
   /** Offset into its own cycle, 0..1, so two of the same subject are not in lockstep. */
   readonly phase?: number
   readonly seed?: number
+  /**
+   * Screen pixels this subject travels sideways over one scene cycle, wrapping at the
+   * edges. A cloud is a body that moves; it needed no new concept, only the admission that
+   * a placement is a position **at a time** rather than a position.
+   */
+  readonly drift?: number
 }
 
 export type Scene = {
@@ -66,7 +72,39 @@ export type Scene = {
   /** Dark to light, and the lightest is the lit strip at the very top of the ground. */
   readonly groundRamp: readonly RGB[]
   readonly placements: readonly Placement[]
+  /**
+   * **Fields: weather, and the first thing here that is not a body.**
+   *
+   * A grammar is bones and parts, so two hundred raindrops would be two hundred parts. Rain,
+   * snow, sparks, embers and smoke are none of them bodies — they are **functions of
+   * position and time**, evaluated per pixel, owning no skeleton and attached to nothing.
+   * That makes them scene-level by nature: a body belongs to a creature, and weather belongs
+   * to the world.
+   *
+   * Closed form and seeded by an integer hash, so a field is as deterministic as everything
+   * else here and loops exactly when its speed completes a whole number of passes.
+   */
+  readonly fields?: readonly Field[]
 }
+
+export type Field =
+  /**
+   * Rain. Drops fall in columns spaced `spacing` apart, each column offset by a hash of its
+   * index so the sheet never marches in step. A drop is a short streak, slanted by `slant`
+   * pixels of drift per pixel of fall — which is what makes rain read as weather rather than
+   * as a scan line.
+   */
+  | {
+      readonly kind: 'rain'
+      /** Palette entries, dark to light. A near drop is lighter than a far one. */
+      readonly colors: readonly RGB[]
+      readonly spacing: number
+      readonly length: number
+      readonly slant: number
+      /** Whole passes down the screen per scene cycle. An integer, or the loop jumps. */
+      readonly passes: number
+      readonly seed: number
+    }
 
 export type Composed = {
   readonly scene: Scene
@@ -160,6 +198,11 @@ export function compose(scene: Scene): Composed {
   const groundBase = palette.length
   for (const c of scene.groundRamp) palette.push(c)
 
+  // Fields paint after the ground and before the subjects, so weather sits behind what it
+  // falls on. A layer in front would need depth it does not have.
+  const fieldBase = palette.length
+  for (const f of scene.fields ?? []) for (const c of f.colors) palette.push(c)
+
   const total = scene.w * scene.h
   const buffers: IndexedBuffer[] = []
   const sceneMs = scene.frames * scene.msPerFrame
@@ -177,6 +220,32 @@ export function compose(scene: Scene): Composed {
     }
 
     const sceneT = f / scene.frames
+
+    // **The fields.** Evaluated per pixel, closed form in (x, y, t): no particle is stored
+    // and none needs to be, which is the whole point of a field over a body.
+    let fieldAt = fieldBase
+    for (const field of scene.fields ?? []) {
+      if (field.kind === 'rain') {
+        const cols = Math.ceil(scene.w / field.spacing) + 2
+        for (let c = 0; c < cols; c++) {
+          // An integer hash, so the sheet is irregular and identical on every run.
+          let hsh = ((c + field.seed) * 2654435761) >>> 0
+          hsh ^= hsh >>> 13
+          const phase = (hsh % 1024) / 1024
+          const tone = hsh % field.colors.length
+          const x0 = c * field.spacing + (hsh % field.spacing)
+          const fall = ((sceneT * field.passes + phase) % 1) * (scene.h + field.length * 2) - field.length
+          for (let k = 0; k < field.length; k++) {
+            const y = Math.round(fall + k)
+            if (y < 0 || y >= scene.h) continue
+            const x = Math.round(x0 + k * field.slant)
+            if (x < 0 || x >= scene.w) continue
+            data[y * scene.w + x] = fieldAt + tone
+          }
+        }
+      }
+      fieldAt += field.colors.length
+    }
     // Back to front by where a subject's feet are: lower on screen is nearer the viewer.
     // Stable, because ties fall back to placement order.
     const order = runs.map((r, i) => i).sort((a, b) => {
@@ -197,7 +266,8 @@ export function compose(scene: Scene): Composed {
       const frame = run.result.frames[Math.floor(t * own) % own] as Frame
       const map = maps.get(run.name) as Uint8Array
       const { w: sw, h: sh, data: src } = frame.buf
-      const ox = p.x - run.result.params.canvas.originX
+      const wrap = p.drift === undefined ? 0 : Math.round(p.drift * sceneT)
+      const ox = p.x + wrap - run.result.params.canvas.originX
       const oy = p.footY === undefined ? (p.y ?? 0) - run.result.params.canvas.originY : p.footY - run.footOffset
       for (let sy = 0; sy < sh; sy++) {
         const dy = oy + sy
@@ -205,7 +275,10 @@ export function compose(scene: Scene): Composed {
         for (let sx = 0; sx < sw; sx++) {
           const v = src[sy * sw + sx] as number
           if (v === 0) continue
-          const dx = ox + sx
+          // A drifting subject wraps rather than leaving: a cloud that sails off the right
+          // has to arrive on the left, or the sky empties over one cycle.
+          let dx = ox + sx
+          if (p.drift !== undefined) dx = ((dx % scene.w) + scene.w) % scene.w
           if (dx < 0 || dx >= scene.w) continue
           data[dy * scene.w + dx] = map[v] as number
         }
