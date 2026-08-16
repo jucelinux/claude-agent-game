@@ -247,7 +247,7 @@ describe('the micro runtime', () => {
     const i = stage.placed.findIndex((p) => p.player !== undefined)
     const clips = stage.placed[i]!.clips as Record<string, { right: number; left: number }>
     const pd = stage.placed[i]!.player!
-    const sheet = h.sheets[clips[pd.attack]!.right] as number
+    const sheet = h.sheets[clips[pd.attack as string]!.right] as number
 
     // Pressed and released between two frames, on purpose: a tap that short is exactly the
     // input a loop sampling key state would drop, and a person taps that fast constantly.
@@ -325,7 +325,7 @@ describe('the micro runtime', () => {
     // the standoff and worth stating as a check of its own.
     const player = stage.placed.find((p) => p.player !== undefined)!.player!
     expect(ap.standoff, 'the photographer settles inside the reach, so the player never moves')
-      .toBeGreaterThan(player.reach)
+      .toBeGreaterThan(player.reach as number)
 
     h.key('ArrowLeft', true)
     for (; f <= 712; f++) h.tick(f * 33.3)

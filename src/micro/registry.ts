@@ -24,6 +24,7 @@
 
 import type { Scene } from '../scene/compose.ts'
 import { forestScene } from './forest-scene.ts'
+import { moonScene } from './moon-scene.ts'
 
 export type MicroGame = {
   /** Stable, and it never changes: he navigates by it. */
@@ -33,6 +34,8 @@ export type MicroGame = {
   readonly blurb: string
   readonly date: string
   readonly scene: Scene
+  /** What the keys do. Written per game, because a control scheme belongs to a game. */
+  readonly keys?: string
 }
 
 
@@ -77,6 +80,25 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     blurb:
       'Walk the silverback with the arrows and hit with space. Photographers come in from the edges, lie down and start shooting; drive them off before they get the picture. Fourteen trees from one recursive grammar, all of them behind the player so the front of the stage stays clear. Depth is one number and haze rather than position; the clouds drift in real seconds, so there is no loop point left for them to jump at.',
     date: '2026-08-16',
+    keys: '← → walk · space attack · drive the photographers off before they get the shot',
     scene: forestScene,
+  },
+  /**
+   * **Gate v3, batch 1.** His sentence, in one turn, with no back-and-forth:
+   *
+   * > *"Eu quero que você crie para mim um astronauta. Quero ser capaz de pular e andar em
+   * > todas as direções com ele. O ambiente: o solo lunar, similar a vista da lua com a terra
+   * > ao fundo."*
+   *
+   * My prediction of a miss, and the reason, are in `BACKLOG.md` — written before he looked.
+   */
+  {
+    id: 'moon',
+    title: 'The moon',
+    blurb:
+      'Walk in eight directions with the arrows and jump with space. One authored body turned about its own axis gives every facing: fifteen grammars from one astronaut. The jump is lunar — 42 px/s of gravity against a 62 px/s push, which hangs for nearly three seconds — and the shadow on the ground is the only thing telling you where you land. No haze anywhere, because there is no air: distance is carried by the floor alone.',
+    date: '2026-08-16',
+    keys: '← → ↑ ↓ walk in eight directions · space jump · the shadow is where you land',
+    scene: moonScene,
   },
 ]

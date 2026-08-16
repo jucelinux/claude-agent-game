@@ -14,6 +14,8 @@ import { FOREST } from './run12/forest.ts'
 import { CLOUDS } from './run12/cloud.ts'
 import { PHOTOGRAPHER } from './run13/photographer.ts'
 import { gorillaIdle } from './run13/idle.ts'
+import { ASTRONAUT } from './run14/astronaut.ts'
+import { MOON } from './run14/moon.ts'
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   fixture,
@@ -36,6 +38,8 @@ export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   ...Object.fromEntries(CLOUDS.map((g) => [g.name, g])),
   'gorilla-idle': gorillaIdle,
   ...Object.fromEntries(PHOTOGRAPHER.map((g) => [g.name, g])),
+  ...Object.fromEntries(ASTRONAUT.map((g) => [g.name, g])),
+  ...Object.fromEntries(MOON.map((g) => [g.name, g])),
 }
 
 /**
@@ -64,6 +68,9 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   ...CLOUDS.map((g) => ({ grammar: g.name, tunables: 'sky' })),
   { grammar: 'gorilla-idle', tunables: 'gorilla-idle' },
   ...PHOTOGRAPHER.map((g) => ({ grammar: g.name, tunables: 'photog' })),
+  ...ASTRONAUT.map((g) => ({ grammar: g.name, tunables: 'astronaut' })),
+  { grammar: 'earth', tunables: 'earth' },
+  ...MOON.filter((g) => g.name !== 'earth').map((g) => ({ grammar: g.name, tunables: 'regolith' })),
 ]
 
 export function grammarByName(name: string): Grammar {

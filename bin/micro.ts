@@ -42,6 +42,7 @@ function buildGame(id: string): AppGame | undefined {
       game.date,
     ],
     stage,
+    ...(game.keys === undefined ? {} : { keys: game.keys }),
   }
 }
 

@@ -33,6 +33,8 @@ export type AppGame = {
   readonly date: string
   readonly meta: readonly string[]
   readonly stage: Stage
+  /** What the keys do, in this game's own words. A control scheme is per game, not per engine. */
+  readonly keys?: string
   /** Filled in by whoever served the page, since only it knows what compression achieved. */
   readonly gzipBytes?: number
 }
@@ -44,12 +46,16 @@ const esc = (s: string): string =>
 const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
   JSON.stringify({
     w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
-    groundRamp: stage.groundRamp, floor: stage.floor, rain: stage.rain, interactive, meter: interactive,
+    groundRamp: stage.groundRamp, floor: stage.floor, stars: stage.stars,
+    rain: stage.rain, interactive, meter: interactive,
     layers: stage.layers.map((l) => ({
       w: l.w, h: l.h, ox: l.ox, oy: l.oy, foot: l.footOff, n: l.frames, ms: l.msPerFrame,
       palette: l.palette, indices: Buffer.from(l.indices).toString('base64'),
     })),
     placed: stage.placed,
+    // The order the stage was built in. A roaming player is spliced out of it and back in at
+    // the row he currently stands on, every frame.
+    order: stage.placed.map((_, i) => i),
   })
 
 /**
@@ -91,6 +97,17 @@ function mount(el, S) {
   // page and the compositor put the horizon in two different rows.
   var bg = cv(S.w, S.h), bx = bg.getContext('2d')
   bx.fillStyle = rgb(S.sky); bx.fillRect(0, 0, S.w, S.h)
+  // **Stars go into the backdrop, not into a field.** A field is evaluated per pixel per
+  // frame because it moves; a fixed sky does not. Same integer hash the rain uses, so the
+  // pattern is irregular and identical on every machine.
+  if (S.stars) {
+    for (var si = 0; si < S.stars.count; si++) {
+      var sh1 = ((si + S.stars.seed) * 2654435761) >>> 0; sh1 = (sh1 ^ (sh1 >>> 13)) >>> 0
+      var sh2 = (sh1 * 1597334677) >>> 0; sh2 = (sh2 ^ (sh2 >>> 15)) >>> 0
+      bx.fillStyle = rgb(S.stars.colors[sh2 % S.stars.colors.length])
+      bx.fillRect(sh1 % S.w, sh2 % S.stars.below, 1, 1)
+    }
+  }
   for (var y = 0; y < S.floor.length; y++) {
     bx.fillStyle = rgb(S.floor[y]); bx.fillRect(0, S.ground + y, S.w, 1)
   }
@@ -105,7 +122,14 @@ function mount(el, S) {
   var P = null, crew = []
   for (var i = 0; i < S.placed.length; i++) {
     var pl = S.placed[i]
-    if (pl.player) P = { at: i, x: pl.x, face: 1, state: 'idle', walk: 0, atk: 0, hit: false }
+    if (pl.player) {
+      P = {
+        at: i, x: pl.x, row: pl.y, face: 1, dir: 'e',
+        state: 'idle', walk: 0, atk: 0, hit: false,
+        // Height above the contact row, and the speed it is changing at. Zero is standing.
+        lift: 0, vy: 0,
+      }
+    }
     if (pl.approach) {
       var a = pl.approach
       crew.push({
@@ -121,17 +145,35 @@ function mount(el, S) {
       var k = e.key
       if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = v; e.preventDefault() }
       if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = v; e.preventDefault() }
+      if (k === 'ArrowUp' || k === 'w' || k === 'W') { keys.up = v; e.preventDefault() }
+      if (k === 'ArrowDown' || k === 's' || k === 'S') { keys.down = v; e.preventDefault() }
       // **A press is latched, not sampled.** A tap that begins and ends between two animation
       // frames is invisible to a loop that only reads the key's current state — and at 60 fps
       // that is a 16 ms window a person hits regularly. The edge is consumed by the loop, so
       // the input survives the gap between frames rather than falling into it.
       if (k === ' ' || k === 'x' || k === 'X' || k === 'z' || k === 'Z') {
-        if (v && !keys.hit) keys.tap = true
+        if (v && !keys.hit) { keys.tap = true; keys.jumpTap = true }
         keys.hit = v; e.preventDefault()
       }
     }
     window.addEventListener('keydown', function (e) { down(e, true) })
     window.addEventListener('keyup', function (e) { down(e, false) })
+  }
+
+  /**
+   * **Which of eight compass points an input vector points at.** The western half is reached
+   * by mirroring the eastern half, so only five are ever rendered — and mirroring is correct
+   * for a *turn* in a way it is not for lighting, which is why 'layers.ts' re-renders the lamp
+   * and this function does not care.
+   *
+   * 'last' is returned when nothing is pressed, so releasing the keys leaves him facing where
+   * he was walking rather than snapping back to a default.
+   */
+  function compass(dx, dy, last) {
+    if (dx === 0 && dy === 0) return last
+    if (dx === 0) return dy < 0 ? 'n' : 's'
+    if (dy === 0) return 'e'
+    return dy < 0 ? 'ne' : 'se'
   }
 
   /** How long a clip runs, in seconds. The sprite owns its own rate; the state does not. */
@@ -175,18 +217,51 @@ function mount(el, S) {
       var dur = span(S.placed[P.at].clips[pd.attack].right)
       if (!P.hit && P.atk >= dur * pd.hitAt) { P.hit = true; strike() }
       if (P.atk >= dur) { P.state = 'idle'; P.hit = false }
-    } else if (keys.hit || keys.tap) {
+    } else if (pd.attack && (keys.hit || keys.tap)) {
+      // **Guarded on the clip existing, and it crashed without the guard.** The moon's player
+      // has a jump and no attack, so the same key that swings the gorilla's fist was setting
+      // a state whose clip is undefined — and the draw then looked up 'undefined-e'. One key
+      // means different things to different actors, and the actor decides, not the key.
       keys.tap = false
       P.state = 'attack'; P.atk = 0; P.hit = false
     } else {
-      var dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
-      if (dir !== 0) {
-        P.face = dir; P.state = 'walk'
-        P.x = Math.max(pd.minX, Math.min(pd.maxX, P.x + dir * pd.speed * dt))
-        // The walk clock only runs while he walks, so the stride resumes where it stopped
-        // instead of carrying on behind a standing pose.
+      var dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
+      var dy = pd.roam ? (keys.down ? 1 : 0) - (keys.up ? 1 : 0) : 0
+
+      /**
+       * **Eight directions, and the diagonals are scaled so they are not faster.**
+       *
+       * Pressing two keys gives a vector of length sqrt(2); dividing by it is the oldest fix
+       * in games and the one every engine that skips it gets reported for. The depth axis
+       * also moves slower than the screen axis, because the floor is foreshortened: a step
+       * "into" the picture covers fewer rows than the same step across it.
+       */
+      if (dx !== 0 || dy !== 0) {
+        var norm = dx !== 0 && dy !== 0 ? 0.7071 : 1
+        P.state = 'walk'
         P.walk += dt * 1000
+        if (dx !== 0) P.face = dx
+        P.dir = compass(dx, dy, P.dir)
+        P.x = Math.max(pd.minX, Math.min(pd.maxX, P.x + dx * pd.speed * norm * dt))
+        if (pd.roam && dy !== 0) {
+          P.row = Math.max(pd.roam.minRow, Math.min(pd.roam.maxRow, P.row + dy * pd.roam.depthSpeed * norm * dt))
+        }
       } else { P.state = 'idle' }
+
+      // **The jump.** A press while standing buys an upward speed; gravity takes it back.
+      // On the moon that ratio is the subject: a sixth of a g gives a hang of over a second,
+      // and it is the one number in this scene that a player feels rather than sees.
+      if (pd.jump && keys.jumpTap && P.lift === 0) { P.vy = -pd.jump.impulse }
+      keys.jumpTap = false
+    }
+
+    if (pd.jump) {
+      if (P.lift > 0 || P.vy !== 0) {
+        P.vy += pd.jump.gravity * dt
+        P.lift = P.lift - P.vy * dt
+        if (P.lift <= 0) { P.lift = 0; P.vy = 0 }
+        P.state = 'jump'
+      }
     }
 
     for (var c = 0; c < crew.length; c++) {
@@ -327,24 +402,75 @@ function mount(el, S) {
 
     var flash = 0
     drawn.length = 0
-    for (var i = 0; i < S.placed.length; i++) {
+    /**
+     * **The y-sort, and it exists because he can now walk toward the camera.**
+     *
+     * Every other subject in this project has a fixed contact row, so paint order is decided
+     * once when the stage is built. A roaming player does not: walk south past a boulder and
+     * you have to come out in front of it. So the order is rebuilt each frame, and only for
+     * the one subject whose row is state rather than data.
+     */
+    var seq = S.order
+    if (P && S.placed[P.at].player && S.placed[P.at].player.roam) {
+      seq = S.order.slice()
+      seq.splice(seq.indexOf(P.at), 1)
+      var slot = 0
+      while (slot < seq.length && S.placed[seq[slot]].y <= P.row) slot++
+      seq.splice(slot, 0, P.at)
+    }
+    for (var oi = 0; oi < seq.length; oi++) {
+      var i = seq[oi]
       var D = S.placed[i], li = D.layer, L, f, dx, dy
 
       if (D.player && P) {
         // The state names a clip; the clip names a layer. Nothing about which animation runs
         // has ever reached the sprites, which is why an idle cost a gait and not a rewrite.
         var pd = D.player
-        var name = P.state === 'attack' ? pd.attack : P.state === 'walk' ? pd.walk : pd.idle
+        var base = P.state === 'attack' ? pd.attack
+          : P.state === 'jump' ? (pd.jump ? pd.jump.clip : pd.idle)
+          : P.state === 'walk' ? pd.walk : pd.idle
+        // **A facing is part of the clip's name.** 'lope' plus '-ne' is a grammar, generated
+        // by yawing the authored body, and the runtime never learns what a yaw is.
+        var name = D.clips[base + '-' + P.dir] ? base + '-' + P.dir : base
         var pair = D.clips[name]
-        li = P.face < 0 ? pair.left : pair.right
+        // The western half is the eastern half mirrored. 'n' and 's' face the camera and are
+        // symmetric, so mirroring them would be a flip nobody could see and a layer nobody
+        // needs — they use the un-mirrored render whichever way he last walked.
+        var mirror = P.face < 0 && P.dir !== 'n' && P.dir !== 's'
+        li = mirror ? pair.left : pair.right
         L = S.layers[li]
-        var own = P.state === 'attack' ? P.atk * 1000 : P.state === 'walk' ? P.walk : t * 1000
+        var own = P.state === 'attack' ? P.atk * 1000
+          : P.state === 'jump' ? t * 1000
+          : P.state === 'walk' ? P.walk : t * 1000
         // The attack plays ONCE and holds its last frame until the state clears, or a fast
         // clip loops back to the wind-up mid-swing and the blow appears to be thrown twice.
         f = P.state === 'attack'
           ? Math.min(L.n - 1, Math.floor(own / L.ms))
           : Math.floor(own / L.ms) % L.n
-        dx = Math.round(P.x) + L.ox; dy = rowOf(D, L)
+        dx = Math.round(P.x) + L.ox
+        // The row he STANDS on drives the sprite; the height he has jumped to lifts it after.
+        var stand = { anchor: D.anchor, y: Math.round(P.row) }
+        dy = rowOf(stand, L) - Math.round(P.lift)
+
+        /**
+         * **The shadow, and it is the only thing telling a player where he will land.**
+         *
+         * A jumping body leaves its contact row and the shadow does not. Without it a jump in
+         * an overhead view is a sprite drifting upward for no reason, and the landing is a
+         * surprise. It shrinks with height because that is what a shadow does, and it is one
+         * ellipse: the cheapest possible answer to the most necessary feedback in the scene.
+         */
+        if (pd.jump) {
+          var lift = P.lift
+          var k = Math.max(0.45, 1 - lift / 44)
+          ox.globalAlpha = 0.42 * k
+          ox.fillStyle = '#000000'
+          var sw = Math.round(L.w * 0.34 * k), sh = Math.max(1, Math.round(sw * 0.4))
+          ox.beginPath()
+          ox.ellipse(Math.round(P.x), Math.round(P.row) - 1, sw, sh, 0, 0, 6.283185)
+          ox.fill()
+          ox.globalAlpha = 1
+        }
       } else if (D.approach) {
         var me = null
         for (var c = 0; c < crew.length; c++) if (crew[c].at === i) me = crew[c]
@@ -504,7 +630,7 @@ export function gamePage(game: AppGame): string {
     `<a class="back" href="/">← shelf</a><h1>${esc(game.title)}</h1><span class="sub mono">${esc(game.id)}</span>`,
     `<div class="stage"><div id="stage"></div></div>
      <div class="meter mono"><span class="tag">measured</span><span id="meter">warming up…</span></div>
-     ${playable ? `<div class="keys"><b>←</b> <b>→</b> walk &nbsp;·&nbsp; <b>space</b> attack &nbsp;·&nbsp; drive the photographers off before they get the shot</div>` : ''}
+     ${playable ? `<div class="keys">${esc(game.keys ?? '← → walk · space act')}</div>` : ''}
      <div class="about">
        <p>${esc(game.blurb)}</p>
        <div class="facts mono"><span class="tag">budget</span>${budgetFacts(budgetOf(game.stage, game.gzipBytes ?? 0))

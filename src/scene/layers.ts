@@ -100,6 +100,8 @@ export type Stage = {
   /** One colour per floor row, from `ground` down. The recede is already in it. */
   readonly floor: readonly RGB[]
   /** Rain, retimed from passes-per-loop into pixels per second — there is no loop now. */
+  /** Stars, painted once into the backdrop. Nothing in a fixed sky moves. */
+  readonly stars: Scene['stars'] | null
   readonly rain: {
     readonly colors: readonly RGB[]
     readonly spacing: number
@@ -304,7 +306,7 @@ export function toStage(scene: Scene): Stage {
 
   return {
     name: scene.name, w: scene.w, h: scene.h, scale: scene.scale, ground: scene.ground,
-    sky: scene.sky, groundRamp: scene.groundRamp, rain, floor,
+    sky: scene.sky, groundRamp: scene.groundRamp, stars: scene.stars ?? null, rain, floor,
     layers, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
   }
 }

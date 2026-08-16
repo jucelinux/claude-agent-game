@@ -145,11 +145,45 @@ export type Placement = {
     readonly maxX: number
     readonly idle: string
     readonly walk: string
-    readonly attack: string
+    readonly attack?: string
     /** How far in front of him the blow reaches, in scene pixels. */
-    readonly reach: number
+    readonly reach?: number
     /** Where in the attack clip the blow lands, 0..1. Anticipation is longer than impact. */
-    readonly hitAt: number
+    readonly hitAt?: number
+    /**
+     * **Walking in eight directions instead of two**, which is the gap named on 15/08 and the
+     * half of his commission of 16/08 that the engine could not reach.
+     *
+     * When present, the player also moves along the depth axis: `minRow` and `maxRow` bound
+     * which contact rows he may stand on, and his **paint order follows him** — walk toward
+     * the camera and you pass in front of a boulder you were behind. That is the y-sort every
+     * overhead game has, arriving because a commission asked for it.
+     *
+     * `clip` names the clip prefix; the runtime appends the compass point, so `lope` reaches
+     * `lope-e`, `lope-ne`, `lope-n` and their mirrors.
+     */
+    readonly roam?: {
+      readonly minRow: number
+      readonly maxRow: number
+      /** Rows per second along the depth axis. Lower than `speed`: the floor is foreshortened. */
+      readonly depthSpeed: number
+    }
+    /**
+     * **A jump, and it is the first vertical motion in this engine.**
+     *
+     * `gravity` is scene pixels per second squared and `impulse` is the upward speed a press
+     * buys. On the moon that ratio is the whole subject: a sixth of a g means a hang of well
+     * over a second, and getting it wrong is what makes lunar gravity look like a trampoline.
+     *
+     * A jumping body lifts off its contact row and **its shadow does not**. That shadow is the
+     * only thing telling a player where he will land, and without it a jump in an overhead
+     * view is unreadable.
+     */
+    readonly jump?: {
+      readonly clip: string
+      readonly gravity: number
+      readonly impulse: number
+    }
   }
   /**
    * **A subject that walks in from an edge, settles at a distance from the player, and runs
@@ -203,6 +237,14 @@ export type Scene = {
   /** How far a subject at depth 1 is pulled toward the sky's colour. */
   readonly haze: number
   readonly sky: RGB
+  /**
+   * **Stars, and they are a backdrop rather than a field.**
+   *
+   * A field is evaluated per pixel per frame because it *moves*. Stars do not: the moon is
+   * tidally locked and its sky is fixed, so they are painted once into the backdrop from an
+   * integer hash. Two colours and a count, which is the whole of a night sky at this scale.
+   */
+  readonly stars?: { readonly count: number; readonly colors: readonly RGB[]; readonly seed: number; readonly below: number }
   /** Dark to light. The lightest is the lit strip along the very edge of the floor. */
   readonly groundRamp: readonly RGB[]
   readonly placements: readonly Placement[]

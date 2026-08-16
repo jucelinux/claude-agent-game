@@ -1,0 +1,82 @@
+{
+  "canvas": {
+    "w": 56,
+    "h": 56,
+    "originX": 28,
+    "originY": 32
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 12
+  },
+  "light": {
+    "x": -0.55,
+    "y": -0.5,
+    "z": -0.25,
+    "curve": 1.15
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.26,
+    "lift": 5,
+    "depth": 7
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "shadow": {
+    "steps": 8,
+    "bias": 0.25,
+    "strength": 2
+  },
+  "fill": {
+    "x": 0.5,
+    "y": 0.7,
+    "z": -0.2,
+    "weight": 0.03
+  },
+  "playback": {
+    "msPerFrame": 85,
+    "scale": 3
+  },
+  "_anchors": {
+    "canvas.w": "56. The widest facing is `ne`, where the pack swings out from behind the torso and the two arms are at their furthest apart on screen: 42 px. 56 holds it with the outline ring and 7 px of margin, and the same cell has to hold all five facings because the runtime swaps between them at one origin.",
+    "canvas.h": "56, square with the width. He stands 46 px and the leap's reach adds 4.",
+    "canvas.originX": "canvas.w / 2. Every subject in this project centres horizontally in its cell, so a facing swap or a scale change never slides the body sideways.",
+    "canvas.originY": "32, canvas.h - 24, the ground under his boots. The first value was 38 and every one of the fifteen sprites clipped the bottom of the cell: a suit's boot sits 20 px below the pelvis and the leap tucks it further. The scene anchors him by his lowest painted pixel, because a jump moves his feet.",
+    "tones.perMaterial": "5, the Chrono idiom he ranked first on 15/08 and the budget every subject in this project now shares.",
+    "frames.walk": "12, three per named phase. A lope hangs for two whole phases, so the hang needs enough frames to read as a hang rather than as a pause.",
+    "light.x": "-0.55, from the upper left, and it is the SUN. On the moon there is one light source and no sky to bounce it, which is the whole reason this subject looks different from every other one here.",
+    "light.y": "-0.5, and it is deliberately LOWER than the -0.8 every other subject uses. The Apollo photographs were taken with the sun close to the horizon, because that is when the surface reads as terrain instead of as a blank field. A low sun is also what gives a walking figure a long shadow.",
+    "light.z": "-0.25, barely on the viewer's side.",
+    "light.curve": "1.15, above linear. The suit is a bright body and the dark end has to compress into a rim, or a white figure on grey ground turns into a silhouette-free blob. It is the opposite decision from the tree, which is a dark body and needs the light end compressed.",
+    "outline.enabled": "ON. A white figure against sunlit regolith has almost no value separation at the edge; the line is what holds him.",
+    "outline.inner": "on, and it is only affordable because the suit's seams are MARKINGS. Every limb segment meeting the torso would otherwise draw a seam and the figure would read as a pile of sausages - his words on 16/08, and the reason `Part.marking` exists.",
+    "outline.rim": "OFF. A line and a rim are two answers to one question.",
+    "outline.material": "the ink ramp, a cool near-black.",
+    "body.scale": "1. Every subject in this project is authored at its true size and none is scaled to fake distance.",
+    "gait.swing": "0.26 turn = 94 deg, set by the LARGEST motion across the three gaits, which is the leap's knee tuck at about 47 deg. A lope's thigh swings 28 deg and its key is authored as a third of the amplitude.",
+    "gait.lift": "5 px. A lope lifts the whole body about 5 px off the ground and hangs there; on Earth the same subject would lift 2. This number IS the low gravity, and it is the only place in the sprite where the moon is expressed rather than drawn.",
+    "gait.depth": "7 px, and it carries the YAW. Turning a body converts limb rotation into limb translation in depth (`src/core/yaw.ts`), and this is the amplitude that conversion lands on. It is set to the body's own depth - the torso is 5.4 deep and the limb rows sit at 5 - so a swing that reads as 28 degrees from the side reads as the same reach from the front.",
+    "texture.speckle": "0. Every pixel is placed.",
+    "playback.msPerFrame": "85 ms. 12 x 85 = 1020 ms for one lope, against the gorilla's 600 ms stride. A body in a sixth of a g takes longer between footfalls, and getting that number wrong is the single loudest way to make the moon look like Earth.",
+    "playback.scale": "3, the scene's. 3 is the integer scale every micro game blits at; a fractional one would sample pixel art through mud.",
+    "shadow.steps": "8 px, the project's measured saturation point.",
+    "shadow.bias": "0.25 px, the project's.",
+    "shadow.strength": "2 ramp steps, and it is DOUBLE every other subject in the project. That is the moon: no atmosphere means no scattered light, so a shadow on a suit goes to nearly black rather than to a lit-from-elsewhere grey. It is the second place the setting is expressed as a number rather than as a drawing.",
+    "fill.x": "+0.5, opposite the key lamp.",
+    "fill.y": "+0.7, bounce off the regolith - which on the moon is real and strong, since the surface is right there and the sky contributes nothing.",
+    "fill.z": "-0.2, barely on the viewer side.",
+    "fill.weight": "0.03, and it is the lowest in the project by a factor of five. Everywhere else 0.15 is the measured edge; here almost all of it is spent, because a fill stands in for sky bounce and there is no sky. What little remains is the ground bounce, which is why it is not zero."
+  }
+}
