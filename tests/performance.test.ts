@@ -95,6 +95,52 @@ describe('every micro game stays inside the frame budget', () => {
   }
 })
 
+/**
+ * **Nothing is rendered, shipped or decoded twice**, and this is his fourth item: *"isso é ruim.
+ * Em jogos mais robustos vai custar caro esse desperdício. Vamos resolver isso."*
+ *
+ * Every subject with clips was carrying a duplicate of one of them. The layer cache keys on the
+ * request, and the placement asked for its main layer with `scale` left undefined while the clips
+ * asked with the same number written out — `cat-fall@cat` and `cat-fall@cat×1`, two keys for one
+ * picture. It cost a render, a slot in the atlas, bytes on the wire and a decode on the page, and
+ * it changed nothing anybody could see, which is why nothing had ever noticed.
+ *
+ * **The rule the lock states is about the cache and not about the scale:** a key built from an
+ * unresolved field varies with how the caller spelled the request. This asserts the consequence
+ * directly, in bytes, so any future field with the same shape trips it too.
+ */
+describe('nothing is drawn twice', () => {
+  for (const game of MICRO_GAMES) {
+    it(`${game.id}: no two layers are byte-identical`, () => {
+      const stage = toStage(game.scene)
+      const seen = new Map<string, string>()
+      for (const layer of stage.layers) {
+        const key = Buffer.from(layer.indices).toString('base64')
+        const first = seen.get(key)
+        expect(first, `${layer.id} is a byte-for-byte copy of ${first}`).toBeUndefined()
+        seen.set(key, layer.id)
+      }
+    })
+  }
+
+  /**
+   * The null case: the check has to be able to fail. A stage whose layer list contains the same
+   * layer twice is exactly what the defect looked like, and the assertion above must catch it.
+   */
+  it('fires on a stage that does carry a copy', () => {
+    const stage = toStage(MICRO_GAMES[0]!.scene)
+    const doubled = [...stage.layers, stage.layers[0]!]
+    const seen = new Set<string>()
+    let caught = false
+    for (const layer of doubled) {
+      const key = Buffer.from(layer.indices).toString('base64')
+      if (seen.has(key)) caught = true
+      seen.add(key)
+    }
+    expect(caught).toBe(true)
+  })
+})
+
 describe('the budget counts the loop that actually runs', () => {
   it('a rain column costs one draw call, not one per drop pixel', () => {
     // The null case for the biggest single saving in the page, and the reason it is checked

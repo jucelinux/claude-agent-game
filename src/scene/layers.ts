@@ -177,10 +177,20 @@ function layerOf(
   recede: number,
   flipLight: boolean,
 ): { layer: Layer; foot: number; origin: { x: number; y: number } } {
-  const overrides: Record<string, number> = {}
-  if (spec.scale !== undefined) overrides['body.scale'] = spec.scale
-  if (spec.msPerFrame !== undefined) overrides['playback.msPerFrame'] = spec.msPerFrame
   const run = execute({ grammar: spec.grammar, tunables: spec.tunables, seed: spec.seed ?? 1 })
+  /**
+   * **An override that restates the tunables' own value is not an override.**
+   *
+   * A caller that resolves `body.scale` up front — which every caller now does, so that one
+   * subject's clips cannot disagree about how big it is — hands this function a number that is
+   * usually the file's own. Setting it anyway forced a second `execute` for an identical result.
+   * Compared rather than assumed, so the second render happens only when something differs.
+   */
+  const overrides: Record<string, number> = {}
+  if (spec.scale !== undefined && spec.scale !== run.params.body.scale) overrides['body.scale'] = spec.scale
+  if (spec.msPerFrame !== undefined && spec.msPerFrame !== run.params.playback.msPerFrame) {
+    overrides['playback.msPerFrame'] = spec.msPerFrame
+  }
   const lit = flipLight
     ? execute({
         grammar: spec.grammar, tunables: spec.tunables, seed: spec.seed ?? 1,
@@ -254,12 +264,6 @@ export function toStage(scene: Scene): Stage {
 
   for (const [i, p] of scene.placements.entries()) {
     const recede = p.sky === true ? 0 : hazeAt(scene, p.depth ?? 0)
-    const main = build(p, recede, false)
-
-    // Depth gives the contact row and nothing here adjusts it. `anchor` is passed through so
-    // the draw applies it against whichever clip is on screen — resolving it once, against the
-    // main clip, is what put the prone photographer 21 px in the air.
-    const row = p.sky === true ? (p.y ?? 0) : standRow(scene, p.depth ?? 0)
 
     /**
      * **Every clip of one subject renders at one scale, and the subject decides which.**
@@ -269,13 +273,34 @@ export function toStage(scene: Scene): Stage {
      * character, and then the animal visibly shrank every time it swung. A clip's tunables own
      * its lighting and its timing; **they do not get to own how big the body is**, because
      * that is a fact about the subject and not about the action.
+     *
+     * **It is resolved HERE, above the main build, and that placement is the whole of his
+     * fourth item.** It used to be resolved below: the main layer was built from the placement
+     * with `scale` left undefined, and the clips were built with the same number written out.
+     * `cat-fall@cat` and `cat-fall@cat×1` are two cache keys for one picture, so every subject
+     * with clips was rendered, stored, shipped and decoded **twice** — the moon, the forest and
+     * the climb all carried it. *"Em jogos mais robustos vai custar caro esse desperdício."*
+     *
+     * The lesson is about the cache rather than about the scale: **a key built from an
+     * unresolved field is a key that varies with how the caller spelled the request.** Resolve
+     * first, key second.
      */
     const scale = p.scale ?? loadParams(p.tunables).body.scale
+    const main = build({ ...p, scale }, recede, false)
+
+    // Depth gives the contact row and nothing here adjusts it. `anchor` is passed through so
+    // the draw applies it against whichever clip is on screen — resolving it once, against the
+    // main clip, is what put the prone photographer 21 px in the air.
+    const row = p.sky === true ? (p.y ?? 0) : standRow(scene, p.depth ?? 0)
+
     let clips: Placed['clips']
     if (p.clips !== undefined) {
       const built: Record<string, { right: number; left: number }> = {}
       for (const [name, spec] of Object.entries(p.clips)) {
-        const sized = { ...spec, scale }
+        // The placement's own frame rate reaches its clips too. Without it the main layer and
+        // the clips of one subject could run at two speeds, which is the same class of
+        // disagreement the scale had.
+        const sized = { ...spec, scale, ...(p.msPerFrame === undefined ? {} : { msPerFrame: p.msPerFrame }) }
         built[name] = { right: build(sized, recede, false).layer, left: build(sized, recede, true).layer }
       }
       clips = built

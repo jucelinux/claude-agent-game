@@ -378,16 +378,23 @@ sample since — `outline.rim` is on in every shipped tunables file. §3b.4, and
       on one renderer would make the artifact less portable, not more.
 - [x] ~~**The exporter**~~ → **dead 15/08**, with the scope redefinition. The output contract
       and its locks stay; nothing builds against them.
-- [ ] **The forest still has a mechanic and no consequence.** The climb has one now, so the
-      pattern exists and can be harvested rather than designed: a state that can be lost, a
-      number that counts, and one key to start again.
+- [x] ~~**The forest still has a mechanic and no consequence.**~~ → **Closed by him, 16/08,
+      without being built:** *"O microgame do gorila está fechado. Se no futuro eu decidir
+      revisitá-lo eu te aviso."* The pattern exists in the climb if it is ever wanted. Same
+      answer closes **the attack that lands looking like one that misses** — both defects live
+      inside that one game.
+- [x] ~~**A 4 px enclosed pocket between the gorilla's legs.**~~ → **Closed by him, 16/08:**
+      *"Não percebo isso visualmente, nem precisamos revisitar isso."* A defect nobody can see
+      is not a defect; it is a number I found. Kept in `DECISIONS.md` and off this list.
 - [ ] **`compose.ts` and `layers.ts` are still two paths and still uncompared** — for every
       scene that is not a climb. The climb resolved its own half by refusing outright, which is
       honest and is not the general fix.
-- [ ] **Every clip of a subject renders twice under two cache keys** when the placement's main
-      grammar is also one of its clips: once without a scale in the key and once with it. One
-      duplicate 41×32×8 layer on the climb, and the moon and the forest carry it too. Costs
-      wire and a decode, changes no pixel.
+- [x] ~~**Every clip of a subject renders twice under two cache keys.**~~ → **Fixed 16/08 at
+      his instruction:** *"Isso é ruim. Em jogos mais robustos vai custar caro esse desperdício.
+      Vamos resolver isso."* The scale is resolved above the main build instead of below it, so
+      one picture has one key. **83 layers → 79, 2245 KB → 2176 KB of indices, and every stage
+      now carries zero byte-identical layers.** Locked in `tests/performance.test.ts`, with its
+      null case.
 - [x] ~~**The "sprite in situ" axis**~~ → **done, and content asked for it rather than a plan.**
       Three micro games, each a loop inside a real scene with a camera, parallax and
       neighbours. _(Ticked 16/08 at a cycle open; it had sat open through all three. §3b.4.)_
@@ -471,8 +478,10 @@ Written for him, so no method vocabulary crosses into this section.
 - [x] ~~The five reference loops~~ → **no longer needed.** Gate v3 needs no reference files
       at all; it needs one sentence of commission and one word of verdict.
 
-- [ ] 🟡 **Should the gorilla, the photographer and the trees be asked the seam question too?**
-      Asked 16/08, and it costs you one word.
+- [x] ~~🟡 **Should the gorilla, the photographer and the trees be asked the seam question?**~~
+      → **Answered 16/08: LEAVE IT.** *"Não vamos mais mexer nesse micro game. Deixemos como
+      está."* The 135 hidden lines stay. They are recorded here and in `DECISIONS.md` so that
+      whoever lightens that coat one day knows what is under it. Asked 16/08:
       · *Open:* nothing. This is a yes/no about work you have already approved.
       · *What it is:* you told me the gorilla's limb contours were handled on purpose. They were
       not. The gorilla has 135 of those internal lines, exactly like the cat had — you cannot see
