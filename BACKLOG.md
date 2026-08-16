@@ -29,44 +29,77 @@ turns a reactive scene into a game.* He read it and chose it over the 3D work.
 | batch | commissions | shipped | hit rate | cycles per shipped piece |
 |---|---|---|---|---|
 | 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading from him |
-| 2 | 1 | *awaiting his word* | — | 1 model cycle |
+| 2 | 1 | **1 — ships** | **1/1** | 1 model cycle, 2 readings from him |
 
-### My prediction, recorded before he looks
+**Running: 1 of 2.**
 
-**I predict a MISS, and the named risk is the CAT rather than the game.**
+### His verdict, 16/08, unsoftened
 
-Last batch's lesson is the one being applied: *a declared risk is a place I was already
-looking*, and I predicted the failure of the part I had thought hardest about while shipping
-three defects in parts I had not examined. So this prediction names what I have **not**
-examined.
+> *"Eu gostei dessa produção. Temos um gatinho implementado com muita animação (as caudas, as
+> orelhas, sua projeção quando salta) e ficaram boas."*
+>
+> *"No geral achei que o minigame atendeu as expectativas."*
 
-**What I have examined, and therefore expect to hold.** The loop, in every part a number can
-reach: the tower is provably climbable (worst gap 46 px against a 78 px apex, asserted over ten
-thousand bands), a fall ends the run, the camera never comes back down, the score counts, and
-space restarts. Eleven locks, run headless against the real runtime. **The consequence he asked
-for exists and is measured.**
+**That is a ship.** Two notes came with it, and both are specifications rather than complaints:
 
-**What I have not examined is whether a kitten reads as a kitten.** It is the first quadruped
-this project has drawn, and every fact I have about it is a count rather than a look:
+> *"embora eu sinta que tenham muitas plataformas disponíveis, o que torna o jogo pouco
+> desafiador, pois é difícil errar um salto assim"*
+>
+> *"tornar o gatinho mais pixelado. Ver os contornos de suas formas dá ao gato um aspecto mais
+> mecânico, o que você já resolveu com o gorila."*
 
-- **22 parts in a body 34 px tall.** The recorded ceiling for part density is the tree's crown
-  at 28 parts in 30×28 px, and `TASTE.md` §2b says articulation density is the model's ceiling.
-  This is under it and not far under it.
-- **The head is as wide as the chest**, deliberately, because that ratio is what makes a young
-  animal read. If it is wrong, it is wrong in the most visible place on the sprite.
-- **The face is four parts in a 12 px skull** — muzzle, nose, eye, inner ear. Two of them paint
-  three pixels. That is the crown-as-a-sponge shape.
-- **Cozy is a word I translated into a hue policy**, on the reasoning that the 15/08 verdict
-  selected a wide value range and "cozy" pulls straight at the sample that tied for last. That
-  translation is an argument, not a measurement, and it is the second thing to disbelieve.
+### Scoring the prediction — **wrong, and wrong on the half I named**
 
-**Confidence: 55/45 toward a miss**, and the two halves of the commission are likely to split —
-the game working and the cat not, or the reverse. **The mitigation he offered is what resolves
-it:** one or two words of why, on a miss.
+| I predicted | what happened |
+|---|---|
+| a MISS at 55/45 | **ships** |
+| the cat is the risk — 22 parts in 34 px, a face of four parts in a 12 px skull | **the cat is what he praised**, by name: the tail, the ears, the projection on the jump |
+| the loop holds, because I measured every part of it a number can reach | **the loop is where the note landed** — too many platforms, too easy |
 
-**If it misses on the cat, the capability it specifies is the face at small scale** — every
-subject before this one was read by its mass and its silhouette, and a face is the first thing
-here that has to be read by four parts inside one.
+**Last batch's lesson was applied and it was applied too literally.** The rule I took from batch 1
+was *name what you have not examined*. So I named the drawing, because I had counted it instead
+of looking at it. **But "not examined" is not the same as "at risk", and I substituted one for
+the other.** The counts on the cat were good and I discounted them for being counts; the counts
+on the loop were good and I trusted them — and the loop is where the miss-shaped note came from.
+
+**The sharper form, and it is the one worth carrying:** the loop was measured by an instrument
+that could not perceive the quantity he judged it on. It reports whether progress happens, never
+whether progress is *earned*. **A number that comes back green from an instrument blind to the
+question is worth less than a count I have simply not looked at.** Confidence should have gone to
+the axis with the weakest instrument, not to the axis with the least attention.
+
+### What the two notes specified, and both are built
+
+**"Muitas plataformas" — the difficulty knob had been tuned against a robot.** The tower was
+thickened to break a locked orbit, and the thickening was tuned by a headless run holding one
+key: a player who never aims. That instrument cannot feel "too easy". Pushed on, it drives every
+knob to the generous end and reports success all the way.
+
+The reading is a **pair** now, and it is a lock:
+
+| | before his note | now |
+|---|---|---|
+| shelves on screen | 15.8 | **9.2** |
+| landing window | 26% of the width | **22%** |
+| a run that never aims | ~20 m | **6.1 m, then falls** |
+| a run that steers at the nearest shelf | — | **67 m in a minute, still climbing** |
+
+**One number is not a difficulty reading; the ratio between two is.** `tests/climb.test.ts`
+asserts both ends and the ratio, so a tower that gets this easy again goes red.
+
+**"Mais pixelado" — and it was never a drawing problem.** Measured before anything was touched:
+the cat carries the same five tones, the same drawn line, the same inner outline as the gorilla,
+and **28% of its painted pixels are outline against the gorilla's 27%**. Identical.
+
+What differed was the scene. Every other hero on the shelf stands **132 px tall on screen with
+3×3 pixels**; the kitten stood **72 px with 2×2** — the only game rendering at ×2. At half the
+size and two thirds the pixel, the eye stops reading pixels and reads the smooth shaded round
+masses, which is exactly *"os contornos de suas formas"*. The world is 200×240 at ×3 now:
+600×720 on the page, kitten 132 px, 3 px pixel.
+
+**Portable, and it is the finding of the round:** a subject can be drawn correctly and presented
+wrongly. A complaint about how a thing is *drawn* gets checked against how it is *shown* before a
+pixel is touched.
 
 ---
 
@@ -390,10 +423,12 @@ without both is a rumour.
 | fixture baseline hash | `a542197e4c49b27d` | `npm run baseline` | 15/08 |
 | min pair distance, shipped tunables | 0.106 | `node bin/run.ts runs/fixture.run.json` | 15/08 |
 | locks green | 328 | `npm test` | 16/08 |
-| the climb: worst gap in an infinite tower | 46 px, against a 78 px apex | `npx vitest run tests/climb.test.ts` | 16/08 |
+| the climb: worst gap in an infinite tower | 58 px, against a 96 px apex — ratio 0.60 | `npx vitest run tests/climb.test.ts` | 16/08 |
 | the climb, draw calls per frame | 98, against a 200 ceiling | `node bin/micro.ts --static` then read the budget row | 16/08 |
-| the climb, on the wire | 37 KB gzip, 11 layers, 35 colours | `node bin/micro.ts --static` | 16/08 |
-| an unaimed run: one key held, sixty seconds | reaches ~20 m, then falls | `npx vitest run tests/climb.test.ts` | 16/08 |
+| the climb, on the wire | 11 layers, 35 colours | `node bin/micro.ts --static` | 16/08 |
+| **difficulty, and it is a PAIR because one number is not a reading** | never aims: **6.1 m then falls** · aims at the nearest shelf: **67 m in a minute, still climbing** | `npx vitest run tests/climb.test.ts` | 16/08, after his note |
+| every hero's on-screen height | forest 132 px · moon 141 px · climb 132 px, all at a 3 px pixel | `node bin/micro.ts --static` | 16/08, after his note |
+| outline as a share of painted pixels | kitten 28%, gorilla 27% — the drawing was never the difference | `node bin/bench.ts --grammar cat-rise --tunables cat` | 16/08 |
 | gate page, tells found by grep | 0 | `node bin/gate.ts runs/probe-b.run.json && grep -cE "fixture\|label\|keydown\|button\|http\|seed" sheet/gate.html` | 15/08 |
 
 ## The harness, as of 14/08

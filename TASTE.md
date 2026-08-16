@@ -130,6 +130,30 @@ _Fills from evidence. Every entry cites the artifact that produced it._
   gets predicted out loud before he sees it, and the prediction gets scored. This one scored
   zero, and it is the second time §2a has caught me writing a verdict before anyone looked.
 
+- **[16/08 · batch 2, his verdict against my prediction] I put my confidence on the axis I paid
+  the most attention to, when it belongs on the axis with the weakest instrument.** Batch 1
+  taught me to predict against what I had *not* examined, so I named the cat: 22 parts in a
+  34 px body, a face of four parts in a 12 px skull, all counted and never looked at. **The cat
+  is what he praised, by name.** Both his notes landed on the loop — the part I had measured in
+  every way a number can reach, and shipped fourteen locks for. **"Not examined" is not the same
+  as "at risk", and I substituted one for the other.** The loop's numbers were green from an
+  instrument that could not perceive the quantity he judged it on: a headless run holding one
+  key reports whether progress *happens*, never whether it is *earned*, so it certified a tower
+  he found too easy to fall off. **portable, and it sharpens batch 1's lesson rather than
+  replacing it: a green number from an instrument blind to the question is worth less than a
+  count nobody has looked at. Ask what each instrument cannot see, and put the confidence
+  there.**
+
+- **[16/08 · batch 2, "mais pixelado"] I look for a complaint's cause in the layer it names.**
+  He said the kitten looked mechanical and wanted it more pixelated, and every reflex I had was
+  a grammar reflex — part count, seams, the inner outline, the tone budget. All of it measured
+  identical to the gorilla he was comparing it to, down to 28% of painted pixels being outline
+  against his 27%. **The cause was that this was the only game on the shelf rendering at ×2**:
+  132 px of hero everywhere else, 72 px here, at two thirds the pixel size. Nothing about the
+  drawing was wrong and nothing about the drawing changed. **portable: a subject can be drawn
+  correctly and presented wrongly, and the layer a complaint names is where the symptom is, not
+  where the cause has to be.**
+
 - **[16/08 · the climb, four tuning sweeps] Four identical results are a finding, and I read
   them as four points on a curve.** The kitten could not climb past the first shelf, so I swept
   the landing window: 8 px, 14, 20, 26 — **exactly 4.0 m every time** — then 34, and suddenly

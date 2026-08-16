@@ -119,7 +119,7 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     id: 'cozy',
     title: 'The climb',
     blurb:
-      'Steer the kitten with the arrows; the bounce is automatic and there is no jump key. The tower has no top and is not stored anywhere — every shelf is an integer hash of its own band index, so the climb is endless and identical on every machine. It is provably climbable: the apex of one bounce is 78 px and no gap is ever more than 52. The sky is a function of how high you are, the stars come out as you go, and falling off the bottom ends the run — which is the first consequence anything on this shelf has had.',
+      'Steer the kitten with the arrows; the bounce is automatic and there is no jump key. The tower has no top and is not stored anywhere — every shelf is an integer hash of its own band index, so the climb is endless and identical on every machine. It is provably climbable: the apex of one bounce is 96 px and no gap is ever more than 58. The sky is a function of how high you are, the stars come out as you go, and falling off the bottom ends the run — the first consequence anything on this shelf has had. His second reading thinned the tower and doubled the pixel: 9 shelves on screen instead of 16, and a run that never aims now reaches 6 m where it used to reach 20.',
     date: '2026-08-16',
     keys: '← → steer · space to climb again after a fall · the bounce takes care of itself',
     scene: cozyScene,

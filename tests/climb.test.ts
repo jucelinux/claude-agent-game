@@ -35,6 +35,8 @@ type Harness = {
   readonly sheets: number[]
   readonly text: Record<string, string>
   readonly fills: string[]
+  /** The loop's own state, the findings channel `app.ts` exposes. See its comment on `state`. */
+  state: () => { x: number; y: number; top: number; state: string; over: boolean }
   tick: (now: number) => void
   key: (name: string, down: boolean) => void
 }
@@ -85,11 +87,14 @@ function run(html: string): Harness {
     atob: (s: string) => Buffer.from(s, 'base64').toString('binary'),
     Math,
   }
+  let mounted: unknown = null
+  const capture = { ...sandbox, __capture: (m: unknown) => { mounted = m } }
   // eslint-disable-next-line @typescript-eslint/no-implied-eval
-  new Function(...Object.keys(sandbox), script)(...Object.values(sandbox))
+  new Function(...Object.keys(capture), `${script}\n__capture(__last)`)(...Object.values(capture))
 
   return {
     frames, sheets, text, fills,
+    state: () => (mounted as { state: () => ReturnType<Harness['state']> }).state(),
     tick: (now: number) => {
       const fn = pending
       pending = null
@@ -301,6 +306,89 @@ describe('the loop', () => {
     h.key(' ', false)
     step(20)
     expect(h.text['score'], 'space did not start a new run').not.toMatch(/you fell/)
+  })
+})
+
+/**
+ * **Difficulty is a ratio between two players, never one number — and this section exists
+ * because his second reading said so.**
+ *
+ * > *"embora eu sinta que tenham muitas plataformas disponíveis, o que torna o jogo pouco
+ * > desafiador, pois é difícil errar um salto assim"*
+ *
+ * The tower had been thickened to break a locked orbit, and the thickening was tuned against a
+ * robot holding one key. **That instrument cannot perceive "too easy."** It reports whether
+ * progress happens at all, so pushed on it, it drives every knob to the generous end and reports
+ * success the whole way. It was measuring the wrong quantity and it never said so.
+ *
+ * The fix is a second player. One who steers at the nearest shelf under him is the cheapest
+ * stand-in for somebody actually playing, and the **gap between the two** is the thing a
+ * difficulty setting moves. A game where aiming buys nothing is a game with no skill in it; a
+ * game where not aiming still climbs for ever is a game with no consequence.
+ */
+function drive(seconds: number, aim: boolean): { peak: number; over: boolean; landings: number } {
+  const h = run(page)
+  const w = cozyScene.w
+  let held: string | null = null
+  let landings = 0
+  let was = ''
+  for (let i = 0; i < Math.round(seconds * 60); i++) {
+    const st = h.state()
+    if (aim) {
+      // The nearest shelf below him, weighted so a shelf far to the side is worth less than a
+      // shelf just under him. Not clever: a stand-in for a person, not a solver.
+      let best: { d: number; dx: number } | null = null
+      for (let k = -1; k < 600; k++) {
+        for (let s = 0; s < C.perBand; s++) {
+          const b = k < 0 ? { x: st.x, y: C.startRow } : bandAt(k, s)
+          if (b.y < st.y + 4 || b.y > st.y + 130) continue
+          let dx = b.x - st.x
+          if (dx > w / 2) dx -= w
+          if (dx < -w / 2) dx += w
+          const d = b.y - st.y + Math.abs(dx) * 0.4
+          if (best === null || d < best.d) best = { d, dx }
+        }
+      }
+      const want = best === null ? null : best.dx > 2 ? 'ArrowRight' : best.dx < -2 ? 'ArrowLeft' : null
+      if (want !== held) {
+        if (held !== null) h.key(held, false)
+        if (want !== null) h.key(want, true)
+        held = want
+      }
+    } else if (held === null) {
+      h.key('ArrowRight', true)
+      held = 'ArrowRight'
+    }
+    h.tick(i * 16.67)
+    const now = h.state()
+    if (now.state === 'tuck' && was !== 'tuck') landings++
+    was = now.state
+  }
+  const st = h.state()
+  return { peak: (C.startRow - st.top) / C.pxPerMetre, over: st.over, landings }
+}
+
+describe('difficulty is the gap between aiming and not aiming', () => {
+  it('a player who never aims falls, and does not get far first', () => {
+    const r = drive(60, false)
+    expect(r.over, 'a minute of never aiming never ended the run').toBe(true)
+    // 12 m is three times what it reaches today and well under the 20 m that drew his note.
+    expect(r.peak).toBeLessThan(12)
+  })
+
+  it('a player who steers at the nearest shelf climbs, and keeps climbing', () => {
+    const r = drive(60, true)
+    expect(r.over, 'aiming at every shelf still ended the run — the game is unplayable').toBe(false)
+    expect(r.peak).toBeGreaterThan(30)
+  })
+
+  /**
+   * **The pair, and it is the reading his note actually produced.** Either number alone is
+   * satisfiable by a broken game: a tower nobody can climb passes the first, and a tower nobody
+   * can fall off passes the second. Only the ratio says the skill is doing something.
+   */
+  it('aiming is worth several times not aiming', () => {
+    expect(drive(60, true).peak / Math.max(1, drive(60, false).peak)).toBeGreaterThan(4)
   })
 })
 

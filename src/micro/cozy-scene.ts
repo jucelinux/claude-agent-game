@@ -36,15 +36,52 @@
  *
  * `bounce` and `gravity`. Everything else is decoration.
  *
- * A landing buys 205 px/s upward against 270 px/s² of gravity, so the apex is **78 px** and
- * the airtime from one landing to the next is **1.52 s**. The bands are **52 px** apart, and
- * the jitter only ever moves a shelf DOWN from its band's row — so 52 px is a bound on every
- * gap in an infinite tower, and 78 px of apex clears it with half again to spare. **The tower
- * is provably climbable, and the proof is one inequality rather than a level designer.**
+ * A landing buys 228 px/s upward against 270 px/s² of gravity, so the apex is **96 px** — just
+ * under three cat-heights — and the airtime from one landing to the next is **1.69 s**. The
+ * worst gap anywhere in the tower is `bandH + jitterY` = **58 px**, which is 0.60 of the apex.
+ * **The tower is provably climbable and the proof is one inequality rather than a level
+ * designer**, asserted over ten thousand bands in `tests/climb.test.ts`.
  *
- * Sideways, `steer` is 116 px/s. The world wraps, so no two shelves are ever more than 100 px
- * apart, and 100 px takes 0.86 s against 1.52 s of airtime. That is a comfortable margin and it
- * is deliberately comfortable: a cozy game is not a game about precision.
+ * ## His second reading, 16/08, and it moved four numbers
+ *
+ * > *"embora eu sinta que tenham muitas plataformas disponíveis, o que torna o jogo pouco
+ * > desafiador, pois é difícil errar um salto assim"*
+ *
+ * Correct, and it is the visible consequence of a fix rather than a taste I got wrong. The
+ * tower had been thickened to break a locked orbit — one shelf per band made the game periodic
+ * — and the thickening was tuned against a **robot holding one key**, which is a player who
+ * never aims. That instrument cannot feel "too easy": it only reports whether progress happens.
+ *
+ * So the reading is now taken twice, and the pair is the measurement:
+ *
+ * | | before his note | now |
+ * |---|---|---|
+ * | shelves on screen | 15.8 | **9.2** |
+ * | landing window | 26% of the width | **22%** |
+ * | a run that never aims | ~20 m | **6.1 m, then falls** |
+ * | a run that steers at the nearest shelf | — | **67 m in a minute, still climbing** |
+ *
+ * **One number is not a difficulty reading; the ratio between two is.** A game where aiming
+ * buys you eleven times the height is a game where the skill is doing something.
+ *
+ * ## And the pixels, which were never a drawing problem
+ *
+ * > *"tornar o gatinho mais pixelado. Ver os contornos de suas formas dá ao gato um aspecto
+ * > mais mecânico, o que você já resolveu com o gorila"*
+ *
+ * Measured rather than guessed, and the drawing was identical to the gorilla's on every axis
+ * that could have explained it: same five tones, same drawn line, same inner outline, and
+ * **28% of the kitten's painted pixels are outline against the gorilla's 27%**.
+ *
+ * What differed was the scene. Every other hero on this shelf stands **132 px tall on screen
+ * with 3×3 pixels**; the kitten stood **72 px with 2×2**. At half the size and two thirds the
+ * pixel, the eye stops reading pixels and starts reading the smooth shaded round masses — which
+ * is exactly "seeing the contours of its forms". The world is 200×240 at ×3 now, so the kitten
+ * is 132 px tall with 3×3 pixels, like everything else he has approved.
+ *
+ * **The finding is about where to look, not about the cat:** a subject can be drawn correctly
+ * and presented wrongly, and a complaint about how something is *drawn* is worth checking
+ * against how it is *shown* before a single pixel is touched.
  */
 import type { Scene } from '../scene/compose.ts'
 
@@ -84,21 +121,25 @@ export const cozyScene: Scene = {
   name: 'cozy',
   /**
    * **Portrait, and it is the genre's shape.** A vertical climber needs to show the next two
-   * bands of shelves above the player and enough below to see what was just left. 200×300 at
-   * ×2 is 400×600 on the page, which fits a browser window beside its own notes.
+   * bands of shelves above the player and enough below to see what was just left.
+   *
+   * 200×240 at **×3** is 600×720 on the page. It was 200×300 at ×2, and the height came down so
+   * the pixel could go up without the page growing: his second reading was that the kitten did
+   * not read as pixel art, and the cause was that this was the only game on the shelf rendering
+   * at ×2. Every hero here is now ~132 px tall on screen with a 3 px pixel.
    */
   w: 200,
-  h: 300,
+  h: 240,
   // Unused by a climb — there is no frozen frame list — but every scene declares them, and the
   // shelf card and the budget both read the cycle length.
   frames: 8,
   msPerFrame: 90,
-  scale: 2,
+  scale: 3,
   // The garden band, and it is the only ground in the game. `nearRow` is a scene pixel below
   // the canvas because nothing here stands at depth 0: the floor is a backdrop, not a plane a
   // subject walks into.
-  ground: 268,
-  nearRow: 300,
+  ground: 212,
+  nearRow: 240,
   // A garden at head height has almost no aerial perspective in it. The forest's haze was
   // about fifty metres of trees; there is nothing here to look through.
   haze: 0.04,
@@ -127,33 +168,35 @@ export const cozyScene: Scene = {
   ],
   climb: {
     /**
-     * **30 px between bands, and the first value was 52 for a reason that turned out to be
-     * wrong twice over.**
+     * **52 px between bands, and this number has been wrong in both directions.**
      *
-     * The reasoning was: the apex is 78 px, so put the gap at two thirds of it and the tower is
-     * climbable with room to spare. Both halves of that failed a lock.
+     * It opened at 52 on the reasoning that the apex was 78 and two thirds of it left room. Two
+     * halves of that failed:
      *
-     * 1. **The jitter compounds across a pair.** A shelf may sit below its band's row, so the
-     *    gap between two neighbours is `bandH + jitter(lower) - jitter(upper)` and the worst
-     *    case is `bandH + jitterY`, not `bandH`. Measured over ten thousand bands: 67 px
-     *    against a claimed bound of 52. The apex still cleared it, by 11 px instead of 26.
-     * 2. **One shelf every 78 px is not this genre.** In the game he named, a jump passes
-     *    several platforms on the way up and catches one on the way down; the player aims. At
-     *    52 px a bounce passed one and a half, and a run with no aiming at all died in seconds.
-     *    **Cozy is a difficulty statement as much as a palette statement**, and this was not a
-     *    cozy tower.
+     * 1. **The jitter compounds across a pair.** A shelf may sit below its band's row, which
+     *    shortens the gap above it and lengthens the gap below it by the same amount, so the
+     *    worst case is `bandH + jitterY` and not `bandH`. Claimed 52, measured 67.
+     * 2. **The tower locked.** One shelf per band with a steady input is a periodic system, and
+     *    a robot holding one key bounced between the garden and the first shelf for ever. So the
+     *    tower was thickened — two shelves per band, 30 px apart — and the thickening was tuned
+     *    against that robot.
      *
-     * At 30, a bounce clears about two and a half bands and a fall past six of them is what it
-     * takes to lose. Somebody steering catches one nearly every time.
+     * **His reading is what corrected the correction:** *"muitas plataformas... é difícil errar
+     * um salto assim"*. A robot that never aims cannot report "too easy"; it can only report
+     * whether progress happens at all, so it drove the number to the wrong end of its range.
+     *
+     * Back to 52, with a bigger bounce under it: 9.2 shelves on screen instead of 15.8, and a
+     * run that never aims now reaches 6 m and falls where it used to reach 20.
      */
-    bandH: 38,
-    // A shelf may sit up to 8 px BELOW its band's row and never above it, so the worst gap in
-    // the whole infinite tower is 46 px against an apex of 78. Off-grid enough that the tower
-    // never reads as a ladder, small enough that the bound stays comfortable.
-    jitterY: 8,
+    bandH: 52,
+    // A shelf may sit up to 6 px BELOW its band's row and never above it, so the worst gap in
+    // the whole infinite tower is 58 px against an apex of 96 — a ratio of 0.60. Off-grid enough
+    // that the tower never reads as a ladder, small enough that the bound stays comfortable.
+    jitterY: 6,
     // **Two, and it is the fix for a locked orbit rather than a density preference.** See
-    // `Climb.perBand`. Two 48 px landing windows out of 200 puts a shelf within reach of about
-    // half of every band, and a bounce passes two bands.
+    // `Climb.perBand`. Two 44 px landing windows out of 200 puts a shelf within reach of about
+    // 44% of every band. Density is controlled by `bandH` instead, which is the knob that does
+    // not put the orbit back.
     perBand: 2,
     // ±15 px around a shelf's constructed position. The two shelves of a band are 100 px apart
     // by construction, so this leaves them between 70 and 130 apart — never more than 78 px of
@@ -172,27 +215,26 @@ export const cozyScene: Scene = {
     // a leaf is not a floor.
     halfW: 16,
     /**
-     * How far past the plank's end a paw may catch: **10 px, which is the forgiveness every
-     * platformer has and none of them mentions.** The paw itself is 5, so this is twice the
-     * geometric truth, and it is deliberate — a landing that misses by one pixel is a landing
-     * the player believes he made.
+     * How far past the plank's end a paw may catch: **6 px, which is the forgiveness every
+     * platformer has and none of them mentions.** The paw itself is 5, so this is barely past
+     * the geometric truth — a landing that misses by a pixel is a landing the player believes he
+     * made, and nothing more generous than that.
      *
-     * Measured with the whole loop run headless, one key held for sixty seconds — a player who
-     * never aims at anything. At 9 he reaches 5 m. At 10 he reaches 20 and the run still ends.
-     * Somebody actually aiming does far better than either, which is why the number is set from
-     * the floor of the range rather than the middle.
+     * It was 10, and 10 made the landing window 26% of the world. His reading: *"é difícil errar
+     * um salto assim"*. At 6 the window is 44 px, 22% of the width, and the difference between
+     * aiming and not aiming is a factor of eleven in height reached.
      */
-    footHalf: 10,
+    footHalf: 6,
     // 220 ms, which is `cat-tuck`'s own four frames at 55 ms. The clip and the state end
     // together or the pose holds past the spring it is describing.
     tuckMs: 220,
     gravity: 270,
-    bounce: 205,
+    bounce: 228,
     steer: 116,
     // 0.42 down the screen. High enough that a player sees three bands above and reads where he
     // is going; low enough that the shelf he just left is still visible under him.
     hold: 0.42,
-    // The first shelf sits 62 px above the garden, which is inside one bounce from a standing
+    // The first shelf sits 62 px above the garden, well inside the 96 px apex from a standing
     // start. The first thing a player does must succeed.
     firstBand: 62,
     seed: 61,
@@ -200,12 +242,12 @@ export const cozyScene: Scene = {
     // is not physics; it is the only unit on screen a player can see the size of.
     pxPerMetre: 34,
     skyRamp: SKY,
-    // 640 px of climb spends the whole ramp — about twelve bounces, or a minute of play. Past
-    // it the sky holds at the top colour and the stars are at full strength.
+    // 640 px of climb spends the whole ramp — about seven bounces, and 2.7 screens. Past it the
+    // sky holds at the top colour and the stars are at full strength.
     skyHeight: 640,
     // Parallax 0.35: the stars move a third as fast as the shelves. A fixed field would read as
     // wallpaper and a field at full speed would read as more shelves.
-    stars: { count: 110, colors: [[150, 152, 180], [204, 206, 228], [246, 246, 252]], seed: 29, parallax: 0.35 },
+    stars: { count: 90, colors: [[150, 152, 180], [204, 206, 228], [246, 246, 252]], seed: 29, parallax: 0.35 },
     /**
      * **Motes, and they are the cozy signature.** Warm specks drifting up through the garden
      * air — pollen at the bottom of the climb and something closer to fireflies at the top.
