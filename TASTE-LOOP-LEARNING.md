@@ -207,6 +207,41 @@ itself the deliverable of that reading. Reading 1 asks *is this the character*. 
 **Status:** not adopted. It costs him one extra reading per commission and buys attribution. The
 number to watch is whether his notes get shorter, not whether there are fewer of them.
 
+**Scoped by him the same day, and the scope is the more useful half.** *"Importante separarmos o
+que é discussão sobre uma mudança fundacional nesse repo do que for tema de um microjogo...
+quando você está melhorando as estruturas que lhe tornarão o melhor agente de códigos para
+gamedev, possivelmente as coisas vão se acumular."*
+
+**Attributability binds a reading, not a change.** It is a rule about the human's attention, so
+it applies exactly where his attention is spent and nowhere else:
+
+| | a commission | a foundation |
+|---|---|---|
+| what it is | a micro game he plays | a change to the core: 3D, the depth solver, a new field |
+| judged by | his eye, once, one word | **the locks, before he ever sees it** |
+| bounded by | **attributability** — small enough to attribute | **the null case** — arbitrarily large, provided nothing that already works moves |
+| may accumulate | no | **yes, and it should** |
+
+Three foundational changes shipped on 16/08 and all three were verified the second way, not the
+first: `Part.weld` (every subject predating the field renders byte-identical, asserted over the
+whole catalogue), the cache fix and the deletion of the second renderer (all three games hash
+identical before and after). **None of them was shown to him and none of them needed to be.**
+
+Splitting a foundation to make it attributable would be worse than pointless — half a rotation
+is not a shippable state, and the intermediate readings would be of bodies that are broken on
+purpose.
+
+**Two bounds still apply to foundational work, and they are not attributability:**
+
+1. **Nothing that already works may move**, or the difference is declared and locked. That is
+   the gate all three changes above passed.
+2. **A foundation is demanded by a commission, never planned ahead of one.** The yaw arrived
+   because an astronaut had to walk in eight directions; the whole climb engine arrived because
+   a kitten had to land on something. `CLAUDE.md` records that order as *the right way round*.
+
+So the two halves compose rather than conflict: **the foundation may accumulate freely, because
+the reading is still only ever on the game.**
+
 ---
 
 ## Note, 16/08 — **on convergence, and why the model should stop aiming at it**
