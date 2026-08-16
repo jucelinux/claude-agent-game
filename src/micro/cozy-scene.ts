@@ -83,7 +83,7 @@
  * and presented wrongly, and a complaint about how something is *drawn* is worth checking
  * against how it is *shown* before a single pixel is touched.
  */
-import type { Scene } from '../scene/compose.ts'
+import type { Scene } from '../scene/types.ts'
 
 /**
  * **The garden floor the run starts on**, and it is the one piece of ground in the game.

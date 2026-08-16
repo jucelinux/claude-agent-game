@@ -24,7 +24,7 @@
  * this was legible: nothing told the eye that a lower row was nearer. It now recedes by the
  * same haze its trees carry — one rule for the floor and for the things standing on it.
  */
-import type { Scene } from '../scene/compose.ts'
+import type { Scene } from '../scene/types.ts'
 
 const CANOPY: readonly [number, number, number][] = [
   [26, 30, 26],

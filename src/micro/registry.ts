@@ -22,7 +22,7 @@
  * not one — which shows the defect instead of hiding it behind an arrangement.
  */
 
-import type { Scene } from '../scene/compose.ts'
+import type { Scene } from '../scene/types.ts'
 import { cozyScene } from './cozy-scene.ts'
 import { forestScene } from './forest-scene.ts'
 import { moonScene } from './moon-scene.ts'

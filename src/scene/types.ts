@@ -1,33 +1,30 @@
 /**
- * **A scene: many sprites in one world, on one clock, in one palette.**
+ * **A scene: the data, and nothing that draws it.**
  *
- * This is the first thing in the project that is not a sprite, and it exists because a loop
- * on a page cannot answer the question it raises. A sprite shown alone is judged against
- * itself. A sprite standing next to six others is judged against **them** — do these belong
- * in the same game? — and that axis has been declared in `TASTE.md` §1b since 14/08 under
- * the name *sheet cohesion* and has never once been tested.
+ * This file used to be called `compose.ts` and it used to contain a **second renderer**. That
+ * renderer took a scene and produced a frozen list of finished pictures, for a gallery; the one
+ * in `layers.ts` ships the arrangement to the browser and lets the game compose every frame from
+ * live state. Two code paths drawing the same world, with nothing comparing them, and they
+ * agreed only because they shared the four depth functions at the bottom of this file.
  *
- * Three things the composition forces into the open, none of which a strip can:
+ * **It is one path now, and the reason is his, 16/08:**
  *
- * 1. **One palette or none.** Every grammar carries its own, and index 3 in the gorilla is
- *    not index 3 in the tree. Compositing in index space means merging them, and the merged
- *    count is a cohesion measurement that needs no opinion: a set that shares colours is a
- *    set, and a set that shares none is a collection.
- * 2. **Relative size is a decision nobody had made.** Each subject was authored to fill its
- *    own 64 px cell, so at their rendered sizes a beetle and a gorilla are the same animal.
- *    A placement carries a scale, and choosing it is the first time these subjects have had
- *    to agree about how big they are.
- * 3. **One clock, many cycles.** A 600 ms walk and a 1200 ms wind have to finish together or
- *    the scene stutters at its loop point. Each subject plays a whole number of its own
- *    cycles inside the scene's, which is the same rule the viewer already applies to a row
- *    of cells and the reason it says a cell may own a rate but never a clock.
+ * > *"só faz sentido desenhar se for em uma cena de jogo. O objetivo deste projeto é sairmos com
+ * > um arranjo (harness, engine, recursos) que lhe permitam criar jogos. Então acredito que o
+ * > subproduto aqui deva ser uma única coisa."*
  *
- * portable — all three. Any agent composing generated art into a world meets exactly these.
+ * The frozen renderer answered a question from the era when the deliverable was a drawing — *do
+ * these subjects belong to one game* — and it was superseded **the same day it was written**, by
+ * a commission that needed a gorilla somebody could steer. It then survived thirteen commits
+ * with exactly one caller: a 29-line script that rendered one gallery picture. **A second
+ * implementation of a rule is two rules eventually**, and this one was two rules that nobody was
+ * spending.
+ *
+ * What is left here is the vocabulary — what a scene *is* — in the same shape and for the same
+ * reason as `core/types.ts`: everything is data, so an agent writes a world by writing text.
+ * portable.
  */
-import type { Grammar, IndexedBuffer, Palette, RGB } from '../core/types.ts'
-import type { Frame } from '../core/render.ts'
-import type { RunSpec } from '../io/load.ts'
-import { execute } from '../io/load.ts'
+import type { RGB } from '../core/types.ts'
 
 export type Placement = {
   readonly grammar: string
@@ -434,17 +431,6 @@ export type Field =
       readonly seed: number
     }
 
-export type Composed = {
-  readonly scene: Scene
-  readonly palette: Palette
-  readonly buffers: readonly IndexedBuffer[]
-  /** What the merge cost, which is the cohesion reading. */
-  readonly cohesion: {
-    readonly totalColours: number
-    readonly perSubject: readonly { readonly name: string; readonly colours: number; readonly shared: number }[]
-  }
-}
-
 /**
  * **Everything about distance, derived from one number, in one place.**
  *
@@ -482,232 +468,3 @@ export const paintOrder = (p: Placement, i: number): number =>
 /** How far the floor at row `y` has receded. 1 at the horizon, 0 at the near edge. */
 export const floorDepth = (s: Scene, y: number): number =>
   Math.max(0, Math.min(1, (s.nearRow - y) / Math.max(1, s.nearRow - s.ground)))
-
-const key = (c: RGB): string => `${c[0]},${c[1]},${c[2]}`
-
-/** One lerp toward the sky. Haze does not change a colour's hue relationships, it dilutes them. */
-const haze = (c: RGB, sky: RGB, k: number): RGB => [
-  Math.round(c[0] + (sky[0] - c[0]) * k),
-  Math.round(c[1] + (sky[1] - c[1]) * k),
-  Math.round(c[2] + (sky[2] - c[2]) * k),
-]
-
-/**
- * **Merge every subject's palette into one, and count what that cost.**
- *
- * Exact-match dedupe only. Nothing here quietly nudges two nearly-equal colours together:
- * that would manufacture the cohesion the reading exists to measure, which is the shape of
- * instrument defect `HARNESS.md` §5 warns about — the flattering kind.
- *
- * A subject's `recede` is part of its key, so two trees in the same haze band share every
- * entry and two in different bands share none. The reading therefore reports the true price
- * of depth rather than hiding it.
- */
-function mergePalettes(
-  runs: readonly { readonly name: string; readonly grammar: Grammar; readonly recede: number }[],
-  sky: RGB,
-): { palette: RGB[]; maps: Map<string, Uint8Array>; cohesion: Composed['cohesion'] } {
-  const palette: RGB[] = [[0, 0, 0]]
-  const seen = new Map<string, number>()
-  const maps = new Map<string, Uint8Array>()
-  const perSubject: { name: string; colours: number; shared: number }[] = []
-
-  for (const run of runs) {
-    const colours = run.grammar.palette.colors
-    const map = new Uint8Array(Math.max(256, colours.length))
-    let own = 0
-    let shared = 0
-    for (let i = 1; i < colours.length; i++) {
-      const c = run.recede === 0 ? (colours[i] as RGB) : haze(colours[i] as RGB, sky, run.recede)
-      const k = `${key(c)}@${run.recede}`
-      const already = seen.get(k)
-      if (already === undefined) {
-        palette.push(c)
-        seen.set(k, palette.length - 1)
-        map[i] = palette.length - 1
-        own++
-      } else {
-        map[i] = already
-        shared++
-      }
-    }
-    maps.set(run.name, map)
-    perSubject.push({ name: run.name, colours: own, shared })
-  }
-  return { palette, maps, cohesion: { totalColours: palette.length, perSubject } }
-}
-
-export function compose(scene: Scene): Composed {
-  /**
-   * **A climbing scene has no frozen frame list, and this throws rather than inventing one.**
-   *
-   * `compose()` renders a fixed cast under a fixed camera into N finished pictures. A climb has
-   * a camera that follows a player, platforms that are generated at runtime from a band index,
-   * and a state that can be lost. There is no cycle to freeze. Returning *something* — the
-   * first screen, say — would put a picture in the gallery that disagreed with the game, with
-   * no lock able to say why, which is exactly the failure mode this project recorded on 16/08
-   * about these two files.
-   */
-  if (scene.climb !== undefined) {
-    throw new Error(
-      `scene "${scene.name}" is a climb: it has no frozen composition. Use toStage() and the live runtime.`,
-    )
-  }
-  const runs = scene.placements.map((p, i) => {
-    const spec: RunSpec = {
-      grammar: p.grammar,
-      tunables: p.tunables,
-      seed: p.seed ?? 1,
-      ...(p.scale === undefined && p.msPerFrame === undefined
-        ? {}
-        : {
-            overrides: {
-              ...(p.scale === undefined ? {} : { 'body.scale': p.scale }),
-              ...(p.msPerFrame === undefined ? {} : { 'playback.msPerFrame': p.msPerFrame }),
-            },
-          }),
-    }
-    const result = execute(spec)
-    // The lowest painted row across the whole cycle, so a subject whose feet move keeps
-    // the same floor: measured once, from the art, rather than declared by hand.
-    let footOffset = 0
-    for (const frame of result.frames) {
-      const { w, h, data } = frame.buf
-      for (let y = h - 1; y >= 0; y--) {
-        let any = false
-        for (let x = 0; x < w; x++) if (data[y * w + x] !== 0) { any = true; break }
-        if (any) { if (y + 1 > footOffset) footOffset = y + 1; break }
-      }
-    }
-    return {
-      name: `${p.grammar}#${i}`, grammar: result.grammar, result, placement: p, footOffset,
-      recede: p.sky === true ? 0 : hazeAt(scene, p.depth ?? 0),
-    }
-  })
-
-  const { palette, maps, cohesion } = mergePalettes(runs, scene.sky)
-
-  // The ground and sky enter the same palette as everything else. A scene whose backdrop
-  // lives outside the locked palette is a scene that cannot be exported as one image.
-  const skyIndex = palette.length
-  palette.push(scene.sky)
-  /**
-   * **The floor recedes, by the same haze its trees carry.** One lit strip at the horizon,
-   * then the floor's own dark tone pulled toward the sky in proportion to how far away that
-   * row is. Quantised to eight steps, because every distinct tone is a palette entry and a
-   * smooth gradient would spend a third of the 256 on ground nobody looks at.
-   */
-  const FLOOR_STEPS = 8
-  const floorBase = palette.length
-  const lastTone = scene.groundRamp.length - 1
-  for (let k = 0; k <= FLOOR_STEPS; k++) {
-    const d = k / FLOOR_STEPS
-    const u = d * lastTone
-    const lo = scene.groundRamp[Math.min(lastTone, Math.floor(u))] as RGB
-    const hi = scene.groundRamp[Math.min(lastTone, Math.ceil(u))] as RGB
-    const f = u - Math.floor(u)
-    palette.push(haze([
-      Math.round(lo[0] + (hi[0] - lo[0]) * f),
-      Math.round(lo[1] + (hi[1] - lo[1]) * f),
-      Math.round(lo[2] + (hi[2] - lo[2]) * f),
-    ], scene.sky, scene.haze * d))
-  }
-  const floorIndex = (y: number): number =>
-    floorBase + Math.round(floorDepth(scene, y) * FLOOR_STEPS)
-
-  // Fields paint after the ground and before the subjects, so weather sits behind what it
-  // falls on. A layer in front would need depth it does not have.
-  const fieldBase = palette.length
-  for (const f of scene.fields ?? []) for (const c of f.colors) palette.push(c)
-
-  const total = scene.w * scene.h
-  const buffers: IndexedBuffer[] = []
-  const sceneMs = scene.frames * scene.msPerFrame
-
-  for (let f = 0; f < scene.frames; f++) {
-    const data = new Uint8Array(total)
-    data.fill(skyIndex)
-    // The ground: the lightest tone is a one-pixel lit strip along the top edge, and the
-    // rest steps down. Three tones is enough for a flat plane and more would compete with
-    // the subjects standing on it.
-    for (let y = scene.ground; y < scene.h; y++) {
-      data.fill(floorIndex(y), y * scene.w, (y + 1) * scene.w)
-    }
-
-    const sceneT = f / scene.frames
-
-    // **The fields.** Evaluated per pixel, closed form in (x, y, t): no particle is stored
-    // and none needs to be, which is the whole point of a field over a body.
-    let fieldAt = fieldBase
-    for (const field of scene.fields ?? []) {
-      if (field.kind === 'rain') {
-        const cols = Math.ceil(scene.w / field.spacing) + 2
-        for (let c = 0; c < cols; c++) {
-          // An integer hash, so the sheet is irregular and identical on every run.
-          // The trailing >>> 0 is load-bearing. XOR yields a SIGNED 32-bit integer in JS, so
-          // without it `hsh` goes negative and `hsh % colors.length` returns -1 — which wrote
-          // the palette entry BEFORE the rain's, silently, for about half the columns. Found
-          // by the micro runtime's headless lock, not by looking: the wrong colour is a
-          // plausible grey and the right one is a plausible grey.
-          let hsh = ((c + field.seed) * 2654435761) >>> 0
-          hsh = (hsh ^ (hsh >>> 13)) >>> 0
-          const phase = (hsh % 1024) / 1024
-          const tone = hsh % field.colors.length
-          const x0 = c * field.spacing + (hsh % field.spacing)
-          const fall = ((sceneT * field.passes + phase) % 1) * (scene.h + field.length * 2) - field.length
-          for (let k = 0; k < field.length; k++) {
-            const y = Math.round(fall + k)
-            if (y < 0 || y >= scene.h) continue
-            const x = Math.round(x0 + k * field.slant)
-            if (x < 0 || x >= scene.w) continue
-            data[y * scene.w + x] = fieldAt + tone
-          }
-        }
-      }
-      fieldAt += field.colors.length
-    }
-    // Back to front. **Haze outranks the foot row**, because haze is now the scene's
-    // statement about distance and the foot row is only its consequence: two trees in the
-    // same band are separated by where they stand, but a hazier tree is behind a clearer
-    // one whatever their feet do. Stable, because ties fall back to placement order.
-    const order = runs
-      .map((r, i) => i)
-      .sort((a, b) => paintOrder(runs[a]!.placement, a) - paintOrder(runs[b]!.placement, b))
-
-    for (const i of order) {
-      const run = runs[i]!
-      const p = run.placement
-      const own = run.result.frames.length
-      const ownMs = own * run.result.params.playback.msPerFrame
-      // A whole number of its own cycles inside the scene's, so the loop point is silent.
-      const cycles = Math.max(1, Math.round(sceneMs / ownMs))
-      const t = (sceneT * cycles + (p.phase ?? 0)) % 1
-      const frame = run.result.frames[Math.floor(t * own) % own] as Frame
-      const map = maps.get(run.name) as Uint8Array
-      const { w: sw, h: sh, data: src } = frame.buf
-      const ox = p.x - run.result.params.canvas.originX
-      // `origin` is exact and measures nothing; `foot` measures the lowest painted pixel of
-      // the frames actually being drawn. Which one is right depends on where the sprite's
-      // author put its origin, and getting that wrong put five trees in the air, then one
-      // below the gorilla, then a photographer lying down at standing height.
-      const row = p.sky === true ? (p.y ?? 0) : standRow(scene, p.depth ?? 0)
-      const oy = p.anchor === 'foot' ? row - run.footOffset : row - run.result.params.canvas.originY
-      for (let sy = 0; sy < sh; sy++) {
-        const dy = oy + sy
-        if (dy < 0 || dy >= scene.h) continue
-        for (let sx = 0; sx < sw; sx++) {
-          const v = src[sy * sw + sx] as number
-          if (v === 0) continue
-          // The compositor is the frozen path now: continuous motion belongs to the live
-          // runtime, which has elapsed time to move things with. A cloud stands still here.
-          const dx = ox + sx
-          if (dx < 0 || dx >= scene.w) continue
-          data[dy * scene.w + dx] = map[v] as number
-        }
-      }
-    }
-    buffers.push({ w: scene.w, h: scene.h, data })
-  }
-
-  return { scene, palette: { name: scene.name, colors: palette, ramps: [] }, buffers, cohesion }
-}

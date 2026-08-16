@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { execute } from '../src/io/load.ts'
 import { FOREST, makeTree } from '../src/grammars/run12/forest.ts'
 import { forestScene } from '../src/micro/forest-scene.ts'
-import { standRow } from '../src/scene/compose.ts'
+import { standRow } from '../src/scene/types.ts'
 import { toStage } from '../src/scene/layers.ts'
 
 /**

@@ -28,7 +28,7 @@
  *   hangs in one place, forever. It gets no drift, no bob and no cadence — and that stillness,
  *   next to three clouds that never stopped moving in the forest, is the loudest thing here.
  */
-import type { Scene } from '../scene/compose.ts'
+import type { Scene } from '../scene/types.ts'
 
 /**
  * **Sunlit regolith, and the first version of this was far too dark.**

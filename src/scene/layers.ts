@@ -27,8 +27,8 @@
  */
 import type { RGB } from '../core/types.ts'
 import { execute, loadParams } from '../io/load.ts'
-import type { Climb, Placement, Scene } from './compose.ts'
-import { floorDepth, hazeAt, paintOrder, standRow } from './compose.ts'
+import type { Climb, Placement, Scene } from './types.ts'
+import { floorDepth, hazeAt, paintOrder, standRow } from './types.ts'
 
 /** One sprite's whole cycle, cropped, in index space. */
 export type Layer = {

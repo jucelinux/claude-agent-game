@@ -1,5 +1,5 @@
+import { readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { compose } from '../src/scene/compose.ts'
 import { gamePage } from '../src/micro/app.ts'
 import { toStage } from '../src/scene/layers.ts'
 import { cozyScene } from '../src/micro/cozy-scene.ts'
@@ -392,17 +392,37 @@ describe('difficulty is the gap between aiming and not aiming', () => {
   })
 })
 
-describe('the two draw paths', () => {
+describe('there is one renderer', () => {
   /**
-   * **`compose()` refuses a climb rather than rendering a wrong one.**
+   * **`compose()` is gone, and this lock is what stops it growing back.**
    *
-   * `DECISIONS.md`, 16/08: `compose.ts` and `layers.ts` are two independent paths drawing the
-   * same scene and nothing compares them. A scrolling, generated, stateful world has no frozen
-   * frame list at all, so the honest handling is a refusal — a gallery entry that disagreed
-   * with the game would have no lock able to say why.
+   * `DECISIONS.md`, 16/08: this project had two independent code paths drawing the same world,
+   * and nothing compared them. They agreed only because they shared four depth functions. The
+   * frozen one answered a question from the era when the deliverable was a drawing, was
+   * superseded the same day it was written, and then survived thirteen commits with one caller.
+   *
+   * His call: *"só faz sentido desenhar se for em uma cena de jogo... o subproduto aqui deva ser
+   * uma única coisa."*
+   *
+   * The property is now structural rather than compared: **a scene is data and one module turns
+   * it into pixels.** Asserted by reading the source, because the defect is a file that imports
+   * the renderer, and no behavioural test can see a second path that nothing is calling yet.
    */
-  it('a climbing scene has no frozen composition and says so', () => {
-    expect(() => compose(cozyScene)).toThrow(/climb/)
+  it('the scene vocabulary is data: it imports nothing that can draw', () => {
+    const src = readFileSync(new URL('../src/scene/types.ts', import.meta.url), 'utf8')
+    for (const forbidden of ['io/load.ts', 'core/render.ts', 'core/raster.ts', 'core/skeleton.ts']) {
+      expect(src.includes(forbidden), `scene/types.ts imports ${forbidden} — a second renderer is starting`).toBe(false)
+    }
+  })
+
+  it('exactly one module turns a scene into pixels', () => {
+    const dir = new URL('../src/scene/', import.meta.url)
+    const drawers = readdirSync(dir).filter((f) => {
+      if (!f.endsWith('.ts')) return false
+      const src = readFileSync(new URL(f, dir), 'utf8')
+      return src.includes("from '../io/load.ts'")
+    })
+    expect(drawers).toEqual(['layers.ts'])
   })
 
   it('a climb with no climber in it is a configuration error, not a blank screen', () => {
