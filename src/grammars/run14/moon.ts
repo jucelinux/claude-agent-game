@@ -167,7 +167,7 @@ function makeRock(name: string, r: number, seed: number): Grammar {
 }
 
 /**
- * **Six craters and two small rocks**, and the ratio is his: *"acho válido manter algumas
+ * **Six craters and three small rocks**, and the ratio is his: *"acho válido manter algumas
  * pedras, e trocar essas pedras maiores por crateras circulares"*. A boulder on the moon is a
  * rare thing; a crater is what the ground is made of.
  */
@@ -179,6 +179,10 @@ export const MOON: readonly Grammar[] = [
   makeCrater('crater-d', 12, 5.6),
   makeCrater('crater-e', 31, 1.9),
   makeCrater('crater-f', 21, 3.3),
-  makeRock('rock-a', 7, 1.3),
-  makeRock('rock-b', 4.5, 3.7),
+  // **Small, at his instruction: "diminua o tamanho de todas as pedras, pode deixá-las
+  // pequenas".** A boulder standing on a plain competes with the figure for the eye; a scatter
+  // of stones is texture. The craters do the work of saying where you are.
+  makeRock('rock-a', 4.2, 1.3),
+  makeRock('rock-b', 2.8, 3.7),
+  makeRock('rock-c', 3.4, 5.9),
 ]

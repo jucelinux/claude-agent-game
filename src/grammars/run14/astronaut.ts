@@ -97,22 +97,25 @@ const bones: Bone[] = [
   { name: 'neck', parent: 'torso', x: 0, y: -12, z: 0, angle: 0 },
   { name: 'head', parent: 'neck', x: 0.5, y: -4, z: 0, angle: 0 },
   /**
-   * Far limbs first. **±7.6 against a torso 5.4 wide**, and the number is set by the facing he
+   * Far limbs first. **±8.4 against a torso 5.4 wide**, and the number is set by the facing he
    * could not read rather than by the one he could.
    *
    * In a side view the arms overlap the barrel and any offset past 5.5 works. Turned to face
    * the camera those same offsets become the shoulders' width on screen, and at ±5 the arms
    * cleared the torso by two pixels and vanished behind it — *"quando ando com S, não
-   * visualizo os braços"*. At ±7.6 they stand five pixels clear of the barrel and, more
-   * importantly, clear of the THIGH — which sits at ±3.4 and was eating the forearm at the
-   * three-quarter facings. A suit holds the arms out; this is that, said in the only axis a
-   * side-on body has for saying it.
+   * visualizo os braços"*. At ±8.4 they stand three pixels clear of the barrel with the arm's own swing counted, and clear of the
+   * THIGH at ±3.4. **The number that mattered was not the shoulder's, it was the forearm's**:
+   * an arm leaning back swings its wrist toward the body's centre line, and at three quarters
+   * that drift ate the whole clearance — *"o antebraço entra no corpo do astronauta"*. The
+   * lean came down with the row going out.
+   *
+   * A suit holds the arms out; this is that, said in the only axis a side-on body has.
    */
   // **Both arms hang the same way and differ only in PHASE.** They were mirrored — the far
   // one splayed forward and the near one back — which is a natural thing to type and an
   // impossible thing for a body. It is the third time this project has shipped that defect,
   // after probe D and the photographer, and the first time it was caught by a lock.
-  { name: 'armFU', parent: 'torso', x: 0, y: -10, z: 7.6, angle: -0.03 },
+  { name: 'armFU', parent: 'torso', x: 0, y: -10, z: 8.4, angle: -0.012 },
   /**
    * **The forearm hangs straight from the elbow, and the splay it briefly had was a joint
    * break wearing a disguise.**
@@ -131,7 +134,7 @@ const bones: Bone[] = [
   { name: 'legFL', parent: 'legFU', x: 0, y: 8.5, z: 0, angle: 0.02 },
   { name: 'legNU', parent: 'pelvis', x: 0, y: 1, z: -3.4, angle: 0 },
   { name: 'legNL', parent: 'legNU', x: 0, y: 8.5, z: 0, angle: 0.02 },
-  { name: 'armNU', parent: 'torso', x: 0, y: -10, z: -7.6, angle: -0.03 },
+  { name: 'armNU', parent: 'torso', x: 0, y: -10, z: -8.4, angle: -0.012 },
   { name: 'armNL', parent: 'armNU', x: 0, y: 7, z: 0, angle: -0.04 },
 ]
 
@@ -260,10 +263,10 @@ const LOPE: Gait = {
      * restrained; nine is broken. **A fact about a subject is not a licence to stop animating
      * it**, and that is the general form of the mistake.
      */
-    { bone: 'armNU', channel: 'angle', keys: [0.01, -0.13, -0.27, -0.13] },
-    { bone: 'armNL', channel: 'angle', keys: [-0.15, -0.19, -0.23, -0.19] },
-    { bone: 'armFU', channel: 'angle', keys: [-0.27, -0.13, 0.01, -0.13] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.23, -0.19, -0.15, -0.19] },
+    { bone: 'armNU', channel: 'angle', keys: [0.09, -0.05, -0.19, -0.05] },
+    { bone: 'armNL', channel: 'angle', keys: [-0.05, -0.09, -0.13, -0.09] },
+    { bone: 'armFU', channel: 'angle', keys: [-0.19, -0.05, 0.09, -0.05] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.13, -0.09, -0.05, -0.09] },
     { bone: 'head', channel: 'angle', keys: [0.01, -0.01, 0.01, -0.01] },
   ],
 }
@@ -285,10 +288,10 @@ const IDLE: Gait = {
     { bone: 'pelvis', channel: 'y', keys: [0, -0.12, 0, 0.1] },
     { bone: 'torso', channel: 'angle', keys: [0.02, 0.01, 0.02, 0.03] },
     { bone: 'head', channel: 'angle', keys: [0.02, -0.03, -0.01, 0.04] },
-    { bone: 'armNU', channel: 'angle', keys: [-0.13, -0.15, -0.13, -0.11] },
-    { bone: 'armNL', channel: 'angle', keys: [-0.17, -0.19, -0.17, -0.15] },
-    { bone: 'armFU', channel: 'angle', keys: [-0.11, -0.13, -0.11, -0.09] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.14, -0.16, -0.14, -0.12] },
+    { bone: 'armNU', channel: 'angle', keys: [-0.05, -0.07, -0.05, -0.03] },
+    { bone: 'armNL', channel: 'angle', keys: [-0.07, -0.09, -0.07, -0.05] },
+    { bone: 'armFU', channel: 'angle', keys: [-0.03, -0.05, -0.03, -0.01] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.05, -0.07, -0.05, -0.03] },
     { bone: 'legNU', channel: 'angle', keys: [0.01, 0.02, 0.01, 0] },
     { bone: 'legFU', channel: 'angle', keys: [0, 0.01, 0.02, 0.01] },
   ],
@@ -317,10 +320,10 @@ const LEAP: Gait = {
     { bone: 'legNL', channel: 'angle', keys: [0.5, 0.06, 0.46, 0.16] },
     { bone: 'legFU', channel: 'angle', keys: [0.36, -0.24, 0.28, 0.06] },
     { bone: 'legFL', channel: 'angle', keys: [0.46, 0.04, 0.4, 0.1] },
-    { bone: 'armNU', channel: 'angle', keys: [-0.04, -0.28, -0.25, -0.2] },
-    { bone: 'armNL', channel: 'angle', keys: [-0.24, -0.14, -0.12, -0.17] },
-    { bone: 'armFU', channel: 'angle', keys: [-0.02, -0.25, -0.22, -0.18] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.21, -0.12, -0.1, -0.15] },
+    { bone: 'armNU', channel: 'angle', keys: [0.04, -0.2, -0.17, -0.12] },
+    { bone: 'armNL', channel: 'angle', keys: [-0.14, -0.06, -0.04, -0.09] },
+    { bone: 'armFU', channel: 'angle', keys: [0.06, -0.17, -0.14, -0.1] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.11, -0.04, -0.02, -0.07] },
     { bone: 'head', channel: 'angle', keys: [0.04, -0.02, -0.03, -0.01] },
   ],
 }

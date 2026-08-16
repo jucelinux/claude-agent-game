@@ -106,10 +106,13 @@ export const moonScene: Scene = {
     { grammar: 'crater-f', tunables: 'regolith', x: 100, depth: MID },
     { grammar: 'crater-d', tunables: 'regolith', x: 254, depth: MID },
     { grammar: 'rock-b', tunables: 'regolith', x: 310, depth: MID },
+    { grammar: 'rock-c', tunables: 'regolith', x: 62, depth: MID },
 
     { grammar: 'crater-e', tunables: 'regolith', x: 84, depth: NEAR },
     { grammar: 'crater-b', tunables: 'regolith', x: 212, depth: NEAR },
     { grammar: 'rock-a', tunables: 'regolith', x: 300, depth: NEAR },
+    { grammar: 'rock-c', tunables: 'regolith', x: 168, depth: NEAR },
+    { grammar: 'rock-b', tunables: 'regolith', x: 232, depth: FRONT },
 
     // **The front rank**, and it is deliberately sparse: this is the floor the player walks
     // on and a boulder standing in it is a boulder hiding him.

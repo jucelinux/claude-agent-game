@@ -139,10 +139,26 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26,
    * `cos θ` of it survives as rotation. The rest of it becomes a fixed depth offset, folded
    * into the bone's own `z` at the radius a limb reaches.
    */
+  const angleOf = new Map(grammar.skeleton.bones.map((b) => [b.name, b.angle]))
   const bones: Bone[] = grammar.skeleton.bones.map((b) => {
     const p = yawPoint(b.x, b.z ?? 0, c, s)
-    return { ...b, x: p.x, z: p.z + Math.sin(b.angle * Math.PI * 2) * LIMB * s, angle: b.angle * c }
+    // **A bone's own rotation moves its CHILDREN in depth, never itself**, and the first
+    // version folded it into the bone's own `z`. A joint's origin does not move when the joint
+    // turns; what hangs off it does. Folding it the wrong way put the forearm two units
+    // further from the camera than the elbow it hangs from — *"parece que o antebraço está
+    // atrás do braço"* — and stacked down the chain, so the error grew with every segment.
+    const parent = b.parent === null ? 0 : (angleOf.get(b.parent) ?? 0)
+    return { ...b, x: p.x, z: p.z + Math.sin(parent * Math.PI * 2) * b.y * s, angle: b.angle * c }
   })
+
+  /** Which bones hang off each bone, so a rotation can be pushed down to them. */
+  const children = new Map<string, { readonly name: string; readonly reach: number }[]>()
+  for (const b of grammar.skeleton.bones) {
+    if (b.parent === null) continue
+    const list = children.get(b.parent) ?? []
+    list.push({ name: b.name, reach: b.y })
+    children.set(b.parent, list)
+  }
 
   const parts: Part[] = grammar.parts.map((p) => yawPart(p, c, s))
 
@@ -172,7 +188,8 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26,
    * (`LIMB`), and the amplitude the answer will be read back through (`depth`, in pixels).
    * Leaving any of the three out is a unit error wearing a plausible number.
    */
-  const toDepth = (k: number): number => (Math.sin(k * swing * Math.PI * 2) * LIMB * s) / depth
+  const toDepth = (k: number, reach: number): number =>
+    (Math.sin(k * swing * Math.PI * 2) * reach * s) / depth
 
   const tracks: Track[] = []
   for (const t of grammar.gait.tracks) {
@@ -181,9 +198,27 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26,
       continue
     }
     if (Math.abs(c) > 1e-6) tracks.push({ ...t, keys: t.keys.map((k) => k * c) })
-    // A turn of exactly a quarter leaves no on-screen rotation at all, and pushing a zeroed
-    // track would be a track that paints nothing but still costs a lookup.
-    tracks.push({ bone: t.bone, channel: 'z', keys: t.keys.map(toDepth) })
+    /**
+     * **The depth goes on the CHILDREN, at each child's own reach.**
+     *
+     * Rotating a shoulder does not move the shoulder. It moves the elbow, by the length of the
+     * upper arm; and the wrist, by the elbow's travel plus its own. Putting the displacement
+     * on the rotating bone itself moved that bone's origin — so the whole limb slid in depth
+     * and the segments came apart in the ordering even while they touched on screen.
+     *
+     * A turn of exactly a quarter leaves no on-screen rotation at all, so the `angle` track is
+     * dropped there rather than pushed as a row of zeroes.
+     *
+     * **Declared approximation, and it is the one this transform cannot avoid.** The *parts*
+     * on the rotating bone are not tilted into depth — a capsule carries one depth for its
+     * whole length, and a tilted limb's far end is genuinely deeper than its near end. So a
+     * limb swung toward the camera moves its joints correctly and keeps its own segments flat.
+     * At the amplitudes a walk uses, that is under two pixels; a limb thrown straight at the
+     * viewer would show it.
+     */
+    for (const kid of children.get(t.bone) ?? []) {
+      tracks.push({ bone: kid.name, channel: 'z', keys: t.keys.map((k) => toDepth(k, kid.reach)) })
+    }
     /**
      * **The third component, and leaving it out was the first version's real defect.**
      *
