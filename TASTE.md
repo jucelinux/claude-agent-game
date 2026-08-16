@@ -242,6 +242,38 @@ _Every entry cites the artifact that demonstrated it; self-assessment does not c
   *"which hand-tuned family is standing in for one quantity nobody has computed?"*, not the
   z-buffer.
 
+### The mastery ledger — **what has actually shipped, and on which axis**
+
+_Added 16/08, at his instruction: *"vamos considerar que todas as melhorias incrementais te dão
+dominância... você já dominou isso e não precisamos ter a dor de parto para cada item que você já
+tem maestria."* He is right, and spending that capital needs a ledger rather than a feeling —
+this section's standing rule already says **self-assessment does not count**._
+
+**Dominance transfers along the axis it was proven on, and not across it.** That sentence is not
+caution, it is the recorded history of this project's four most expensive mistakes: probe C won
+on a beetle and held the house style for **seven runs** before losing on a gorilla; the gorilla's
+coat was the wrong colour for a day after his verdict on its walk; the inner line was wrong on
+**every subject since round zero** and only a ginger cat made it visible.
+
+| capability | proven by | read on | what does NOT transfer |
+|---|---|---|---|
+| a body with a gait, side view | gorilla, photographer, astronaut, kitten | four subjects, four verdicts | nothing known. **Spend freely** |
+| recursive vegetation | 14 trees from one grammar, the forest | one scene, one scale, background role | a tree seen from above, at night, or as a surface to land on |
+| fields — rain, motes | the forest and the climb | two scenes | anything with volume: fire, smoke, an explosion |
+| a receding ground plane | forest, moon, garden | three scenes, three lighting regimes | nothing known. **Spend freely** |
+| a body a person steers | gorilla, astronaut, kitten | three games | nothing known. **Spend freely** |
+| props: rocks, craters, shelves | moon, climb | two scenes | anything a body interacts with beyond standing on it |
+| **a body turned in depth** | astronaut, 15 grammars | **one subject, and it took five corrections** | **a body whose depth over width is under ~0.45 collapses. Measured** |
+| a face at small scale | the kitten | **one subject, one verdict** | any face that is not a round-skulled animal |
+| a game that can be lost | the climb | **one game** | any win condition that is not "how far did you get" |
+| pattern inside a part | — | **does not exist** | — |
+| pitch and roll | — | **inexpressible.** A bone has one angle, in the screen plane | — |
+
+**The cheap safeguard, and it costs him nothing.** A commission that moves a mastered subject
+along an axis it has not been read on gets **one line at delivery** saying so. Not a reading, not
+a question — a pointer at where the risk is. Silence would be the model spending capital it does
+not have; an extra reading would be spending his attention on a settled question.
+
 Two **hypotheses** recorded on 14/08, so they can be refuted rather than rewritten later.
 They are not §2b entries and must not be treated as such until a sample supports them:
 
