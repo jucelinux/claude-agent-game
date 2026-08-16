@@ -468,6 +468,25 @@ In a batch, with samples attached. **Every item carries the five lines of `CLAUD
 what to open, what to do, how long, what a pass looks like, what each answer changes.**
 Written for him, so no method vocabulary crosses into this section.
 
+- [ ] 🟡 **Your sentence reaches further than the file I just deleted. How far?** Asked 16/08.
+      · *What happened:* you said drawing only makes sense inside a game scene, and that the
+      subproduct should be one thing. I deleted the second renderer. That was clearly right and
+      it is done.
+      · *What is left:* **962 lines that still show drawing outside a game.** They are three
+      different things and they are not equally guilty:
+        1. **My eye** — the terminal contact sheet and the findings channel. This is how I see my
+           own work without a browser. If it goes, I go blind. It is not a product surface and I
+           recommend keeping it.
+        2. **The live sprite bench and the gate sheet** — a web page showing sprites in cells,
+           out of any scene. This is a second surface by your definition. 616 lines.
+        3. **The frozen gallery** — 33 kept generations, 2.7 MB on disk. It is the only record of
+           what the art looked like on a past day. Git keeps the *code*, never the picture.
+      · *Do:* say **"tudo"**, **"só o bench e o gate"**, or **"nada mais"**.
+      · *Time:* thirty seconds.
+      · *Answer changes:* how much I delete. If you say "tudo", what is lost is the ability to
+      ever look at what a subject used to look like. I will not delete the gallery without you
+      saying so, because that destroys a record rather than a code path.
+
 - [x] ~~Check four things on the self-test page~~ → **all four confirmed by the human,
       14/08.** The viewer's null case now has the one link the headless locks cannot cover.
 - [x] ~~**Approve, change or reject the new gate reading.**~~ → **Answered.** Adopted 14/08
