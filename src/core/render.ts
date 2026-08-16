@@ -105,7 +105,12 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     // The inner line sits one step above the outer one, so the silhouette stays the darkest
     // thing on screen. With a single-tone ramp they collapse, and that is the ramp's fault.
     if (params.outline.inner) {
-      innerOutline(painter, (ramp.indices[1] ?? ramp.indices[0]) as number, grammar.parts.map((p) => p.marking === true))
+      innerOutline(
+        painter,
+        (ramp.indices[1] ?? ramp.indices[0]) as number,
+        grammar.parts.map((p) => p.marking === true),
+        grammar.parts.map((p) => p.weld === true),
+      )
     }
     if (params.outline.enabled) outline(painter, ramp.indices[0] as number)
   }

@@ -37,8 +37,41 @@
  * animal. Warmth is a hue decision. Softness would have been a value decision, and this file
  * does not make it.
  *
- * portable — the head-to-body ratio for young animals, and the observation that a style word
- * usually names a hue policy while the value range stays under the read's control.
+ * ## The inner line, and when a body may not have one — **his second note, 16/08**
+ *
+ * > *"o rabo, as pernas, as orelhas e as patas traseiras possuem o contorno das formas que
+ * > montam aquele membro... Eu sinto que faltou esse acabamento no gato. Digo mais: no
+ * > astronauta, esses contornos na conexão dos membros ficou legal. Então estamos refletindo
+ * > aqui sobre seu discernimento de quando tratar esse contorno e quando deixá-lo visível.
+ * > Isso depende muito do objeto que você está desenhando."*
+ *
+ * **The rule, and it is one question about the real thing: if somebody built this, would there
+ * be a seam there?**
+ *
+ * | subject | seam? | why |
+ * |---|---|---|
+ * | a pressure suit | **yes** | segments, joints, a hard pack, a visor. He approved these by name |
+ * | a mech | **yes** | it is assembled out of plates and it should look assembled |
+ * | chitin | **yes** | a beetle's plates really do meet at an edge |
+ * | **a cat** | **no** | a tail is one tapering rope, an ear is one flap, a leg runs into its paw |
+ *
+ * The three capsules in this tail are **scaffolding for a shape**, not parts of a tail. Ringing
+ * each one draws my construction rather than the animal, and that is what turned a live kitten
+ * into a jointed puppet. Every solid here therefore carries `weld: true`, which suppresses the
+ * inner line **between two welded parts and nowhere else**. What replaces it is form: the depth
+ * solver, the cast shadow, and the far row's ramp shift already separate these masses by value,
+ * which is how the gorilla has always read.
+ *
+ * **The reason this needed a verdict to find is worth more than the fix.** He believed the
+ * gorilla had been given this treatment on purpose and credited me for it. **It never was.** The
+ * gorilla carries 135 inner-line pixels, every junction ringed exactly like this cat's — they
+ * are simply invisible, because a black coat against a near-black ink sits **0.20** of luminance
+ * apart where this kitten's ginger against warm brown sits **0.48**. Same setting, twice the
+ * visibility. The palette was making a decision I thought I had made.
+ *
+ * portable — the head-to-body ratio for young animals; the seam question above; the observation
+ * that a style word usually names a hue policy while the value range stays under the read's
+ * control; and the warning that a dark palette hides a defect rather than fixing it.
  * stack — every number.
  */
 import type { Grammar, Palette } from '../../core/types.ts'
@@ -147,18 +180,18 @@ const SKELETON = {
 const PARTS = [
   // The far side. `shift: -1` is the deliberate extra step down the ramp that art takes past
   // what the light would do — occlusion is correct, legibility is a decision.
-  { name: 'armF', bone: 'armF', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7.4, r: 2, r1: 1.6 }, shift: -1 },
-  { name: 'pawF', bone: 'armF', material: 'cream', shape: { kind: 'ellipse', cx: 0.7, cy: 8.1, rx: 2, ry: 1.7, rz: 2.2 }, shift: -1 },
-  { name: 'legF', bone: 'legF', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.3, r1: 1.8 }, shift: -1 },
-  { name: 'pawLF', bone: 'legF', material: 'cream', shape: { kind: 'ellipse', cx: 0.8, cy: 7.6, rx: 2.1, ry: 1.8, rz: 2.2 }, shift: -1 },
+  { weld: true, name: 'armF', bone: 'armF', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7.4, r: 2, r1: 1.6 }, shift: -1 },
+  { weld: true, name: 'pawF', bone: 'armF', material: 'cream', shape: { kind: 'ellipse', cx: 0.7, cy: 8.1, rx: 2, ry: 1.7, rz: 2.2 }, shift: -1 },
+  { weld: true, name: 'legF', bone: 'legF', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.3, r1: 1.8 }, shift: -1 },
+  { weld: true, name: 'pawLF', bone: 'legF', material: 'cream', shape: { kind: 'ellipse', cx: 0.8, cy: 7.6, rx: 2.1, ry: 1.8, rz: 2.2 }, shift: -1 },
   // The far ear is authored up the negative y axis, which is the one place in this file a
   // shape points against its bone: an ear stands up from the skull and a leg hangs down from
   // the shoulder, and both are the same bone convention seen from opposite ends.
-  { name: 'earF', bone: 'earF', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: -1, y1: -5.2, r: 2.6, r1: 0.7 }, shift: -1 },
+  { weld: true, name: 'earF', bone: 'earF', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: -1, y1: -5.2, r: 2.6, r1: 0.7 }, shift: -1 },
 
   // The tail, drawn before the masses so the hips win where they overlap.
-  { name: 'tail1', bone: 'tail1', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6, r: 2.3, r1: 2 } },
-  { name: 'tail2', bone: 'tail2', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 5.4, r: 2, r1: 1.6 } },
+  { weld: true, name: 'tail1', bone: 'tail1', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6, r: 2.3, r1: 2 } },
+  { weld: true, name: 'tail2', bone: 'tail2', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 5.4, r: 2, r1: 1.6 } },
   /**
    * **The tail ends in white, and the ginger segment is cut short to make room for it.**
    *
@@ -168,19 +201,19 @@ const PARTS = [
    * geometric rather than a depth nudge: the coat stops at 3.2 and the cream owns everything
    * past it, so the two share a boundary instead of a volume.
    */
-  { name: 'tail3', bone: 'tail3', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 3.2, r: 1.6, r1: 1.3 } },
-  { name: 'tailTip', bone: 'tail3', material: 'cream', shape: { kind: 'capsule', x0: 0, y0: 3, x1: 0, y1: 5.4, r: 1.35, r1: 0.9 } },
+  { weld: true, name: 'tail3', bone: 'tail3', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 3.2, r: 1.6, r1: 1.3 } },
+  { weld: true, name: 'tailTip', bone: 'tail3', material: 'cream', shape: { kind: 'capsule', x0: 0, y0: 3, x1: 0, y1: 5.4, r: 1.35, r1: 0.9 } },
 
   // The two masses.
-  { name: 'hips', bone: 'hips', material: 'coat', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 5.6, ry: 5.2, rz: 5 } },
-  { name: 'chest', bone: 'chest', material: 'coat', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 6.2, ry: 5.6, rz: 5.4 } },
-  { name: 'neck', bone: 'neck', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 2.6, y1: 0.4, r: 3.4 } },
+  { weld: true, name: 'hips', bone: 'hips', material: 'coat', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 5.6, ry: 5.2, rz: 5 } },
+  { weld: true, name: 'chest', bone: 'chest', material: 'coat', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 6.2, ry: 5.6, rz: 5.4 } },
+  { weld: true, name: 'neck', bone: 'neck', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 2.6, y1: 0.4, r: 3.4 } },
   // **The head, and it is the commission.** `rx 6.0` against a chest of 6.2: the same mass.
   // An adult cat's skull is half this against the same body, and the animal stops being a
   // kitten the moment the ratio moves.
-  { name: 'head', bone: 'head', material: 'coat', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 6, ry: 5.4, rz: 5.6 } },
-  { name: 'muzzle', bone: 'head', material: 'cream', shape: { kind: 'ellipse', cx: 4.2, cy: 2, rx: 3, ry: 2.4, rz: 3 }, z: -1.2 },
-  { name: 'nose', bone: 'head', material: 'pink', shape: { kind: 'ellipse', cx: 6.4, cy: 0.9, rx: 1.2, ry: 1, rz: 1.2 }, z: -2.6 },
+  { weld: true, name: 'head', bone: 'head', material: 'coat', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 6, ry: 5.4, rz: 5.6 } },
+  { weld: true, name: 'muzzle', bone: 'head', material: 'cream', shape: { kind: 'ellipse', cx: 4.2, cy: 2, rx: 3, ry: 2.4, rz: 3 }, z: -1.2 },
+  { weld: true, name: 'nose', bone: 'head', material: 'pink', shape: { kind: 'ellipse', cx: 6.4, cy: 0.9, rx: 1.2, ry: 1, rz: 1.2 }, z: -2.6 },
   /**
    * **The eye is a marking, and that is the whole reason it can be here at all.**
    *
@@ -197,11 +230,11 @@ const PARTS = [
   { name: 'bib', bone: 'chest', material: 'cream', marking: true, z: -1, shape: { kind: 'lobed', cx: 2.4, cy: 2.4, rx: 4.6, ry: 3.6, rz: 4.6, lobes: 4, depth: 0.18, phase: 1.1, octaves: 2 } },
 
   // The near side, and it paints last only to break ties at exactly equal depth. Depth decides.
-  { name: 'legN', bone: 'legN', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.5, r1: 1.9 } },
-  { name: 'pawLN', bone: 'legN', material: 'cream', shape: { kind: 'ellipse', cx: 0.8, cy: 7.6, rx: 2.3, ry: 1.9, rz: 2.3 } },
-  { name: 'armN', bone: 'armN', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7.4, r: 2.2, r1: 1.7 } },
-  { name: 'pawN', bone: 'armN', material: 'cream', shape: { kind: 'ellipse', cx: 0.7, cy: 8.1, rx: 2.2, ry: 1.8, rz: 2.3 } },
-  { name: 'earN', bone: 'earN', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: -1, y1: -5.2, r: 2.8, r1: 0.8 } },
+  { weld: true, name: 'legN', bone: 'legN', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.5, r1: 1.9 } },
+  { weld: true, name: 'pawLN', bone: 'legN', material: 'cream', shape: { kind: 'ellipse', cx: 0.8, cy: 7.6, rx: 2.3, ry: 1.9, rz: 2.3 } },
+  { weld: true, name: 'armN', bone: 'armN', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7.4, r: 2.2, r1: 1.7 } },
+  { weld: true, name: 'pawN', bone: 'armN', material: 'cream', shape: { kind: 'ellipse', cx: 0.7, cy: 8.1, rx: 2.2, ry: 1.8, rz: 2.3 } },
+  { weld: true, name: 'earN', bone: 'earN', material: 'coat', shape: { kind: 'capsule', x0: 0, y0: 0, x1: -1, y1: -5.2, r: 2.8, r1: 0.8 } },
   // The inner ear, a decal on the near ear only. The far ear turns away from the viewer, and
   // its inside is not visible on any real cat either.
   { name: 'earInner', bone: 'earN', material: 'pink', marking: true, z: -1, shape: { kind: 'capsule', x0: 0.2, y0: -1, x1: -0.6, y1: -3.8, r: 1.3, r1: 0.4 } },

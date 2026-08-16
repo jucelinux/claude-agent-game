@@ -471,6 +471,21 @@ Written for him, so no method vocabulary crosses into this section.
 - [x] ~~The five reference loops~~ → **no longer needed.** Gate v3 needs no reference files
       at all; it needs one sentence of commission and one word of verdict.
 
+- [ ] 🟡 **Should the gorilla, the photographer and the trees be asked the seam question too?**
+      Asked 16/08, and it costs you one word.
+      · *Open:* nothing. This is a yes/no about work you have already approved.
+      · *What it is:* you told me the gorilla's limb contours were handled on purpose. They were
+      not. The gorilla has 135 of those internal lines, exactly like the cat had — you cannot see
+      them because the animal is black and the line is nearly black. The cat's are twice as
+      strong against ginger fur, which is why they jumped out at you there.
+      · *Do:* say **leave it** or **clean it**. "Leave it" means the gorilla keeps its hidden
+      lines and I do nothing. "Clean it" means I remove them, which changes 135 pixels of 837 by
+      an amount you probably cannot see today — but it stops the defect coming back if that
+      animal ever gets a lighter coat.
+      · *Time:* ten seconds.
+      · *Answer changes:* only whether I touch three subjects you already passed. Either answer
+      is fine and I am not asking because I think one is better.
+
 - [ ] 🟡 **Run 8 — one jump, three inks.** Asked 15/08. **This is the open round.**
       · *Open:* `node bin/serve.ts`. Top row, three cells, same jump in three inks.
       · *Do:* put them in order, best first, and say one sentence about the worst one.

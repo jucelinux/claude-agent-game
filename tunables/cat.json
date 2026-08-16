@@ -72,7 +72,7 @@
     "playback.scale": "4, read only by the bench viewer. The game sets its own.",
     "outline.enabled": "true. The 15/08 ink verdict: a drawn line is half of what made the winning sample read. Every subject in this project has carried one since.",
     "outline.material": "\"ink\". The palette's own line material, a warm dark brown rather than a black \u2014 a neutral line against a warm coat would be the one cool thing in the picture.",
-    "outline.inner": "true. The line between two parts of one body, one ramp step lighter than the outer line so the silhouette stays the darkest thing on screen. A cat is a stack of round masses that overlap constantly; without it the head and the chest merge into one blob.",
+    "outline.inner": "true, and it is now doing almost nothing on this subject BY DESIGN. The flag is per sprite and can only say all-or-nothing; whether two shapes are one surface is a fact about those two shapes, so it is declared per part with `Part.weld`. Every solid on the cat is welded \u2014 a cat has no seams \u2014 and the inner line survives only where a welded part meets an unwelded one. Left true because the mechanism is the weld, not the switch, and turning the switch off would also silence a seam that ought to be there.",
     "outline.rim": "false. `rim` and `enabled` are the two answers to the same question and this project settled on the drawn line on 15/08. Kept expressible so \"both\" and \"neither\" stay reachable.",
     "shadow.bias": "0.25, the project-wide value since run 7. Depth tolerance, so a curved surface does not shadow itself along its own tangent.",
     "fill.x": "0.45, opposite the key in x. A fill is what a photographer puts across from the key light and what a painter calls bounce.",

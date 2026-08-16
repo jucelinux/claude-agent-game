@@ -38,6 +38,20 @@ Last distillation: none — the log does not exist yet._
   **So neither factor alone buys anything: range without regions loses, regions without
   range loses.** The retired line is kept here in words because its shape matters — one
   verdict, one subject, generalised to every subject without a retest.
+- **[derived · 16/08 · batch 2, the kitten against the astronaut]** **An inner line is a claim
+  that two things are two things, and whether to draw it is a fact about the subject rather than
+  a setting.** He raised it as a question about judgement — *"seu discernimento de quando tratar
+  esse contorno e quando deixá-lo visível. Isso depende muito do objeto que você está
+  desenhando"* — and supplied both ends himself: the astronaut's limb connections *"ficou
+  legal"*, the kitten's tail, ears, legs and hind paws did not. **The test that separates them is
+  whether the real object would have a seam.** A pressure suit has seams; a cat does not.
+  Compiled as `Part.weld`.
+- **[derived · 16/08 · the same message]** **He judges the finished picture and does not care
+  which layer produced it, so a complaint names a symptom and never a cause.** *"Mais pixelado"*
+  turned out to be the scene's scale, with the drawing measuring identical to the gorilla's on
+  every axis. *"O contorno das formas"* turned out to be the grammar, on a defect the palette
+  had been hiding on every earlier subject. Two notes in one message, two different layers, and
+  neither was where the words pointed.
 - **[derived · 15/08 · probe D]** **He reads a defect through what it resembles, not
   through what it is:** "the sash plus the neck skin makes it look like a buggy arm". The
   location was exact and the cause was one level below the words — same material as the

@@ -219,7 +219,12 @@ export function paintPart(
  *
  * portable.
  */
-export function innerOutline(painter: Painter, index: number, marking: readonly boolean[] = []): void {
+export function innerOutline(
+  painter: Painter,
+  index: number,
+  marking: readonly boolean[] = [],
+  weld: readonly boolean[] = [],
+): void {
   const { w, h, data } = painter.buf
   const { owners, depth } = painter
   // Collected first, applied after: a line drawn during the scan would seed the next one.
@@ -228,10 +233,17 @@ export function innerOutline(painter: Painter, index: number, marking: readonly 
    * A marking is skipped on **both** sides of the test: it neither casts a line onto what it
    * lies on, nor receives one from what lies on it. Half a rule would leave the saddle ringed
    * from underneath, which is the same badge drawn from the other direction.
+   *
+   * **A weld is different from a marking and the difference is which side it takes.** A marking
+   * is exempt against *everything*, because a decal is never a boundary. A weld is exempt only
+   * against **another welded part**, because it is a statement about a pair: these two shapes
+   * are one surface. A welded ear still takes a line from an unwelded helmet sitting on it, and
+   * it must — that seam is real (`Part.weld`).
    */
   const inFront = (n: number, owner: number, z: number): boolean => {
     const other = owners[n] as number
     if (other < 0 || other === owner || marking[other] === true) return false
+    if (weld[owner] === true && weld[other] === true) return false
     return (depth[n] as number) < z
   }
   for (let y = 0; y < h; y++) {

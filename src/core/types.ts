@@ -189,6 +189,46 @@ export type Part = {
    * and every drawing system eventually needs it.
    */
   readonly marking?: boolean
+  /**
+   * **This part is a piece of one continuous surface, and not a thing in its own right.**
+   *
+   * No inner line is drawn between two welded parts. Everything else about them is unchanged:
+   * they still occlude each other, still shade separately, still own their pixels.
+   *
+   * ## The rule, and it is his question rather than a knob
+   *
+   * *"estamos refletindo aqui sobre seu discernimento de quando tratar esse contorno e quando
+   * deixá-lo visível. Isso depende muito do objeto que você está desenhando."* — 16/08.
+   *
+   * **An inner line means "these are two objects."** The test is one question about the real
+   * thing: *if somebody built this, would there be a seam there?*
+   *
+   * - **A pressure suit would.** Segments, joints, a hard pack, a visor. He looked at the
+   *   astronaut and said the contours at the limb connections *"ficou legal"*, and they are as
+   *   strong there as anywhere — 0.43 of luminance against what they lie on.
+   * - **A cat would not.** A tail is one tapering rope, an ear is one flap, a leg runs into its
+   *   paw. The three capsules in the kitten's tail are **scaffolding for a shape**, not parts of
+   *   a tail, and ringing each one turns a live animal into a jointed puppet: *"o rabo, as
+   *   pernas, as orelhas e as patas traseiras possuem o contorno das formas que montam aquele
+   *   membro."*
+   *
+   * ## Why this took a verdict to find, and it is the useful half
+   *
+   * He believed the gorilla had been given this treatment deliberately and credited me for it.
+   * **It never was.** The gorilla carries 135 inner-line pixels, every junction ringed like the
+   * cat's — they are simply invisible, because a black coat and a near-black ink sit **0.20** of
+   * luminance apart where the kitten's ginger and brown sit **0.48**. One setting, twice the
+   * visibility, and it was the palette doing the deciding rather than me.
+   *
+   * So the knob it replaces is `outline.inner`, which is one boolean for a whole sprite and can
+   * only ever say all-or-nothing. **Whether two shapes are one surface is a fact about those two
+   * shapes**, so it is declared per part, the same way `marking` is — and for the same reason:
+   * no measurement can infer intent from a picture.
+   *
+   * Defaults to false, which is the null case: every part authored before this renders
+   * byte-identical. portable — the solid/surface distinction outlives this project.
+   */
+  readonly weld?: boolean
 }
 
 /** A named instant of the cycle. The gait is a set of named phases, never a bare sine. */
