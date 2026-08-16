@@ -66,7 +66,8 @@
     "fill.x": "+0.5, opposite the key lamp on the horizontal. A fill placed on the same side as the key lifts the half that is already lit and does nothing for the half that needs it.",
     "fill.y": "+0.7, from BELOW. This is bounce: light off the ground back up into the underside of a body. Every fill in painting and photography comes from lower than the key for that reason.",
     "fill.z": "-0.2, barely on the viewer side. A fill that faces the viewer as hard as the key does flattens the form it exists to recover.",
-    "fill.weight": "0.15, and it is the measured edge rather than a taste. His ink verdict of 15/08 requires BOTH a wide value range and clustered tone regions, and this knob moves them in opposite directions. Swept at 0, 0.10, 0.13, 0.15, 0.17, 0.19 and 0.22: regions improve monotonically, and the tree loses 23% of its value range between 0.15 and 0.17 (0.654 down to 0.504). 0.15 is the largest weight that costs no range on either subject, and it still buys a 7% gain in region size."
+    "fill.weight": "0.15, and it is the measured edge rather than a taste. His ink verdict of 15/08 requires BOTH a wide value range and clustered tone regions, and this knob moves them in opposite directions. Swept at 0, 0.10, 0.13, 0.15, 0.17, 0.19 and 0.22: regions improve monotonically, and the tree loses 23% of its value range between 0.15 and 0.17 (0.654 down to 0.504). 0.15 is the largest weight that costs no range on either subject, and it still buys a 7% gain in region size.",
+    "silverback": "The silver saddle and the heavier crest were added 16/08 at his request: 'vamos caracterizar esse gorila? Ele deveria ser um silverback.' The saddle is its own MATERIAL, not a lighter shift of the fur, because a shift walks a part along its own ramp and grey hair is a colder hue than pale fur. The crest is the half that changes the silhouette, which is where a sprite is actually read."
   },
   "shadow": {
     "steps": 8,

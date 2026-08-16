@@ -97,7 +97,11 @@ const bones: Bone[] = [
   { name: 'head', parent: 'neck', x: 0.5, y: -3.5, z: 0, angle: 0 },
   // Far limbs first, so a tie at exactly equal depth still breaks the way the animal reads.
   { name: 'armFU', parent: 'torso', x: 0, y: -11, z: 6, angle: 0.02 },
-  { name: 'armFL', parent: 'armFU', x: 0, y: 7.5, z: 0, angle: 0.05 },
+  // **Both elbows fold the same way, and the far one used to fold the opposite way.** It was
+  // inherited from probe D, where the two forearms are mirrored — which is a natural-looking
+  // thing to type and an impossible thing for a body: on a side view both elbows point the
+  // same direction. It is the same defect he saw in the prone legs, on the arms.
+  { name: 'armFL', parent: 'armFU', x: 0, y: 7.5, z: 0, angle: -0.05 },
   { name: 'legFU', parent: 'pelvis', x: -0.5, y: 1, z: 5, angle: 0 },
   { name: 'legFL', parent: 'legFU', x: 0, y: 9, z: 0, angle: 0.02 },
   { name: 'legNU', parent: 'pelvis', x: 1, y: 1, z: -5, angle: 0 },
@@ -165,13 +169,13 @@ const WALK: Gait = {
     { bone: 'pelvis', channel: 'y', keys: [0, 0.34, 0, -0.34] },
     { bone: 'torso', channel: 'angle', keys: [0.03, 0.05, 0.03, 0.01] },
     { bone: 'legNU', channel: 'angle', keys: [0.24, 0, -0.23, 0] },
-    { bone: 'legNL', channel: 'angle', keys: [0, 0.44, 0.08, -0.14] },
+    { bone: 'legNL', channel: 'angle', keys: [0.02, 0.44, 0.1, -0.05] },
     { bone: 'legFU', channel: 'angle', keys: [-0.23, 0, 0.24, 0] },
-    { bone: 'legFL', channel: 'angle', keys: [0.08, -0.14, 0, 0.44] },
+    { bone: 'legFL', channel: 'angle', keys: [0.1, -0.05, 0.02, 0.44] },
     { bone: 'armNU', channel: 'angle', keys: [-0.19, -0.02, 0.15, -0.02] },
     { bone: 'armNL', channel: 'angle', keys: [-0.3, -0.34, -0.3, -0.26] },
     { bone: 'armFU', channel: 'angle', keys: [0.17, -0.01, -0.19, -0.01] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.19, -0.15, -0.19, -0.23] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.12, -0.08, -0.12, -0.16] },
     { bone: 'head', channel: 'angle', keys: [0.02, 0, -0.02, 0] },
     // Aimed down and in, hanging at the chest: a camera nobody is looking through points at
     // the ground. Without a track it inherits the forearm and swings like a lantern.
@@ -225,7 +229,7 @@ const PRONE: Gait = {
     { bone: 'armNU', channel: 'angle', keys: [-0.89, -0.91, -0.9, -0.895] },
     { bone: 'armNL', channel: 'angle', keys: [-0.95, -0.97, -0.96, -0.955] },
     { bone: 'armFU', channel: 'angle', keys: [-0.85, -0.87, -0.86, -0.855] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.92, -0.94, -0.93, -0.925] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.58, -0.6, -0.59, -0.585] },
     // **The camera is aimed, not carried, and that is why it has a track of its own.**
     //
     // Without one it inherits the forearm's angle, and a forearm folded back to the eye
@@ -251,14 +255,14 @@ const RUN: Gait = {
     // A stride at 40 degrees against the walk's 25: the difference between the two gaits is
     // amplitude and pitch, and nothing else. A run that is a fast walk is a fast walk.
     { bone: 'legNU', channel: 'angle', keys: [0.38, -0.05, -0.36, 0.08] },
-    { bone: 'legNL', channel: 'angle', keys: [-0.05, 0.62, 0.08, -0.24] },
+    { bone: 'legNL', channel: 'angle', keys: [0.02, 0.62, 0.1, -0.05] },
     { bone: 'legFU', channel: 'angle', keys: [-0.36, 0.08, 0.38, -0.05] },
-    { bone: 'legFL', channel: 'angle', keys: [0.08, -0.24, -0.05, 0.62] },
+    { bone: 'legFL', channel: 'angle', keys: [0.1, -0.05, 0.02, 0.62] },
     // Both arms in and folded: the camera is being protected, not carried.
     { bone: 'armNU', channel: 'angle', keys: [-0.26, -0.2, -0.28, -0.22] },
     { bone: 'armNL', channel: 'angle', keys: [-0.5, -0.54, -0.48, -0.52] },
     { bone: 'armFU', channel: 'angle', keys: [-0.2, -0.26, -0.22, -0.28] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.46, -0.42, -0.5, -0.44] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.28, -0.24, -0.32, -0.26] },
     { bone: 'head', channel: 'angle', keys: [-0.06, -0.02, -0.06, -0.02] },
     // Clutched in and turned down, protected against the chest.
     { bone: 'cam', channel: 'angle', keys: [0.66, 0.68, 0.65, 0.67] },

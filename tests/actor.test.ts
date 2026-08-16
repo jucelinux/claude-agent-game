@@ -93,6 +93,65 @@ function landmarks(): Record<string, { x: number; y: number }> {
   }
 }
 
+/**
+ * **A hinge bends to one side of straight and never through it.**
+ *
+ * He asked whether the gorilla's elbow and knee were right, before any number said they were
+ * not — *"estou um pouco incomodado com o cotovelo do gorila e com seu joelho. O movimento
+ * está correto?"*. It was not: the knee spent seven frames of eight between -36° and +4°,
+ * which is a shin pointing forward of the thigh. A knee that does that is a bird's, or a
+ * broken one.
+ *
+ * The check is the general form and it is cheap: for every elbow and knee in every gait, take
+ * the child bone's angle relative to its parent across the whole cycle. If the range spans
+ * both signs by more than a few degrees, the joint is bending both ways.
+ *
+ * **Three degrees of tolerance**, because a real joint does hyperextend a little and a key
+ * that lands exactly on straight is not a defect. Twenty is.
+ */
+const HINGE_TOL = 3
+
+const HINGES: readonly (readonly [string, string])[] = [
+  ['armFL', 'armFU'], ['armNL', 'armNU'], ['legFL', 'legFU'], ['legNL', 'legNU'],
+]
+
+/** Every grammar any micro game actually draws, with the tunables it draws it under. */
+function drawn(): readonly (readonly [string, string])[] {
+  const out = new Map<string, readonly [string, string]>()
+  for (const game of MICRO_GAMES) {
+    for (const p of game.scene.placements) {
+      out.set(`${p.grammar}|${p.tunables}`, [p.grammar, p.tunables])
+      for (const spec of Object.values(p.clips ?? {})) out.set(`${spec.grammar}|${spec.tunables}`, [spec.grammar, spec.tunables])
+    }
+  }
+  return [...out.values()]
+}
+
+describe('no joint bends both ways', () => {
+  for (const [name, tunables] of drawn()) {
+    const g = grammarByName(name)
+    if (!HINGES.some(([c]) => g.skeleton.bones.some((b) => b.name === c))) continue
+
+    it(`${name}`, () => {
+      const params = loadParams(tunables)
+      for (const [child, parent] of HINGES) {
+        if (!g.skeleton.bones.some((b) => b.name === child)) continue
+        const angles: number[] = []
+        for (let f = 0; f < params.frames.walk; f++) {
+          const w = solve(g.skeleton, evaluate(g.gait, params, f / params.frames.walk), { x: 0, y: 0, z: 0, a: 0, sx: 1, sy: 1, sz: 1 })
+          angles.push((w.get(child)!.a - w.get(parent)!.a) * 360)
+        }
+        const lo = Math.min(...angles)
+        const hi = Math.max(...angles)
+        expect(
+          lo >= -HINGE_TOL || hi <= HINGE_TOL,
+          `${name}: ${child} swings ${lo.toFixed(0)}° to ${hi.toFixed(0)}° against ${parent} — it folds both ways`,
+        ).toBe(true)
+      }
+    })
+  }
+})
+
 describe('a body lying on its belly', () => {
   const m = landmarks()
 

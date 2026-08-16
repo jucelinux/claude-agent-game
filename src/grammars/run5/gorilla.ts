@@ -46,10 +46,27 @@ const FUR: Palette = {
     [58, 49, 48],
     [73, 62, 59],
     [90, 77, 72],
+    // **silver — the saddle, and it is what the word silverback means.**
+    //
+    // A mature male grows a band of pale hair from the shoulders to the hips, and it is the
+    // single feature that tells his age and rank from across a clearing. It is a separate
+    // MATERIAL rather than a light `shift` of the fur, because `shift` walks a part along its
+    // own ramp and cannot reach a colder hue — and the saddle is not lighter fur, it is grey
+    // hair. That is probe D's lesson used the other way round: an accessory sharing a
+    // material is read as anatomy, and anatomy sharing a material is read as shading.
+    [42, 42, 50],
+    [64, 66, 76],
+    [92, 95, 106],
+    [124, 128, 140],
+    [156, 160, 172],
+    [188, 192, 202],
+    [214, 218, 226],
+    [238, 241, 246],
   ],
   ramps: [
     { material: 'fur', indices: [1, 2, 3, 4, 5, 6, 7, 8] },
     { material: 'hide', indices: [9, 10, 11, 12, 13, 14, 15, 16] },
+    { material: 'silver', indices: [17, 18, 19, 20, 21, 22, 23, 24] },
   ],
 }
 
@@ -70,10 +87,14 @@ export const gorilla: Grammar = {
       // old paint order could not even express. Legs at ±8 against the hips' 8.
       { name: 'armFU', parent: 'chest', x: 3, y: -2, z: 9, angle: -0.02 },
       { name: 'armFL', parent: 'armFU', x: 0, y: 12, z: 0, angle: 0.03 },
+      // **The shin rests folded BACK, and it used to rest folded forward.** A hinge bends to
+      // one side of straight and never through it; this one spent its whole cycle between
+      // -36 and +4 degrees, which is a knee bending backwards for seven frames out of eight.
+      // He felt it before any number said it: "estou incomodado com o cotovelo e com o joelho".
       { name: 'legFU', parent: 'hips', x: -1, y: 3, z: 8, angle: 0.02 },
-      { name: 'legFL', parent: 'legFU', x: 0, y: 8, z: 0, angle: -0.04 },
+      { name: 'legFL', parent: 'legFU', x: 0, y: 8, z: 0, angle: 0.04 },
       { name: 'legNU', parent: 'hips', x: 2, y: 4, z: -8, angle: 0.02 },
-      { name: 'legNL', parent: 'legNU', x: 0, y: 8, z: 0, angle: -0.04 },
+      { name: 'legNL', parent: 'legNU', x: 0, y: 8, z: 0, angle: 0.04 },
       { name: 'armNU', parent: 'chest', x: 4, y: 0, z: -9, angle: -0.02 },
       { name: 'armNL', parent: 'armNU', x: 0, y: 13, z: 0, angle: 0.03 },
     ],
@@ -111,10 +132,26 @@ export const gorilla: Grammar = {
     // The crest is what makes a silhouette read as a gorilla rather than as a bear. It is a
     // blade on the midline, so it keeps its shallow default depth and earns its keep purely
     // by standing above the skull — where the two overlap, the skull correctly wins.
-    { name: 'crest', bone: 'head', material: 'fur', shape: { kind: 'ellipse', cx: -1, cy: -4, rx: 3.6, ry: 2.4 } },
+    // **The sagittal crest, grown for the silverback.** It was 3.6 x 2.4; a mature male's
+    // skull carries a ridge of muscle and bone that makes the head read as a helmet from any
+    // distance. It is the second thing after the saddle that says which animal this is, and
+    // unlike the saddle it changes the SILHOUETTE — which is where a sprite is read.
+    { name: 'crest', bone: 'head', material: 'fur', shape: { kind: 'ellipse', cx: -1.2, cy: -5, rx: 4.4, ry: 3.6, rz: 4 } },
     // A browridge wraps toward the viewer; without the offset the skull swallows it whole.
     { name: 'brow', bone: 'head', material: 'hide', shape: { kind: 'capsule', x0: 2, y0: -1.5, x1: 4.5, y1: -0.5, r: 1.6 }, z: -2.6 },
     { name: 'muzzle', bone: 'head', material: 'hide', shape: { kind: 'ellipse', cx: 4.6, cy: 1.6, rx: 3, ry: 2.6 }, z: -0.8 },
+
+    /**
+     * **The saddle.** Two masses rather than one, because the silver runs over the shoulders
+     * and the loins and dips at the waist — a single band across the whole back reads as a
+     * blanket. `lobed` rather than an ellipse so the boundary between grey hair and black is
+     * ragged, which is what a coat boundary is; a clean edge reads as paint.
+     *
+     * They sit at z -1 so they are proud of the mass they lie on. Any deeper and the chest
+     * swallows them, which is the defect `Part.z` was added for in the first place.
+     */
+    { name: 'saddleB', bone: 'chest', material: 'silver', z: -1, shape: { kind: 'lobed', cx: -2.6, cy: -5.2, rx: 9.4, ry: 6.2, rz: 9.5, lobes: 5, depth: 0.17, phase: 0.7, octaves: 2 } },
+    { name: 'saddleH', bone: 'hips', material: 'silver', z: -1, shape: { kind: 'lobed', cx: -0.6, cy: -4.6, rx: 7.8, ry: 4.8, rz: 8, lobes: 4, depth: 0.2, phase: 2.4, octaves: 2 } },
 
     { name: 'legNU', bone: 'legNU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 4, r1: 3.3 } },
     { name: 'legNL', bone: 'legNL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 3.2, r1: 2.8 } },
@@ -144,13 +181,16 @@ export const gorilla: Grammar = {
       { bone: 'head', channel: 'angle', keys: [-0.014, 0, 0.014, 0.006] },
       // Diagonal: near arm with far leg, then the other pair.
       { bone: 'armNU', channel: 'angle', keys: [1, 0.1, -0.9, -0.2] },
-      { bone: 'armNL', channel: 'angle', keys: [-0.35, -0.1, 0.5, 0.2] },
+      { bone: 'armNL', channel: 'angle', keys: [-0.28, -0.1, 0.5, 0.2] },
       { bone: 'legFU', channel: 'angle', keys: [0.9, 0, -0.9, 0] },
-      { bone: 'legFL', channel: 'angle', keys: [-0.2, -0.6, 0.1, 0.5] },
+      // Knee flexion at contact / load / pass / lift: about 10, 20, 5 and 40 degrees. Most
+      // folded through the swing so the foot clears the ground, straightest as it passes
+      // under the body. Authored against a 14.4 deg rest and the gait's 36 deg amplitude.
+      { bone: 'legFL', channel: 'angle', keys: [-0.26, 0.71, -0.12, 0.16] },
       { bone: 'armFU', channel: 'angle', keys: [-0.9, -0.2, 1, 0.1] },
-      { bone: 'armFL', channel: 'angle', keys: [0.5, 0.2, -0.35, -0.1] },
+      { bone: 'armFL', channel: 'angle', keys: [0.5, 0.2, -0.28, -0.1] },
       { bone: 'legNU', channel: 'angle', keys: [-0.9, 0, 0.9, 0] },
-      { bone: 'legNL', channel: 'angle', keys: [0.1, 0.5, -0.2, -0.6] },
+      { bone: 'legNL', channel: 'angle', keys: [-0.12, 0.16, -0.26, 0.71] },
     ],
   },
 }

@@ -109,7 +109,10 @@ describe('the budget counts the loop that actually runs', () => {
     expect(budget.perFrame.drawCalls).toBe(1 + columns + stage.placed.length + 1)
   })
 
-  it('the page reports the same budget it was built with', () => {
+  // Two full stage builds, which is two renders of every sprite in the game. It is the most
+  // expensive check in the suite and it earns it: a meter reading a stale number is worse
+  // than no meter, because it arrives looking like data.
+  it('the page reports the same budget it was built with', { timeout: 30_000 }, () => {
     // A meter that reads a stale number is worse than no meter: it arrives looking like data.
     const stage = toStage(MICRO_GAMES[0]!.scene)
     const a = budgetOf(stage)

@@ -59,11 +59,23 @@ const STARDEW: Palette = {
     [24, 19, 24],
     [34, 28, 33],
     [46, 39, 45],
+    // **silver — the saddle, added 16/08 when the body became a silverback.**
+    //
+    // Four tones because this idiom has four, not because the saddle needs four: **a body and
+    // its palette are a pair, and a new material on the body obliges every palette that
+    // dresses it.** These two probes re-palette the gorilla to compare inks, so they inherit
+    // the obligation — and they should, since a probe wearing a different animal than the
+    // one it is probing is no longer a comparison.
+    [78, 76, 84],
+    [124, 122, 130],
+    [172, 172, 178],
+    [216, 218, 222],
   ],
   ramps: [
     { material: 'fur', indices: [1, 2, 3, 4] },
     { material: 'hide', indices: [5, 6, 7, 8] },
     { material: 'ink', indices: [9, 10, 11, 12] },
+    { material: 'silver', indices: [13, 14, 15, 16] },
   ],
 }
 
@@ -97,11 +109,20 @@ const CHRONO: Palette = {
     [28, 21, 33],
     [38, 29, 43],
     [50, 39, 55],
+    // silver — the saddle, in this idiom's own wide range
+    [62, 60, 72],
+    [104, 104, 116],
+    [150, 152, 162],
+    [196, 200, 208],
+    [236, 240, 246],
   ],
   ramps: [
     { material: 'fur', indices: [1, 2, 3, 4, 5] },
     { material: 'hide', indices: [6, 7, 8, 9, 10] },
     { material: 'ink', indices: [11, 12, 13, 14, 15] },
+    // Five tones over a wide range, which is this idiom's whole argument, applied to the
+    // saddle as it is to everything else.
+    { material: 'silver', indices: [16, 17, 18, 19, 20] },
   ],
 }
 

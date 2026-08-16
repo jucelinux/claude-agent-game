@@ -75,7 +75,7 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     id: 'forest',
     title: 'The forest',
     blurb:
-      'Walk the gorilla with the arrows and hit with space. Photographers come in from the edges, lie down and start shooting; drive them off before they get the picture. Fourteen trees from one recursive grammar, all of them behind the player so the front of the stage stays clear. Depth is one number and haze rather than position; the clouds drift in real seconds, so there is no loop point left for them to jump at.',
+      'Walk the silverback with the arrows and hit with space. Photographers come in from the edges, lie down and start shooting; drive them off before they get the picture. Fourteen trees from one recursive grammar, all of them behind the player so the front of the stage stays clear. Depth is one number and haze rather than position; the clouds drift in real seconds, so there is no loop point left for them to jump at.',
     date: '2026-08-16',
     scene: forestScene,
   },
