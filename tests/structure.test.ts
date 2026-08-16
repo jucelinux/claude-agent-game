@@ -139,9 +139,16 @@ describe('the findings channel — null cases', () => {
   /**
    * And the same instrument is loud on the idiom he ranked last, with nothing changed but
    * the sample. Without this the test above passes for a channel that never alerts at all.
+   *
+   * **The sample moved on 16/08, and the reason is a good one.** It used to be `gorilla-jump`,
+   * which was in the incumbent idiom — eight tones over a narrow range with 18% noise. That
+   * whole family went to Chrono when he asked for the micro game to be repainted, so the old
+   * sample stopped being an example of the thing this check exists to catch. `probe-c` is
+   * still there, is still the incumbent, and is not going anywhere: it is a retired probe
+   * rather than a shipped subject, which is exactly what a calibration sample should be.
    */
   it('is loud on the idiom he ranked last', () => {
-    const result = execute({ grammar: 'gorilla-jump', tunables: 'gorilla-jump', seed: 1 })
+    const result = execute({ grammar: 'probe-c', tunables: 'probe-c', seed: 1 })
     const alerts = findings(result.frames, result.grammar).filter((f) => f.level === 'alert')
     expect(alerts.some((a) => a.check === 'regions')).toBe(true)
   })

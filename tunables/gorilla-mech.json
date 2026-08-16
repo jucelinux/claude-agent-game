@@ -6,7 +6,7 @@
     "originY": 36
   },
   "tones": {
-    "perMaterial": 8
+    "perMaterial": 5
   },
   "frames": {
     "walk": 16
@@ -14,14 +14,14 @@
   "light": {
     "x": -0.6,
     "y": -0.8,
-    "z": -0.35,
-    "curve": 1.25
+    "z": -0.2,
+    "curve": 1.1
   },
   "outline": {
-    "enabled": false,
-    "material": "hide",
+    "enabled": true,
+    "material": "ink",
     "inner": true,
-    "rim": true
+    "rim": false
   },
   "body": {
     "scale": 1
@@ -32,7 +32,7 @@
     "depth": 8
   },
   "texture": {
-    "speckle": 0.18
+    "speckle": 0
   },
   "playback": {
     "msPerFrame": 110,
@@ -43,19 +43,19 @@
     "canvas.h": "square with canvas.w",
     "canvas.originX": "canvas.w * 0.41: the hips sit back of centre because the chest, the arms and the head all reach forward of them",
     "canvas.originY": "canvas.h * 0.56, so a body that hangs below the hips still lands inside the frame",
-    "tones.perMaterial": "8, above the knob's declared 3-6 range on purpose: this is the sample that spends everything, so the round can see what spending buys",
+    "tones.perMaterial": "5, and it followed the gorilla rather than choosing. This grammar borrows the gorilla's palette and adds two ramps to it; when the coat went to five tones in the Chrono idiom on 16/08, a mech still declaring eight was declaring a budget its own ramps did not have.",
     "frames.walk": "16, four per named phase. A transformation is read for its middle frames, not its ends: at 8 the change happens in two jumps and the mechanism is invisible.",
     "light.x": "unit vector from the upper left, held identical across all four probe samples",
     "light.curve": "1.25. Dark fur has almost no ramp to spare above the middle, so the curve stays close to linear or the animal turns grey.",
     "light.y": "the y half of light.x's unit vector",
-    "outline.enabled": "off. The idiom he singled out had no outer line, and this run keeps that look - the edge is carried by outline.rim instead, which is what the silhouette locks measure.",
+    "outline.enabled": "ON, with the gorilla. A body and the idiom it is drawn in travel together.",
     "outline.inner": "on, even with the outer outline off: this sample drops the silhouette line but still needs the joints, which is the pairing a gradient idiom lives or dies on",
-    "outline.rim": "ON. Without it this idiom fails the edge-contrast lock at 0.058, which is where the same idiom failed before. The rim is what lets a no-outline sample keep a readable silhouette.",
-    "outline.material": "the hide ramp: this body has no ink, and the darkest hide tone is what the rim reaches for at the shadow edge",
+    "outline.rim": "OFF. A line and a rim are two answers to one question.",
+    "outline.material": "the ink ramp, borrowed with the rest of the coat.",
     "body.scale": "1: these bodies are authored at 64 px directly rather than scaled up from the 48 px arthropod",
     "gait.swing": "0.10 turn on a 23 px arm: about 14 px of hand travel, which is the stride of a knuckle walker - long arms take long steps",
     "gait.lift": "2.6 px: the chest travels further here than in the walk, because standing up out of a knuckle stance is a bigger move than taking a step",
-    "texture.speckle": "0.18. Fur is the one surface in this project where per-pixel noise is the material rather than dirt - it is what a coat looks like without drawing a single hair.",
+    "texture.speckle": "0, with the gorilla.",
     "playback.msPerFrame": "110 ms. 16 x 110 = a 1760 ms cycle, and this is the first sample in the project that does NOT share the 600 ms walk cycle - the shared duration existed so walks could be compared, and this is not a walk.",
     "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size",
     "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",

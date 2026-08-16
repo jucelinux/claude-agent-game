@@ -26,47 +26,67 @@
  */
 import type { Grammar, Palette } from '../../core/types.ts'
 
+/**
+ * **The coat, remade on 16/08, and both halves of it are his reading.**
+ *
+ * *"cara o gorila é preto"* — and it was not. The fur ran to [182, 164, 140], a warm cream,
+ * which is a brown bear's highlight and not a gorilla's. **Black hair does not go warm in the
+ * light; it goes blue**, because the only thing it has to reflect is the sky.
+ *
+ * *"a costa prateada não é literal da forma como você fez"* — and it was not. The saddle
+ * topped out at [238, 241, 246], eleven points off white, on an animal whose darkest tone was
+ * 14. That is a stripe painted onto a black coat. **A silverback's saddle is the same coat
+ * going grey**, so its range now overlaps the fur's and reaches exactly one step past its
+ * brightest tone. Grey hair on black, not white paint on black.
+ *
+ * **Five tones per material, in the idiom he ranked first**, which is the second half of his
+ * ask: the wood, the clouds and the photographer were all in Chrono's ink and the animal a
+ * person is steering was still in the incumbent — eight tones, no drawn line, a rim instead,
+ * and 18% noise. The player character was the only thing in the picture from a different game.
+ *
+ * **The declared cost, and it is a real one.** Chrono's argument is a genuinely wide value
+ * range, and a black animal cannot have one: this ramp spans 9 to 134 where the run 8 probe
+ * spanned 30 to 196. The range is spent *inside the dark half* instead. Separation comes from
+ * the drawn line and from the saddle rather than from reaching a cream highlight, and that is
+ * a trade rather than a win.
+ */
 const FUR: Palette = {
   name: 'gorilla',
   colors: [
     [0, 0, 0],
-    [14, 12, 15],
-    [24, 21, 24],
-    [36, 31, 34],
-    [50, 43, 44],
-    [68, 58, 56],
-    [90, 77, 70],
-    [140, 122, 104],
-    [182, 164, 140],
-    [10, 8, 10],
-    [17, 14, 16],
-    [25, 21, 23],
-    [34, 29, 30],
-    [45, 38, 38],
-    [58, 49, 48],
-    [73, 62, 59],
-    [90, 77, 72],
-    // **silver — the saddle, and it is what the word silverback means.**
-    //
-    // A mature male grows a band of pale hair from the shoulders to the hips, and it is the
-    // single feature that tells his age and rank from across a clearing. It is a separate
-    // MATERIAL rather than a light `shift` of the fur, because `shift` walks a part along its
-    // own ramp and cannot reach a colder hue — and the saddle is not lighter fur, it is grey
-    // hair. That is probe D's lesson used the other way round: an accessory sharing a
-    // material is read as anatomy, and anatomy sharing a material is read as shading.
-    [42, 42, 50],
-    [64, 66, 76],
-    [92, 95, 106],
-    [124, 128, 140],
-    [156, 160, 172],
-    [188, 192, 202],
-    [214, 218, 226],
-    [238, 241, 246],
+    // fur — black, and the highlight is cool. Black hair reflects the sky and nothing else.
+    [9, 9, 12],
+    [27, 28, 34],
+    [52, 54, 64],
+    [84, 88, 102],
+    [128, 134, 152],
+    // hide — the face, knuckles and feet. Bare gorilla skin is blacker than the coat.
+    [6, 6, 9],
+    [18, 18, 24],
+    [34, 36, 45],
+    [56, 59, 72],
+    [86, 91, 108],
+    // silver — the saddle. **It starts inside the fur's range and ends one step above it.**
+    // That is what makes it read as the same coat going grey rather than as a painted band,
+    // and it is the whole of his correction.
+    [24, 25, 30],
+    [48, 50, 58],
+    [80, 83, 94],
+    [118, 122, 136],
+    [158, 163, 178],
+    // ink — the drawn line. Dark, never pure black: a black ring on a page reads as a sticker
+    // cut out of the background rather than as a drawn edge.
+    [5, 5, 8],
+    [11, 11, 16],
+    [17, 18, 24],
+    [25, 26, 34],
+    [35, 37, 47],
   ],
   ramps: [
-    { material: 'fur', indices: [1, 2, 3, 4, 5, 6, 7, 8] },
-    { material: 'hide', indices: [9, 10, 11, 12, 13, 14, 15, 16] },
-    { material: 'silver', indices: [17, 18, 19, 20, 21, 22, 23, 24] },
+    { material: 'fur', indices: [1, 2, 3, 4, 5] },
+    { material: 'hide', indices: [6, 7, 8, 9, 10] },
+    { material: 'silver', indices: [11, 12, 13, 14, 15] },
+    { material: 'ink', indices: [16, 17, 18, 19, 20] },
   ],
 }
 
@@ -112,11 +132,11 @@ export const gorilla: Grammar = {
   parts: [
     // Every limb tapers now: thick at the joint it hangs from, narrow at the one it ends
     // in. A gorilla's forearm is not a cylinder and neither is anything else on a body.
-    { name: 'armFU', bone: 'armFU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 12, r: 3.4, r1: 2.9 }, shift: -2 },
-    { name: 'armFL', bone: 'armFL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 10, r: 2.9, r1: 2.6 }, shift: -2 },
+    { name: 'armFU', bone: 'armFU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 12, r: 3.4, r1: 2.9 }, shift: -1 },
+    { name: 'armFL', bone: 'armFL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 10, r: 2.9, r1: 2.6 }, shift: -1 },
     { name: 'fistF', bone: 'armFL', material: 'hide', shape: { kind: 'ellipse', cx: 0, cy: 11, rx: 2.8, ry: 2.4, rz: 3.2 }, shift: -1 },
-    { name: 'legFU', bone: 'legFU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 3.6, r1: 3 }, shift: -2 },
-    { name: 'legFL', bone: 'legFL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.9, r1: 2.5 }, shift: -2 },
+    { name: 'legFU', bone: 'legFU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 3.6, r1: 3 }, shift: -1 },
+    { name: 'legFL', bone: 'legFL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.9, r1: 2.5 }, shift: -1 },
     { name: 'footF', bone: 'legFL', material: 'hide', shape: { kind: 'ellipse', cx: 1.5, cy: 7.5, rx: 3.4, ry: 2, rz: 3.2 }, shift: -1 },
 
     // The two masses, and everything else hangs off them.

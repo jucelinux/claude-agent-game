@@ -29,34 +29,42 @@
 import type { Grammar, Palette, Part, Track } from '../../core/types.ts'
 import { gorilla } from '../run5/gorilla.ts'
 
-/** Fur and hide come from the gorilla unchanged; steel and the eye are what this adds. */
+/**
+ * Fur, hide, silver and ink come from the gorilla unchanged; steel and the eye are what this
+ * adds.
+ *
+ * **The indices are derived rather than typed, and that is a repair.** They were written out
+ * by hand — 17 through 24 — against a gorilla palette that had two ramps of eight. When the
+ * coat became black in five tones on 16/08 and grew a saddle and a line, the count moved and
+ * every hand-typed index pointed at the wrong colour. A palette that borrows another one has
+ * to borrow its length too.
+ */
+/** Where the borrowed ramps end, so nothing downstream has to know how long they are. */
+const BORROWED = gorilla.palette.colors.length
+const STEEL = [0, 1, 2, 3, 4].map((i) => BORROWED + i)
+const CORE = [0, 1, 2, 3, 4].map((i) => BORROWED + 5 + i)
+
 const ALLOY: Palette = {
   name: 'gorilla-mech',
   colors: [
     ...gorilla.palette.colors,
     // steel: cool, and the top step is a specular that only the rim ever reaches
-    [18, 22, 30],
-    [30, 37, 48],
-    [45, 55, 70],
-    [64, 77, 95],
-    [88, 103, 124],
-    [118, 134, 156],
-    [156, 172, 192],
-    [206, 220, 236],
+    [22, 27, 36],
+    [48, 58, 74],
+    [82, 98, 120],
+    [128, 146, 170],
+    [196, 212, 230],
     // core: the light inside, and the only saturated ramp in the whole project
-    [40, 12, 10],
-    [78, 20, 14],
-    [122, 32, 18],
-    [166, 52, 22],
-    [206, 82, 30],
-    [234, 126, 46],
-    [248, 176, 86],
-    [255, 226, 156],
+    [52, 14, 10],
+    [110, 28, 16],
+    [176, 56, 24],
+    [226, 104, 38],
+    [250, 190, 104],
   ],
   ramps: [
     ...gorilla.palette.ramps,
-    { material: 'steel', indices: [17, 18, 19, 20, 21, 22, 23, 24] },
-    { material: 'core', indices: [25, 26, 27, 28, 29, 30, 31, 32] },
+    { material: 'steel', indices: STEEL },
+    { material: 'core', indices: CORE },
   ],
 }
 

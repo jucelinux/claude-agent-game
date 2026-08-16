@@ -6,7 +6,7 @@
     "originY": 34
   },
   "tones": {
-    "perMaterial": 8
+    "perMaterial": 5
   },
   "frames": {
     "walk": 12
@@ -14,14 +14,14 @@
   "light": {
     "x": -0.6,
     "y": -0.8,
-    "z": -0.35,
-    "curve": 1.25
+    "z": -0.2,
+    "curve": 1.1
   },
   "outline": {
-    "enabled": false,
-    "material": "hide",
+    "enabled": true,
+    "material": "ink",
     "inner": true,
-    "rim": true
+    "rim": false
   },
   "body": {
     "scale": 0.88
@@ -32,7 +32,7 @@
     "depth": 8
   },
   "texture": {
-    "speckle": 0.18
+    "speckle": 0
   },
   "playback": {
     "msPerFrame": 65,
@@ -43,22 +43,22 @@
     "canvas.h": "square with canvas.w",
     "canvas.originX": "canvas.w * 0.41: the hips sit back of centre because the chest, the arms and the head all reach forward of them",
     "canvas.originY": "canvas.h * 0.53. Was 40, and 40 was wrong: the arc measures y 11..63 across the cycle, so the body ran off the bottom of the cell at the absorb pose and no outline could be drawn under it. The arc is 53 px of a 64 px cell and fits comfortably - it was merely 6 px too low. At 34 it spans 5..57 with room for the ring on both sides. Found by the value lock the moment an idiom with an outline was built (15/08); the incumbent clipped identically and passed only because rim pushes clipped pixels to a ramp end. Changed here too, and identically, or the ink probe would differ in two things.",
-    "tones.perMaterial": "8, above the knob's declared 3-6 range on purpose: this is the sample that spends everything, so the round can see what spending buys",
+    "tones.perMaterial": "5. 16/08. The idiom moved to Chrono, which he ranked first on 15/08, because everything else in the forest was already there and the animal a person steers was the only thing left in the incumbent: eight tones, no drawn line, a rim instead of one, and 18 percent noise. A player character in a different ink from its world is the loudest incoherence a scene can have.",
     "frames.walk": "12, and the grid is the reason: every named phase of the jump lands on a whole frame at twelfths (3/12, 5/12, 7/12, 9/12, 10/12). A phase between frames is a key pose nobody ever sees, and the export contract refuses it.",
     "light.x": "unit vector from the upper left, held identical across all four probe samples",
-    "light.curve": "1.25. Dark fur has almost no ramp to spare above the middle, so the curve stays close to linear or the animal turns grey.",
+    "light.curve": "1.1, Chrono's. Slightly above linear, so the dark end compresses into a rim and the lit half keeps its steps. It was 1.25 against an eight-tone ramp; on five that spends too much of a short ramp on the light side.",
     "light.y": "the y half of light.x's unit vector",
-    "outline.enabled": "off. The idiom he singled out had no outer line, and this run keeps that look - the edge is carried by outline.rim instead, which is what the silhouette locks measure.",
+    "outline.enabled": "ON. Chrono outlines its sprites; that is how they hold at small size against a busy map. It was OFF and a rim was doing the job, which is the incumbent's answer and the one he ranked last.",
     "outline.inner": "on, even with the outer outline off: this sample drops the silhouette line but still needs the joints, which is the pairing a gradient idiom lives or dies on",
-    "outline.rim": "ON. Without it this idiom fails the edge-contrast lock at 0.058, which is where the same idiom failed before. The rim is what lets a no-outline sample keep a readable silhouette.",
-    "outline.material": "the hide ramp: this body has no ink, and the darkest hide tone is what the rim reaches for at the shadow edge",
+    "outline.rim": "OFF. A line and a rim are two answers to one question, and this run picked the line.",
+    "outline.material": "the ink ramp. The palette grew one to carry it: a rim needs no material and a line does.",
     "body.scale": "0.88. The body is ~40 px of a 64 px cell at scale 1, which leaves 24 px of total slack for a 13 px vertical arc plus the limbs that swing outside the standing silhouette. 0.88 buys the room; below ~0.8 the sprite stops matching the walk on a sheet, which is the comparison the round exists for.",
     "gait.swing": "0.22 turn = 79 deg of range, against the walk 0.10. The attack found the rule and the jump obeys it: below about 36 deg no limb clears the torso outline, so a far limb behind the mass renders nothing and the pair reads as one. 0.22 is the smallest amplitude at which the far arm and far leg stay present through the whole cycle, measured rather than chosen - half the attack, because a jump throws its limbs and a slam swings them.",
     "gait.lift": "8 px = a fifth of the standing body height (~36 px at this scale). A gorilla is not a floaty jumper; height past about a quarter of body height reads as a smaller, lighter animal, and weight is the axis this run is spending.",
-    "texture.speckle": "0.18. Fur is the one surface in this project where per-pixel noise is the material rather than dirt - it is what a coat looks like without drawing a single hair.",
+    "texture.speckle": "0. Chrono places every pixel. It was 0.18, which is the incumbent idiom's signature and the thing the ink verdict most wanted the back of.",
     "playback.msPerFrame": "65 ms. 12 x 65 = 780 ms, deliberately longer than the walk’s shared 600 ms - a heavy body takes longer to crouch, leave and land than it takes to make one stride. DECISIONS 15/08 already broke the shared cycle for the same reason.",
     "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size",
-    "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",
+    "light.z": "-0.2, Chrono's. At -0.35 the centre of every mass sits two thirds up its ramp, which is how a body ends up mid-toned everywhere at once.",
     "gait.depth": "8 px, inert in this gait: the jump has no z track. Kept at the arm row separation (bone z is +/-9) so it means the right thing the moment one is added.",
     "shadow.steps": "8 px, and it is measured rather than chosen: a sweep at 6, 10, 16 and 24 returns the same shadow area from 6 onward. Past a few pixels the ray has left the body and there is nothing more to block it. 8 keeps a small margin over the saturation point.",
     "shadow.bias": "0.25 px of depth, and its job changed. It used to guard against a surface shadowing itself, and it could not: acne scales with curvature, so a lone sphere of radius 18 self-shadowed 198 px and still self-shadowed at eight times the tolerance. That case is now settled by identity - a convex part cannot cast onto itself - so the bias only arbitrates a tie between two DIFFERENT parts whose surfaces meet at nearly the same depth. A quarter of a pixel is enough for that, and acne measures zero at every radius and every bias.",
@@ -67,7 +67,8 @@
     "fill.y": "+0.7, from BELOW. This is bounce: light off the ground back up into the underside of a body. Every fill in painting and photography comes from lower than the key for that reason.",
     "fill.z": "-0.2, barely on the viewer side. A fill that faces the viewer as hard as the key does flattens the form it exists to recover.",
     "fill.weight": "0.15, and it is the measured edge rather than a taste. His ink verdict of 15/08 requires BOTH a wide value range and clustered tone regions, and this knob moves them in opposite directions. Swept at 0, 0.10, 0.13, 0.15, 0.17, 0.19 and 0.22: regions improve monotonically, and the tree loses 23% of its value range between 0.15 and 0.17 (0.654 down to 0.504). 0.15 is the largest weight that costs no range on either subject, and it still buys a 7% gain in region size.",
-    "silverback": "The silver saddle and the heavier crest were added 16/08 at his request: 'vamos caracterizar esse gorila? Ele deveria ser um silverback.' The saddle is its own MATERIAL, not a lighter shift of the fur, because a shift walks a part along its own ramp and grey hair is a colder hue than pale fur. The crest is the half that changes the silhouette, which is where a sprite is actually read."
+    "silverback": "The silver saddle and the heavier crest were added 16/08 at his request: 'vamos caracterizar esse gorila? Ele deveria ser um silverback.' The saddle is its own MATERIAL, not a lighter shift of the fur, because a shift walks a part along its own ramp and grey hair is a colder hue than pale fur. The crest is the half that changes the silhouette, which is where a sprite is actually read.",
+    "palette": "Black fur with a COOL highlight, 16/08, his words: 'cara o gorila é preto'. It ran to a warm cream at [182,164,140], which is a brown bear. Black hair reflects the sky. Declared cost: Chrono's argument is a wide value range and a black animal cannot have one - this ramp spans 9 to 134 where the run 8 probe spanned 30 to 196, and the separation is bought with the drawn line and the saddle instead."
   },
   "shadow": {
     "steps": 8,
