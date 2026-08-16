@@ -1,0 +1,82 @@
+{
+  "canvas": {
+    "w": 52,
+    "h": 36,
+    "originX": 26,
+    "originY": 14
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 8
+  },
+  "light": {
+    "x": -0.5,
+    "y": -0.72,
+    "z": -0.3,
+    "curve": 1.1
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.09,
+    "lift": 2,
+    "depth": 3
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "shadow": {
+    "steps": 6,
+    "bias": 0.25,
+    "strength": 1
+  },
+  "fill": {
+    "x": 0.45,
+    "y": 0.5,
+    "z": -0.3,
+    "weight": 0.16
+  },
+  "playback": {
+    "msPerFrame": 220,
+    "scale": 4
+  },
+  "_anchors": {
+    "canvas.w": "52. The board is 32 px and the cushion variant swings a leaf 8 px past the right cap at the end of its sway; 52 holds that with the outline ring and margin.",
+    "canvas.h": "36. A bloom on its stem stands 9 px above the board and the fern's sprig droops 16 px below it. The first value was 32 and the silhouette lock caught two variants painting into row 0 \u2014 **a stem lengthened to fix an absent part is a stem that has to fit**, and the two changes belong in the same turn.",
+    "canvas.originX": "canvas.w / 2. A platform is symmetric about the point the game places it at, and the collision rule uses one half-width for all four variants.",
+    "canvas.originY": "14, and it is ON THE TOP SURFACE of the board. That is the only row of a platform anything cares about, so it is the row the sprite is placed by. Authoring the origin at the centre would make the game responsible for knowing the board's thickness.",
+    "tones.perMaterial": "5, matching the cat and every other subject since 15/08.",
+    "frames.walk": "8, matching the cat's cycle so a shelf and the animal on it never beat against each other.",
+    "gait.swing": "0.09 turns, 32.4 degrees at a key of 1, and it is set by what the SCREEN shows rather than by what a leaf does. A bloom sits 6 to 7 px from the root of its stem, so 32 degrees moves it about 3.5 px over 1.76 s. That is a gentle breeze at this scale. The first pass paired keys of 0.16 with a swing of 0.06 and got three degrees of travel: eight byte-identical frames, and a minimum pair distance of exactly zero from the perception channel. An amplitude below one pixel is not restraint, it is a still image \u2014 the astronaut's nine-degree arms, repeated on a plant.",
+    "gait.lift": "2 px. Unused \u2014 no ornament translates \u2014 and anchored so a future one has a number to spend.",
+    "gait.depth": "3 px. Unused, same reason.",
+    "shadow.steps": "6, one more than the cushion's depth radius of 4.2, so the cushion shades the board under it.",
+    "shadow.strength": "1 ramp step, matching the cat. Same garden, same bounce.",
+    "fill.weight": "0.16, matching the cat, for the same reason: one scene, one fill.",
+    "playback.msPerFrame": "220. Eight frames make a 1.76 s sway \u2014 slower than the cat's 720 ms tail on purpose, because the plant and the animal are moving for different reasons and matching periods would make them look linked.",
+    "playback.scale": "4, read only by the bench viewer.",
+    "light.x": "-0.5, and it is byte-identical to `cat.json`. ONE lamp for the whole picture: a shelf lit from a different direction than the animal standing on it is the defect he named on the moon, one scene earlier.",
+    "light.y": "-0.72, identical to `cat.json`. Late afternoon in a garden: the light comes down through leaves rather than in from a low sun.",
+    "light.z": "-0.3, identical to `cat.json`. A little front light so the near face of a round mass keeps reading.",
+    "light.curve": "1.1, identical to `cat.json`. Near linear, because the wood's own range is wide enough not to need the ramp bent.",
+    "body.scale": "1. The board is 32 px against a 200 px world, so six of them would span it. Two shelves side by side must not look like a floor, and at a sixth of the width they never do.",
+    "texture.speckle": "0. The 15/08 verdict retired per-pixel noise.",
+    "outline.enabled": "true. The 15/08 ink verdict: a drawn line is half of what made the winning sample read. Every subject in this project has carried one since.",
+    "outline.material": "\"ink\". The palette's own line material, a warm dark brown rather than a black \u2014 a neutral line against a warm coat would be the one cool thing in the picture.",
+    "outline.inner": "true. Moss on a plank, a cushion on a plank and a leaf on a stem are all one object overlapping another, and the inner line is what says there are two of them.",
+    "outline.rim": "false. `rim` and `enabled` are the two answers to the same question and this project settled on the drawn line on 15/08. Kept expressible so \"both\" and \"neither\" stay reachable.",
+    "shadow.bias": "0.25, the project-wide value since run 7. Depth tolerance, so a curved surface does not shadow itself along its own tangent.",
+    "fill.x": "0.45, opposite the key in x. A fill is what a photographer puts across from the key light and what a painter calls bounce.",
+    "fill.y": "0.5, from BELOW. The key comes down through leaves and the bounce comes up off the ground, which is what an outdoor scene actually does.",
+    "fill.z": "-0.3, matching the key's own z. The fill is a weaker second lamp, not a different camera."
+  }
+}

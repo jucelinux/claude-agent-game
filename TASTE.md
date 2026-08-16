@@ -130,6 +130,29 @@ _Fills from evidence. Every entry cites the artifact that produced it._
   gets predicted out loud before he sees it, and the prediction gets scored. This one scored
   zero, and it is the second time §2a has caught me writing a verdict before anyone looked.
 
+- **[16/08 · the climb, four tuning sweeps] Four identical results are a finding, and I read
+  them as four points on a curve.** The kitten could not climb past the first shelf, so I swept
+  the landing window: 8 px, 14, 20, 26 — **exactly 4.0 m every time** — then 34, and suddenly
+  10. I widened the knob four times before asking why the first four had produced no gradient
+  at all. A difficulty setting produces a curve; **a cliff is the shape of a structural fault**,
+  and the fault was that with one shelf per band and a steady input the whole game is a periodic
+  system whose crossing position at every shelf is a fixed offset from the landing below it.
+  Either it matches or it never does. **The pull is to treat a knob that did nothing as a knob
+  that needs more, rather than as evidence the knob is not connected to the problem.** portable,
+  and it generalises past tuning: an intervention with no measurable effect is information about
+  the model, not a reason to intervene harder.
+
+- **[16/08 · the swallowed check, withdrawn before shipping] I reach for the measurement I can
+  take rather than the one the question needs.** A limb pair authored as one pose reached its
+  fourth occurrence, so the method says compile it into a lock. I wrote the check where the last
+  four defects had been *seen* — in the pixels — measuring declared shape area against best
+  painted frame. It fired on 237 parts across 69 subjects, including bodies he had passed
+  without a word, because **occlusion is normal and no pixel count separates a part correctly
+  hidden from one accidentally hidden.** The difference is intent, and the intent is in the
+  grammar. Moving the check there took ten lines and it fired on nine subjects, all nine
+  symmetric on purpose. **portable:** when a check over-fires on healthy work, the usual fault is
+  not the threshold, it is that the invariant was asserted about the wrong artifact.
+
 - **[15/08 · run 7, gallery #0018–#0019] I carry a working sample's numbers into a
   different problem and treat them as facts about the body.** Both new actions were
   authored at the walk's `gait.swing` of 0.1, and both came back with a limb absent in

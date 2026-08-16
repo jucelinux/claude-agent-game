@@ -1,7 +1,7 @@
 {
   "note": "Regenerate with the command below. A baseline without its command and date is a rumour.",
   "command": "npm run baseline",
-  "date": "2026-08-15",
+  "date": "2026-08-16",
   "spec": {
     "grammar": "fixture",
     "tunables": "default",

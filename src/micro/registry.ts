@@ -23,6 +23,7 @@
  */
 
 import type { Scene } from '../scene/compose.ts'
+import { cozyScene } from './cozy-scene.ts'
 import { forestScene } from './forest-scene.ts'
 import { moonScene } from './moon-scene.ts'
 
@@ -100,5 +101,27 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     date: '2026-08-16',
     keys: '← → ↑ ↓ walk in eight directions · space jump · the shadow is where you land',
     scene: moonScene,
+  },
+  /**
+   * **The climb.** His commission, 16/08, and the sentence before it decided the round:
+   *
+   * > *"Será um jogo de plataforma em que um gatinho pula de plataforma em plataforma. O mesmo
+   * > conceito do doodle jump, só que com uma estética de Cozy Game."*
+   * >
+   * > *"Não vou atacar o 3d agora pois segundo sua própria recomendação precisamos atacar a
+   * > consequência primeiro."*
+   *
+   * The recommendation is a line of mine from the same day: the forest has a mechanic and no
+   * consequence, and that is the smallest work on the list with the largest return. **So this
+   * is the first game on the shelf that can be lost**, and the fall is the point of it.
+   */
+  {
+    id: 'cozy',
+    title: 'The climb',
+    blurb:
+      'Steer the kitten with the arrows; the bounce is automatic and there is no jump key. The tower has no top and is not stored anywhere — every shelf is an integer hash of its own band index, so the climb is endless and identical on every machine. It is provably climbable: the apex of one bounce is 78 px and no gap is ever more than 52. The sky is a function of how high you are, the stars come out as you go, and falling off the bottom ends the run — which is the first consequence anything on this shelf has had.',
+    date: '2026-08-16',
+    keys: '← → steer · space to climb again after a fall · the bounce takes care of itself',
+    scene: cozyScene,
   },
 ]

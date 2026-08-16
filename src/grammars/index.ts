@@ -16,6 +16,8 @@ import { PHOTOGRAPHER } from './run13/photographer.ts'
 import { gorillaIdle } from './run13/idle.ts'
 import { ASTRONAUT } from './run14/astronaut.ts'
 import { MOON } from './run14/moon.ts'
+import { CAT, catTuck } from './run15/cat.ts'
+import { PERCHES } from './run15/perch.ts'
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   fixture,
@@ -40,6 +42,8 @@ export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   ...Object.fromEntries(PHOTOGRAPHER.map((g) => [g.name, g])),
   ...Object.fromEntries(ASTRONAUT.map((g) => [g.name, g])),
   ...Object.fromEntries(MOON.map((g) => [g.name, g])),
+  ...Object.fromEntries(CAT.map((g) => [g.name, g])),
+  ...Object.fromEntries(PERCHES.map((g) => [g.name, g])),
 }
 
 /**
@@ -71,6 +75,12 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   ...ASTRONAUT.map((g) => ({ grammar: g.name, tunables: 'astronaut' })),
   { grammar: 'earth', tunables: 'earth' },
   ...MOON.filter((g) => g.name !== 'earth').map((g) => ({ grammar: g.name, tunables: 'regolith' })),
+  // **The tuck has its own tunables and the other two clips share one.** A frame count lives in
+  // the tunables file, and a clip that plays once needs four frames where a clip that loops
+  // needs eight. Everything else in the two files is identical, which a lock asserts.
+  ...CAT.filter((g) => g.name !== catTuck.name).map((g) => ({ grammar: g.name, tunables: 'cat' })),
+  { grammar: catTuck.name, tunables: 'cat-tuck' },
+  ...PERCHES.map((g) => ({ grammar: g.name, tunables: 'perch' })),
 ]
 
 export function grammarByName(name: string): Grammar {

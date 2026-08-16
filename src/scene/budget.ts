@@ -81,13 +81,42 @@ export function budgetOf(stage: Stage, gzipBytes = 0): Budget {
   const rainCalls =
     stage.rain === null ? 0 : Math.ceil(stage.w / stage.rain.spacing) + 2
 
+  /**
+   * **The climb pays for a sky it redraws, a field, a star field and an unbounded tower**, and
+   * counting only `placed` would have reported three draw calls for a frame that makes about
+   * two hundred. **A budget that does not know about a whole draw path is an instrument
+   * reporting cheap because it is blind, which is the flattering direction `HARNESS.md` §5 says
+   * instrument defects always come in.**
+   *
+   * Every term below is a loop in `drawClimb`, counted the same way the rain is:
+   *
+   * - the sky is quantised into 14 bands, one fillRect each, because a per-row gradient is 300
+   * - the star field is baked into a two-screen tile at mount and stamped twice for the wrap.
+   *   It was 110 fillRects and that is what pushed this scene over the ceiling
+   * - the garden floor is one baked strip, stamped once, and only while it is on screen
+   * - the motes are one fillRect each and genuinely move, so they stay counted at full price
+   * - the tower is however many bands fit on screen, times the shelves in a band, times up to
+   *   two for a shelf straddling the seam
+   */
+  const c = stage.climb
+  const climbCalls =
+    c === null
+      ? 0
+      : 14 + 1 + 2 + c.motes.count +
+        (Math.ceil(stage.h / c.bandH) + 2) * c.perBand * 2
+  const climbPixels =
+    c === null
+      ? 0
+      : stage.w * stage.h + c.motes.count +
+        (Math.ceil(stage.h / c.bandH) + 2) * c.perBand * sprites
+
   return {
     perFrame: {
-      // backdrop + rain + subjects + the final blit
-      drawCalls: 1 + rainCalls + stage.placed.length + 1,
-      pixels: screen + sprites,
+      // backdrop + rain + subjects + the climb's own loops + the final blit
+      drawCalls: 1 + rainCalls + stage.placed.length + climbCalls + 1,
+      pixels: screen + sprites + climbPixels,
       blitPixels: stage.w * stage.scale * stage.h * stage.scale,
-      overdraw: (screen + sprites) / screen,
+      overdraw: (screen + sprites + climbPixels) / screen,
     },
     load: {
       decodePixels,

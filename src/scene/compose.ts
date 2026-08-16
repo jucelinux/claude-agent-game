@@ -186,6 +186,30 @@ export type Placement = {
     }
   }
   /**
+   * **The climber: a body that falls, lands on whatever surface is under it, and springs.**
+   *
+   * A second kind of actor, beside `player` and `approach`, and it is a second kind rather than
+   * a flag on the first because almost nothing is shared. A `player` walks on a floor that is
+   * always there, chooses when to jump, and never leaves the screen. A climber never chooses
+   * to jump at all — **the bounce is automatic, and that is the genre** — has no floor except
+   * the platform it is currently over, and spends the whole game leaving the screen upward.
+   *
+   * Three clip names, and the state machine over them is two comparisons: rising, falling, or
+   * playing the 220 ms tuck that fires on contact. Which one is on screen is decided by the
+   * sign of one number, which is the smallest state machine this project has and is exactly as
+   * large as the genre needs.
+   *
+   * `CLAUDE.md` §5 says harvest generality, never design it. This is the second actor kind; the
+   * first is `player`. What the two share — a facing, a clip per state, a position clamped to
+   * the world — is visible now but is not extracted yet, because two cases is where a
+   * mechanism becomes arguable and three is where it becomes obvious.
+   */
+  readonly climber?: {
+    readonly rise: string
+    readonly fall: string
+    readonly tuck: string
+  }
+  /**
    * **A subject that walks in from an edge, settles at a distance from the player, and runs
    * home when it is struck.** The photographer, and it is named for the behaviour rather than
    * for the character.
@@ -211,6 +235,114 @@ export type Placement = {
     readonly period: number
     /** Seconds between shutter flashes once it is prone. */
     readonly shutter: number
+  }
+}
+
+/**
+ * **A world that scrolls, generates its own surfaces, and can be lost.**
+ *
+ * Every scene before this one was a stage: a fixed camera, a fixed cast, a floor painted into
+ * the backdrop. His commission of 16/08 — *"um jogo de plataforma em que um gatinho pula de
+ * plataforma em plataforma"* — needs three things none of those had, and this type is all
+ * three in one place.
+ *
+ * 1. **Surfaces instead of a floor.** A floor is one contact row derived from depth. A
+ *    platform is a sprite with a top edge that a body can be stopped by, and there are an
+ *    unbounded number of them.
+ * 2. **A camera.** Everything drawn so far sat at an absolute row. Here the world is taller
+ *    than the screen and the screen follows the player up it.
+ * 3. **Consequence.** `DECISIONS.md`, 16/08: *"the forest has a mechanic and no consequence —
+ *    it is the smallest work on the list with the largest return, and it is what turns a
+ *    reactive scene into a game."* He read that line and chose this over the 3D work. A climb
+ *    has a height reached and a fall that ends it, and those two facts are the whole of it.
+ *
+ * **The platforms are generated, never placed, and they are generated the same way the stars
+ * and the dust and the rain are: by an integer hash of an index.** Band `k` yields a position
+ * and a variant, closed form, so an endless tower costs no storage and replays identically on
+ * every machine. That is the same rule as everywhere else in this project and it is what makes
+ * a run reproducible — `CLAUDE.md` §1: a recorded input sequence must replay to the same
+ * state, or an agent cannot verify a game at all.
+ */
+export type Climb = {
+  /** Vertical distance between two bands of platforms, in scene pixels. */
+  readonly bandH: number
+  /**
+   * **How many shelves a band carries, each in its own slice of the width.**
+   *
+   * It is not a density knob, it is what stops the game from locking. With one per band and a
+   * steady sideways input the whole system is periodic, so the crossing position at every shelf
+   * above a landing is a fixed offset from it — and a fixed offset either matches or never
+   * does. Slicing the width puts a shelf in each part of the world at every altitude, so no
+   * single offset can miss them all.
+   */
+  readonly perBand: number
+  /** How much a platform may sit below its own band's row. Keeps the tower off a grid. */
+  readonly jitterY: number
+  /**
+   * How far a shelf may stray from its constructed position round the world. It is a *jitter on
+   * a guarantee*: the spacing is built by construction and this loosens it without breaking it,
+   * so the tower never reads as a lattice and never leaves a whole side unreachable.
+   */
+  readonly spreadJitter: number
+  /** Which grammars may be stamped as a platform. The hash picks one per band. */
+  readonly perches: readonly { readonly grammar: string; readonly tunables: string }[]
+  /**
+   * **Half the width of the standable surface, in scene pixels.**
+   *
+   * Declared rather than measured off the sprite, and the difference matters: the fern variant
+   * hangs a leaf five pixels past the end of its board, and a leaf is not a floor. Every
+   * variant shares one plank, so one number is the truth for all of them.
+   */
+  readonly halfW: number
+  /**
+   * How far off the plank's end a paw may be and still catch, in scene pixels. It exists to be
+   * generous rather than to be right: a landing that misses by one pixel is a landing a player
+   * believes he made.
+   */
+  readonly footHalf: number
+  /** How long the landing clip plays before the pose returns to rising, in milliseconds. */
+  readonly tuckMs: number
+  /** Scene pixels per second squared. */
+  readonly gravity: number
+  /** Upward speed a landing buys, in scene pixels per second. Nothing else ever grants it. */
+  readonly bounce: number
+  /** Sideways speed under the arrow keys, in scene pixels per second. */
+  readonly steer: number
+  /** Where the camera holds the player, as a fraction of the screen height from the top. */
+  readonly hold: number
+  /** Rows above the start row where the first band sits. The starting ground is below it. */
+  readonly firstBand: number
+  /** Seeds the band hash. Change it and the whole tower is a different tower. */
+  readonly seed: number
+  /** Scene pixels that count as one metre in the score. */
+  readonly pxPerMetre: number
+  /**
+   * **The sky is a function of altitude, and that is the reward for climbing.**
+   *
+   * A ramp walked from the start row upward: warm at the bottom, dark at the top. `skyHeight`
+   * is how far up the ramp is fully spent. Quantised to bands at draw time, because a smooth
+   * vertical gradient is a palette entry per row and this project has never spent colour that
+   * way — the floor takes 8 steps, haze takes 4.
+   */
+  readonly skyRamp: readonly RGB[]
+  readonly skyHeight: number
+  /** Stars, fading in with altitude, scrolled at their own rate so the sky has depth. */
+  readonly stars: { readonly count: number; readonly colors: readonly RGB[]; readonly seed: number; readonly parallax: number }
+  /**
+   * **Motes: warm specks drifting through the air, and they are the second field this engine
+   * has.** Rain was the first. Both are functions of position and time evaluated per frame,
+   * owning no skeleton and attached to nothing, which is what makes them a field rather than a
+   * body — two hundred fireflies would otherwise be two hundred parts.
+   */
+  readonly motes: {
+    readonly count: number
+    readonly colors: readonly RGB[]
+    readonly seed: number
+    /** Pixels per second the drift carries them sideways. */
+    readonly speed: number
+    /** Seconds in one rise-and-fall of a single mote. */
+    readonly period: number
+    readonly parallax: number
   }
 }
 
@@ -271,6 +403,16 @@ export type Scene = {
    * else here and loops exactly when its speed completes a whole number of passes.
    */
   readonly fields?: readonly Field[]
+  /**
+   * **Present on a climbing scene and absent on every other kind.** See `Climb` above.
+   *
+   * `compose()` refuses a scene that carries it — a scrolling, generated, stateful world has no
+   * frozen frame list, and rendering one would produce a picture that agrees with nothing the
+   * player sees. That refusal is deliberate and it is the honest handling of the divergence
+   * `DECISIONS.md` named on 16/08: this file and `layers.ts` are two paths drawing the same
+   * scene, and the cheapest way to keep them from disagreeing is for one of them to say so.
+   */
+  readonly climb?: Climb
 }
 
 export type Field =
@@ -396,6 +538,21 @@ function mergePalettes(
 }
 
 export function compose(scene: Scene): Composed {
+  /**
+   * **A climbing scene has no frozen frame list, and this throws rather than inventing one.**
+   *
+   * `compose()` renders a fixed cast under a fixed camera into N finished pictures. A climb has
+   * a camera that follows a player, platforms that are generated at runtime from a band index,
+   * and a state that can be lost. There is no cycle to freeze. Returning *something* — the
+   * first screen, say — would put a picture in the gallery that disagreed with the game, with
+   * no lock able to say why, which is exactly the failure mode this project recorded on 16/08
+   * about these two files.
+   */
+  if (scene.climb !== undefined) {
+    throw new Error(
+      `scene "${scene.name}" is a climb: it has no frozen composition. Use toStage() and the live runtime.`,
+    )
+  }
   const runs = scene.placements.map((p, i) => {
     const spec: RunSpec = {
       grammar: p.grammar,

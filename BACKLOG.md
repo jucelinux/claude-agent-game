@@ -13,6 +13,63 @@ open (`TASTE-LOOP.md` §3b).
 He names an object and an animation in one sentence. I deliver with no back-and-forth. He
 answers in one word, plus one word of *why* on a miss. Full definition in `CLAUDE.md`.
 
+**Batch 2 given 16/08**, and it is the first commission that is not about drawing. His
+sentence, verbatim:
+
+> *"Será um jogo de plataforma em que um gatinho pula de plataforma em plataforma. O mesmo
+> conceito do doodle jump, só que com uma estética de Cozy Game."*
+>
+> *"Não vou atacar o 3d agora pois segundo sua própria recomendação precisamos atacar a
+> consequência primeiro."*
+
+The recommendation he is quoting is a line of mine from the same day: *the forest has a
+mechanic and no consequence — the smallest work on the list with the largest return, and what
+turns a reactive scene into a game.* He read it and chose it over the 3D work.
+
+| batch | commissions | shipped | hit rate | cycles per shipped piece |
+|---|---|---|---|---|
+| 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading from him |
+| 2 | 1 | *awaiting his word* | — | 1 model cycle |
+
+### My prediction, recorded before he looks
+
+**I predict a MISS, and the named risk is the CAT rather than the game.**
+
+Last batch's lesson is the one being applied: *a declared risk is a place I was already
+looking*, and I predicted the failure of the part I had thought hardest about while shipping
+three defects in parts I had not examined. So this prediction names what I have **not**
+examined.
+
+**What I have examined, and therefore expect to hold.** The loop, in every part a number can
+reach: the tower is provably climbable (worst gap 46 px against a 78 px apex, asserted over ten
+thousand bands), a fall ends the run, the camera never comes back down, the score counts, and
+space restarts. Eleven locks, run headless against the real runtime. **The consequence he asked
+for exists and is measured.**
+
+**What I have not examined is whether a kitten reads as a kitten.** It is the first quadruped
+this project has drawn, and every fact I have about it is a count rather than a look:
+
+- **22 parts in a body 34 px tall.** The recorded ceiling for part density is the tree's crown
+  at 28 parts in 30×28 px, and `TASTE.md` §2b says articulation density is the model's ceiling.
+  This is under it and not far under it.
+- **The head is as wide as the chest**, deliberately, because that ratio is what makes a young
+  animal read. If it is wrong, it is wrong in the most visible place on the sprite.
+- **The face is four parts in a 12 px skull** — muzzle, nose, eye, inner ear. Two of them paint
+  three pixels. That is the crown-as-a-sponge shape.
+- **Cozy is a word I translated into a hue policy**, on the reasoning that the 15/08 verdict
+  selected a wide value range and "cozy" pulls straight at the sample that tied for last. That
+  translation is an argument, not a measurement, and it is the second thing to disbelieve.
+
+**Confidence: 55/45 toward a miss**, and the two halves of the commission are likely to split —
+the game working and the cat not, or the reverse. **The mitigation he offered is what resolves
+it:** one or two words of why, on a miss.
+
+**If it misses on the cat, the capability it specifies is the face at small scale** — every
+subject before this one was read by its mass and its silhouette, and a face is the first thing
+here that has to be read by four parts inside one.
+
+---
+
 **Batch 1 given 16/08.** His sentence, verbatim:
 
 > *"Eu quero que você crie para mim um astronauta. Quero ser capaz de pular e andar em todas
@@ -139,21 +196,28 @@ not gate readings:
 
 ---
 
-## Next round — **the exporter**, and it is a requirement now
+## Next round — **his word on batch 2**, and nothing is chosen until it arrives
 
-- **Axis:** does the artifact leave this repo. Not a quality axis — a *existence* axis, and
-  it moved to the front of the build order when "compatible outward" stopped being a wish
-  (`CLAUDE.md` §1, 15/08).
-- **What ships:** an indexed atlas PNG (zlib is stdlib, no dependency) plus the manifest
-  `src/export/contract.ts` has locked since 14/08, plus a small **Pixi** page that loads it
-  and plays it. Pixi is the consumer that proves the claim, never an import of the core.
-- **Why it is not inventory any more:** the old deferral said exporting probe art is
-  inventory. True of a project whose deliverable was a grammar; false of one whose
-  deliverable is something a gamedev installs.
-- **What closes it:** the tree and the gorilla, exported, loaded by Pixi, playing — and the
-  contract locks still green against the real output rather than against a described one.
-- **Then, and only then, the first commission batch**, because a commission that cannot be
-  handed over is not a commission.
+- **What ships:** `node bin/micro.ts --serve`, route `/cozy`. A kitten climbing an endless
+  tower of garden shelves at dusk. Arrows steer; the bounce is automatic; a fall ends the run
+  and names the height.
+- **What closes it:** one word from him, plus one or two words of why on a miss.
+- **My prediction is at the top of this file**, written before he looked, and it names the cat
+  rather than the loop.
+- **Nothing after this is chosen yet, and that is deliberate.** A miss is a specification, and
+  a feature picked without one is a guess (`CLAUDE.md`, gate block).
+
+---
+
+## Dead — **the exporter**
+
+_Killed 15/08 with the scope redefinition, and the section that described it as "a requirement
+now" sat in this file for a day after. §3b.4 caught it at a cycle open on 16/08._
+
+Exporting to somebody else's engine was building a bridge to a competitor, and it answered a
+requirement that has been replaced. What replaced it: **can a fresh agent, given only this
+repository, build a small game?** `src/export/contract.ts` and its locks stay — a declared
+output contract costs nothing and is the thing that would be needed if this ever came back.
 
 ---
 
@@ -279,10 +343,18 @@ sample since — `outline.rim` is on in every shipped tunables file. §3b.4, and
       frames, anchors, palette ≤ 256 with index 0 transparent, whole-millisecond timing.
       Compatibility with engines is an **output contract, not an architecture** — depending
       on one renderer would make the artifact less portable, not more.
-- [ ] **The exporter** — indexed atlas PNG (zlib is stdlib) + the manifest, and a ~40-line
-      example loading it in Pixi, and later Godot. Pixi as the **consumer that proves the
-      claim**, never as a dependency. At the vertical slice: exporting disposable probe art
-      is inventory.
+- [x] ~~**The exporter**~~ → **dead 15/08**, with the scope redefinition. The output contract
+      and its locks stay; nothing builds against them.
+- [ ] **The forest still has a mechanic and no consequence.** The climb has one now, so the
+      pattern exists and can be harvested rather than designed: a state that can be lost, a
+      number that counts, and one key to start again.
+- [ ] **`compose.ts` and `layers.ts` are still two paths and still uncompared** — for every
+      scene that is not a climb. The climb resolved its own half by refusing outright, which is
+      honest and is not the general fix.
+- [ ] **Every clip of a subject renders twice under two cache keys** when the placement's main
+      grammar is also one of its clips: once without a scale in the key and once with it. One
+      duplicate 41×32×8 layer on the climb, and the moon and the forest carry it too. Costs
+      wire and a decode, changes no pixel.
 - [ ] **The "sprite in situ" axis** — the loop inside a real scene, with camera, parallax
       and neighbours. This is where a game engine finally earns its place. Trigger: after
       the gate has taken a reading, never before — it adds a variable the published loops
@@ -317,7 +389,11 @@ without both is a rumour.
 | full cycle: record → replay → compare | 1.0 s | `node bin/record.ts /tmp/c.run.json && node bin/run.ts /tmp/c.run.json && npm test` | 14/08 |
 | fixture baseline hash | `a542197e4c49b27d` | `npm run baseline` | 15/08 |
 | min pair distance, shipped tunables | 0.106 | `node bin/run.ts runs/fixture.run.json` | 15/08 |
-| locks green | 85 | `npm test` | 15/08 |
+| locks green | 328 | `npm test` | 16/08 |
+| the climb: worst gap in an infinite tower | 46 px, against a 78 px apex | `npx vitest run tests/climb.test.ts` | 16/08 |
+| the climb, draw calls per frame | 98, against a 200 ceiling | `node bin/micro.ts --static` then read the budget row | 16/08 |
+| the climb, on the wire | 37 KB gzip, 11 layers, 35 colours | `node bin/micro.ts --static` | 16/08 |
+| an unaimed run: one key held, sixty seconds | reaches ~20 m, then falls | `npx vitest run tests/climb.test.ts` | 16/08 |
 | gate page, tells found by grep | 0 | `node bin/gate.ts runs/probe-b.run.json && grep -cE "fixture\|label\|keydown\|button\|http\|seed" sheet/gate.html` | 15/08 |
 
 ## The harness, as of 14/08

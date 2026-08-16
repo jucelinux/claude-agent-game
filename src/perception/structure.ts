@@ -167,6 +167,25 @@ export function findings(frames: readonly Frame[], grammar: Grammar): Finding[] 
     if (blank >= Math.ceil(frames.length / 2)) {
       out.push({ check: 'mostly-hidden', level: 'note', message: `part "${part.name}" renders 0 px in ${blank} of ${frames.length} frames` })
     }
+    /**
+     * **A check was written here and withdrawn before shipping, and the withdrawal is kept**
+     * because it is the second time this file has done it for the same reason.
+     *
+     * The class it was for reached its fourth occurrence — a limb pair authored as one pose at
+     * a phase offset, so the far limb hides inside the near one — and `TASTE-LOOP.md` §3.8 says
+     * that is where patching stops and the lock generalizes. `absent` cannot see it (the part is
+     * never at zero) and `mostly-hidden` cannot see it (never blank for half the cycle), so the
+     * attempt measured **declared shape area against best painted frame**.
+     *
+     * It fired on 237 parts across 69 shipped subjects, including the astronaut's pack seen from
+     * behind and the gorilla's neck. **Occlusion is normal and correct**, and a check that cannot
+     * tell a hidden part from a swallowed one is a check that alerts on healthy work — which is
+     * worse than silence, because it trains the reader to skip the channel.
+     *
+     * The invariant was in the wrong place. A limb pair being one pose is a fact about the
+     * **grammar**, not about the render, and no amount of counting pixels recovers intent from
+     * a picture. It is a lock now: `tests/pairs.test.ts`.
+     */
     // 3. THIN. A part reduced to a sliver is present by the count and absent to the eye.
     const bw = (maxX[i] as number) - (minX[i] as number) + 1
     const bh = (maxY[i] as number) - (minY[i] as number) + 1

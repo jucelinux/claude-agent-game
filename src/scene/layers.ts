@@ -27,7 +27,7 @@
  */
 import type { RGB } from '../core/types.ts'
 import { execute, loadParams } from '../io/load.ts'
-import type { Placement, Scene } from './compose.ts'
+import type { Climb, Placement, Scene } from './compose.ts'
 import { floorDepth, hazeAt, paintOrder, standRow } from './compose.ts'
 
 /** One sprite's whole cycle, cropped, in index space. */
@@ -87,6 +87,24 @@ export type Placed = {
   readonly clips?: Readonly<Record<string, { readonly right: number; readonly left: number }>>
   readonly player?: Placement['player']
   readonly approach?: Placement['approach']
+  readonly climber?: Placement['climber']
+}
+
+/**
+ * The climb, with every grammar name already resolved to a layer index.
+ *
+ * The runtime never looks a grammar up by name. It is handed indices into `Stage.layers` and
+ * stamps them, which is the same contract every other subject on the page has: the browser is
+ * a consumer of pre-rendered indexed bytes and has never heard of a grammar.
+ */
+export type StageClimb = Omit<Climb, 'perches'> & {
+  /** Layer index per platform variant, in the order the scene declared them. */
+  readonly perches: readonly number[]
+  /**
+   * The world row the run starts on — the garden floor. Every altitude in the game is measured
+   * from here, so the score is a distance rather than a coordinate.
+   */
+  readonly startRow: number
 }
 
 export type Stage = {
@@ -113,6 +131,8 @@ export type Stage = {
     readonly seed: number
   } | null
   readonly layers: readonly Layer[]
+  /** Present on a climbing scene, null on every other kind. */
+  readonly climb: StageClimb | null
   /** Back to front. */
   readonly placed: readonly Placed[]
   /** Distinct colours across every layer — the same cohesion reading, on the same terms. */
@@ -272,10 +292,34 @@ export function toStage(scene: Scene): Stage {
       ...(clips === undefined ? {} : { clips }),
       ...(p.player === undefined ? {} : { player: p.player }),
       ...(p.approach === undefined ? {} : { approach: p.approach }),
+      ...(p.climber === undefined ? {} : { climber: p.climber }),
       order: paintOrder(p, i),
     })
   }
   placed.sort((a, b) => a.order - b.order)
+
+  /**
+   * **The platform variants, rendered once each and stamped for ever after.**
+   *
+   * A tower is unbounded and the sprites in it are four. They go through exactly the same
+   * `build` as every other subject — same crop, same palette, same cache — and the only thing
+   * that makes them platforms is that nothing puts them in `placed`: the runtime decides where
+   * they are, from a band index and a hash, on every frame.
+   */
+  let climb: StageClimb | null = null
+  if (scene.climb !== undefined) {
+    const c = scene.climb
+    const climberAt = scene.placements.find((p) => p.climber !== undefined)
+    if (climberAt === undefined) {
+      throw new Error(`scene "${scene.name}" declares a climb with no climber in it`)
+    }
+    const { perches, ...rest } = c
+    climb = {
+      ...rest,
+      perches: perches.map((p) => build({ grammar: p.grammar, tunables: p.tunables }, 0, false).layer),
+      startRow: standRow(scene, climberAt.depth ?? 0),
+    }
+  }
 
   // The rain was authored as whole passes per scene loop, because a loop was the only clock
   // there was. In seconds it is one number and it stops being tied to anything.
@@ -328,6 +372,6 @@ export function toStage(scene: Scene): Stage {
   return {
     name: scene.name, w: scene.w, h: scene.h, scale: scene.scale, ground: scene.ground,
     sky: scene.sky, groundRamp: scene.groundRamp, stars: scene.stars ?? null, dust: scene.dust ?? null, rain, floor,
-    layers, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
+    layers, climb, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
   }
 }
