@@ -319,7 +319,11 @@ describe('no joint bends both ways', () => {
     it(`${name}`, () => {
       const params = loadParams(tunables)
       for (const [child, parent] of HINGES) {
+        // **Both ends have to exist.** A body that names a hinge's child under a different
+        // parent is not that hinge, and looking the parent up anyway crashed the lock rather
+        // than skipping it — a lock that throws reports nothing about the body it threw on.
         if (!g.skeleton.bones.some((b) => b.name === child)) continue
+        if (!g.skeleton.bones.some((b) => b.name === parent)) continue
         const angles: number[] = []
         for (let f = 0; f < params.frames.walk; f++) {
           const w = solve(g.skeleton, evaluate(g.gait, params, f / params.frames.walk), { x: 0, y: 0, z: 0, a: 0, sx: 1, sy: 1, sz: 1 })

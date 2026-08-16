@@ -24,6 +24,7 @@
 
 import type { Scene } from '../scene/types.ts'
 import { cozyScene } from './cozy-scene.ts'
+import { cryptScene } from './crypt-scene.ts'
 import { forestScene } from './forest-scene.ts'
 import { moonScene } from './moon-scene.ts'
 
@@ -123,5 +124,26 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     date: '2026-08-16',
     keys: '← → steer · space to climb again after a fall · the bounce takes care of itself',
     scene: cozyScene,
+  },
+  /**
+   * **The run.** His commission, 16/08, given after he asked to work on 3D and I asked for a
+   * sentence that would need pitch or roll.
+   *
+   * > *"Controlamos uma caveira fugindo da morte... estilo a página de offline do google... o
+   * > diferencial aqui é que a caveira tem um pulo duplo em que ela projeta um salto mortal para
+   * > frente. Quero um acabamento e familiaridade com o SOTN."*
+   *
+   * **It did not need 3D.** A somersault seen from the side is a screen-plane rotation. What it
+   * did need was a gait that ends somewhere other than where it started, which nothing here
+   * could express — see `Gait.wrap`.
+   */
+  {
+    id: 'crypt',
+    title: 'The run',
+    blurb:
+      'Space to jump, space again in the air for the somersault. The graveyard is generated from an integer hash of its own index, so it never ends and it is the same on every machine. The first jump clears a broken stump; a cross needs the flip, which is the double jump earning its place rather than decorating it. Death is one number between nought and one: time pushes it up, a collision shoves it, clearing a stone gives a little back, and where she stands on screen is that number read as a distance. Six hits end a run. The somersault turns a full circle, which is the first animation here that does not return to where it started.',
+    date: '2026-08-16',
+    keys: 'space jump · space again in the air = somersault · six collisions and she reaches you',
+    scene: cryptScene,
   },
 ]

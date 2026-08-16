@@ -107,14 +107,14 @@ describe('a weld says two shapes are one surface', () => {
    * field is a weld rather than a switch on the outline. The baseline test covers the fixture;
    * this covers every shipped subject in the project at once.
    */
-  it('the null case is the whole back catalogue, not one fixture', () => {
+  it('the null case is the whole back catalogue, not one fixture', { timeout: 30_000 }, () => {
     const strip = (g: string, t: string): string => {
       const r = execute({ grammar: g, tunables: t, seed: 1 })
       return Buffer.from(r.frames.flatMap((f) => [...f.buf.data])).toString('base64')
     }
     // Every subject that predates the field, rendered with it present and with every weld
     // removed. Byte-identical or the field is not a null case, whatever the fixture says.
-    const welded = new Set(['cat-rise', 'cat-fall', 'cat-tuck'])
+    const welded = new Set(['cat-rise', 'cat-fall', 'cat-tuck', 'bones-run', 'bones-leap', 'bones-flip', 'tomb-slab', 'tomb-cross', 'tomb-broken', 'death'])
     for (const { grammar: g, tunables: t } of PAIRS) {
       if (welded.has(g)) continue
       const grammar = grammarByName(g)

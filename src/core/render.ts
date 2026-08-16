@@ -118,12 +118,25 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
   return { t, buf: painter.buf, owners: painter.owners, depth: painter.depth }
 }
 
-/** One walk cycle, `params.frames.walk` frames evenly spaced over t in [0, 1). */
+/**
+ * One cycle, `params.frames.walk` frames.
+ *
+ * **A looping gait is sampled over [0, 1) and a non-looping one over [0, 1] inclusive**, and the
+ * difference is the whole point of `Gait.wrap`. A cycle's last frame is the step *before* the
+ * first, because the first comes next; a once-played clip's last frame is where the motion
+ * *ends*, and there is nothing after it.
+ *
+ * Measured on the somersault: sampled as a cycle, twelve frames put the last one at 0.917 of the
+ * turn — 330 degrees, so the body finished the jump 30 degrees short of upright. Sampled
+ * inclusively it lands on exactly one revolution. It is also what lets a named phase at `at: 1`
+ * point at a real frame, which the sprite contract requires of every clip.
+ */
 export function strip(grammar: Grammar, params: Params, seed: number): Frame[] {
   const n = params.frames.walk
   if (n < 1) throw new Error(`frames.walk must be >= 1, is ${n}`)
+  const span = grammar.gait.wrap === false && n > 1 ? n - 1 : n
   const frames: Frame[] = []
-  for (let i = 0; i < n; i++) frames.push(sprite(grammar, params, seed, i / n))
+  for (let i = 0; i < n; i++) frames.push(sprite(grammar, params, seed, i / span))
   return frames
 }
 

@@ -275,6 +275,29 @@ export type Gait = {
   readonly name: string
   readonly phases: readonly Phase[]
   readonly tracks: readonly Track[]
+  /**
+   * **Whether the last phase leads back into the first. Default true, which is a cycle.**
+   *
+   * Every gait in this project until 16/08 was periodic by construction — a walk, a sway, a
+   * tail. The curve is a *cyclic* Hermite, so the segment after the last phase interpolates
+   * back toward the first key, and the tangents are computed as though the motion returns.
+   *
+   * **A somersault is not a cycle.** It starts at zero and ends a whole turn later, and those
+   * are different values. Authored as a cyclic track it climbs to 270 degrees and then
+   * *unwinds* — measured, at `t` 0.83 and 0.92: 193 degrees, then 77. The body flips
+   * three-quarters of the way round and rolls backwards out of it.
+   *
+   * With `wrap: false` the phases span **[0, 1] inclusive** rather than [0, 1): the last phase
+   * is the end of the motion rather than the step before the beginning, and the end tangents
+   * are clamped instead of wrapped. A clip that plays once and holds its last frame — which
+   * the runtime already does for an attack, a landing tuck and now a flip — then arrives
+   * where it was authored to arrive.
+   *
+   * It unlocks more than a flip: any action that does not return to its start. A death, a
+   * door opening, a transformation. portable, and the default keeps every gait written before
+   * it byte-identical.
+   */
+  readonly wrap?: boolean
 }
 
 export type Grammar = {

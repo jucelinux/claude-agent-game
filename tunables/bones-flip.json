@@ -1,0 +1,82 @@
+{
+  "canvas": {
+    "w": 56,
+    "h": 56,
+    "originX": 28,
+    "originY": 30
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 12
+  },
+  "light": {
+    "x": -0.5,
+    "y": -0.62,
+    "z": -0.22,
+    "curve": 1.3
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 1,
+    "lift": 4,
+    "depth": 6
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "shadow": {
+    "steps": 7,
+    "bias": 0.25,
+    "strength": 2
+  },
+  "fill": {
+    "x": 0.45,
+    "y": 0.4,
+    "z": -0.22,
+    "weight": 0.06
+  },
+  "playback": {
+    "msPerFrame": 38,
+    "scale": 4
+  },
+  "_anchors": {
+    "canvas.w": "56, and it is square with the height because THE BODY TURNS OVER. A somersault sweeps the sprite through every angle, so the cell has to hold the body's own diagonal \u2014 34 px tall by 30 wide is a 45 px diagonal, and 56 holds it with the outline ring and margin at the worst angle. A cell sized for the rest pose would clip the skull at 45 degrees.",
+    "canvas.h": "56, square with the width, for the same reason.",
+    "canvas.originX": "28, dead centre, and it is the FIRST subject in this project that must be centred. Every other body was anchored where it stands; this one rotates about its hips, so the origin has to be the centre of rotation or the whole sprite orbits its own cell.",
+    "canvas.originY": "30. The hip joint, and the rotation centre. The scene anchors him by his lowest painted pixel, which moves through the flip and is meaningless during it \u2014 the runtime holds him by his own hip row while he is in the air.",
+    "tones.perMaterial": "5, the Chrono idiom, and the SOTN reference spends it asymmetrically: four of the bone's five tones sit below the midpoint.",
+    "frames.walk": "12, and it is the highest frame count in the project. A body turning a full circle passes through twelve distinct silhouettes and any fewer reads as a flicker rather than as a rotation \u2014 the one place here where frames buy readability instead of smoothness.",
+    "light.x": "-0.5, upper left, as every subject except the astronaut.",
+    "light.y": "-0.62, and it is LOWER than the garden's -0.72. A graveyard at night is lit from a moon near the horizon, and a low lamp is what puts a rim on a skull instead of a wash over it.",
+    "light.z": "-0.22, barely toward the viewer. Less front light than the kitten: SOTN wants the form to fall away, so the light grazes.",
+    "light.curve": "1.3, and it is the highest in the project. Above 1 the dark end compresses into a rim, which is exactly the SOTN value structure \u2014 a mass that reads as one dark shape with a bright edge on it.",
+    "gait.swing": "**1 turn, and this file exists for this one number.** At a swing of 1 a track key IS a fraction of a revolution, so the root's angle track can run 0 to 1 and mean one whole turn. No cycle would ever want this amplitude, which is why the flip needs its own tunables: every other track in the clip is authored small to compensate.",
+    "gait.lift": "4 px. The hips bounce 2 px either way over a stride. A skeleton has no muscle to absorb a landing, so it runs high and rigid \u2014 a third of the gorilla's drop on a body of similar height.",
+    "gait.depth": "6 px. Unused; every clip is authored in the screen plane, which is the finding of this round.",
+    "body.scale": "1. He stands 34 px in a 240 px world, a seventh of the width \u2014 the runner proportion, where a player needs to read three obstacles ahead.",
+    "texture.speckle": "0. The 15/08 verdict retired per-pixel noise.",
+    "shadow.steps": "7, one more than the deepest mass (the ribcage at 4.2, the shroud at 3).",
+    "shadow.strength": "2 ramp steps, against the garden's 1. A graveyard at night has one moon and nothing to bounce it \u2014 the same reasoning that put the moon scene at 2.",
+    "fill.weight": "0.06, against the garden's 0.16. Almost no bounce: there is no foliage overhead and the ground is wet stone. The declared cost of a fill is that it compresses the value range, and this is the one subject in the project that cannot afford to lose any.",
+    "playback.msPerFrame": "38. Twelve frames make a 456 ms somersault, which is about what a real front flip takes and is short enough that it never outlives the jump carrying it.",
+    "playback.scale": "4, read only by the bench.",
+    "outline.enabled": "true. The 15/08 ink verdict.",
+    "outline.material": "\"ink\". Near black with a blue cast, because the ground is indigo and a warm line would separate from the scene rather than from the body.",
+    "outline.inner": "true, and `Part.weld` decides where it actually lands. Every solid on this body is welded EXCEPT the jaw: a jaw line is a real seam, and it is the edge that makes a skull read as a skull instead of an egg.",
+    "outline.rim": "false. Settled 15/08.",
+    "shadow.bias": "0.25, the project-wide value since run 7.",
+    "fill.x": "0.45, opposite the key.",
+    "fill.y": "0.4, from below.",
+    "fill.z": "-0.22, matching the key's own z."
+  }
+}

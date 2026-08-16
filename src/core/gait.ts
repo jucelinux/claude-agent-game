@@ -1,4 +1,4 @@
-import type { Gait, Params } from './types.ts'
+import type { Gait, Params, Track } from './types.ts'
 import type { Pose, PoseDelta } from './skeleton.ts'
 
 /**
@@ -13,13 +13,38 @@ import type { Pose, PoseDelta } from './skeleton.ts'
  */
 export function evaluate(gait: Gait, params: Params, t: number): Pose {
   const n = gait.phases.length
-  if (n < 2) throw new Error(`gait "${gait.name}" needs at least 2 phases, has ${n}`)
+  if (n < 1) throw new Error(`gait "${gait.name}" needs at least one phase, has ${n}`)
+  /**
+   * **One phase is a pose, and a pose is a legitimate gait.**
+   *
+   * The rule used to demand two, which was right while every subject moved. A gravestone does
+   * not. Two phases on a one-frame subject then failed the sprite contract — *phase "b" at 0.5
+   * lands between frames of a 1-frame cycle* — because a second phase on a still object is a
+   * named instant nobody can ever see.
+   *
+   * With one phase there is nothing to interpolate: every track contributes its single key.
+   */
+  if (n === 1) {
+    const pose = new Map<string, PoseDelta>()
+    for (const track of gait.tracks) {
+      const delta = pose.get(track.bone) ?? { angle: 0, x: 0, y: 0, z: 0, scale: 0, scaleX: 0, scaleY: 0 }
+      delta[track.channel] += (track.keys[0] ?? 0) * amplitudeOf(track.channel, params)
+      pose.set(track.bone, delta)
+    }
+    return pose
+  }
   const at = gait.phases.map((p) => p.at)
 
-  const cycle = ((t % 1) + 1) % 1
-  // Segment i spans [at[i], at[i+1]); the last wraps past 1.
-  let i = n - 1
-  for (let k = 0; k < n; k++) {
+  /**
+   * **A gait that does not wrap ends where it was authored to end.** Its phases span [0, 1]
+   * inclusive, so the last one is the finish rather than the step before the start, and there
+   * is no segment after it. See `Gait.wrap`.
+   */
+  const wrap = gait.wrap !== false
+  const cycle = wrap ? ((t % 1) + 1) % 1 : Math.max(0, Math.min(1, t))
+  // Segment i spans [at[i], at[i+1]); with wrap, the last one runs past 1 back to the first.
+  let i = wrap ? n - 1 : n - 2
+  for (let k = 0; k < (wrap ? n : n - 1); k++) {
     const a = at[k] as number
     const b = k + 1 < n ? (at[k + 1] as number) : 1 + (at[0] as number)
     if (cycle >= a && cycle < b) {
@@ -27,6 +52,7 @@ export function evaluate(gait: Gait, params: Params, t: number): Pose {
       break
     }
   }
+  if (i < 0) i = 0
   const t0 = at[i] as number
   const t1 = i + 1 < n ? (at[i + 1] as number) : 1 + (at[0] as number)
   const h = t1 - t0
@@ -37,15 +63,8 @@ export function evaluate(gait: Gait, params: Params, t: number): Pose {
     if (track.keys.length !== n) {
       throw new Error(`track ${track.bone}.${track.channel} has ${track.keys.length} keys for ${n} phases`)
     }
-    const value = hermite(at, track.keys, i, u, h)
-    const amplitude =
-      track.channel === 'angle'
-        ? params.gait.swing
-        : track.channel === 'scale' || track.channel === 'scaleX' || track.channel === 'scaleY'
-          ? 1
-          : track.channel === 'z'
-            ? params.gait.depth
-            : params.gait.lift
+    const value = hermite(at, track.keys, i, u, h, wrap)
+    const amplitude = amplitudeOf(track.channel, params)
     const delta = pose.get(track.bone) ?? { angle: 0, x: 0, y: 0, z: 0, scale: 0, scaleX: 0, scaleY: 0 }
     delta[track.channel] += value * amplitude
     pose.set(track.bone, delta)
@@ -53,12 +72,34 @@ export function evaluate(gait: Gait, params: Params, t: number): Pose {
   return pose
 }
 
-/** Cyclic cubic Hermite over segment `i`, tangents by central difference in phase time. */
-function hermite(at: readonly number[], keys: readonly number[], i: number, u: number, h: number): number {
+/**
+ * The amplitude a normalized track key is multiplied by. Angles are turns, offsets are pixels,
+ * and a scale key is already a ratio with no unit in the domain to be anchored against.
+ */
+function amplitudeOf(channel: Track['channel'], params: Params): number {
+  if (channel === 'angle') return params.gait.swing
+  if (channel === 'scale' || channel === 'scaleX' || channel === 'scaleY') return 1
+  if (channel === 'z') return params.gait.depth
+  return params.gait.lift
+}
+
+/**
+ * Cubic Hermite over segment `i`, tangents by central difference in phase time.
+ *
+ * **Cyclic by default and clamped when the gait does not wrap.** Clamping is the whole of the
+ * difference: an index past either end returns the end key instead of walking round, so the
+ * tangent at the last phase is computed from the motion that arrived there rather than from the
+ * motion that would return to the start. That is what stops a somersault unwinding.
+ */
+function hermite(at: readonly number[], keys: readonly number[], i: number, u: number, h: number, wrap = true): number {
   const n = keys.length
-  const key = (j: number) => keys[((j % n) + n) % n] as number
+  const key = (j: number) => (wrap ? (keys[((j % n) + n) % n] as number) : (keys[Math.max(0, Math.min(n - 1, j))] as number))
   // Phase spacing, unwrapped so a wrapped neighbour keeps a positive interval.
   const span = (j: number) => {
+    if (!wrap) {
+      const k = Math.max(0, Math.min(n - 2, j))
+      return (at[k + 1] as number) - (at[k] as number)
+    }
     const a = at[((j % n) + n) % n] as number
     const b = at[(((j + 1) % n) + n) % n] as number
     return b > a ? b - a : b + 1 - a

@@ -207,6 +207,19 @@ export type Placement = {
     readonly tuck: string
   }
   /**
+   * **The runner: a body that never stops and chooses only when to leave the ground.**
+   *
+   * A third actor kind after `player` and `climber`, and it is a third kind for the same reason
+   * the second was: almost nothing is shared. A runner has no horizontal control at all, has two
+   * jumps rather than one, and its second jump plays a clip that **turns a full circle** — the
+   * first animation in this project that does not return to where it started.
+   */
+  readonly runs?: {
+    readonly run: string
+    readonly leap: string
+    readonly flip: string
+  }
+  /**
    * **A subject that walks in from an edge, settles at a distance from the player, and runs
    * home when it is struck.** The photographer, and it is named for the behaviour rather than
    * for the character.
@@ -343,6 +356,71 @@ export type Climb = {
   }
 }
 
+/**
+ * **A world that comes at you, and the only thing you decide is when to leave the ground.**
+ *
+ * His commission, 16/08: *"um jogo estilo a página de offline do google, em que o dinossauro
+ * está correndo infinitamente... a caveira pula das lápides e o diferencial aqui é que a caveira
+ * tem um pulo duplo em que ela projeta um salto mortal para frente."*
+ *
+ * **It is the climb's structure with the axis turned.** The camera is fixed and the world moves;
+ * obstacles are generated from an integer hash of their index rather than stored, so the run is
+ * endless and identical on every machine. What is new is the second jump and what it costs: a
+ * somersault that must complete rather than oscillate, which is why `Gait.wrap` exists.
+ *
+ * **And Death is a number.** She is not an actor with a plan — she is one value between 0 and 1
+ * that creeps up with time and jumps on a hit, and her position on screen is that value read
+ * back as a distance. A chaser with pathfinding would be a mechanism nobody could feel; a bar
+ * that fills is a mechanism a player reads without being told.
+ */
+export type Runner = {
+  /** The row the world stands on. */
+  readonly groundRow: number
+  /** Where the runner is held on screen. He never moves horizontally; the world does. */
+  readonly holdX: number
+  /** Scene pixels per second at the start, and how much a second adds to it. */
+  readonly speed: number
+  readonly accel: number
+  readonly maxSpeed: number
+  readonly gravity: number
+  /** Upward speed the first press buys, and the second. */
+  readonly jump: number
+  readonly flip: number
+  /** Obstacle grammars. The hash picks one per slot. */
+  readonly stones: readonly { readonly grammar: string; readonly tunables: string }[]
+  /** Base distance between obstacles, and how much of that the hash may add. */
+  readonly spacing: number
+  readonly jitterX: number
+  /**
+   * **Clear ground before the first stone.** Without it the run could begin with an obstacle
+   * already inside the runner's box: slot zero sits at `jitter` and the jitter can be zero, so a
+   * fresh start was a collision before the player had touched a key. Found by a lock rather than
+   * by playing, because it only happens on the first frame of a run.
+   */
+  readonly leadIn: number
+  /**
+   * Half the runner's collision box. **There is no matching height**: an obstacle's height is
+   * read from its own art — the crop's top row above the ground line — so a stone's difficulty
+   * is a fact about how it was drawn and never a number typed in two places.
+   */
+  readonly bodyHalfW: number
+  /** Half an obstacle's collision box. Declared, because a mossy edge is not a wall. */
+  readonly stoneHalfW: number
+  readonly pxPerMetre: number
+  /**
+   * **Death, as one number that fills.** `creep` is how much of the gap she closes per second,
+   * `hit` is what one collision costs, and `relief` is what clearing an obstacle gives back.
+   * At 1 she reaches him.
+   */
+  readonly reaper: { readonly grammar: string; readonly tunables: string; readonly creep: number; readonly hit: number; readonly relief: number; readonly fromX: number }
+  /** Painted top to bottom over the screen, not by altitude: the sky here does not change. */
+  readonly skyRamp: readonly RGB[]
+  readonly stars: { readonly count: number; readonly colors: readonly RGB[]; readonly seed: number; readonly below: number }
+  /** The moon, and it is the only round thing in the picture. */
+  readonly moon: { readonly x: number; readonly y: number; readonly r: number; readonly color: RGB; readonly halo: RGB }
+  readonly seed: number
+}
+
 export type Scene = {
   readonly name: string
   readonly w: number
@@ -410,6 +488,8 @@ export type Scene = {
    * scene, and the cheapest way to keep them from disagreeing is for one of them to say so.
    */
   readonly climb?: Climb
+  /** Present on an endless runner and absent on every other kind. See `Runner`. */
+  readonly runner?: Runner
 }
 
 export type Field =

@@ -26,6 +26,13 @@ export type Manifest = {
   readonly frames: readonly { readonly index: number; readonly t: number; readonly durationMs: number }[]
   /** What makes this a grammar and not a GIF: a footstep can be synced to `contact`. */
   readonly phases: readonly { readonly name: string; readonly at: number; readonly frame: number }[]
+  /**
+   * **Whether the last frame leads back into the first.** True for a walk, false for a
+   * somersault, a death or a door. It changes what "the end of the clip" means: a cycle's
+   * frames span [0, 1) and a once-played clip's span [0, 1] inclusive, so a consumer that plays
+   * the second one on a loop will show its last pose twice and its first pose never.
+   */
+  readonly loops: boolean
   /** Rest-pose anchors, in canvas space: where a weapon, a shadow or an effect attaches. */
   readonly anchors: readonly {
     readonly name: string
@@ -40,6 +47,8 @@ export type Manifest = {
 
 export function describe(grammar: Grammar, params: Params): Manifest {
   const n = params.frames.walk
+  const loops = grammar.gait.wrap !== false
+  const span = loops || n < 2 ? n : n - 1
   const ms = params.playback.msPerFrame
   return {
     name: grammar.name,
@@ -47,8 +56,15 @@ export function describe(grammar: Grammar, params: Params): Manifest {
     pivot: { x: params.canvas.originX, y: params.canvas.originY },
     palette: grammar.palette.colors,
     materials: grammar.palette.ramps.map((r) => ({ name: r.material, indices: r.indices })),
-    frames: Array.from({ length: n }, (_, i) => ({ index: i, t: i / n, durationMs: ms })),
-    phases: grammar.gait.phases.map((p) => ({ name: p.name, at: p.at, frame: Math.round(p.at * n) % n })),
+    // **One span rule, and `render.ts` uses the same one.** A cycle's n frames are n steps
+    // round; a once-played clip's n frames are n-1 steps from start to end. A manifest computed
+    // on the wrong span describes frames the strip does not contain.
+    frames: Array.from({ length: n }, (_, i) => ({ index: i, t: i / span, durationMs: ms })),
+    loops: grammar.gait.wrap !== false,
+    phases: grammar.gait.phases.map((p) => ({
+      name: p.name, at: p.at,
+      frame: loops ? Math.round(p.at * span) % n : Math.min(n - 1, Math.round(p.at * span)),
+    })),
     anchors: grammar.skeleton.bones.map((b) => ({
       name: b.name,
       parent: b.parent,
@@ -88,7 +104,12 @@ export function validate(m: Manifest): string[] {
   if (m.frames.length < 1) bad.push('no frames')
   for (const frame of m.frames) {
     if (!int(frame.durationMs) || frame.durationMs < 1) bad.push(`frame ${frame.index} has a duration no engine can play`)
-    if (frame.t < 0 || frame.t >= 1) bad.push(`frame ${frame.index} sits outside the cycle`)
+    // **A clip that loops ends before 1; a clip that plays once ends AT it.** The last frame of
+    // a cycle is the step before the first, because the first comes next. The last frame of a
+    // somersault is where the body finished turning, and there is nothing after it.
+    if (frame.t < 0 || frame.t > (m.loops ? 1 - 1e-9 : 1 + 1e-9)) {
+      bad.push(`frame ${frame.index} sits outside the clip`)
+    }
   }
 
   if (m.phases.length < 1) bad.push('a gait with no named phase is a sine wearing a name')
@@ -98,13 +119,19 @@ export function validate(m: Manifest): string[] {
     if (phase.name.length === 0) bad.push('an unnamed phase')
     if (phaseNames.has(phase.name)) bad.push(`duplicate phase "${phase.name}"`)
     phaseNames.add(phase.name)
-    if (phase.at < 0 || phase.at >= 1) bad.push(`phase "${phase.name}" sits outside the cycle`)
+    if (phase.at < 0 || phase.at > (m.loops ? 1 - 1e-9 : 1 + 1e-9)) {
+      bad.push(`phase "${phase.name}" sits outside the clip`)
+    }
     if (phase.at <= previous) bad.push(`phase "${phase.name}" is out of order`)
     previous = phase.at
     if (phase.frame < 0 || phase.frame >= m.frames.length) bad.push(`phase "${phase.name}" points at no frame`)
     // A phase between two frames is a pose nobody ever sees, and a manifest that rounds it
     // to the nearest frame lies to whoever syncs a footstep to it.
-    const exact = phase.at * m.frames.length
+    // The frame positions of a once-played clip span [0, 1] inclusive, so there are n-1 steps
+    // between n frames rather than n. Using the wrong span here reported every phase of a
+    // somersault as landing between frames when all of them land exactly on one.
+    const span = m.loops || m.frames.length < 2 ? m.frames.length : m.frames.length - 1
+    const exact = phase.at * span
     if (Math.abs(exact - Math.round(exact)) > 1e-9) {
       bad.push(`phase "${phase.name}" at ${phase.at} lands between frames of a ${m.frames.length}-frame cycle`)
     }

@@ -17,6 +17,8 @@ import { gorillaIdle } from './run13/idle.ts'
 import { ASTRONAUT } from './run14/astronaut.ts'
 import { MOON } from './run14/moon.ts'
 import { CAT, catTuck } from './run15/cat.ts'
+import { BONES, bonesFlip, bonesLeap } from './run16/bones.ts'
+import { CRYPT_PROPS, death } from './run16/crypt.ts'
 import { PERCHES } from './run15/perch.ts'
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = {
@@ -44,6 +46,8 @@ export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   ...Object.fromEntries(MOON.map((g) => [g.name, g])),
   ...Object.fromEntries(CAT.map((g) => [g.name, g])),
   ...Object.fromEntries(PERCHES.map((g) => [g.name, g])),
+  ...Object.fromEntries(BONES.map((g) => [g.name, g])),
+  ...Object.fromEntries(CRYPT_PROPS.map((g) => [g.name, g])),
 }
 
 /**
@@ -81,6 +85,14 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   ...CAT.filter((g) => g.name !== catTuck.name).map((g) => ({ grammar: g.name, tunables: 'cat' })),
   { grammar: catTuck.name, tunables: 'cat-tuck' },
   ...PERCHES.map((g) => ({ grammar: g.name, tunables: 'perch' })),
+  // Three clips, three tunables files, and the reason is the same each time: a frame count and
+  // an amplitude live in the tunables, so a clip that plays once needs its own, and a clip that
+  // turns a full circle needs one with a swing of 1.
+  { grammar: 'bones-run', tunables: 'bones' },
+  { grammar: bonesLeap.name, tunables: 'bones-leap' },
+  { grammar: bonesFlip.name, tunables: 'bones-flip' },
+  ...CRYPT_PROPS.filter((g) => g.name !== death.name).map((g) => ({ grammar: g.name, tunables: 'crypt' })),
+  { grammar: death.name, tunables: 'death' },
 ]
 
 export function grammarByName(name: string): Grammar {

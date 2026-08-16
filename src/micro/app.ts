@@ -47,7 +47,7 @@ const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
   JSON.stringify({
     w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
     groundRamp: stage.groundRamp, floor: stage.floor, stars: stage.stars, dust: stage.dust,
-    rain: stage.rain, climb: stage.climb, interactive, meter: interactive,
+    rain: stage.rain, climb: stage.climb, runner: stage.runner, interactive, meter: interactive,
     layers: stage.layers.map((l) => ({
       w: l.w, h: l.h, ox: l.ox, oy: l.oy, foot: l.footOff, n: l.frames, ms: l.msPerFrame,
       palette: l.palette, indices: Buffer.from(l.indices).toString('base64'),
@@ -130,7 +130,7 @@ function mount(el, S) {
    * same plus a timer. Nothing here is in the sprites — a clip is chosen by the state, and
    * the sprites have never heard of a state.
    */
-  var P = null, crew = [], K = null
+  var P = null, crew = [], K = null, R = null
   for (var i = 0; i < S.placed.length; i++) {
     var pl = S.placed[i]
     /**
@@ -150,6 +150,16 @@ function mount(el, S) {
         // which is the one thing this genre never allows.
         cam: S.climb.startRow - S.h * 0.82,
         top: S.climb.startRow, best: 0, over: false,
+      }
+    }
+    /**
+     * **The runner's whole state.** A world distance, a height, a vertical speed, how many jumps
+     * are spent, and one number for Death. Everything a player sees is derived from these.
+     */
+    if (pl.runs && S.runner) {
+      R = {
+        at: i, dist: 0, y: 0, vy: 0, jumps: 0, state: 'run', clip: 0,
+        speed: S.runner.speed, menace: 0, passed: -1, best: 0, over: false,
       }
     }
     if (pl.player) {
@@ -570,6 +580,191 @@ function mount(el, S) {
       : K.best.toFixed(1) + ' m'
   }
 
+
+  /**
+   * **The obstacles, and none of them is stored.** Slot 'k' yields a world position and a
+   * variant from one integer hash — the same family the stars, the rain and the climb's shelves
+   * all use. An endless graveyard costs no memory and is identical on every machine.
+   */
+  function stoneAt(k) {
+    var N = S.runner
+    var h = ((k + N.seed) * 2654435761) >>> 0; h = (h ^ (h >>> 13)) >>> 0
+    var h2 = (h * 1597334677) >>> 0; h2 = (h2 ^ (h2 >>> 15)) >>> 0
+    return {
+      x: N.leadIn + k * N.spacing + (h % N.jitterX),
+      v: (h2 >>> 7) % N.stones.length,
+    }
+  }
+
+  /**
+   * **The run: one axis, two jumps, and a number called Death.**
+   *
+   * The only decision a player makes is when to leave the ground, which is the whole of the
+   * genre he named. What is new here is the second press: it buys another impulse **and** a
+   * somersault that has to complete rather than oscillate.
+   */
+  function runner(t, dt) {
+    var N = S.runner
+    if (R.over) {
+      if (keys.jumpTap) {
+        keys.jumpTap = false
+        R.dist = 0; R.y = 0; R.vy = 0; R.jumps = 0; R.state = 'run'; R.clip = 0
+        R.speed = N.speed; R.menace = 0; R.passed = -1; R.best = 0; R.over = false
+      }
+      return
+    }
+
+    // The world speeds up for ever, which is what makes an endless runner end.
+    R.speed = Math.min(N.maxSpeed, R.speed + N.accel * dt)
+    R.dist += R.speed * dt
+    if (R.dist / N.pxPerMetre > R.best) R.best = R.dist / N.pxPerMetre
+
+    /**
+     * **The double jump.** The first press works only from the ground; the second only in the
+     * air, and only once. 'jumps' is the whole of that rule and it is reset by landing.
+     */
+    if (keys.jumpTap) {
+      keys.jumpTap = false
+      if (R.jumps === 0 && R.y === 0) {
+        R.vy = -N.jump; R.jumps = 1; R.state = 'leap'; R.clip = 0
+      } else if (R.jumps === 1) {
+        // The somersault. A second impulse AND a clip that turns a full circle: the impulse is
+        // what makes it a double jump, the turn is what makes it his.
+        R.vy = -N.flip; R.jumps = 2; R.state = 'flip'; R.clip = 0
+      }
+    }
+
+    if (R.y > 0 || R.vy !== 0) {
+      R.vy += N.gravity * dt
+      R.y = R.y - R.vy * dt
+      R.clip += dt
+      if (R.y <= 0) { R.y = 0; R.vy = 0; R.jumps = 0; R.state = 'run'; R.clip = 0 }
+    }
+
+    /**
+     * **Death creeps, and a collision hands her a stride.** She is one number: 'menace' between
+     * 0 and 1, read back as a position on screen. At 1 she reaches him.
+     *
+     * Clearing a stone gives a little back, so a clean run holds her off and a clumsy one does
+     * not. That is the entire feedback loop, and it needs no pathfinding to be felt.
+     */
+    R.menace += N.reaper.creep * dt
+
+    /**
+     * **One stone is resolved once**, either as a hit or as a clear, and 'passed' is the whole of
+     * that bookkeeping. A slot behind him that was never touched gives a little of the gap back;
+     * a slot he is inside of while lower than its top takes a stride.
+     *
+     * The height is read from the ART — the crop's own top row above the ground line — so a
+     * stone's difficulty is a fact about how it was drawn and never a number typed twice.
+     */
+    var near = Math.round(R.dist / N.spacing)
+    for (var k = Math.max(0, near - 2); k <= near + 2; k++) {
+      if (k <= R.passed) continue
+      var st = stoneAt(k)
+      var rel = st.x - R.dist
+      var reach = N.bodyHalfW + N.stoneHalfW
+      if (Math.abs(rel) < reach) {
+        var SL = S.layers[N.stones[st.v]]
+        if (R.y < -SL.oy - 2) {
+          R.passed = k
+          R.menace = Math.min(1, R.menace + N.reaper.hit)
+        }
+      } else if (rel < -reach) {
+        R.passed = k
+        R.menace = Math.max(0, R.menace - N.reaper.relief)
+      }
+    }
+
+    if (R.menace >= 1) { R.menace = 1; R.over = true; R.state = 'caught' }
+  }
+
+  /** The runner's backdrop: a fixed sky, stars, a moon. Nothing here moves with the camera. */
+  var runnerBg = null
+  if (S.runner) {
+    runnerBg = cv(S.w, S.h)
+    var rb = runnerBg.getContext('2d')
+    var bands = S.runner.skyRamp.length
+    for (var bi = 0; bi < bands; bi++) {
+      var y0b = Math.floor((bi * S.runner.groundRow) / bands)
+      var y1b = Math.floor(((bi + 1) * S.runner.groundRow) / bands)
+      rb.fillStyle = rgb(S.runner.skyRamp[bi]); rb.fillRect(0, y0b, S.w, y1b - y0b)
+    }
+    for (var sj = 0; sj < S.runner.stars.count; sj++) {
+      var sha = ((sj + S.runner.stars.seed) * 2654435761) >>> 0; sha = (sha ^ (sha >>> 13)) >>> 0
+      var shb = (sha * 1597334677) >>> 0; shb = (shb ^ (shb >>> 15)) >>> 0
+      rb.fillStyle = rgb(S.runner.stars.colors[shb % S.runner.stars.colors.length])
+      rb.fillRect(sha % S.w, shb % S.runner.stars.below, 1, 1)
+    }
+    // The moon: a halo ring under a disc, and it is the only round thing in the picture.
+    var M0 = S.runner.moon
+    rb.fillStyle = rgb(M0.halo)
+    rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r + 3, M0.r + 3, 0, 0, 6.283185); rb.fill()
+    rb.fillStyle = rgb(M0.color)
+    rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r, M0.r, 0, 0, 6.283185); rb.fill()
+    for (var fy3 = 0; fy3 < S.floor.length; fy3++) {
+      rb.fillStyle = rgb(S.floor[fy3]); rb.fillRect(0, S.runner.groundRow + fy3, S.w, 1)
+    }
+  }
+
+  function drawRunner(t) {
+    var N = S.runner
+    ox.drawImage(runnerBg, 0, 0)
+
+    // The stones, far to near is irrelevant here: they all stand on one row.
+    var first = Math.floor((R.dist - 60) / N.spacing)
+    var last = Math.floor((R.dist + S.w + 60) / N.spacing) + 1
+    for (var k = Math.max(0, first); k <= last; k++) {
+      var st = stoneAt(k)
+      var li = N.stones[st.v], L = S.layers[li]
+      var sx = N.holdX + (st.x - R.dist) + L.ox
+      if (sx > S.w + 40 || sx < -40) continue
+      ox.drawImage(sheets[li], 0, 0, L.w, L.h, Math.round(sx), Math.round(N.groundRow + L.oy), L.w, L.h)
+    }
+
+    /**
+     * **Death, placed by one number.** 'fromX' is where she waits at menace 0 and the runner's
+     * own column is where she arrives at 1. Nothing about her is a decision made per frame.
+     */
+    var D2 = S.layers[N.reaper.layer]
+    var rx = N.fromX + (N.holdX - 14 - N.fromX) * R.menace
+    var rf = Math.floor(t * 1000 / D2.ms) % D2.n
+    ox.drawImage(sheets[N.reaper.layer], 0, rf * D2.h, D2.w, D2.h,
+      Math.round(rx + D2.ox), Math.round(N.groundRow + D2.oy), D2.w, D2.h)
+
+    // The runner. The state names a clip; the clip names a layer.
+    var D = S.placed[R.at]
+    var cn = R.state === 'flip' ? D.runs.flip : R.state === 'leap' ? D.runs.leap : D.runs.run
+    var pair = D.clips[cn]
+    var ri = pair.right
+    var RL = S.layers[ri]
+    /**
+     * **The two airborne clips play ONCE and hold their last frame**, which is what 'Gait.wrap'
+     * false is for: the pose at the end of a somersault is a whole turn from where it started,
+     * so a clip that looped would put the body back where it began halfway through the jump.
+     */
+    var rfr = R.state === 'run'
+      ? Math.floor(R.dist / 2.2) % RL.n
+      : Math.min(RL.n - 1, Math.floor(R.clip * 1000 / RL.ms))
+    ox.drawImage(sheets[ri], 0, rfr * RL.h, RL.w, RL.h,
+      Math.round(N.holdX + RL.ox), Math.round(N.groundRow + RL.oy - R.y), RL.w, RL.h)
+
+    if (R.over) {
+      ox.globalAlpha = 0.5
+      ox.fillStyle = '#0a0812'; ox.fillRect(0, 0, S.w, S.h)
+      ox.globalAlpha = 1
+    }
+  }
+
+  function runnerScore(now) {
+    if (!S.meter || now - scoreAt < 90) return
+    scoreAt = now
+    var el = document.getElementById('score'); if (!el) return
+    el.textContent = R.over
+      ? 'she caught you at ' + R.best.toFixed(0) + ' m  ·  press space to run again'
+      : R.best.toFixed(0) + ' m'
+  }
+
   /**
    * **The blow.** Anything prone within reach, on the side he is facing, gets up and runs.
    * It fires once per attack, at 'hitAt' through the clip — anticipation is longer than
@@ -776,6 +971,17 @@ function mount(el, S) {
     // **A climbing scene takes the other path entirely.** Its camera moves, its cast is one
     // subject and an unbounded number of stamps, and its backdrop is a function of altitude —
     // none of which the fixed-camera loop below has any way to express.
+    if (S.runner && R) {
+      drawn.length = 0
+      runner(t, dt)
+      drawRunner(t)
+      vx.drawImage(off, 0, 0, view.width, view.height)
+      meter.work.push(clock() - began); if (meter.work.length > 120) meter.work.shift()
+      report(now); runnerScore(now)
+      requestAnimationFrame(frame)
+      return
+    }
+
     if (S.climb && K) {
       drawn.length = 0
       climb(t, dt)
@@ -923,11 +1129,11 @@ function mount(el, S) {
    * from its draw calls at all — a screen row is a world row minus a camera, and neither of the
    * two is recoverable from their difference.
    *
-   * It is a **findings channel and not a picture** (\`CLAUDE.md\` §5): it answers questions about
+   * It is a **findings channel and not a picture** (\'CLAUDE.md\' §5): it answers questions about
    * the state, and it cannot show pixels. The first thing it found was a locked orbit that four
    * different tuning sweeps had failed to explain.
    */
-  return { view: view, drawn: drawn, state: function () { return K || P } }
+  return { view: view, drawn: drawn, state: function () { return R || K || P } }
 }
 `
 
@@ -1031,11 +1237,11 @@ export function shelfPage(games: readonly AppGame[]): string {
 
 /** **One game, big, and playable.** Input is bound on this route and nowhere else. */
 export function gamePage(game: AppGame): string {
-  const playable = game.stage.placed.some((p) => p.player !== undefined || p.climber !== undefined)
+  const playable = game.stage.placed.some((p) => p.player !== undefined || p.climber !== undefined || p.runs !== undefined)
   // **The score is a DOM element and not a sprite.** A HUD is not art: baking a number into an
   // indexed buffer would mean drawing a font, and a font is the one thing in a pixel game that
   // has to be legible at every scale rather than beautiful at one.
-  const scored = game.stage.climb !== null
+  const scored = game.stage.climb !== null || game.stage.runner !== null
   return shell(
     `${game.title} · claude-ink-2d`,
     `<a class="back" href="/">← shelf</a><h1>${esc(game.title)}</h1><span class="sub mono">${esc(game.id)}</span>`,

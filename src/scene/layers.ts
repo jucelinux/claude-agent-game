@@ -27,7 +27,7 @@
  */
 import type { RGB } from '../core/types.ts'
 import { execute, loadParams } from '../io/load.ts'
-import type { Climb, Placement, Scene } from './types.ts'
+import type { Climb, Placement, Runner, Scene } from './types.ts'
 import { floorDepth, hazeAt, paintOrder, standRow } from './types.ts'
 
 /** One sprite's whole cycle, cropped, in index space. */
@@ -88,6 +88,7 @@ export type Placed = {
   readonly player?: Placement['player']
   readonly approach?: Placement['approach']
   readonly climber?: Placement['climber']
+  readonly runs?: Placement['runs']
 }
 
 /**
@@ -97,6 +98,12 @@ export type Placed = {
  * stamps them, which is the same contract every other subject on the page has: the browser is
  * a consumer of pre-rendered indexed bytes and has never heard of a grammar.
  */
+/** The runner, with every grammar name already resolved to a layer index. */
+export type StageRunner = Omit<Runner, 'stones' | 'reaper'> & {
+  readonly stones: readonly number[]
+  readonly reaper: Omit<Runner['reaper'], 'grammar' | 'tunables'> & { readonly layer: number }
+}
+
 export type StageClimb = Omit<Climb, 'perches'> & {
   /** Layer index per platform variant, in the order the scene declared them. */
   readonly perches: readonly number[]
@@ -133,6 +140,8 @@ export type Stage = {
   readonly layers: readonly Layer[]
   /** Present on a climbing scene, null on every other kind. */
   readonly climb: StageClimb | null
+  /** Present on an endless runner, null on every other kind. */
+  readonly runner: StageRunner | null
   /** Back to front. */
   readonly placed: readonly Placed[]
   /** Distinct colours across every layer — the same cohesion reading, on the same terms. */
@@ -318,6 +327,7 @@ export function toStage(scene: Scene): Stage {
       ...(p.player === undefined ? {} : { player: p.player }),
       ...(p.approach === undefined ? {} : { approach: p.approach }),
       ...(p.climber === undefined ? {} : { climber: p.climber }),
+      ...(p.runs === undefined ? {} : { runs: p.runs }),
       order: paintOrder(p, i),
     })
   }
@@ -331,6 +341,19 @@ export function toStage(scene: Scene): Stage {
    * that makes them platforms is that nothing puts them in `placed`: the runtime decides where
    * they are, from a band index and a hash, on every frame.
    */
+  let runner: StageRunner | null = null
+  if (scene.runner !== undefined) {
+    const { stones, reaper, ...rest } = scene.runner
+    runner = {
+      ...rest,
+      stones: stones.map((o) => build({ grammar: o.grammar, tunables: o.tunables }, 0, false).layer),
+      reaper: {
+        creep: reaper.creep, hit: reaper.hit, relief: reaper.relief, fromX: reaper.fromX,
+        layer: build({ grammar: reaper.grammar, tunables: reaper.tunables }, 0, false).layer,
+      },
+    }
+  }
+
   let climb: StageClimb | null = null
   if (scene.climb !== undefined) {
     const c = scene.climb
@@ -397,6 +420,6 @@ export function toStage(scene: Scene): Stage {
   return {
     name: scene.name, w: scene.w, h: scene.h, scale: scene.scale, ground: scene.ground,
     sky: scene.sky, groundRamp: scene.groundRamp, stars: scene.stars ?? null, dust: scene.dust ?? null, rain, floor,
-    layers, climb, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
+    layers, climb, runner, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
   }
 }
