@@ -30,12 +30,27 @@
  */
 import type { Scene } from '../scene/compose.ts'
 
-/** Dark to light. The lit strip along the horizon is the sun catching the far regolith. */
+/**
+ * **Sunlit regolith, and the first version of this was far too dark.**
+ *
+ * His reading: *"esse solo lunar não está bem representado. Me parece apenas um chão preto com
+ * pedras."* Two causes, and only one of them was the colours.
+ *
+ * The colours were wrong — lunar soil has an albedo around 0.12, which is dark *as a material*
+ * and blindingly bright *in direct sun*, because there is nothing between it and the sun. The
+ * Apollo surface photographs read as pale grey gravel. This ramp now runs from 54 to 150 in
+ * luminance where it ran from 29 to 100.
+ *
+ * The bigger cause was structural: the floor took one tone and diluted it by haze, and the
+ * moon's haze is zero. **Zero times anything is the same colour on every row**, so the whole
+ * plane was one flat value — which is exactly what a black floor looks like. The floor now
+ * walks its own ramp by depth and haze rides on top (`src/scene/layers.ts`).
+ */
 const REGOLITH: readonly [number, number, number][] = [
-  [30, 28, 27],
-  [48, 45, 42],
-  [74, 70, 64],
-  [104, 99, 90],
+  [56, 52, 48],
+  [86, 81, 74],
+  [120, 114, 104],
+  [158, 151, 138],
 ]
 
 /**
@@ -68,6 +83,13 @@ export const moonScene: Scene = {
   sky: [7, 7, 13],
   stars: { count: 90, colors: [[120, 126, 150], [186, 192, 214], [238, 242, 252]], seed: 23, below: 96 },
   groundRamp: REGOLITH,
+  /**
+   * **Dust.** Regolith is powder churned by four billion years of impacts, and a flat fill
+   * reads as a floor tile however carefully its value is graded. Two tones, one lighter than
+   * the ground and one darker, so the grain reads as *particles* rather than as noise on a
+   * screen — which is what a single tone would have given.
+   */
+  dust: { count: 1400, colors: [[44, 41, 38], [172, 165, 152], [70, 66, 61]], seed: 71 },
   placements: [
     // **The Earth, hanging.** Placed by `y` and marked `sky`, so it takes no ground haze and
     // is drawn before everything: it is not far away, it is *behind the world*.

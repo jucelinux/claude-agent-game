@@ -131,14 +131,42 @@ describe('the eight facings are eight different pictures', () => {
   })
 })
 
+describe('which way he is looking', () => {
+  it('walking away shows the pack, walking toward shows the visor', () => {
+    /**
+     * **His finding in one look, as an instrument.** *"quando ando para cima (W), deveria ver
+     * as costas do astronauta. Ao invés disso vejo o visor dele."*
+     *
+     * Two defects made it: the compass signs were inverted, and `Part.z` was never yawed at
+     * all — so the visor, which sits on the front of the helmet at `z: -3.6`, stayed on the
+     * camera side in every facing. Rotating a part's `x` and leaving its `z` is not an
+     * approximation, it is half a rotation.
+     */
+    const depth = (facing: string, part: string): number => {
+      const g = grammarByName(`astro-idle-${facing}`)
+      return g.parts.find((p) => p.name === part)!.z ?? 0
+    }
+    // Walking away: the pack is nearer the camera than the visor.
+    expect(depth('n', 'pack'), 'walking north shows his face').toBeLessThan(depth('n', 'visor'))
+    // Walking toward, and side-on: the visor is nearer.
+    expect(depth('s', 'visor'), 'walking south shows his back').toBeLessThan(depth('s', 'pack'))
+    expect(depth('e', 'visor')).toBeLessThan(depth('e', 'pack'))
+  })
+})
+
 describe('the compass', () => {
   it('names eight points and the western half mirrors the eastern', () => {
     expect(FACINGS).toHaveLength(8)
     for (const f of FACINGS) expect(YAW_OF[f]).toBeTypeOf('number')
+    // **North turns the face AWAY from the camera**, and it did not: the signs were inverted
+    // and he walked north and saw the visor. `n` is a positive quarter turn, which sends a
+    // bone in front of the body to +z — away.
+    expect(YAW_OF['n']).toBeGreaterThan(0)
+    expect(YAW_OF['s']).toBeLessThan(0)
     // A body turned west genuinely is a body turned east seen in a mirror, which is why only
     // five are ever rendered. The lamp is the part that must not be mirrored, and `layers.ts`
     // re-renders it — the same trick the gorilla's facing already uses.
-    expect(YAW_OF['w']).toBeCloseTo(-YAW_OF['e']! - 0.5, 6)
+    expect(Math.abs(YAW_OF['w']!)).toBeCloseTo(0.5, 6)
     expect(ASTRONAUT.map((g) => g.name).filter((n) => n.startsWith('astro-lope'))).toHaveLength(5)
   })
 })

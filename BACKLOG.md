@@ -20,7 +20,71 @@ answers in one word, plus one word of *why* on a miss. Full definition in `CLAUD
 
 | batch | commissions | shipped | hit rate | cycles per shipped piece |
 |---|---|---|---|---|
-| 1 | 1 | *awaiting his word* | — | — |
+| 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading from him |
+
+### His verdict, 16/08, unsoftened
+
+**Shipped:**
+
+> *"O espaço profundo e a terra ficaram muito boas: aqui eu acho que você conseguiu superar
+> minhas expectativas. A sombra na terra, as estrelas, embora simples, é o tipo de
+> representação que traz uma memória nostálgica para quem joga."*
+
+> *"O Astronauta (apenas a visão esquerda e direita): a representação ficou muito boa também.
+> Eu senti falta daquela mochila quadrada... Se fosse um jogo 2d apenas com movimentos para
+> esquerda e direita, não teria defeito algum."*
+
+**Missed:**
+
+> *"Na animação de movimento, não importa a direção, os braços estão fixos, sempre."*
+>
+> *"Quando ando para cima (W), deveria ver as costas do astronauta. Ao invés disso vejo o visor
+> dele e o braço esquerdo apontado para minha direção... Os movimentos diagonais precisam
+> corrigir os braços também."*
+>
+> *"O pulo enquanto me desloco com o A ou D está com uma animação muito boa. Para qualquer
+> outra direção não."*
+>
+> *"A relação entre origem de luz e sombra não está bem resolvida... quando observo a terra
+> tenho um indicador claro de onde está o sol. Porém quando olho para o terreno da lua e para
+> o astronauta, o foco de luz não fica claro."*
+>
+> *"Esse solo lunar não está bem representado. Me parece apenas um chão preto com pedras."*
+
+### Scoring the prediction
+
+**The call was right and the reasoning was half right, and the half I got wrong is the more
+useful half.**
+
+| I predicted | what happened |
+|---|---|
+| a MISS at 60/40 | **miss** |
+| the body works | **works** — he shipped the side view outright |
+| the turned WALK fails | **it did**, but not for the reason I gave |
+
+I predicted the failure would be the gait decomposition — that a stride turned to face the
+camera would swing its legs sideways. **That part was fine.** The back view keeps 65% of the
+side view's motion.
+
+What actually broke was three things I never considered:
+
+1. **`Part.z` was never yawed at all.** The visor sits on the front of the helmet at `z: -3.6`
+   and stayed on the camera side in every facing. Rotating a part's `x` and leaving its `z` is
+   not an approximation, it is half a rotation — and I wrote the transform believing it was
+   complete enough to name its own weaknesses.
+2. **The compass signs were inverted.** North turned the face toward the camera. A sign.
+3. **The arms were animated at nine degrees**, which is not restraint, it is a still image. I
+   had a true fact — Apollo crews loped with their arms out rather than swinging them — and
+   applied it until the animation stopped.
+
+**The lesson, and it is about the prediction rather than about the code:** I predicted the
+failure of the part I had *thought hardest about*, and shipped three defects in the parts I
+had not thought about at all. **A declared risk is a place I was already looking.** Next
+prediction should name what I have not examined, not what I have.
+
+**The capability the miss specifies:** not *"a gait that survives being turned"*, which is what
+I guessed. It is **a body that survives being turned** — every field that carries a position
+has to rotate, and I had only rotated some of them.
 
 ### My prediction, recorded before he looks
 

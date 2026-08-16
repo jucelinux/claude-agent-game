@@ -128,9 +128,22 @@ function makeCrater(name: string, r: number, seed: number): Grammar {
     parts: [
       // The bowl: a shallow dish, one step down from the plain.
       { name: 'bowl', bone: 'c', material: 'regolith', shift: -1, shape: { kind: 'lobed', cx: 0, cy: 0, rx: r, ry: r * 0.42, rz: r * 0.3, lobes: 6, depth: 0.09, phase: seed, octaves: 2 } },
-      // The rim, as a marking: it recolours the bowl's edge and adds nothing to its outline.
-      { name: 'rim', bone: 'c', material: 'regolith', marking: true, shift: 1, z: -1, shape: { kind: 'lobed', cx: -r * 0.06, cy: -r * 0.09, rx: r * 0.96, ry: r * 0.38, rz: r * 0.26, lobes: 6, depth: 0.09, phase: seed + 0.3, octaves: 2 } },
-      { name: 'shade', bone: 'c', material: 'regolith', marking: true, shift: -2, z: -2, shape: { kind: 'lobed', cx: r * 0.16, cy: r * 0.1, rx: r * 0.6, ry: r * 0.22, rz: r * 0.2, lobes: 5, depth: 0.12, phase: seed + 1.7, octaves: 2 } },
+      /**
+       * **The rim and the shadow, and both now agree with the lamp.**
+       *
+       * The sun is at (-0.55, -0.5): upper left. For a *depression* that means the inner wall
+       * on the upper-left faces down and away from it and pools shadow, while the raised rim
+       * catches light on its upper-left outer edge. The first version put the shadow on the
+       * lower right, which is the lit side — so every crater in the scene disagreed with the
+       * Earth hanging above it about where the sun was. His reading: *"quando observo a terra
+       * tenho um indicador claro de onde está o sol. Porém quando olho para o terreno da lua...
+       * o foco de luz não fica claro"*.
+       *
+       * These are markings rather than solids, so a crater is a hole in the ground rather than
+       * a lid on it, and none of the three rings draws an inner line.
+       */
+      { name: 'rim', bone: 'c', material: 'regolith', marking: true, shift: 1, z: -1, shape: { kind: 'lobed', cx: -r * 0.1, cy: -r * 0.2, rx: r * 0.96, ry: r * 0.36, rz: r * 0.26, lobes: 6, depth: 0.09, phase: seed + 0.3, octaves: 2 } },
+      { name: 'shade', bone: 'c', material: 'regolith', marking: true, shift: -2, z: -2, shape: { kind: 'lobed', cx: -r * 0.2, cy: -r * 0.04, rx: r * 0.62, ry: r * 0.24, rz: r * 0.2, lobes: 5, depth: 0.12, phase: seed + 1.7, octaves: 2 } },
     ],
     gait: STILL,
   }

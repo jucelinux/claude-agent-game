@@ -245,7 +245,17 @@ export type Scene = {
    * integer hash. Two colours and a count, which is the whole of a night sky at this scale.
    */
   readonly stars?: { readonly count: number; readonly colors: readonly RGB[]; readonly seed: number; readonly below: number }
-  /** Dark to light. The lightest is the lit strip along the very edge of the floor. */
+  /**
+   * **Dust on the floor, and it is a backdrop rather than a field**, for the same reason the
+   * stars are: it does not move.
+   *
+   * Regolith is powder churned by four billion years of impacts. Painted as a flat fill it
+   * reads as a floor tile, and no amount of value gradient fixes that — *"me parece apenas um
+   * chão preto com pedras"*. A scattering of single pixels in two tones is the whole of it,
+   * and it is the cheapest texture this engine can express.
+   */
+  readonly dust?: { readonly count: number; readonly colors: readonly RGB[]; readonly seed: number }
+  /** Dark to light, walked by depth. The lightest is the far edge of the floor. */
   readonly groundRamp: readonly RGB[]
   readonly placements: readonly Placement[]
   /**
@@ -432,13 +442,21 @@ export function compose(scene: Scene): Composed {
    */
   const FLOOR_STEPS = 8
   const floorBase = palette.length
-  const floorTone = scene.groundRamp[0] as RGB
-  palette.push(scene.groundRamp[scene.groundRamp.length - 1] as RGB)
+  const lastTone = scene.groundRamp.length - 1
   for (let k = 0; k <= FLOOR_STEPS; k++) {
-    palette.push(haze(floorTone, scene.sky, (scene.haze * k) / FLOOR_STEPS))
+    const d = k / FLOOR_STEPS
+    const u = d * lastTone
+    const lo = scene.groundRamp[Math.min(lastTone, Math.floor(u))] as RGB
+    const hi = scene.groundRamp[Math.min(lastTone, Math.ceil(u))] as RGB
+    const f = u - Math.floor(u)
+    palette.push(haze([
+      Math.round(lo[0] + (hi[0] - lo[0]) * f),
+      Math.round(lo[1] + (hi[1] - lo[1]) * f),
+      Math.round(lo[2] + (hi[2] - lo[2]) * f),
+    ], scene.sky, scene.haze * d))
   }
   const floorIndex = (y: number): number =>
-    y === scene.ground ? floorBase : floorBase + 1 + Math.round(floorDepth(scene, y) * FLOOR_STEPS)
+    floorBase + Math.round(floorDepth(scene, y) * FLOOR_STEPS)
 
   // Fields paint after the ground and before the subjects, so weather sits behind what it
   // falls on. A layer in front would need depth it does not have.

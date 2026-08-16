@@ -46,7 +46,7 @@ const esc = (s: string): string =>
 const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
   JSON.stringify({
     w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
-    groundRamp: stage.groundRamp, floor: stage.floor, stars: stage.stars,
+    groundRamp: stage.groundRamp, floor: stage.floor, stars: stage.stars, dust: stage.dust,
     rain: stage.rain, interactive, meter: interactive,
     layers: stage.layers.map((l) => ({
       w: l.w, h: l.h, ox: l.ox, oy: l.oy, foot: l.footOff, n: l.frames, ms: l.msPerFrame,
@@ -110,6 +110,17 @@ function mount(el, S) {
   }
   for (var y = 0; y < S.floor.length; y++) {
     bx.fillStyle = rgb(S.floor[y]); bx.fillRect(0, S.ground + y, S.w, 1)
+  }
+  // **Dust.** Same hash as the stars, thrown over the floor instead of the sky. Regolith is
+  // powder, and a flat fill reads as a tile however well its value is graded.
+  if (S.dust) {
+    var band = S.h - S.ground
+    for (var di = 0; di < S.dust.count; di++) {
+      var dh = ((di + S.dust.seed) * 2654435761) >>> 0; dh = (dh ^ (dh >>> 13)) >>> 0
+      var dh2 = (dh * 1597334677) >>> 0; dh2 = (dh2 ^ (dh2 >>> 15)) >>> 0
+      bx.fillStyle = rgb(S.dust.colors[dh2 % S.dust.colors.length])
+      bx.fillRect(dh % S.w, S.ground + (dh2 % band), 1, 1)
+    }
   }
 
   /**

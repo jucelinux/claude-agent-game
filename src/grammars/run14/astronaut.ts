@@ -98,8 +98,12 @@ const bones: Bone[] = [
   { name: 'head', parent: 'neck', x: 0.5, y: -4, z: 0, angle: 0 },
   // Far limbs first. ±5 against a torso 5.5 deep, so a near limb stands proud of the barrel
   // and a far one is genuinely behind it — and both keep that relationship when turned.
-  { name: 'armFU', parent: 'torso', x: 0, y: -10, z: 5, angle: 0.03 },
-  { name: 'armFL', parent: 'armFU', x: 0, y: 7, z: 0, angle: 0.04 },
+  // **Both arms hang the same way and differ only in PHASE.** They were mirrored — the far
+  // one splayed forward and the near one back — which is a natural thing to type and an
+  // impossible thing for a body. It is the third time this project has shipped that defect,
+  // after probe D and the photographer, and the first time it was caught by a lock.
+  { name: 'armFU', parent: 'torso', x: 0, y: -10, z: 5, angle: -0.03 },
+  { name: 'armFL', parent: 'armFU', x: 0, y: 7, z: 0, angle: -0.04 },
   { name: 'legFU', parent: 'pelvis', x: 0, y: 1, z: 3.4, angle: 0 },
   { name: 'legFL', parent: 'legFU', x: 0, y: 8.5, z: 0, angle: 0.02 },
   { name: 'legNU', parent: 'pelvis', x: 0, y: 1, z: -3.4, angle: 0 },
@@ -131,7 +135,17 @@ const parts: Part[] = [
   // is why this body survives being turned at all.
   { name: 'hips', bone: 'pelvis', material: 'suit', shape: { kind: 'ellipse', cx: 0, cy: 0, rx: 4.6, ry: 4.4, rz: 4.6 } },
   { name: 'torso', bone: 'torso', material: 'suit', shape: { kind: 'ellipse', cx: 0, cy: -6, rx: 5.4, ry: 7.6, rz: 5.4 } },
-  { name: 'pack', bone: 'torso', material: 'gear', z: 4.6, shift: -1, shape: { kind: 'rect', x: -4.4, y: -11.5, w: 4.4, h: 10, d: 5 } },
+  /**
+   * **The PLSS — the square pack on the back**, and he named its absence: *"eu senti falta
+   * daquela mochila quadrada que fica nas costas do astronauta"*. It was there and it was too
+   * small and too far behind the barrel to clear it.
+   *
+   * It is also the one part of this body that tells you which way he is facing when the visor
+   * has turned away, so it is the silhouette cue the whole eight-way walk rests on. A rect
+   * rather than an ellipse because it is the only hard-edged thing on the figure and that
+   * contrast is what makes it read as equipment.
+   */
+  { name: 'pack', bone: 'torso', material: 'gear', z: 5.6, shift: -1, shape: { kind: 'rect', x: -7.4, y: -13, w: 6.4, h: 12, d: 6.4 } },
   { name: 'neck', bone: 'neck', material: 'gear', shape: { kind: 'capsule', x0: 0, y0: -0.5, x1: 0, y1: 1.5, r: 2.6 } },
   // The helmet: a sphere, and the one part of this body that is genuinely the same from every
   // angle. It is also the largest single mass, which is what makes the figure read at 40 px.
@@ -190,12 +204,20 @@ const LOPE: Gait = {
     { bone: 'legNL', channel: 'angle', keys: [0.04, 0.3, 0.1, 0.06] },
     { bone: 'legFU', channel: 'angle', keys: [-0.28, -0.02, 0.3, 0.06] },
     { bone: 'legFL', channel: 'angle', keys: [0.1, 0.06, 0.04, 0.3] },
-    // Arms up and out for balance, barely swinging. A suit's shoulder joint resists, and a
-    // loping astronaut looks like someone carrying two invisible buckets.
-    { bone: 'armNU', channel: 'angle', keys: [-0.24, -0.3, -0.26, -0.2] },
-    { bone: 'armNL', channel: 'angle', keys: [-0.34, -0.3, -0.36, -0.32] },
-    { bone: 'armFU', channel: 'angle', keys: [0.2, 0.26, 0.22, 0.16] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.3, -0.34, -0.28, -0.32] },
+    /**
+     * **The arms pump, and the first version's did not.** His reading of 16/08: *"na animação
+     * de movimento, não importa a direção, os braços estão fixos, sempre"*.
+     *
+     * I had a real fact — a suit's shoulder resists, and Apollo crews loped with their arms
+     * out for balance rather than swinging them like a walk — and I applied it until the range
+     * was nine degrees, which is not restraint, it is a still image. Twenty-six degrees is
+     * restrained; nine is broken. **A fact about a subject is not a licence to stop animating
+     * it**, and that is the general form of the mistake.
+     */
+    { bone: 'armNU', channel: 'angle', keys: [-0.16, -0.3, -0.44, -0.3] },
+    { bone: 'armNL', channel: 'angle', keys: [-0.3, -0.34, -0.38, -0.34] },
+    { bone: 'armFU', channel: 'angle', keys: [-0.44, -0.3, -0.16, -0.3] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.38, -0.34, -0.3, -0.34] },
     { bone: 'head', channel: 'angle', keys: [0.01, -0.01, 0.01, -0.01] },
   ],
 }
@@ -219,8 +241,8 @@ const IDLE: Gait = {
     { bone: 'head', channel: 'angle', keys: [0.02, -0.03, -0.01, 0.04] },
     { bone: 'armNU', channel: 'angle', keys: [-0.22, -0.24, -0.22, -0.2] },
     { bone: 'armNL', channel: 'angle', keys: [-0.3, -0.32, -0.3, -0.28] },
-    { bone: 'armFU', channel: 'angle', keys: [0.19, 0.21, 0.19, 0.17] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.27, -0.29, -0.27, -0.25] },
+    { bone: 'armFU', channel: 'angle', keys: [-0.19, -0.21, -0.19, -0.17] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.25, -0.27, -0.25, -0.23] },
     { bone: 'legNU', channel: 'angle', keys: [0.01, 0.02, 0.01, 0] },
     { bone: 'legFU', channel: 'angle', keys: [0, 0.01, 0.02, 0.01] },
   ],
@@ -251,7 +273,7 @@ const LEAP: Gait = {
     { bone: 'legFL', channel: 'angle', keys: [0.46, 0.04, 0.4, 0.1] },
     { bone: 'armNU', channel: 'angle', keys: [-0.14, -0.44, -0.4, -0.34] },
     { bone: 'armNL', channel: 'angle', keys: [-0.4, -0.26, -0.24, -0.3] },
-    { bone: 'armFU', channel: 'angle', keys: [0.1, 0.4, 0.36, 0.3] },
+    { bone: 'armFU', channel: 'angle', keys: [-0.1, -0.4, -0.36, -0.3] },
     { bone: 'armFL', channel: 'angle', keys: [-0.36, -0.22, -0.2, -0.26] },
     { bone: 'head', channel: 'angle', keys: [0.04, -0.02, -0.03, -0.01] },
   ],

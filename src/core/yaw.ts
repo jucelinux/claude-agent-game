@@ -46,45 +46,58 @@ const yawPoint = (x: number, z: number, c: number, s: number): { x: number; z: n
   z: x * s + z * c,
 })
 
-function yawShape(shape: Shape, c: number, s: number): Shape {
+/**
+ * **A part rotates as a rigid thing, and its `z` is half of where it is.**
+ *
+ * The first version rotated only the shape's own `cx` and left `Part.z` alone — so the
+ * astronaut's visor, which sits at `z: -3.6` on the front of the helmet, **stayed on the
+ * camera side in every facing**. He walked away from the camera and looked straight at it.
+ * His words: *"quando ando para cima (W), deveria ver as costas do astronauta. Ao invés
+ * disso vejo o visor dele"*.
+ *
+ * A part's position in its bone is the pair `(x along the body, z into it)`, and a yaw
+ * rotates that pair. Leaving one of the two out is not an approximation, it is half a
+ * rotation.
+ */
+function yawPart(part: Part, c: number, s: number): Part {
+  const z = part.z ?? 0
+  const shape = part.shape
   // |cos| and |sin|: a radius has no sign, and a body turned 190 degrees is as wide as one
   // turned 170. Using the signed value here silently inverted every shape past a quarter turn.
   const ac = Math.abs(c)
   const as = Math.abs(s)
+
   switch (shape.kind) {
-    case 'ellipse': {
-      const rz = shape.rz ?? Math.min(shape.rx, shape.ry)
-      const p = yawPoint(shape.cx, 0, c, s)
-      return {
-        ...shape,
-        cx: p.x,
-        rx: Math.hypot(shape.rx * ac, rz * as),
-        rz: Math.hypot(shape.rx * as, rz * ac),
-      }
-    }
+    case 'ellipse':
     case 'lobed': {
       const rz = shape.rz ?? Math.min(shape.rx, shape.ry)
-      const p = yawPoint(shape.cx, 0, c, s)
+      const p = yawPoint(shape.cx, z, c, s)
       return {
-        ...shape,
-        cx: p.x,
-        rx: Math.hypot(shape.rx * ac, rz * as),
-        rz: Math.hypot(shape.rx * as, rz * ac),
+        ...part,
+        z: p.z,
+        shape: {
+          ...shape,
+          cx: p.x,
+          rx: Math.hypot(shape.rx * ac, rz * as),
+          rz: Math.hypot(shape.rx * as, rz * ac),
+        },
       }
     }
     case 'capsule': {
-      // The exact case. A swept sphere is rotation-invariant in its radius, and its two
-      // endpoints are points.
-      const a = yawPoint(shape.x0, 0, c, s)
-      const b = yawPoint(shape.x1, 0, c, s)
-      return { ...shape, x0: a.x, x1: b.x }
+      // **The exact case.** A swept sphere is rotation-invariant in its radius, and its two
+      // endpoints are points. They can end at different depths — an arm pointing forward
+      // recedes when you look at it from the front — and `Part.z` holds one number, so the
+      // part takes their mean. On this vocabulary's limbs the two ends share an x, so the
+      // mean is exact; on a limb authored across the body it is a half-pixel.
+      const a = yawPoint(shape.x0, z, c, s)
+      const b = yawPoint(shape.x1, z, c, s)
+      return { ...part, z: (a.z + b.z) / 2, shape: { ...shape, x0: a.x, x1: b.x } }
     }
     case 'rect': {
       const d = shape.d ?? Math.min(shape.w, shape.h)
-      const cx = shape.x + shape.w / 2
-      const p = yawPoint(cx, 0, c, s)
+      const p = yawPoint(shape.x + shape.w / 2, z, c, s)
       const w = shape.w * ac + d * as
-      return { ...shape, x: p.x - w / 2, w, d: shape.w * as + d * ac }
+      return { ...part, z: p.z, shape: { ...shape, x: p.x - w / 2, w, d: shape.w * as + d * ac } }
     }
   }
 }
@@ -106,12 +119,23 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26)
   const c = Math.cos(a)
   const s = Math.sin(a)
 
+  /**
+   * **The rest angle turns too, and forgetting it is why he saw the arms crooked.**
+   *
+   * A bone's `angle` is a rotation in the screen plane, exactly like a gait key — an arm hung
+   * at 11 degrees out from the body is splayed *forward and back*, in the plane the author was
+   * looking at. Seen from the front that splay is depth, not a slant, and an arm that keeps
+   * its 11 degrees on screen is an arm sticking out sideways for no reason.
+   *
+   * `cos θ` of it survives as rotation. The rest of it becomes a fixed depth offset, folded
+   * into the bone's own `z` at the radius a limb reaches.
+   */
   const bones: Bone[] = grammar.skeleton.bones.map((b) => {
     const p = yawPoint(b.x, b.z ?? 0, c, s)
-    return { ...b, x: p.x, z: p.z }
+    return { ...b, x: p.x, z: p.z + b.angle * s * LIMB, angle: b.angle * c }
   })
 
-  const parts: Part[] = grammar.parts.map((p) => ({ ...p, shape: yawShape(p.shape, c, s) }))
+  const parts: Part[] = grammar.parts.map((p) => yawPart(p, c, s))
 
   /**
    * **The gait, decomposed.** An `angle` key is a rotation about the axis running left-right
@@ -182,13 +206,21 @@ export const FACINGS = ['e', 'ne', 'n', 'nw', 'w', 'sw', 's', 'se'] as const
 export type Facing = (typeof FACINGS)[number]
 
 /** Turns of yaw for each compass point, measured from the authored facing. */
+/**
+ * Turns of yaw for each compass point, measured from the authored facing.
+ *
+ * **The signs were inverted and he found it in one look.** `n` is walking *away* from the
+ * camera, so it has to turn the body's face to +z — away — and it was turning it to -z. He
+ * walked north and saw the visor. The transform was right and the compass was reading it
+ * backwards, which is the cheapest kind of defect to have and the easiest to ship.
+ */
 export const YAW_OF: Readonly<Record<Facing, number>> = {
   e: 0,
-  ne: -0.125,
-  n: -0.25,
-  nw: -0.375,
-  w: -0.5,
-  sw: 0.375,
-  s: 0.25,
-  se: 0.125,
+  ne: 0.125,
+  n: 0.25,
+  nw: 0.375,
+  w: 0.5,
+  sw: -0.375,
+  s: -0.25,
+  se: -0.125,
 }

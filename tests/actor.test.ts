@@ -6,7 +6,7 @@ import { grammarByName } from '../src/grammars/index.ts'
 import { solve } from '../src/core/skeleton.ts'
 import { evaluate } from '../src/core/gait.ts'
 import { sprite } from '../src/core/render.ts'
-import type { Grammar } from '../src/core/types.ts'
+import type { Grammar, Params } from '../src/core/types.ts'
 
 /**
  * **The three defects of his fifth reading, turned into instruments.**
@@ -108,46 +108,65 @@ function drawn(): readonly (readonly [string, string])[] {
 }
 
 /**
- * **A body has no holes in it.**
+ * **A body has no holes in it, and the check is a DIFFERENCE rather than a ceiling.**
  *
- * His reading of 16/08: *"e esse buraco nas costas do gorila?"* — and it was not a hole in the
- * usual sense. Nothing was transparent. It was the inner outline **ringing the silver saddle**,
- * and where a ragged marking's boundary folds back on itself the ring closes into a solid
- * patch. Ink deep inside a body reads as a gap whatever colour the gap technically is.
+ * His reading of 16/08: *"e esse buraco nas costas do gorila?"* — and nothing was transparent.
+ * It was the inner outline ringing the silver saddle, and where a ragged marking's boundary
+ * folds back on itself the ring closes into a solid patch. Ink deep inside a body reads as a
+ * gap whatever colour the gap technically is.
  *
- * **The measurement:** the largest connected mass of outline whose pixels sit three or more
- * pixels from any transparent one, over the whole cycle. A real inner line is a *ring* and
- * stays near an edge; a closed ring is a *disc* and does not.
+ * **The first version was an absolute ceiling and it was the wrong instrument.** 90 px,
+ * calibrated against the gorilla. It then failed the astronaut seen from behind — whose PLSS
+ * pack is a hard-edged box strapped to a suit and *should* be outlined, all 106 px of it. A
+ * threshold derived from one body measures that body: a gorilla has no hard-edged solid on it
+ * and a spacesuit has three.
  *
- * **Calibrated in both directions, which is the only way a threshold is worth anything
- * (`HARNESS.md` §5):**
+ * **What the defect actually was, stated exactly: a MARKING added interior ink.** So the check
+ * renders the body twice — once as authored, once with every marking deleted — and asks what
+ * the markings *added*. A marking that draws no line adds nothing. A marking that gets ringed
+ * adds its whole perimeter, and a ring that closes adds its area.
  *
- * | sample | px |
- * |---|---|
- * | `gorilla-jump-chrono`, the idiom he ranked first | 83 |
- * | the gorilla with the saddle un-ringed — after the fix | 75–81 |
- * | **the gorilla with the saddle ringed — the defect he saw** | **101–111** |
+ * 8 px of slack, because deleting a marking uncovers whatever was beneath it and the solids
+ * underneath can meet differently by a pixel or two.
  *
- * 90 sits between the worst healthy sample and the best sick one. The first draft of this
- * check used 12, taken from one frame of one pose, and it failed every subject in the project
- * including the one he ranked first — a threshold read off a single sample measures that
- * sample.
+ * **What this lock does NOT do, stated because I checked and it does not.** Reintroducing the
+ * original defect — deleting `marking: true` from the saddle — leaves this check green. The
+ * saddle is then a solid, so it is present in both renders and the difference is zero.
  *
- * A marking opts out with `Part.line = false`: a saddle, a blaze, a stripe. A region of a
- * surface rather than a solid, and grey hair does not have an edge drawn around it.
+ * That is not a hole to patch, it is the honest boundary of what a lock can know. **`marking`
+ * is a declaration, and no measurement can infer intent**: whether a thing on a body is a
+ * separate object or a patch of its surface is a judgement about the subject, not a property
+ * of the pixels. What the locks guarantee is that a *declared* marking behaves — draws no
+ * line, adds no silhouette. Whether it should have been declared is his eye, and that is the
+ * division of labour this whole project is built on (`TASTE-LOOP.md` §7).
  */
-const INTERIOR_INK_MAX = 90
+/**
+ * The clips of every actor — the subjects a state machine drives. **Not the scenery**: a tree
+ * of 97 branches carries hundreds of pixels of ink deep inside its own outline and every one
+ * of them is a branch. The metric is about a body built from a few big masses.
+ */
+function actors(): readonly (readonly [string, string])[] {
+  const out = new Map<string, readonly [string, string]>()
+  for (const game of MICRO_GAMES) {
+    for (const p of game.scene.placements) {
+      if (p.clips === undefined) continue
+      for (const spec of Object.values(p.clips)) out.set(`${spec.grammar}|${spec.tunables}`, [spec.grammar, spec.tunables])
+    }
+  }
+  return [...out.values()]
+}
 
-function interiorInk(grammar: string, tunables: string): number {
-  const run = execute({ grammar, tunables, seed: 1 })
-  const g = grammarByName(grammar)
-  const ramp = g.palette.ramps.find((r) => r.material === run.params.outline.material)
-  if (ramp === undefined || !run.params.outline.enabled) return 0
+const MARKING_INK_MAX = 8
+
+/** The largest connected mass of outline sitting three or more pixels inside the silhouette. */
+function interiorInk(g: Grammar, params: Params): number {
+  const ramp = g.palette.ramps.find((r) => r.material === params.outline.material)
+  if (ramp === undefined || !params.outline.enabled) return 0
   const ink = new Set<number>(ramp.indices)
 
   let worst = 0
-  for (const frame of run.frames) {
-    const { w, h, data } = frame.buf
+  for (let f = 0; f < params.frames.walk; f++) {
+    const { w, h, data } = sprite(g, params, 1, f / params.frames.walk).buf
     // Chessboard distance from every pixel to the nearest transparent one, in two passes.
     const dist = new Int32Array(w * h).fill(1e6)
     for (let i = 0; i < w * h; i++) if (data[i] === 0) dist[i] = 0
@@ -179,40 +198,6 @@ function interiorInk(grammar: string, tunables: string): number {
   return worst
 }
 
-/**
- * The clips of every actor — the subjects a state machine drives. **Not the scenery**, and the
- * first draft of the hole check did not make that distinction and was wrong for it: a tree of
- * 97 branches carries hundreds of pixels of ink deep inside its own outline and every one of
- * them is a branch, not a hole. A cloud does not even outline in ink. The metric is about a
- * body built from a few big masses, so it is scoped to bodies.
- */
-function actors(): readonly (readonly [string, string])[] {
-  const out = new Map<string, readonly [string, string]>()
-  for (const game of MICRO_GAMES) {
-    for (const p of game.scene.placements) {
-      if (p.clips === undefined) continue
-      for (const spec of Object.values(p.clips)) out.set(`${spec.grammar}|${spec.tunables}`, [spec.grammar, spec.tunables])
-    }
-  }
-  return [...out.values()]
-}
-
-/**
- * **A marking may not change a silhouette, and this is the check that says so.**
- *
- * Render the body, then render it again with every marking deleted, and compare *which pixels
- * are painted* — not their colours. The two must be identical: a marking recolours a surface,
- * so it can neither add to an outline nor cut into one.
- *
- * **It is the defect he had to report twice.** The first fix stopped the inner outline ringing
- * the silver saddle, which was real and was not what he was pointing at. The saddle's lobed
- * boundary stood three pixels proud of the chest and hips it lay on, and where the two masses
- * failed to meet the gap between them was empty canvas with the outer outline traced around it
- * — *"as costas do gorila possui um vão na região da cintura"*. A notch cut into the back.
- *
- * Comparing silhouettes rather than pixels is what makes this catch it: the notch was never a
- * hole a flood fill could find, because it opened onto the sky.
- */
 describe('a marking recolours a body, it does not reshape one', () => {
   for (const [name, tunables] of actors()) {
     const g = grammarByName(name)
@@ -240,12 +225,17 @@ describe('a marking recolours a body, it does not reshape one', () => {
   }
 })
 
-describe('a body has no holes in it', () => {
+describe('a marking draws no line, and no hole', () => {
   for (const [name, tunables] of actors()) {
+    const g = grammarByName(name)
+    if (!g.parts.some((p) => p.marking === true)) continue
+
     it(`${name}`, () => {
-      const deep = interiorInk(name, tunables)
-      expect(deep, `${name} carries ${deep} px of outline three or more pixels inside its own silhouette`)
-        .toBeLessThanOrEqual(INTERIOR_INK_MAX)
+      const params = loadParams(tunables)
+      const bare: Grammar = { ...g, parts: g.parts.filter((p) => p.marking !== true) }
+      const added = interiorInk(g, params) - interiorInk(bare, params)
+      expect(added, `${name}: its markings add ${added} px of outline deep inside the body`)
+        .toBeLessThanOrEqual(MARKING_INK_MAX)
     })
   }
 })

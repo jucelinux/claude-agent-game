@@ -102,6 +102,8 @@ export type Stage = {
   /** Rain, retimed from passes-per-loop into pixels per second — there is no loop now. */
   /** Stars, painted once into the backdrop. Nothing in a fixed sky moves. */
   readonly stars: Scene['stars'] | null
+  /** Grain scattered over the floor. Regolith is dust, and dust is not a flat fill. */
+  readonly dust: Scene['dust'] | null
   readonly rain: {
     readonly colors: readonly RGB[]
     readonly spacing: number
@@ -291,14 +293,33 @@ export function toStage(scene: Scene): Stage {
   // **The floor as one colour per row.** Computed here rather than in the browser, so the
   // runtime and the compositor cannot disagree about where the horizon is — the recurring
   // failure in this file's history is two consumers each doing the same arithmetic.
-  const floorTone = scene.groundRamp[0] as RGB
+  /**
+   * **The floor has its own value gradient, and haze rides on top of it.**
+   *
+   * It used to be one tone hazed by depth, which works in a forest and produced **a flat black
+   * plane on the moon** — because the moon has no air, `haze` is zero, and zero times anything
+   * is the same colour on every row. His reading: *"esse solo lunar não está bem representado.
+   * Me parece apenas um chão preto com pedras."*
+   *
+   * The ramp is walked by depth first, so a floor recedes even when nothing dilutes it. That
+   * is also the truer picture in a forest: ground close to the eye is in its own shadow and
+   * ground further off catches more sky. **Haze was doing two jobs and only one of them was
+   * about air.**
+   */
   const floor: RGB[] = []
+  const last = scene.groundRamp.length - 1
   for (let y = scene.ground; y < scene.h; y++) {
-    floor.push(
-      y === scene.ground
-        ? (scene.groundRamp[scene.groundRamp.length - 1] as RGB)
-        : haze(floorTone, scene.sky, scene.haze * floorDepth(scene, y)),
-    )
+    const d = floorDepth(scene, y)
+    const u = d * last
+    const lo = scene.groundRamp[Math.min(last, Math.floor(u))] as RGB
+    const hi = scene.groundRamp[Math.min(last, Math.ceil(u))] as RGB
+    const f = u - Math.floor(u)
+    const tone: RGB = [
+      Math.round(lo[0] + (hi[0] - lo[0]) * f),
+      Math.round(lo[1] + (hi[1] - lo[1]) * f),
+      Math.round(lo[2] + (hi[2] - lo[2]) * f),
+    ]
+    floor.push(haze(tone, scene.sky, scene.haze * d))
   }
 
   const seen = new Set<string>()
@@ -306,7 +327,7 @@ export function toStage(scene: Scene): Stage {
 
   return {
     name: scene.name, w: scene.w, h: scene.h, scale: scene.scale, ground: scene.ground,
-    sky: scene.sky, groundRamp: scene.groundRamp, stars: scene.stars ?? null, rain, floor,
+    sky: scene.sky, groundRamp: scene.groundRamp, stars: scene.stars ?? null, dust: scene.dust ?? null, rain, floor,
     layers, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
   }
 }
