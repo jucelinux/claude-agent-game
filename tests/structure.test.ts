@@ -59,7 +59,7 @@ function bench(patch: Partial<Params> = {}): Params {
     ...base,
     canvas: { w: 32, h: 32, originX: 16, originY: 16 },
     outline: { enabled: false, material: 'mass', inner: false, rim: false },
-    texture: { speckle: 0 },
+    texture: { speckle: 0, dither: 0, lattice: 4 },
     frames: { walk: 2 },
     ...patch,
   }
@@ -97,7 +97,7 @@ describe('the findings channel — null cases', () => {
 
   it('the region metric separates noise from shading, and the direction is right', () => {
     const clean = regions(sprite(subject({}), bench(), 1, 0).buf)
-    const noisy = regions(sprite(subject({}), bench({ texture: { speckle: 0.4 } }), 1, 0).buf)
+    const noisy = regions(sprite(subject({}), bench({ texture: { speckle: 0.4, dither: 0, lattice: 4 } }), 1, 0).buf)
     // Same shape, same size, same palette. Only per-pixel noise differs.
     expect(noisy.count).toBeGreaterThan(clean.count * 2)
     expect(noisy.meanSize).toBeLessThan(clean.meanSize)

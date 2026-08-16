@@ -5,6 +5,8 @@ import { cryptScene } from '../src/micro/crypt-scene.ts'
 import { grammarByName } from '../src/grammars/index.ts'
 import { loadParams } from '../src/io/load.ts'
 import { evaluate } from '../src/core/gait.ts'
+import type { Harness } from './harness.ts'
+import { run } from './harness.ts'
 
 /**
  * **The run, driven headless, and the question it answers is whether the double jump is load
@@ -15,62 +17,6 @@ import { evaluate } from '../src/core/gait.ts'
  * contains obstacles that cannot be cleared without it**, and that is arithmetic over the art
  * rather than an opinion about the design.
  */
-
-type Harness = {
-  state: () => { dist: number; y: number; jumps: number; state: string; menace: number; over: boolean; best: number }
-  text: Record<string, string>
-  tick: (now: number) => void
-  key: (name: string, down: boolean) => void
-}
-
-function run(html: string): Harness {
-  const script = html.slice(html.indexOf('<script>') + 8, html.lastIndexOf('</script>'))
-  const text: Record<string, string> = {}
-  let pending: ((now: number) => void) | null = null
-  let next = 0
-  const makeCanvas = (): Record<string, unknown> => {
-    const id = next++
-    const ctx = {
-      set imageSmoothingEnabled(_v: boolean) {},
-      set fillStyle(_v: string) {},
-      set globalAlpha(_v: number) {},
-      createImageData: (w: number, h: number) => ({ width: w, height: h, data: new Uint8ClampedArray(w * h * 4) }),
-      putImageData: () => {},
-      fillRect: () => {}, beginPath: () => {}, fill: () => {}, ellipse: () => {},
-      drawImage: (src: { _canvas?: true }) => {
-        if (src?._canvas !== true) throw new TypeError('drawImage got a non-canvas — a browser would have thrown')
-      },
-    }
-    return { _id: id, _canvas: true as const, width: 0, height: 0, getContext: () => ctx }
-  }
-  const listeners: Record<string, ((e: unknown) => void)[]> = {}
-  const sandbox = {
-    document: {
-      createElement: () => makeCanvas(),
-      getElementById: (id: string) => ({
-        appendChild: () => {}, className: '',
-        set textContent(v: string) { text[id] = v },
-        get textContent() { return text[id] ?? '' },
-      }),
-    },
-    window: { addEventListener: (n: string, fn: (e: unknown) => void) => { (listeners[n] ??= []).push(fn) }, onerror: null },
-    requestAnimationFrame: (fn: (now: number) => void) => { pending = fn },
-    atob: (s: string) => Buffer.from(s, 'base64').toString('binary'),
-    Math,
-  }
-  let mounted: unknown = null
-  const capture = { ...sandbox, __capture: (m: unknown) => { mounted = m } }
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval
-  new Function(...Object.keys(capture), `${script}\n__capture(__last)`)(...Object.values(capture))
-  return {
-    state: () => (mounted as { state: () => ReturnType<Harness['state']> }).state(),
-    text,
-    tick: (now: number) => { const fn = pending; pending = null; fn?.(now) },
-    key: (name: string, down: boolean) => {
-      for (const fn of listeners[down ? 'keydown' : 'keyup'] ?? []) fn({ key: name, preventDefault: () => {} })
-    },
-  }
-}
 
 const stage = toStage(cryptScene)
 const N = stage.runner!

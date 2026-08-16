@@ -13,26 +13,62 @@ open (`TASTE-LOOP.md` §3b).
 He names an object and an animation in one sentence. I deliver with no back-and-forth. He
 answers in one word, plus one word of *why* on a miss. Full definition in `CLAUDE.md`.
 
-**Batch 2 given 16/08**, and it is the first commission that is not about drawing. His
-sentence, verbatim:
+**Batch 4 given 16/08**, and it is the first one he framed as an experiment rather than a
+commission. His sentence, verbatim:
 
-> *"Será um jogo de plataforma em que um gatinho pula de plataforma em plataforma. O mesmo
-> conceito do doodle jump, só que com uma estética de Cozy Game."*
->
-> *"Não vou atacar o 3d agora pois segundo sua própria recomendação precisamos atacar a
-> consequência primeiro."*
+> *"você havia se recusado a trabalhar no aprimoramento 3D no microjogo anterior e agora eu quero
+> explorar a possibilidade de desenharmos pixel art. Quero tratar esses 2 temas nessa run mais
+> experimental."*
 
-The recommendation he is quoting is a line of mine from the same day: *the forest has a
-mechanic and no consequence — the smallest work on the list with the largest return, and what
-turns a reactive scene into a game.* He read it and chose it over the 3D work.
+Then, after I offered three themes and recommended the skate:
+
+> *"Vamos de skate (sua recomendação), e posteriormente os outros 2 para validar se consolidamos a
+> técnica. Pixel Art: pode puxar para o extremo do desafio. A ideia desse experimentor é provar uma
+> tese, então pode recomendar aqui o que a força."*
+
+**Two things he said that shape how this closes.** The other two themes are *transfer tests*, not
+follow-ups — he wants to know whether the technique consolidated, which is `TASTE.md` §2b's own rule
+about dominance transferring only along the axis it was proven on. And "prove a thesis" means the
+round is allowed to come back with a NO.
 
 | batch | commissions | shipped | hit rate | cycles per shipped piece |
 |---|---|---|---|---|
 | 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
 | 2 | 1 | **1 — ships** | 1/1 | 1 model cycle, 3 readings |
 | 3 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
+| 4 | 1 | *open* | — | 1 model cycle so far |
 
-**Running: 1 of 3.**
+**Running: 1 of 3, batch 4 open.**
+
+### What ships — `node bin/micro.ts`, route `/skate`
+
+A skater on a dusk street. Space ollies; space again in the air is a **kickflip**. The kerb and the
+cone fall to the ollie, the rail needs the flip. One collision ends the run.
+
+### My prediction, recorded before he looks
+
+**I predict a MISS, at 60/40, and I split the confidence unevenly across the two halves on
+purpose.**
+
+| half | what I expect | why |
+|---|---|---|
+| **the roll** | **passes** | It has an instrument. The board's wood face swells 47 → 106 px and its grip face 21 → 146 px across one flip, a quarter turn apart, and both nearly vanish at the edges. Nine locks in `tests/roll.test.ts` and five in `tests/skate.test.ts` assert it, including the null case that runs the whole marching path at a full turn and reproduces the closed form to 99% of pixels |
+| **the pixel art** | **misses, and I already know how** | It came back with a measured NO on the rider and I shipped that answer rather than a nicer one. The weave is on the sky and the road and OFF on the body. So the thing he asked to push to the extreme is not visible on the subject he commissioned, and "the extreme was applied and the instrument refused it" is a sentence that sounds like an excuse whether or not it is true |
+| **the ollie** | **the control** | Authored entirely on `Bone.angle`. If it reads worse than the crypt's leap, the roll work damaged the screen-plane path and it is a rollback rather than a tuning problem |
+
+**The specific way I expect the miss to arrive**: he looks at the rider and it is the same drawing as
+before. Not worse — the same. The only visible change on the body is the flip, and the sky.
+
+**What I am NOT confident about and have no instrument for:** whether a 26 px board reads as a
+skateboard at all. The wheels are 4 px discs and the two kicks are 4 px rects at 20°. Every number
+about them is counted and none of it says "this looks like a skateboard" — and `TASTE.md` §2a's
+standing lesson is to put the confidence on the axis with the weakest instrument, which is this one
+and not the dither.
+
+**The mastery-ledger line, which the record says I owe at delivery.** This commission moves two
+mastered subjects onto axes they have not been read on: **a human head at 8 px** (the ledger's face
+entry is one round-skulled animal, one verdict) and **a prop a body stands on** (the props entry says
+"anything a body interacts with beyond standing on it" does not transfer, and a deck is exactly that).
 
 ### Batch 3 verdict, 16/08, unsoftened
 
@@ -264,18 +300,40 @@ not gate readings:
 
 ---
 
-## Next round — **his word on batch 2**, and nothing is chosen until it arrives
+## Next round — **his word on batch 4**, and nothing after it is chosen
 
-- **What ships:** `node bin/micro.ts --serve`, route `/cozy`. A kitten climbing an endless
-  tower of garden shelves at dusk. Arrows steer; the bounce is automatic; a fall ends the run
-  and names the height.
+- **What ships:** `node bin/micro.ts`, route `/skate`. A skater on a dusk street; space ollies, space
+  again in the air is a kickflip. The kerb and the cone fall to the ollie, the rail needs the flip,
+  one collision ends the run.
 - **What closes it:** one word from him, plus one or two words of why on a miss.
-- **My prediction is at the top of this file**, written before he looked, and it names the cat
-  rather than the loop.
-- **Nothing after this is chosen yet, and that is deliberate.** A miss is a specification, and
-  a feature picked without one is a guess (`CLAUDE.md`, gate block).
+- **My prediction is at the top of this file**, written before he looked and before the one permitted
+  look. It names the pixel-art half as the miss and the roll as the pass.
+- **He has already named what comes after, and it is not a feature:** the biplane's barrel roll and
+  the snowboarder's carve, *"para validar se consolidamos a técnica"*. Those are **transfer tests**
+  on the axis this round opened, which is exactly what `TASTE.md` §2b says a single-subject
+  capability needs before it can be spent freely.
 
----
+### What the look caught that the channel could not, recorded because the amendment is on trial
+
+The 16/08 amendment allows one look at one rendered sample per round boundary, and says it is retired
+if three rounds pass with no change to the hit rate and no change to his cost. **Round one of three,
+and it paid — but not where I expected.**
+
+| what the image reported | could the channel have said it? |
+|---|---|
+| the dithered dusk is strongly visible and reads as pixel art | **no.** There is no instrument for the backdrop at all — the weave measure reads sprites |
+| the asphalt is too dark for its own weave to show | **no.** Same reason |
+| neither rider has a contact shadow, so both float | **no.** The channel has no notion of the scene |
+
+**All three are about the SCENE and none about the sprite.** That is a sharper claim than the
+amendment made for itself: the channel's blind spot was never pixels, it is the world a sprite is
+placed in. The amendment argued that the eye catches *"the thing does not look like what it is
+supposed to be"*; what it actually caught here is *"the thing is not lit or grounded like part of a
+place"*.
+
+**The asphalt was not touched, and that is the rule biting.** It is a knob and thirty seconds of
+work. Look to decide **whether to ship**, never **what to change** — a value range corrected by eye is
+the tuning the blindness used to prevent. It goes to him as a thing I saw.
 
 ## Dead — **the exporter**
 
@@ -464,14 +522,22 @@ without both is a rumour.
 | full cycle: record → replay → compare | 1.0 s | `node bin/record.ts /tmp/c.run.json && node bin/run.ts /tmp/c.run.json && npm test` | 14/08 |
 | fixture baseline hash | `a542197e4c49b27d` | `npm run baseline` | 15/08 |
 | min pair distance, shipped tunables | 0.106 | `node bin/run.ts runs/fixture.run.json` | 15/08 |
-| locks green | 328 | `npm test` | 16/08 |
+| locks green | 410 | `npm test` | 16/08, after run 17 |
 | the climb: worst gap in an infinite tower | 58 px, against a 96 px apex — ratio 0.60 | `npx vitest run tests/climb.test.ts` | 16/08 |
 | the climb, draw calls per frame | 98, against a 200 ceiling | `node bin/micro.ts --static` then read the budget row | 16/08 |
 | the climb, on the wire | 11 layers, 35 colours | `node bin/micro.ts --static` | 16/08 |
 | **difficulty, and it is a PAIR because one number is not a reading** | never aims: **6.1 m then falls** · aims at the nearest shelf: **67 m in a minute, still climbing** | `npx vitest run tests/climb.test.ts` | 16/08, after his note |
 | every hero's on-screen height | forest 132 px · moon 141 px · climb 132 px, all at a 3 px pixel | `node bin/micro.ts --static` | 16/08, after his note |
 | outline as a share of painted pixels | kitten 28%, gorilla 27% — the drawing was never the difference | `node bin/bench.ts --grammar cat-rise --tunables cat` | 16/08 |
-| lines of TypeScript, source and locks | 9 693 source, 3 564 locks | `find src bin -name '*.ts' \| xargs wc -l` | 16/08, after the deletion |
+| **share of painted pixels in a single-owner 4×4 cell** — whether a subject HAS a surface to dither | rider **0.000** · skeleton 0.080 · kitten 0.068 · kerb 0.432 · rider at ×2 scale 0.177 | the `[weave]` line of `node bin/bench.ts --grammar skate-roll --tunables skate` | 16/08 |
+| the same, at a 2×2 lattice | rider 0.289 · skeleton 0.347 · kerb 0.703 | `node bin/bench.ts` with `--set texture.lattice=2` | 16/08 |
+| periodicity, weave against speckle against a hard cut, on one gradient | hard **-0.006** · speckle **0.068** · half weave **0.589** · full weave **0.628**. `PERIODIC` is 0.25 | `npx vitest run tests/dither.test.ts` | 16/08 |
+| the kickflip, in pixels: the deck's two faces trading places | wood 47 → **106** → 0 px · grip 21 → 0 → **146** px, peaks a quarter turn apart | `node bin/bench.ts --grammar skate-flip --tunables skate-flip` | 16/08 |
+| the far wheels through the flip, before and after the offset-roll fix | **0 px in all 12 frames** → 0→12→0 while the near pair goes 10→0→12 | the same command, `part wheelFF` row | 16/08 |
+| the marched path against the closed form, at one full turn of roll | **99.4% of pixels identical** on three shapes | `npx vitest run tests/roll.test.ts` | 16/08 |
+| `/skate` on the wire | 9 layers, 50 colours, 102 KB of indices, **10 draw calls/frame** against a 200 ceiling | `node bin/micro.ts --static` | 16/08 |
+| one bench turn, the kickflip (12 rolled frames, ray-marched board) | 46 ms | `node bin/bench.ts --grammar skate-flip --tunables skate-flip` | 16/08 |
+| lines of TypeScript, source and locks | 12 515 source, 4 523 locks | `find src bin -name '*.ts' \| xargs wc -l` | 16/08, after run 17 |
 
 ## The harness, as of 14/08
 

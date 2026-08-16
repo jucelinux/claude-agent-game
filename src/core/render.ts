@@ -1,6 +1,6 @@
 import type { Grammar, IndexedBuffer, Params } from './types.ts'
 import { castShadow, createPainter, innerOutline, outline, paintPart, rimEdge, OWNER_EMPTY } from './raster.ts'
-import { solve } from './skeleton.ts'
+import { solve, TURN } from './skeleton.ts'
 import { evaluate } from './gait.ts'
 import { mulberry32 } from './rng.ts'
 
@@ -27,6 +27,9 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     // it, so the whole sprite can never drift toward or away from the viewer by accident.
     z: 0,
     a: 0,
+    // The root never rolls. A whole sprite tilted toward the viewer is a camera decision, and
+    // the camera belongs to the game; the sprite carries the pose. Same rule the jump obeys.
+    roll: 0,
     sx: params.body.scale,
     sy: params.body.scale,
     sz: params.body.scale,
@@ -63,7 +66,27 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     if (bone === undefined) throw new Error(`part "${part.name}" is bound to unknown bone "${part.bone}"`)
     // The part's own depth rides on the bone's, scaled with it: a body that shrinks takes
     // its browridge along instead of leaving it floating where the head used to be.
-    const xf = part.z === undefined ? bone : { ...bone, z: bone.z + bone.sz * part.z }
+    /**
+     * **A part's own depth offset rolls with its bone**, for the same reason a child bone's does
+     * (`skeleton.ts`): a depth offset is a position, and every field that carries a position has
+     * to rotate or the body does not survive being turned. At a quarter turn a part pushed 3 px
+     * toward the viewer belongs 3 px **up the screen**, not 3 px toward the viewer still.
+     *
+     * At roll 0, `cos` is 1 and `sin` is 0, so `y` is untouched and `z` is exactly what it was —
+     * the identity in floating point rather than an approximation of it, which is why the
+     * baseline hash is unaffected.
+     */
+    const xf =
+      part.z === undefined
+        ? bone
+        : (() => {
+            const r = bone.roll * TURN
+            return {
+              ...bone,
+              y: bone.y + bone.sy * -part.z * Math.sin(r),
+              z: bone.z + bone.sz * part.z * Math.cos(r),
+            }
+          })()
     /**
      * **A marking on the far side of its bone is not drawn at all.**
      *
@@ -76,7 +99,7 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     if (part.marking === true && (part.z ?? 0) > 0) continue
     paintPart(
       painter, part.shape, xf, ramp.indices, params.light, params.fill, i, rng,
-      params.texture.speckle, part.shift ?? 0, part.marking === true, part.cut === true,
+      params.texture.speckle, params.texture.dither, params.texture.lattice, part.shift ?? 0, part.marking === true, part.cut === true,
     )
   }
 

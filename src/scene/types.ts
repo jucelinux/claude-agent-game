@@ -419,12 +419,32 @@ export type Runner = {
    * `hit` is what one collision costs, and `relief` is what clearing an obstacle gives back.
    * At 1 she reaches him.
    */
-  readonly reaper: { readonly grammar: string; readonly tunables: string; readonly creep: number; readonly hit: number; readonly relief: number; readonly fromX: number }
+  readonly reaper?: { readonly grammar: string; readonly tunables: string; readonly creep: number; readonly hit: number; readonly relief: number; readonly fromX: number }
+  /**
+   * **Optional now, and the second game is what earned that** (`CLAUDE.md` §5: harvest generality,
+   * do not design it). The crypt's chaser is a gap that closes and it is the right consequence for
+   * a graveyard. A street has nothing chasing you, so a collision ends the run outright — the
+   * dinosaur's rule, one mechanism instead of two.
+   */
+  /** The line shown when a run ends. A chaser and a kerb do not end a run in the same words. */
+  readonly overText?: string
+  /**
+   * **Ordered dither for the backdrop, and this is where the pixel-art weave measurably pays.**
+   *
+   * The sprite pipeline carries the same lattice and it is switched off on every body: a 36 px
+   * character of 27 primitives has 0.000 of its pixels inside a single-owner 4×4 cell, so a weave
+   * there is the speckle his 15/08 verdict retired. A sky is one surface a hundred rows deep.
+   *
+   * `amount` is in stop units and `lattice` is 2 or 4. The backdrop is painted once into a static
+   * canvas and never scrolls, so the pattern cannot crawl — which is the one dither defect worth
+   * predicting, avoided by construction rather than by tuning.
+   */
+  readonly dither?: { readonly amount: number; readonly lattice: number }
   /** Painted top to bottom over the screen, not by altitude: the sky here does not change. */
   readonly skyRamp: readonly RGB[]
-  readonly stars: { readonly count: number; readonly colors: readonly RGB[]; readonly seed: number; readonly below: number }
-  /** The moon, and it is the only round thing in the picture. */
-  readonly moon: { readonly x: number; readonly y: number; readonly r: number; readonly color: RGB; readonly halo: RGB }
+  readonly stars?: { readonly count: number; readonly colors: readonly RGB[]; readonly seed: number; readonly below: number }
+  /** The moon, and it is the only round thing in the picture. Absent in daylight. */
+  readonly moon?: { readonly x: number; readonly y: number; readonly r: number; readonly color: RGB; readonly halo: RGB }
   readonly seed: number
 }
 

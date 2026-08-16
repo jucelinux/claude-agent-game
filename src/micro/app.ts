@@ -648,7 +648,7 @@ function mount(el, S) {
      * Clearing a stone gives a little back, so a clean run holds her off and a clumsy one does
      * not. That is the entire feedback loop, and it needs no pathfinding to be felt.
      */
-    R.menace += N.reaper.creep * dt
+    if (N.reaper) R.menace += N.reaper.creep * dt
 
     /**
      * **One stone is resolved once**, either as a hit or as a clear, and 'passed' is the whole of
@@ -668,15 +668,19 @@ function mount(el, S) {
         var SL = S.layers[N.stones[st.v]]
         if (R.y < -SL.oy - 2) {
           R.passed = k
-          R.menace = Math.min(1, R.menace + N.reaper.hit)
+          // **No chaser means a collision is the consequence itself.** The crypt spends a hit as
+          // time off a closing gap; a street has nothing chasing you, so hitting a kerb at speed
+          // ends the run. That is the dinosaur's rule and it needs no second mechanism.
+          if (N.reaper) R.menace = Math.min(1, R.menace + N.reaper.hit)
+          else { R.over = true; R.state = 'caught' }
         }
       } else if (rel < -reach) {
         R.passed = k
-        R.menace = Math.max(0, R.menace - N.reaper.relief)
+        if (N.reaper) R.menace = Math.max(0, R.menace - N.reaper.relief)
       }
     }
 
-    if (R.menace >= 1) { R.menace = 1; R.over = true; R.state = 'caught' }
+    if (N.reaper && R.menace >= 1) { R.menace = 1; R.over = true; R.state = 'caught' }
   }
 
   /** The runner's backdrop: a fixed sky, stars, a moon. Nothing here moves with the camera. */
@@ -684,26 +688,76 @@ function mount(el, S) {
   if (S.runner) {
     runnerBg = cv(S.w, S.h)
     var rb = runnerBg.getContext('2d')
-    var bands = S.runner.skyRamp.length
-    for (var bi = 0; bi < bands; bi++) {
-      var y0b = Math.floor((bi * S.runner.groundRow) / bands)
-      var y1b = Math.floor(((bi + 1) * S.runner.groundRow) / bands)
-      rb.fillStyle = rgb(S.runner.skyRamp[bi]); rb.fillRect(0, y0b, S.w, y1b - y0b)
+    /**
+     * **The sky and the road are where the ordered dither actually pays, and that is measured.**
+     *
+     * The sprite pipeline carries the same weave and it was switched OFF on the rider: a 36 px body
+     * of 27 primitives has 0.000 of its pixels inside a single-owner 4x4 cell, so a lattice there is
+     * indistinguishable from the speckle his verdict retired. A sky is 240x100 px of ONE surface.
+     * Same knob, same reasoning, four hundred times the room.
+     *
+     * So instead of N flat bands, the sky is a continuous ramp quantised through the Bayer lattice:
+     * each row's exact position between two stops becomes a per-pixel choice between those two
+     * stops, weighted by the lattice cell. Two colours weave and the eye reads the value between
+     * them. That is the classic pixel-art dusk, and it is the whole visible result of this half of
+     * the round.
+     *
+     * **No crawl, and it is by construction rather than by luck.** The one dither defect I predicted
+     * was a pattern that slides through a moving surface. The backdrop is painted ONCE into a static
+     * canvas and never scrolls, so the lattice is welded to the world. The scrolling elements — the
+     * road dashes and the obstacles — carry no dither at all.
+     */
+    var DZ = S.runner.dither || { amount: 0, lattice: 4 }
+    var BAY4 = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5]
+    var BAY2 = [0,2,3,1]
+    function bayerAt(x, y, n) {
+      if (n === 2) return (BAY2[(y & 1) * 2 + (x & 1)] + 0.5) / 4 - 0.5
+      return (BAY4[(y & 3) * 4 + (x & 3)] + 0.5) / 16 - 0.5
     }
-    for (var sj = 0; sj < S.runner.stars.count; sj++) {
-      var sha = ((sj + S.runner.stars.seed) * 2654435761) >>> 0; sha = (sha ^ (sha >>> 13)) >>> 0
-      var shb = (sha * 1597334677) >>> 0; shb = (shb ^ (shb >>> 15)) >>> 0
-      rb.fillStyle = rgb(S.runner.stars.colors[shb % S.runner.stars.colors.length])
-      rb.fillRect(sha % S.w, shb % S.runner.stars.below, 1, 1)
+    /** Paint rows y0..y1 as a dithered ramp through 'stops'. At amount 0 it is flat bands. */
+    function ramp(ctx, stops, y0, y1) {
+      var span = y1 - y0
+      var img = ctx.createImageData(S.w, span)
+      var d = img.data
+      for (var yy = 0; yy < span; yy++) {
+        // Position along the ramp in STOP units, so the fraction is the thing to dither.
+        var u = (stops.length - 1) * (yy / Math.max(1, span - 1))
+        for (var xx = 0; xx < S.w; xx++) {
+          var k = Math.floor(u + DZ.amount * bayerAt(xx, y0 + yy, DZ.lattice))
+          if (k < 0) k = 0
+          if (k > stops.length - 1) k = stops.length - 1
+          var c = stops[k]
+          var at = (yy * S.w + xx) * 4
+          d[at] = c[0]; d[at + 1] = c[1]; d[at + 2] = c[2]; d[at + 3] = 255
+        }
+      }
+      ctx.putImageData(img, 0, y0)
+    }
+    ramp(rb, S.runner.skyRamp, 0, S.runner.groundRow)
+    if (S.runner.stars) {
+      for (var sj = 0; sj < S.runner.stars.count; sj++) {
+        var sha = ((sj + S.runner.stars.seed) * 2654435761) >>> 0; sha = (sha ^ (sha >>> 13)) >>> 0
+        var shb = (sha * 1597334677) >>> 0; shb = (shb ^ (shb >>> 15)) >>> 0
+        rb.fillStyle = rgb(S.runner.stars.colors[shb % S.runner.stars.colors.length])
+        rb.fillRect(sha % S.w, shb % S.runner.stars.below, 1, 1)
+      }
     }
     // The moon: a halo ring under a disc, and it is the only round thing in the picture.
-    var M0 = S.runner.moon
-    rb.fillStyle = rgb(M0.halo)
-    rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r + 3, M0.r + 3, 0, 0, 6.283185); rb.fill()
-    rb.fillStyle = rgb(M0.color)
-    rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r, M0.r, 0, 0, 6.283185); rb.fill()
-    for (var fy3 = 0; fy3 < S.floor.length; fy3++) {
-      rb.fillStyle = rgb(S.floor[fy3]); rb.fillRect(0, S.runner.groundRow + fy3, S.w, 1)
+    if (S.runner.moon) {
+      var M0 = S.runner.moon
+      rb.fillStyle = rgb(M0.halo)
+      rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r + 3, M0.r + 3, 0, 0, 6.283185); rb.fill()
+      rb.fillStyle = rgb(M0.color)
+      rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r, M0.r, 0, 0, 6.283185); rb.fill()
+    }
+    // The road, dithered the same way: a receding surface is a ramp from the horizon down, and a
+    // flat asphalt is the one thing that would say "this is a render at low resolution".
+    if (DZ.amount > 0 && S.floor.length > 2) {
+      ramp(rb, S.floor, S.runner.groundRow, S.h)
+    } else {
+      for (var fy3 = 0; fy3 < S.floor.length; fy3++) {
+        rb.fillStyle = rgb(S.floor[fy3]); rb.fillRect(0, S.runner.groundRow + fy3, S.w, 1)
+      }
     }
   }
 
@@ -727,11 +781,13 @@ function mount(el, S) {
      * **Death, placed by one number.** 'fromX' is where she waits at menace 0 and the runner's
      * own column is where she arrives at 1. Nothing about her is a decision made per frame.
      */
-    var D2 = S.layers[N.reaper.layer]
-    var rx = N.fromX + (N.holdX - 14 - N.fromX) * R.menace
-    var rf = Math.floor(t * 1000 / D2.ms) % D2.n
-    ox.drawImage(sheets[N.reaper.layer], 0, rf * D2.h, D2.w, D2.h,
-      Math.round(rx + D2.ox), Math.round(rowOf({ anchor: 'origin', y: N.groundRow }, D2)), D2.w, D2.h)
+    if (N.reaper) {
+      var D2 = S.layers[N.reaper.layer]
+      var rx = N.fromX + (N.holdX - 14 - N.fromX) * R.menace
+      var rf = Math.floor(t * 1000 / D2.ms) % D2.n
+      ox.drawImage(sheets[N.reaper.layer], 0, rf * D2.h, D2.w, D2.h,
+        Math.round(rx + D2.ox), Math.round(rowOf({ anchor: 'origin', y: N.groundRow }, D2)), D2.w, D2.h)
+    }
 
     // The runner. The state names a clip; the clip names a layer.
     var D = S.placed[R.at]
@@ -785,7 +841,7 @@ function mount(el, S) {
     scoreAt = now
     var el = document.getElementById('score'); if (!el) return
     el.textContent = R.over
-      ? 'she caught you at ' + R.best.toFixed(0) + ' m  ·  press space to run again'
+      ? (S.runner.overText || 'she caught you at ') + R.best.toFixed(0) + ' m  ·  press space to run again'
       : R.best.toFixed(0) + ' m'
   }
 

@@ -25,6 +25,7 @@
 import type { Scene } from '../scene/types.ts'
 import { cozyScene } from './cozy-scene.ts'
 import { cryptScene } from './crypt-scene.ts'
+import { skateScene } from './skate-scene.ts'
 import { forestScene } from './forest-scene.ts'
 import { moonScene } from './moon-scene.ts'
 
@@ -145,5 +146,32 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     date: '2026-08-16',
     keys: 'space jump · space again in the air = somersault · six collisions and she reaches you',
     scene: cryptScene,
+  },
+  /**
+   * **Micro game 5: the kickflip.** His commission, 16/08, chosen from three themes I offered after
+   * he asked to attack 3D and pixel art in one experimental round.
+   *
+   * > *"Vamos de skate (sua recomendação), e posteriormente os outros 2 para validar se
+   * > consolidamos a técnica. Pixel Art: pode puxar para o extremo do desafio."*
+   *
+   * **This one did need 3D, and it is the first commission here that does.** A kickflip is rotation
+   * about the axis the skater travels along, which for a figure crossing the picture is screen x —
+   * so the deck tilts toward and away from the camera. `Bone.angle` lives in the screen plane and
+   * `yaw.ts` turns a body about the vertical; neither could do it. The record called it
+   * *inexpressible* rather than badly tuned, and this is the round that expressed it.
+   *
+   * **The pixel-art half came back with a measured no on the rider**, and the number is in
+   * `skate-scene.ts`: a 36 px body of 27 primitives has no patch of one surface for a lattice to sit
+   * on, so the weave there is the speckle his 15/08 verdict retired. It ships on the sky and the
+   * road, which are one surface a hundred rows deep.
+   */
+  {
+    id: 'skate',
+    title: 'Kickflip',
+    blurb:
+      'Space to ollie, space again in the air for a kickflip. The board turns a full circle about its own length, which is the first rotation here that leaves the screen plane at all: a quarter of the way through you are looking at 8 px of pale wood where a moment before there were 2 px of edge, and three quarters through it is the grip tape, the darkest thing on the subject. Thin, bright, thin, dark, thin — and no paint order, ramp shift or depth offset can produce that sequence. The kerb and the cone fall to the ollie; the rail needs the flip. The dusk and the asphalt are an ordered Bayer weave rather than flat bands, which is where the pixel-art work of this round measurably landed — the rider carries none of it, because a body this small has no surface to weave on.',
+    date: '2026-08-16',
+    keys: 'space ollie · space again in the air = kickflip · one collision ends the run',
+    scene: skateScene,
   },
 ]

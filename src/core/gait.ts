@@ -1,5 +1,8 @@
 import type { Gait, Params, Track } from './types.ts'
 import type { Pose, PoseDelta } from './skeleton.ts'
+// The zero pose was written out by hand in two places here, and adding a channel broke both.
+// One definition, so a third channel cannot be forgotten in one of them.
+import { ZERO_DELTA } from './skeleton.ts'
 
 /**
  * Sample a gait at cycle position `t` in [0, 1).
@@ -27,7 +30,7 @@ export function evaluate(gait: Gait, params: Params, t: number): Pose {
   if (n === 1) {
     const pose = new Map<string, PoseDelta>()
     for (const track of gait.tracks) {
-      const delta = pose.get(track.bone) ?? { angle: 0, x: 0, y: 0, z: 0, scale: 0, scaleX: 0, scaleY: 0 }
+      const delta = pose.get(track.bone) ?? { ...ZERO_DELTA }
       delta[track.channel] += (track.keys[0] ?? 0) * amplitudeOf(track.channel, params)
       pose.set(track.bone, delta)
     }
@@ -65,7 +68,7 @@ export function evaluate(gait: Gait, params: Params, t: number): Pose {
     }
     const value = hermite(at, track.keys, i, u, h, wrap)
     const amplitude = amplitudeOf(track.channel, params)
-    const delta = pose.get(track.bone) ?? { angle: 0, x: 0, y: 0, z: 0, scale: 0, scaleX: 0, scaleY: 0 }
+    const delta = pose.get(track.bone) ?? { ...ZERO_DELTA }
     delta[track.channel] += value * amplitude
     pose.set(track.bone, delta)
   }
@@ -78,6 +81,10 @@ export function evaluate(gait: Gait, params: Params, t: number): Pose {
  */
 function amplitudeOf(channel: Track['channel'], params: Params): number {
   if (channel === 'angle') return params.gait.swing
+  // Roll has its own amplitude, and the reason is in `Channel`: `swing` is a walk's 0.08 of a
+  // turn, a flip is a whole one, and sharing a knob across a 12x range is how a limb went absent
+  // in every frame of two clips in run 7.
+  if (channel === 'roll') return params.gait.roll
   if (channel === 'scale' || channel === 'scaleX' || channel === 'scaleY') return 1
   if (channel === 'z') return params.gait.depth
   return params.gait.lift

@@ -65,7 +65,7 @@ function bench(patch: Partial<Params> = {}): Params {
     ...base,
     canvas: { w: 32, h: 32, originX: 16, originY: 16 },
     outline: { enabled: false, material: 'ink', inner: false, rim: false },
-    texture: { speckle: 0 },
+    texture: { speckle: 0, dither: 0, lattice: 4 },
     frames: { walk: 4 },
     gait: { ...base.gait, depth: 10 },
     ...patch,

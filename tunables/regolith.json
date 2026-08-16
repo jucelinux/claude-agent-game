@@ -23,10 +23,13 @@
   "gait": {
     "swing": 0.26,
     "lift": 5,
-    "depth": 7
+    "depth": 7,
+    "roll": 0
   },
   "texture": {
-    "speckle": 0
+    "speckle": 0,
+    "dither": 0,
+    "lattice": 4
   },
   "shadow": {
     "steps": 8,
@@ -67,7 +70,10 @@
     "gait.swing": "0.26, held equal to the astronaut so the whole scene shares one amplitude. Nothing here uses it; a gait with no tracks reads no amplitude.",
     "gait.lift": "5, the astronaut's. Unused.",
     "gait.depth": "7, the astronaut's. Unused.",
+    "gait.roll": "0 = no roll. Turns, and it is a SEPARATE amplitude from gait.swing on purpose: swing is a walk range (0.08 of a turn) and a flip is a whole one. Run 7 spent a walk amplitude on a jump and lost a limb in every frame; one knob across a 12x range would guarantee it a third time.",
     "texture.speckle": "0. Chrono places every pixel, and noise is the incumbent idiom's signature — the thing the ink verdict of 15/08 most wanted the back of.",
+    "texture.dither": "0 = the hard cut this sample shipped with, and it is the null case: at 0 the dither term is exactly 0 and the render is byte-for-byte what it was. Turned on per subject, never globally, because the weave is an idiom decision and not a fix.",
+    "texture.lattice": "4. Size of the ordered dither lattice, 2 or 4. MEASURED rather than chosen: a 4x4 weave needs a 4x4 patch of one surface to be visible, and this project s characters have none — the rider at 36 px scores 0.000 on that share, the skeleton 0.080, the kitten 0.068, a kerb 0.432. Switching both outlines off moved it not at all; doubling the body scale moved it to 0.177, so the cause is scale and not the line. 2 is what fits a small body; 4 is for a road or a sky. Read it with the [weave] line of `node bin/bench.ts`.",
     "playback.msPerFrame": "500. Two frames at 500 ms is a one-second cycle that changes nothing, which is the cheapest still this vocabulary can express.",
     "playback.scale": "3, the scene's. 3 is the integer scale every micro game blits at; a fractional one would sample pixel art through mud.",
     "shadow.steps": "8 px, and it is measured rather than chosen: a sweep at 6, 10, 16 and 24 returns the same shadow area from 6 onward. Past a few pixels the ray has left the body and there is nothing more to block it.",

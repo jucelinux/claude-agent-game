@@ -25,7 +25,7 @@ process.stdout.write(`${dumpStrip(buffers, result.grammar.palette)}\n\n`)
 process.stdout.write(`silhouette, 25%:\n${silhouetteStrip(buffers)}\n\n`)
 
 // The findings channel: what is wrong with the parts, not what the frame looks like.
-process.stdout.write(`findings:\n${report(result.frames, result.grammar)}\n\n`)
+process.stdout.write(`findings:\n${report(result.frames, result.grammar, result.params.texture.lattice)}\n\n`)
 
 const m = result.metrics
 process.stdout.write(`hash            ${result.hash}\n`)

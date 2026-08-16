@@ -29,10 +29,13 @@
   "gait": {
     "swing": 0.4,
     "lift": 4,
-    "depth": 16
+    "depth": 16,
+    "roll": 0
   },
   "texture": {
-    "speckle": 0
+    "speckle": 0,
+    "dither": 0,
+    "lattice": 4
   },
   "playback": {
     "msPerFrame": 50,
@@ -56,10 +59,13 @@
     "gait.swing": "0.40 turn = 144 deg of range, four times the walk. Not a preference - the absence lock forced it. At the project 0.10 the far arm rendered 0 or 1 px in all twelve frames, because 36 deg never lifts a limb clear of the torso outline and only being in front was keeping the near arm visible. A walk amplitude cannot express a strike, and every key in this gait is a fraction of the 144.",
     "gait.lift": "4 px, half the jump’s. The attack moves the body about its own axis rather than through space - what travels here is the arms.",
     "texture.speckle": "0. Chrono places every pixel. It was 0.18, which is the incumbent idiom's signature and the thing the ink verdict most wanted the back of.",
+    "texture.dither": "0 = the hard cut this sample shipped with, and it is the null case: at 0 the dither term is exactly 0 and the render is byte-for-byte what it was. Turned on per subject, never globally, because the weave is an idiom decision and not a fix.",
+    "texture.lattice": "4. Size of the ordered dither lattice, 2 or 4. MEASURED rather than chosen: a 4x4 weave needs a 4x4 patch of one surface to be visible, and this project s characters have none — the rider at 36 px scores 0.000 on that share, the skeleton 0.080, the kitten 0.068, a kerb 0.432. Switching both outlines off moved it not at all; doubling the body scale moved it to 0.177, so the cause is scale and not the line. 2 is what fits a small body; 4 is for a road or a sky. Read it with the [weave] line of `node bin/bench.ts`.",
     "playback.msPerFrame": "50 ms. 12 x 50 = 600 ms, the project’s shared cycle. The attack is the one action fast enough to keep it.",
     "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size",
     "light.z": "-0.2, Chrono's. At -0.35 the centre of every mass sits two thirds up its ramp, which is how a body ends up mid-toned everywhere at once.",
     "gait.depth": "16 px = the arm row separation (9) plus the chest’s own depth radius (9.5), rounded down. At this amplitude a key of +0.6 puts the near fist behind the chest’s front surface and a key of -0.5 puts it clear in front of every part on the body - the two ends of the travel the round exists to show.",
+    "gait.roll": "0 = no roll. Turns, and it is a SEPARATE amplitude from gait.swing on purpose: swing is a walk range (0.08 of a turn) and a flip is a whole one. Run 7 spent a walk amplitude on a jump and lost a limb in every frame; one knob across a 12x range would guarantee it a third time.",
     "shadow.steps": "8 px, and it is measured rather than chosen: a sweep at 6, 10, 16 and 24 returns the same shadow area from 6 onward. Past a few pixels the ray has left the body and there is nothing more to block it. 8 keeps a small margin over the saturation point.",
     "shadow.bias": "0.25 px of depth, and its job changed. It used to guard against a surface shadowing itself, and it could not: acne scales with curvature, so a lone sphere of radius 18 self-shadowed 198 px and still self-shadowed at eight times the tolerance. That case is now settled by identity - a convex part cannot cast onto itself - so the bias only arbitrates a tie between two DIFFERENT parts whose surfaces meet at nearly the same depth. A quarter of a pixel is enough for that, and acne measures zero at every radius and every bias.",
     "shadow.strength": "1 ramp step. On a five-tone ramp that is a fifth of the whole range, which is a readable value drop with a hard edge - the shape the ink verdict of 15/08 selected. 0 disables the pass.",

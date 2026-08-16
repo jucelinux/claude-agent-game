@@ -191,6 +191,20 @@ _Fills from evidence. Every entry cites the artifact that produced it._
   symmetric on purpose. **portable:** when a check over-fires on healthy work, the usual fault is
   not the threshold, it is that the invariant was asserted about the wrong artifact.
 
+- **[16/08 · the weave instrument, calibrated on a gradient and pointed at a body within the hour] I
+  build an instrument, prove it on the easiest possible artifact, and then trust it on the hardest
+  one without re-measuring.** `PERIODIC` separated an ordered weave (0.628) from the retired speckle
+  (0.068) on a 64×64 single-material ramp, with margins asserted either side and a null case in both
+  directions. It was a good instrument. Then it reported **-0.22 on the rider with the weave switched
+  on** — "this is dirt" — and I had no way to tell whether the dither was broken or the number was.
+  The answer was that a 36 px body of 27 primitives has **0.000** of its pixels inside a
+  single-owner 4×4 cell, so there was nothing for a lattice to sit on and the measure was reading
+  seams and outlines. **This is §2b's own transfer rule turned on my instruments instead of on my
+  drawing**: probe C won on a beetle and held the house style for seven runs; this threshold won on a
+  gradient and I aimed it at a character in the same session. **portable, and the correction is one
+  question asked before the second use: what is different about the artifact I am about to measure?**
+  An instrument's calibration is a fact about the thing it was calibrated on.
+
 - **[15/08 · run 7, gallery #0018–#0019] I carry a working sample's numbers into a
   different problem and treat them as facts about the body.** Both new actions were
   authored at the walk's `gait.swing` of 0.1, and both came back with a limb absent in

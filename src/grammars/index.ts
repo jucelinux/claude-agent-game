@@ -20,6 +20,12 @@ import { CAT, catTuck } from './run15/cat.ts'
 import { BONES, bonesFlip, bonesLeap } from './run16/bones.ts'
 import { CRYPT_PROPS, death } from './run16/crypt.ts'
 import { PERCHES } from './run15/perch.ts'
+import { skateFlip, skateOllie, skateRoll } from './run17/skate.ts'
+import { streetCone, streetKerb, streetRail } from './run17/street.ts'
+
+/** The rider's three clips, and the street furniture. Run 17. */
+const SKATE: readonly Grammar[] = [skateRoll, skateOllie, skateFlip]
+const STREET_PROPS: readonly Grammar[] = [streetKerb, streetCone, streetRail]
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   fixture,
@@ -48,6 +54,8 @@ export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   ...Object.fromEntries(PERCHES.map((g) => [g.name, g])),
   ...Object.fromEntries(BONES.map((g) => [g.name, g])),
   ...Object.fromEntries(CRYPT_PROPS.map((g) => [g.name, g])),
+  ...Object.fromEntries(SKATE.map((g) => [g.name, g])),
+  ...Object.fromEntries(STREET_PROPS.map((g) => [g.name, g])),
 }
 
 /**
@@ -93,6 +101,13 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: bonesFlip.name, tunables: 'bones-flip' },
   ...CRYPT_PROPS.filter((g) => g.name !== death.name).map((g) => ({ grammar: g.name, tunables: 'crypt' })),
   { grammar: death.name, tunables: 'death' },
+  // Three clips, three tunables files, for the reason the crypt records: a frame count and an
+  // amplitude live in the tunables. The kickflip additionally needs `gait.roll` at a whole turn,
+  // which is a range no looping clip has any business carrying.
+  { grammar: skateRoll.name, tunables: 'skate' },
+  { grammar: skateOllie.name, tunables: 'skate-ollie' },
+  { grammar: skateFlip.name, tunables: 'skate-flip' },
+  ...STREET_PROPS.map((g) => ({ grammar: g.name, tunables: 'street' })),
 ]
 
 export function grammarByName(name: string): Grammar {

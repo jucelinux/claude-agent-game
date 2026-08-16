@@ -101,7 +101,8 @@ export type Placed = {
 /** The runner, with every grammar name already resolved to a layer index. */
 export type StageRunner = Omit<Runner, 'stones' | 'reaper'> & {
   readonly stones: readonly number[]
-  readonly reaper: Omit<Runner['reaper'], 'grammar' | 'tunables'> & { readonly layer: number }
+  /** Absent when the game has no chaser: a collision is then the consequence on its own. */
+  readonly reaper: (Omit<NonNullable<Runner['reaper']>, 'grammar' | 'tunables'> & { readonly layer: number }) | null
 }
 
 export type StageClimb = Omit<Climb, 'perches'> & {
@@ -347,10 +348,13 @@ export function toStage(scene: Scene): Stage {
     runner = {
       ...rest,
       stones: stones.map((o) => build({ grammar: o.grammar, tunables: o.tunables }, 0, false).layer),
-      reaper: {
-        creep: reaper.creep, hit: reaper.hit, relief: reaper.relief, fromX: reaper.fromX,
-        layer: build({ grammar: reaper.grammar, tunables: reaper.tunables }, 0, false).layer,
-      },
+      reaper:
+        reaper === undefined
+          ? null
+          : {
+              creep: reaper.creep, hit: reaper.hit, relief: reaper.relief, fromX: reaper.fromX,
+              layer: build({ grammar: reaper.grammar, tunables: reaper.tunables }, 0, false).layer,
+            },
     }
   }
 

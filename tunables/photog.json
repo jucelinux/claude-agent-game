@@ -29,10 +29,13 @@
   "gait": {
     "swing": 0.29,
     "lift": 6,
-    "depth": 4
+    "depth": 4,
+    "roll": 0
   },
   "texture": {
-    "speckle": 0
+    "speckle": 0,
+    "dither": 0,
+    "lattice": 4
   },
   "shadow": {
     "steps": 8,
@@ -68,7 +71,10 @@
     "gait.swing": "0.29 turn = 104 deg, and it is set by the LARGEST motion across the three gaits, which is the prone pose laying the spine flat. A quarter turn is 0.25 and the key is authored at 0.86 of the amplitude, so the pelvis lands at 0.25 exactly. The walk's leg swing then rides the same channel at about a third of it, which is run 7's lesson applied inside one subject: one amplitude, keys authored as fractions of it.",
     "gait.lift": "6 px. The pelvis rises about 2 px through a stride and drops about 2 px through a run's flight; the keys are authored as thirds of the amplitude.",
     "gait.depth": "4 px = the limb row separation on this body, arms at 6 and legs at 5 against a torso 5 deep. Nothing in these three gaits travels in depth yet, so it is the null case and it is set to the body's own scale so the first gait that needs it starts from a number that means something.",
+    "gait.roll": "0 = no roll. Turns, and it is a SEPARATE amplitude from gait.swing on purpose: swing is a walk range (0.08 of a turn) and a flip is a whole one. Run 7 spent a walk amplitude on a jump and lost a limb in every frame; one knob across a 12x range would guarantee it a third time.",
     "texture.speckle": "0. Every pixel is placed.",
+    "texture.dither": "0 = the hard cut this sample shipped with, and it is the null case: at 0 the dither term is exactly 0 and the render is byte-for-byte what it was. Turned on per subject, never globally, because the weave is an idiom decision and not a fix.",
+    "texture.lattice": "4. Size of the ordered dither lattice, 2 or 4. MEASURED rather than chosen: a 4x4 weave needs a 4x4 patch of one surface to be visible, and this project s characters have none — the rider at 36 px scores 0.000 on that share, the skeleton 0.080, the kitten 0.068, a kerb 0.432. Switching both outlines off moved it not at all; doubling the body scale moved it to 0.177, so the cause is scale and not the line. 2 is what fits a small body; 4 is for a road or a sky. Read it with the [weave] line of `node bin/bench.ts`.",
     "playback.msPerFrame": "70 ms. 12 x 70 = 840 ms for a stride, against the gorilla's 8 x 75 = 600. A person's stride is longer than a knuckle-walking gorilla's and the two have to disagree or they read as one animation on two bodies.",
     "playback.scale": "3, the scene's",
     "shadow.steps": "8 px, the project's measured saturation point.",

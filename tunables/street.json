@@ -1,0 +1,88 @@
+{
+  "canvas": {
+    "w": 48,
+    "h": 48,
+    "originX": 24,
+    "originY": 40
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 1
+  },
+  "light": {
+    "x": -0.5,
+    "y": -0.58,
+    "z": -0.3,
+    "curve": 1.15
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.1,
+    "lift": 2,
+    "depth": 6,
+    "roll": 0
+  },
+  "texture": {
+    "speckle": 0,
+    "dither": 0.8,
+    "lattice": 2
+  },
+  "shadow": {
+    "steps": 7,
+    "bias": 0.25,
+    "strength": 2
+  },
+  "fill": {
+    "x": 0.45,
+    "y": 0.4,
+    "z": -0.3,
+    "weight": 0.1
+  },
+  "playback": {
+    "msPerFrame": 125,
+    "scale": 4
+  },
+  "_anchors": {
+    "canvas.w": "48. The widest prop is the rail at 22 px including its feet, and 48 holds it with the outline ring and margin.",
+    "canvas.h": "48. The tallest prop is the rail at 30 px, and the cell has to hold it above the contact row.",
+    "canvas.originX": "24, dead centre. A prop is symmetric about its own base.",
+    "canvas.originY": "40. The contact row: every prop is authored upward from y=0, so the origin sits 8 px above the cell's bottom edge and the art grows into the space above it.",
+    "tones.perMaterial": "5, the idiom the 15/08 verdict selected. THE WEAVE DOES NOT REPLACE IT: the ordered dither spends range BELOW one tone step, so it adds apparent levels without taking authored ones away. Dropping to 3 was the other half of the extreme I offered him and it is not spent here \u2014 a tone count is a thing his verdict already ruled on, and the weave is a thing it has never seen.",
+    "frames.walk": "1. Street furniture does not move. A single frame is the honest count and it is what keeps the draw-call budget for the rider.",
+    "light.x": "-0.5, upper left, as every subject except the astronaut. A dusk street is lit from a low sun behind the rider's left shoulder.",
+    "light.y": "-0.58, and it is low. A long shadow street: a low lamp puts a rim along the deck's edge, which is the surface this round has to make readable.",
+    "light.z": "-0.3, toward the viewer. More front light than the crypt, because the board's TOP and UNDERSIDE both have to be legible and a grazing lamp would lose one of them.",
+    "light.curve": "1.15. Slightly above linear, which compresses the dark end into a rim without going as far as the SOTN 1.3 \u2014 the rider is the bright thing in this picture, unlike the skull.",
+    "gait.swing": "0.1. Unused: there is no gait.",
+    "gait.lift": "2. Unused.",
+    "gait.depth": "6 px. Unused: every clip here is authored in the screen plane or in roll.",
+    "gait.roll": "0. Unused. A kerb does not flip.",
+    "body.scale": "1. The rider stands 36 px in a 240 px world, which is the runner proportion \u2014 a player needs to read three obstacles ahead.",
+    "texture.speckle": "0. The 15/08 verdict retired per-pixel noise: random orphans read as dirt. THIS IS NOT WHAT THE DITHER BELOW IS \u2014 same histogram, different lattice, and `src/perception/weave.ts` is the only instrument that can tell them apart.",
+    "texture.dither": "0.8. Street furniture is where the weave actually works: a kerb has 0.703 of its pixels inside a single-owner 2x2 cell against the rider's 0.289, and its periodicity goes -0.021 undithered to +0.113 at 0.8 \u2014 clearly ordered, against the rider's -0.107. Same knob, same lattice, four times the effect, and the only difference is that a kerb is a slab and a limb is 4 px across.",
+    "texture.lattice": "2, and 4 was measured wrong for a body rather than assumed wrong. A 4x4 weave needs a 4x4 patch of one surface: the rider scores 0.000 on that share, the skeleton 0.080, the kitten 0.068. Turning both outlines off moved it not at all; doubling the body scale moved it to 0.177 \u2014 so the cause is SCALE and not the drawn line. At lattice 2 the rider recovers 0.289 of surface. 4 belongs to a road or a sky, and this project has no character big enough for it.",
+    "shadow.steps": "7, one more than the deepest mass on the body (the chest at 3.8, the deck at 4).",
+    "shadow.bias": "0.25, the project-wide value since run 7.",
+    "shadow.strength": "2 ramp steps. A dusk street has one low sun and asphalt does not bounce, so a shadow is nearly as dark as the crypt's.",
+    "fill.x": "0.45, opposite the key.",
+    "fill.y": "0.4, from below.",
+    "fill.z": "-0.3, matching the key's own z.",
+    "fill.weight": "0.1. Some bounce off the road, less than the garden's 0.16. The declared cost of a fill is that it compresses the value range, and the deck's two faces need every bit of theirs.",
+    "playback.msPerFrame": "125. Unused at one frame.",
+    "playback.scale": "4, read only by the bench.",
+    "outline.enabled": "true. The 15/08 ink verdict.",
+    "outline.material": "\"ink\". Near black with a blue cast, because the road is cool and a warm line would separate from the scene instead of from the body.",
+    "outline.inner": "true, and `Part.weld` decides where it lands. Everything on the rider is welded; the shoes against the deck and the trucks against the deck are NOT, because a shoe on a plank and a bolted truck are places the real object comes apart (his kitten note, 16/08).",
+    "outline.rim": "false. Settled 15/08."
+  }
+}

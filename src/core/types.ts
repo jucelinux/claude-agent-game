@@ -47,8 +47,37 @@ export type Bone = {
    * problem. portable.
    */
   readonly z?: number
-  /** Rest angle, in turns. */
+  /** Rest angle, in turns. Rotation about the depth axis — the screen plane. */
   readonly angle: number
+  /**
+   * **Rest roll, in turns: rotation about the horizontal screen axis.** Optional, 0 by default,
+   * and 0 renders byte-for-byte what a bone without this field always did.
+   *
+   * This is the one rotation 2.5D could not express **at all** rather than express badly. Every
+   * earlier complaint on the depth axis traced to a bug of mine; this one traced to the
+   * vocabulary — `angle` lives in the screen plane, `yaw.ts` turns a body about the vertical,
+   * and nothing tilted a surface toward or away from the viewer. A board that flips, a wing
+   * that drops, a body that tumbles at the camera: none of them was a tuning problem.
+   *
+   * **Why the horizontal axis and not a general one.** A kickflip is rotation about the axis the
+   * skater travels along, and for a figure moving across the picture that axis *is* screen x. So
+   * the commission that asked for this needs exactly this one axis, and one axis is what it
+   * gets — `CLAUDE.md` §5: harvest generality, do not design it. A second axis arrives when a
+   * second subject needs it.
+   *
+   * **The cost, declared.** A rolled part cannot be sampled by the closed-form one-liner every
+   * shape uses, because the viewing ray is no longer axis-aligned in the shape's own space. It
+   * is ray-marched instead (`raster.ts`, `marchLocal`). That path runs **only** for parts whose
+   * roll is non-zero, so the fast path and the baseline hash are untouched.
+   *
+   * **The approximation, declared.** Roll accumulates down the hierarchy as a scalar, the same
+   * way `angle` does. Composing a roll with a parent's screen-plane angle is not commutative, so
+   * the accumulation is exact when the parent chain is unrotated and an approximation when it is
+   * not. A skeleton whose rolled subtree also swings hard in the screen plane will drift, and the
+   * honest fix is a matrix per bone rather than two scalars. Not built: the board flips while its
+   * parent stays flat, and the drift is unmeasurable there.
+   */
+  readonly roll?: number
 }
 
 export type Skeleton = { readonly bones: readonly Bone[] }
@@ -297,7 +326,18 @@ export type Phase = { readonly name: string; readonly at: number }
  * static ordering expresses both. Its amplitude is `gait.depth`, in pixels, like `x`
  * and `y`. portable.
  */
-export type Channel = 'angle' | 'x' | 'y' | 'z' | 'scale' | 'scaleX' | 'scaleY'
+/**
+ * `roll` is rotation **out of** the screen plane — see `Bone.roll`. It is the only channel here
+ * that no amount of 2.5D could approximate: `angle` turns a part in the picture, `z` moves it
+ * through the picture, and neither tilts a surface toward the camera.
+ *
+ * Its amplitude is `gait.roll`, in turns, and it is a **separate** amplitude from `gait.swing`
+ * for a reason the record already paid for: `swing` is a walk's range, 0.08 of a turn, and run 7
+ * spent it on a jump and an attack without re-deriving it — a limb came back absent in every
+ * frame of both. A flip needs a whole turn. One amplitude covering both would put a 12x factor
+ * on one knob and guarantee the same defect a third time.
+ */
+export type Channel = 'angle' | 'roll' | 'x' | 'y' | 'z' | 'scale' | 'scaleX' | 'scaleY'
 
 /**
  * One key per phase, in phase order, **normalized to [-1, 1]**. The amplitude that turns
@@ -410,9 +450,22 @@ export type Params = {
    * Amplitudes applied to the grammar's normalized track keys. `swing` is turns, `lift` is
    * pixels across the screen, `depth` is pixels into it.
    */
-  readonly gait: { readonly swing: number; readonly lift: number; readonly depth: number }
-  /** Probability a painted pixel drops one tone. 0 disables the injected RNG entirely. */
-  readonly texture: { readonly speckle: number }
+  readonly gait: { readonly swing: number; readonly lift: number; readonly depth: number; readonly roll: number }
+  /**
+   * How a continuous brightness becomes one of a handful of tones.
+   *
+   * - `speckle` — probability a painted pixel drops one tone, from the injected RNG. 0 disables
+   *   the RNG entirely. **Retired by his verdict of 15/08:** random orphans read as dirt.
+   * - `dither` — amplitude of the **ordered** Bayer weave, in tone steps. Same histogram as
+   *   speckle and a different lattice, and the lattice is the difference between a texture and
+   *   dirt (`src/core/dither.ts`). 0 is the hard cut every sample before 16/08 shipped with.
+   *
+   * The two are not variants of one knob. Speckle is aperiodic and destroys the region
+   * structure the 15/08 verdict selected; the weave is periodic and preserves it at a scale
+   * below one tone step. `src/perception/weave.ts` is the only instrument that can tell them
+   * apart, and every other lock in the repo is blind to both.
+   */
+  readonly texture: { readonly speckle: number; readonly dither: number; readonly lattice: number }
   /**
    * **Shadow cast by the body onto itself**, marched through the depth buffer.
    *

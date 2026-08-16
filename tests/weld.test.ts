@@ -115,7 +115,12 @@ describe('a weld says two shapes are one surface', () => {
     }
     // Every subject that predates the field, rendered with it present and with every weld
     // removed. Byte-identical or the field is not a null case, whatever the fixture says.
-    const welded = new Set(['cat-rise', 'cat-fall', 'cat-tuck', 'bones-run', 'bones-leap', 'bones-flip', 'tomb-slab', 'tomb-cross', 'tomb-broken', 'death'])
+    const welded = new Set(['cat-rise', 'cat-fall', 'cat-tuck', 'bones-run', 'bones-leap', 'bones-flip', 'tomb-slab', 'tomb-cross', 'tomb-broken', 'death',
+      // Run 17. Same verdict behind them: an inner line claims two things are two things, and the
+      // test is whether the real object has a seam. The rider is welded throughout; the shoes on
+      // the deck and the trucks bolted to it are NOT, because those are places a real skateboard
+      // comes apart.
+      'skate-roll', 'skate-ollie', 'skate-flip', 'street-kerb', 'street-cone', 'street-rail'])
     for (const { grammar: g, tunables: t } of PAIRS) {
       if (welded.has(g)) continue
       const grammar = grammarByName(g)

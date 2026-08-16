@@ -2,6 +2,7 @@ import type { IndexedBuffer, Shape } from './types.ts'
 import type { Xform } from './skeleton.ts'
 import { TURN } from './skeleton.ts'
 import type { Rng } from './rng.ts'
+import { ditherOffset } from './dither.ts'
 
 /** The most irrational rotation: what you use when two periodic things must never agree. */
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5))
@@ -54,6 +55,14 @@ export function paintPart(
   partId: number,
   rng: Rng | null,
   speckle: number,
+  /**
+   * Amplitude of the ordered dither, in tone steps. 0 is the hard cut this renderer shipped
+   * with. See `src/core/dither.ts` — and note that no lock in this repo can see this number
+   * change, which is why `src/perception/weave.ts` had to exist before it did.
+   */
+  dither = 0,
+  /** Lattice size for the weave: 2 or 4. See `src/core/dither.ts` for why it is a knob. */
+  lattice = 4,
   shift = 0,
   /** A marking paints only where a solid already claimed the pixel. It adds no silhouette. */
   clipToBody = false,
@@ -83,41 +92,74 @@ export function paintPart(
   const invX = 1 / xf.sx
   const invY = 1 / xf.sy
 
+  /**
+   * **Roll: rotation about the horizontal screen axis, and it is the one thing 2.5D could not
+   * express at all.** Non-zero here switches the whole part onto a ray-marched path, because the
+   * viewing ray stops being axis-aligned in the shape's own space and every primitive's
+   * closed-form solve depends on exactly that. See `marchLocal`.
+   *
+   * At 0, `cr` is 1 and `sr` is 0 and every expression they appear in below collapses to what it
+   * was — the fast path is not a branch around the roll, it is the roll evaluated at zero.
+   */
+  const roll = xf.roll * TURN
+  const rolled = roll !== 0
+  const cr = Math.cos(roll)
+  const sr = Math.sin(roll)
+
   // Light, normalized here rather than in the data: the tunables then carry a *direction*,
   // which is a thing with an anchor, instead of a unit vector, which is a thing with
   // arithmetic in it (`HARNESS.md` §2.7).
   const lm = Math.hypot(light.x, light.y, light.z) || 1
-  // Rotated into bone space — the x/y half only. Depth does not rotate, because the bone
-  // angle lives in the screen plane; that is what 2.5D means here.
+  // Rotated into bone space by the **inverse of the full part rotation** — the screen-plane
+  // angle, and then the roll. Depth used to stay put, because the angle lived in the screen
+  // plane and that was all 2.5D meant; a rolled part tilts its surface toward the viewer, so
+  // the lamp has to tilt with it or a flipping board would be lit from a moving sun.
+  //
+  // **At roll 0 this is exactly the old expression**: `cr` is 1 and `sr` is 0, so the two extra
+  // terms are `y*1 + z*0` and `-y*0 + z*1`, which are identities in floating point rather than
+  // approximations of one. That is why it runs unconditionally and the baseline hash still holds.
   const lx = (cos * light.x + sin * light.y) / lm
-  const ly = (-sin * light.x + cos * light.y) / lm
-  const lz = light.z / lm
+  const ly0 = (-sin * light.x + cos * light.y) / lm
+  const lz0 = light.z / lm
+  const ly = ly0 * cr + lz0 * sr
+  const lz = -ly0 * sr + lz0 * cr
 
   // The fill goes through exactly the same rotation and normalization as the key, so the
   // two are in one space and the blend below is a blend of like with like.
   const fw = fill.weight
   const fm = Math.hypot(fill.x, fill.y, fill.z) || 1
   const fx = (cos * fill.x + sin * fill.y) / fm
-  const fy = (-sin * fill.x + cos * fill.y) / fm
-  const fz = fill.z / fm
+  const fy0 = (-sin * fill.x + cos * fill.y) / fm
+  const fz0 = fill.z / fm
+  const fy = fy0 * cr + fz0 * sr
+  const fz = -fy0 * sr + fz0 * cr
 
   const { w: cw, h: ch, data } = painter.buf
   const { depth } = painter
   const [bx0, by0, bx1, by1] = localBounds(shape)
 
-  // World AABB from the four transformed corners of the local bounds.
+  const hd = rolled ? depthExtent(shape) : 0
+
+  // World AABB from the transformed corners of the local bounds: four of them flat, and all
+  // eight of the 3D box when the part is rolled — a rolled shape swings its depth into y, so
+  // the flat box would clip the very edge the roll exists to show.
   let minX = Infinity
   let minY = Infinity
   let maxX = -Infinity
   let maxY = -Infinity
-  for (const [px, py] of [
-    [bx0, by0],
-    [bx1, by0],
-    [bx0, by1],
-    [bx1, by1],
-  ] as const) {
-    const wx = xf.x + xf.sx * (cos * px - sin * py)
-    const wy = xf.y + xf.sy * (sin * px + cos * py)
+  const corners: (readonly [number, number, number])[] = rolled
+    ? [
+        [bx0, by0, -hd], [bx1, by0, -hd], [bx0, by1, -hd], [bx1, by1, -hd],
+        [bx0, by0, hd], [bx1, by0, hd], [bx0, by1, hd], [bx1, by1, hd],
+      ]
+    : [
+        [bx0, by0, 0], [bx1, by0, 0], [bx0, by1, 0], [bx1, by1, 0],
+      ]
+  for (const [lx0, ly0, lz0] of corners) {
+    // Roll first, then the screen-plane angle: the same order the sampler inverts below.
+    const ry = ly0 * cr - lz0 * sr
+    const wx = xf.x + xf.sx * (cos * lx0 - sin * ry)
+    const wy = xf.y + xf.sy * (sin * lx0 + cos * ry)
     if (wx < minX) minX = wx
     if (wx > maxX) maxX = wx
     if (wy < minY) minY = wy
@@ -136,7 +178,17 @@ export function paintPart(
       const px = cos * ux + sin * uy
       const py = -sin * ux + cos * uy
 
-      const hit = sample(shape, px, py)
+      /**
+       * **Two solvers, and the second one exists because the first assumes the ray points
+       * straight into the screen.**
+       *
+       * Unrolled, a screen pixel maps to one point of the shape's own x/y plane and every
+       * primitive answers "where is my near surface under this point" in closed form. Rolled,
+       * the same pixel traces a slanted line through the shape, and no closed form survives
+       * for all four primitives — the lobed boundary alone is a summed cosine series in the
+       * polar angle. So a rolled part is marched, and only a rolled part pays for it.
+       */
+      const hit = rolled ? marchLocal(shape, px, py, cr, sr, hd) : sample(shape, px, py)
       if (!hit.inside) continue
 
       const at = y * cw + x
@@ -192,7 +244,25 @@ export function paintPart(
         const dotFill = hit.nx * fx + hit.ny * fy + hit.nz * fz
         u = u * (1 - fw) + ((dotFill + 1) / 2) * fw
       }
-      let level = Math.floor((light.curve === 1 ? u : Math.pow(u, 1 / light.curve)) * levels)
+      /**
+       * **The woven cut, and it is the whole pixel-art thesis in one term.**
+       *
+       * A zero-mean threshold from a fixed 4x4 lattice, added before the floor. In the band
+       * between two tones the two tones alternate, and the eye reads a value the palette does
+       * not contain. At `dither` 0 the term is exactly 0 and this expression is byte-for-byte
+       * what it was, which is what lets the baseline hash stand.
+       *
+       * **Anchored to `x, y` — the canvas cell, not the screen cell.** A subject renders into
+       * its own buffer and the buffer is blitted as one, so canvas coordinates ride with the
+       * object and the weave stays welded to the surface it shades. Keyed to the screen, the
+       * pattern would crawl through a moving body, which is the most-seen dither defect there
+       * is. The bone-space `px, py` were the other candidate and they are wrong: a rotating
+       * part maps screen pixels to fractional bone coordinates, so the lattice would be
+       * resampled every frame and moiré with itself.
+       */
+      let level = Math.floor(
+        (light.curve === 1 ? u : Math.pow(u, 1 / light.curve)) * levels + ditherOffset(dither, x, y, lattice),
+      )
       if (level >= levels) level = levels - 1
       if (level < 0) level = 0
       if (rng !== null && speckle > 0 && rng() < speckle && level > 0) level -= 1
@@ -540,20 +610,9 @@ function sample(shape: Shape, px: number, py: number): Local {
       const uy = (py - shape.cy) / shape.ry
       const d2 = ux * ux + uy * uy
       if (d2 === 0) return { inside: true, nx: 0, ny: 0, nz: -1, dz: -(shape.rz ?? Math.min(shape.rx, shape.ry)) }
-      const theta = Math.atan2(uy, ux)
       // Summed octaves, amplitude halving and frequency doubling — fractional Brownian
       // motion evaluated on a circle, in closed form because the "noise" is a cosine.
-      const octaves = Math.max(1, Math.round(shape.octaves ?? 1))
-      let norm = 0
-      for (let o = 0, a = 1; o < octaves; o++, a *= 0.5) norm += a
-      let boundary = 1
-      let amp = shape.depth / norm
-      let freq = shape.lobes
-      for (let o = 0; o < octaves; o++) {
-        boundary += amp * Math.cos(freq * theta + (shape.phase ?? 0) + o * GOLDEN_ANGLE)
-        amp *= 0.5
-        freq *= 2
-      }
+      const boundary = lobedBoundary(shape, Math.atan2(uy, ux))
       if (boundary <= 0) return MISS
       const t = Math.sqrt(d2) / boundary
       if (t > 1) return MISS
@@ -577,6 +636,201 @@ function sample(shape: Shape, px: number, py: number): Local {
       return normalize(ux * m, uy * m, hd === 0 ? -1 : dz / hd, dz)
     }
   }
+}
+
+/**
+ * **The same four solids, written as one implicit function, and this is what made roll cheap.**
+ *
+ * Every primitive in this vocabulary turns out to be `Q(x, y) + (z / H(x, y))² ≤ 1` — an
+ * ellipsoid trivially, a rounded box with `Q` the squared max-norm, a lobed body with `Q` the
+ * squared radius over its waving boundary, a tapered capsule with `Q` the squared distance from
+ * the swept axis over the local radius. That shared form was not designed; it fell out of
+ * `sample()` already computing the depth bulge for each of them, and it is why a full 3D
+ * rotation cost one function rather than four ray-vs-primitive derivations.
+ *
+ * Returns the signed field **and** its outward normal in one pass. The normal is the same
+ * expression `sample()` uses for the unrolled case, so the two paths agree where they overlap
+ * instead of agreeing approximately.
+ */
+type Probe = { readonly f: number; readonly nx: number; readonly ny: number; readonly nz: number }
+
+/**
+ * The thinnest a solid is allowed to be on the marched path.
+ *
+ * A shape authored with zero depth is a mathematical disc, and a mathematical disc seen edge-on
+ * is invisible: a slanted ray passes through it in zero distance and the march finds nothing.
+ * Half a pixel is the smallest thickness an integer grid can represent, so that is the floor.
+ * **This affects the rolled path only** — an unrolled zero-depth part is sampled in closed form
+ * exactly as it always was.
+ */
+const MIN_DEPTH = 0.5
+
+function probe3(shape: Shape, qx: number, qy: number, qz: number): Probe {
+  switch (shape.kind) {
+    case 'ellipse': {
+      const ux = (qx - shape.cx) / shape.rx
+      const uy = (qy - shape.cy) / shape.ry
+      const rz = Math.max(MIN_DEPTH, shape.rz ?? Math.min(shape.rx, shape.ry))
+      const uz = qz / rz
+      return { f: ux * ux + uy * uy + uz * uz - 1, nx: ux / shape.rx, ny: uy / shape.ry, nz: uz / rz }
+    }
+    case 'lobed': {
+      const ux = (qx - shape.cx) / shape.rx
+      const uy = (qy - shape.cy) / shape.ry
+      const d2 = ux * ux + uy * uy
+      const rz = Math.max(MIN_DEPTH, shape.rz ?? Math.min(shape.rx, shape.ry))
+      const uz = qz / rz
+      const boundary = lobedBoundary(shape, Math.atan2(uy, ux))
+      if (boundary <= 0) return OUTSIDE
+      const t = Math.sqrt(d2) / boundary
+      return { f: t * t + uz * uz - 1, nx: ux / shape.rx, ny: uy / shape.ry, nz: uz / rz }
+    }
+    case 'rect': {
+      const hw = shape.w / 2
+      const hh = shape.h / 2
+      const hdr = Math.max(MIN_DEPTH, (shape.d ?? Math.min(shape.w, shape.h)) / 2)
+      const ux = hw === 0 ? 0 : (qx - (shape.x + hw)) / hw
+      const uy = hh === 0 ? 0 : (qy - (shape.y + hh)) / hh
+      const m = Math.max(Math.abs(ux), Math.abs(uy))
+      const uz = qz / hdr
+      return { f: m * m + uz * uz - 1, nx: ux * m, ny: uy * m, nz: uz }
+    }
+    case 'capsule': {
+      // The axis lies in the x/y plane, so the `u` that minimises the distance to a tapered
+      // sweep does not involve `z` at all — every term carrying `qz` is constant in `u`. That is
+      // why this is the exact 3D solve and not an approximation of one.
+      const ax = shape.x1 - shape.x0
+      const ay = shape.y1 - shape.y0
+      const len2 = ax * ax + ay * ay
+      const dr = (shape.r1 ?? shape.r) - shape.r
+      const px0 = qx - shape.x0
+      const py0 = qy - shape.y0
+      const denom = len2 - dr * dr
+      let u = denom === 0 ? 0 : (px0 * ax + py0 * ay + shape.r * dr) / denom
+      u = u < 0 ? 0 : u > 1 ? 1 : u
+      const dx = px0 - ax * u
+      const dy = py0 - ay * u
+      const ru = shape.r + dr * u
+      if (ru <= 0) return OUTSIDE
+      return { f: (dx * dx + dy * dy + qz * qz) / (ru * ru) - 1, nx: dx, ny: dy, nz: qz }
+    }
+  }
+}
+
+const OUTSIDE: Probe = { f: Infinity, nx: 0, ny: 0, nz: 0 }
+
+/** Half-thickness along the depth axis, for the rolled part's 3D bounding box. */
+function depthExtent(shape: Shape): number {
+  switch (shape.kind) {
+    case 'ellipse':
+    case 'lobed':
+      return Math.max(MIN_DEPTH, shape.rz ?? Math.min(shape.rx, shape.ry))
+    case 'rect':
+      return Math.max(MIN_DEPTH, (shape.d ?? Math.min(shape.w, shape.h)) / 2)
+    case 'capsule':
+      return Math.max(MIN_DEPTH, shape.r, shape.r1 ?? shape.r)
+  }
+}
+
+/**
+ * **A rolled part, sampled by marching the viewing ray through the shape's own space.**
+ *
+ * Roll tilts the shape about the horizontal screen axis, so the inverse map takes the camera's
+ * straight-in ray and slants it: origin `Rx(-roll)·(px, py, 0)` and direction
+ * `Rx(-roll)·(0, 0, 1)`, which is `(0, sin roll, cos roll)`. What comes back is the **nearest**
+ * surface along that ray, in the same `Local` shape the closed-form sampler returns, so
+ * everything downstream — depth test, lambert, quantiser, ownership — is untouched.
+ *
+ * **Bounded first, then marched.** The ray is clipped to the shape's own 3D box by two slab
+ * tests, so the march never walks empty space and never starts inside the solid it is looking
+ * for. Two samples per pixel of span find the first crossing; twelve bisections then put the
+ * surface inside a hundredth of a pixel, which is two orders of magnitude below anything an
+ * integer grid can show.
+ *
+ * **The declared limit, and it is a sampling limit rather than a geometric one:** a feature
+ * thinner than half a pixel along the ray can fall between two steps and be missed. Nothing in
+ * this vocabulary is that thin — `MIN_DEPTH` is the floor — but a future primitive with a slot
+ * cut through it would need the step count raised, not the method changed.
+ */
+function marchLocal(shape: Shape, px: number, py: number, cr: number, sr: number, hd: number): Local {
+  const ox = px
+  const oy = py * cr
+  const oz = -py * sr
+
+  const [bx0, by0, bx1, by1] = localBounds(shape)
+  // The ray has no x component — roll cannot move a point along the axis it rotates about — so
+  // x is a plain interval test rather than a slab.
+  if (ox < bx0 || ox > bx1) return MISS
+
+  let s0 = -Infinity
+  let s1 = Infinity
+  if (sr === 0) {
+    if (oy < by0 || oy > by1) return MISS
+  } else {
+    const a1 = (by0 - oy) / sr
+    const a2 = (by1 - oy) / sr
+    s0 = Math.max(s0, Math.min(a1, a2))
+    s1 = Math.min(s1, Math.max(a1, a2))
+  }
+  if (cr === 0) {
+    if (oz < -hd || oz > hd) return MISS
+  } else {
+    const b1 = (-hd - oz) / cr
+    const b2 = (hd - oz) / cr
+    s0 = Math.max(s0, Math.min(b1, b2))
+    s1 = Math.min(s1, Math.max(b1, b2))
+  }
+  if (!(s1 > s0)) return MISS
+
+  const span = s1 - s0
+  const steps = Math.max(16, Math.ceil(span * 2))
+  const at = (s: number): Probe => probe3(shape, ox, oy + sr * s, oz + cr * s)
+
+  let lo = s0
+  if (at(s0).f <= 0) return hitAt(shape, ox, oy, oz, sr, cr, s0)
+  for (let i = 1; i <= steps; i++) {
+    const s = s0 + (span * i) / steps
+    if (at(s).f > 0) {
+      lo = s
+      continue
+    }
+    let hi = s
+    for (let k = 0; k < 12; k++) {
+      const mid = (lo + hi) / 2
+      if (at(mid).f <= 0) hi = mid
+      else lo = mid
+    }
+    return hitAt(shape, ox, oy, oz, sr, cr, hi)
+  }
+  return MISS
+}
+
+/** The surface at ray parameter `s`: the outward normal in bone space, and `s` itself as depth. */
+function hitAt(shape: Shape, ox: number, oy: number, oz: number, sr: number, cr: number, s: number): Local {
+  const p = probe3(shape, ox, oy + sr * s, oz + cr * s)
+  // `s` **is** the depth: it parametrises the ray along the camera's own axis, so the distance
+  // from the bone's plane to the surface is exactly the distance the ray travelled.
+  return normalize(p.nx, p.ny, p.nz, s)
+}
+
+/**
+ * The lobed silhouette's radius at one polar angle: summed octaves, amplitude halving and
+ * frequency doubling. Factored out of `sample()` when the marched path needed the same series —
+ * two copies of a closed-form fBm would have been two primitives with one name.
+ */
+function lobedBoundary(shape: Extract<Shape, { kind: 'lobed' }>, theta: number): number {
+  const octaves = Math.max(1, Math.round(shape.octaves ?? 1))
+  let norm = 0
+  for (let o = 0, a = 1; o < octaves; o++, a *= 0.5) norm += a
+  let boundary = 1
+  let amp = shape.depth / norm
+  let freq = shape.lobes
+  for (let o = 0; o < octaves; o++) {
+    boundary += amp * Math.cos(freq * theta + (shape.phase ?? 0) + o * GOLDEN_ANGLE)
+    amp *= 0.5
+    freq *= 2
+  }
+  return boundary
 }
 
 const MISS: Local = { inside: false, nx: 0, ny: 0, nz: 0, dz: 0 }

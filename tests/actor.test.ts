@@ -80,7 +80,7 @@ describe('a subject is one body, whatever it is doing', () => {
 function landmarks(): Record<string, { x: number; y: number }> {
   const g = grammarByName('photog-prone')
   const params = loadParams('photog')
-  const world = solve(g.skeleton, evaluate(g.gait, params, 0.5), { x: 0, y: 0, z: 0, a: 0, sx: 1, sy: 1, sz: 1 })
+  const world = solve(g.skeleton, evaluate(g.gait, params, 0.5), { x: 0, y: 0, z: 0, a: 0, roll: 0, sx: 1, sy: 1, sz: 1 })
   const at = (bone: string, lx: number, ly: number): { x: number; y: number } => {
     const w = world.get(bone)!
     const a = w.a * Math.PI * 2
@@ -295,7 +295,7 @@ describe('a limb stays joined to itself', () => {
         if (child === undefined || child.parent !== upper) continue
         const reach = child.y
         for (let f = 0; f < params.frames.walk; f++) {
-          const w = solve(g.skeleton, evaluate(g.gait, params, f / params.frames.walk), { x: 0, y: 0, z: 0, a: 0, sx: 1, sy: 1, sz: 1 })
+          const w = solve(g.skeleton, evaluate(g.gait, params, f / params.frames.walk), { x: 0, y: 0, z: 0, a: 0, roll: 0, sx: 1, sy: 1, sz: 1 })
           const u = w.get(upper)!
           const l = w.get(lower)!
           const a = u.a * Math.PI * 2
@@ -326,7 +326,7 @@ describe('no joint bends both ways', () => {
         if (!g.skeleton.bones.some((b) => b.name === parent)) continue
         const angles: number[] = []
         for (let f = 0; f < params.frames.walk; f++) {
-          const w = solve(g.skeleton, evaluate(g.gait, params, f / params.frames.walk), { x: 0, y: 0, z: 0, a: 0, sx: 1, sy: 1, sz: 1 })
+          const w = solve(g.skeleton, evaluate(g.gait, params, f / params.frames.walk), { x: 0, y: 0, z: 0, a: 0, roll: 0, sx: 1, sy: 1, sz: 1 })
           angles.push((w.get(child)!.a - w.get(parent)!.a) * 360)
         }
         const lo = Math.min(...angles)

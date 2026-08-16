@@ -246,7 +246,7 @@ describe('turning a body that was never authored to turn', () => {
           const t = k / params.frames.walk
           const { w, h, data } = sprite(g, params, 1, t).buf
           for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (data[y * w + x] !== 0) { if (x < x0) x0 = x; if (x > x1) x1 = x }
-          const world = solve(g.skeleton, evaluate(g.gait, params, t), { x: 0, y: 0, z: 0, a: 0, sx: 1, sy: 1, sz: 1 })
+          const world = solve(g.skeleton, evaluate(g.gait, params, t), { x: 0, y: 0, z: 0, a: 0, roll: 0, sx: 1, sy: 1, sz: 1 })
           for (const [u, l] of [['armFU', 'armFL'], ['armNU', 'armNL'], ['legFU', 'legFL'], ['legNU', 'legNL']] as const) {
             const child = g.skeleton.bones.find((b) => b.name === l)
             if (child === undefined || child.parent !== u) continue

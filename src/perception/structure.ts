@@ -18,6 +18,7 @@
 import type { Grammar, IndexedBuffer } from '../core/types.ts'
 import type { Frame } from '../core/render.ts'
 import { OWNER_OUTLINE } from '../core/raster.ts'
+import { PERIODIC, weave } from './weave.ts'
 
 export type Finding = {
   /** Machine-readable, so a lock can assert on a class of finding. */
@@ -27,8 +28,16 @@ export type Finding = {
   readonly message: string
 }
 
-/** Mean same-tone region size below which shading has become per-pixel noise. */
-const NOISE_FLOOR = 5
+/**
+ * Mean same-tone region size below which shading has become per-pixel noise.
+ *
+ * **It is not a noise test on its own, and `tests/dither.test.ts` measures why.** Over one
+ * gradient an ordered Bayer weave lands at 4.2 px and the retired speckle at 10.0 — so this
+ * floor fires on the correct work and clears the dirt. Region size measures how *finely*
+ * shading is cut; it was standing in for whether the cutting is *intentional*, and only
+ * periodicity carries that (`src/perception/weave.ts`). The check below reads both.
+ */
+export const NOISE_FLOOR = 5
 
 function materialOf(grammar: Grammar): Map<number, string> {
   const map = new Map<number, string>()
@@ -112,7 +121,7 @@ export function silhouetteOwners(frame: Frame, grammar: Grammar): Map<string, nu
  * **The whole strip, read for problems.** The output is a list of findings, never a dump —
  * a dump is a picture made of numbers and it has the same defect as a picture.
  */
-export function findings(frames: readonly Frame[], grammar: Grammar): Finding[] {
+export function findings(frames: readonly Frame[], grammar: Grammar, lattice = 4): Finding[] {
   const out: Finding[] = []
   if (frames.length === 0) return [{ check: 'empty', level: 'alert', message: 'the strip has no frames' }]
 
@@ -240,23 +249,49 @@ export function findings(frames: readonly Frame[], grammar: Grammar): Finding[] 
   }
 
   // 7. REGION STRUCTURE. Settled the ink probe when the eye had lost twice.
+  //
+  // **It now reads the lattice before it calls anything noise**, and the reason is measured in
+  // `tests/dither.test.ts`: over one gradient an ordered weave lands at 4.2 px mean region and
+  // the retired speckle at 10.0. Region size alone had the two cases exactly backwards. Fine
+  // cutting is noise when it is aperiodic and a texture when it is periodic, and only
+  // `weave()` can tell which — so the alert now requires both halves.
   const r = regions(first.buf)
-  const level = r.meanSize < NOISE_FLOOR ? 'alert' : 'note'
+  const wv = weave(first.buf, first.owners, lattice)
+  const fine = r.meanSize < NOISE_FLOOR
+  const ordered = wv.surface >= 0.12 && wv.period >= PERIODIC
+  const level = fine && !ordered ? 'alert' : 'note'
   out.push({
     check: 'regions',
     level,
     message:
       `tone regions: ${r.count}, mean ${r.meanSize.toFixed(1)} px, biggest ${r.biggest}, ` +
       `${Math.round(100 * r.singletonFraction)}% single-pixel` +
-      (level === 'alert' ? ` — below ${NOISE_FLOOR} px mean is noise, not shading` : ''),
+      (level === 'alert' ? ` — below ${NOISE_FLOOR} px mean and aperiodic: noise, not shading` : '') +
+      (fine && level === 'note' ? ` — fine, but periodic (${wv.period.toFixed(2)}): an ordered weave` : ''),
+  })
+
+  // 8. THE WEAVE. Born 16/08 with the ordered dither, because every other check in this file
+  // and every lock in the repo is blind to it: the threshold has zero mean, so a dithered
+  // region carries the same average tone, the same silhouette and the same pixel count as an
+  // undithered one. Reported always, including at 0, so its absence is as visible as its
+  // presence — a weave that silently switched off would otherwise read as a weave that works.
+  out.push({
+    check: 'weave',
+    level: 'note',
+    message:
+      `surface ${Math.round(100 * wv.surface)}% of painted` +
+      (wv.surface < 0.12
+        ? ` — TOO LITTLE SURFACE TO DITHER: almost no ${lattice}x${lattice} cell belongs to one part, so a weave here is indistinguishable from noise`
+        : `, textured ${Math.round(100 * wv.textured)}%, orphans ${Math.round(100 * wv.orphans)}%, ` +
+          `period ${wv.period.toFixed(2)} (${wv.period >= PERIODIC ? 'ordered' : 'aperiodic'})`),
   })
 
   return out
 }
 
 /** One line per finding, alerts first. Nothing else — a wall of data is a picture again. */
-export function report(frames: readonly Frame[], grammar: Grammar): string {
-  const all = findings(frames, grammar)
+export function report(frames: readonly Frame[], grammar: Grammar, lattice = 4): string {
+  const all = findings(frames, grammar, lattice)
   const alerts = all.filter((f) => f.level === 'alert')
   const notes = all.filter((f) => f.level === 'note')
   const line = (f: Finding): string => `  ${f.level === 'alert' ? '!!' : '  '} [${f.check}] ${f.message}`
