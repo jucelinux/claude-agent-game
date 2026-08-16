@@ -62,7 +62,20 @@ function run(html: string): Harness {
       fillRect: () => {},
       set fillStyle(_v: string) {},
       set globalAlpha(_v: number) {},
-      drawImage: (src: { _id?: number }, ...rest: number[]) => {
+      drawImage: (src: { _id?: number; _canvas?: true }, ...rest: number[]) => {
+        // **A real drawImage refuses anything that is not a canvas, and this one must too.**
+        //
+        // It did not, and that is how a blank page reached him. `var off` inside the rain
+        // stamp loop shadowed the offscreen buffer twelve lines above it — `var` is
+        // function-scoped — so every frame called drawImage on the number -1. The browser
+        // threw on the first frame. This harness shrugged and reported 136 green locks.
+        //
+        // **A fake that shrugs cannot report the defect the real thing reports.** That is
+        // the null-case rule (`HARNESS.md` §5) applied to a test double rather than to a
+        // measurement: an instrument has to be able to fail.
+        if (src?._canvas !== true) {
+          throw new TypeError(`drawImage got ${src === undefined ? 'undefined' : typeof src} — a browser would have thrown here`)
+        }
         if (rest.length < 8) return // the backdrop copy and the final blit
         // The slot is the index in `placed`, tracked by the runtime and read back here: a
         // subject that is off screen is not drawn at all, so position in the call list is not
@@ -70,7 +83,7 @@ function run(html: string): Harness {
         current.push({ canvas: src._id ?? -1, sx: rest[0]!, sy: rest[1]!, sw: rest[2]!, sh: rest[3]!, dx: rest[4]!, dy: rest[5]!, slot: -1 })
       },
     }
-    return { _id: id, width: 0, height: 0, getContext: () => ctx }
+    return { _id: id, _canvas: true as const, width: 0, height: 0, getContext: () => ctx }
   }
 
   const listeners: Record<string, ((e: unknown) => void)[]> = {}
@@ -116,6 +129,15 @@ const stage = toStage(forestScene)
 const page = gamePage({ id: 'forest', title: 'The forest', blurb: '', date: '', meta: [], stage })
 
 describe('the micro runtime', () => {
+  it('runs for a full minute without throwing', () => {
+    // The cheapest lock in the file and the one that would have caught the blank page. Every
+    // other test here ticks a handful of frames for a specific answer; this one just runs.
+    const h = run(page)
+    for (let f = 0; f < 1800; f++) h.tick(f * 33.3)
+    expect(h.frames).toHaveLength(1800)
+    expect(h.frames[1799]!.length, 'the loop stopped drawing').toBeGreaterThan(0)
+  })
+
   it('decodes index 0 as fully transparent and turns smoothing off', () => {
     const h = run(page)
     h.tick(0)

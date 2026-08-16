@@ -223,9 +223,13 @@ function mount(el, S) {
     for (var ci = 0; ci < S.rain.colors.length; ci++) {
       var xs = [], lo = 0, hi = 0
       for (var dk = 0; dk < S.rain.length; dk++) {
-        var off = Math.round(dk * S.rain.slant); xs.push(off)
-        if (off < lo) lo = off
-        if (off > hi) hi = off
+        // **Named 'lean', and the name is the bug fix.** It was 'off', which is also the name
+        // of the offscreen buffer twelve lines up — and 'var' is function-scoped, so building
+        // the rain stamps quietly replaced the canvas the whole page draws into with the
+        // number -1. Every frame then called drawImage on an integer.
+        var lean = Math.round(dk * S.rain.slant); xs.push(lean)
+        if (lean < lo) lo = lean
+        if (lean > hi) hi = lean
       }
       var stamp = cv(hi - lo + 1, S.rain.length), stx = stamp.getContext('2d')
       stx.fillStyle = rgb(S.rain.colors[ci])
@@ -436,6 +440,10 @@ const STYLE = `
   .back { color: var(--dim); font-size: 13px }
   .back:hover { color: var(--accent) }
   .empty { color: var(--dim); text-align: center; padding: 60px 0 }
+  /* The page's own perception channel. I cannot look at his browser, so it has to speak. */
+  #boot { max-width: 860px; margin: 0 auto 14px; padding: 11px 16px; border-radius: 8px;
+          border: 1px solid var(--line); background: #10131a; color: var(--dim); font-size: 12.5px }
+  #boot.bad { border-color: #a8453c; background: #241416; color: #f0b7b0; white-space: pre-wrap }
 `
 
 const shell = (title: string, head: string, body: string, script: string): string =>
@@ -491,6 +499,19 @@ export function gamePage(game: AppGame): string {
          .join('')}</div>
        <div class="facts mono">${game.meta.map((m) => `<span>${esc(m)}</span>`).join('')}</div>
      </div>`,
-    `var __last = mount(document.getElementById('stage'), ${payloadOf(game.stage, game.stage.scale, true)});`,
+    `
+     var __boot = document.getElementById('boot');
+     function __say(kind, text) { if (!__boot) return; __boot.className = 'mono ' + kind; __boot.textContent = text }
+     window.onerror = function (msg, src, line, col, err) {
+       __say('bad', 'the runtime threw and the game is not running:\\n' + msg + '\\n' + ((err && err.stack) || '') );
+       return false
+     };
+     var __last = null;
+     try {
+       __last = mount(document.getElementById('stage'), ${payloadOf(game.stage, game.stage.scale, true)});
+       __say('', 'running — ${game.stage.layers.length} layers, ${game.stage.w}×${game.stage.h} at ×${game.stage.scale}');
+     } catch (e) {
+       __say('bad', 'mount failed and the game is not running:\\n' + (e && (e.stack || e.message) || e));
+     }`,
   )
 }
