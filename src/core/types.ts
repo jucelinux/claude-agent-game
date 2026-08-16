@@ -166,23 +166,29 @@ export type Part = {
    */
   readonly shift?: number
   /**
-   * **Whether this part gets an inner outline. A marking does not.**
+   * **A marking, not a solid: a region of the surface it lies on.**
    *
-   * The inner line exists to say *these are two things*: a limb across a chest, a fist against
-   * a torso, a plate on a hull. It is drawn wherever a nearer part borders a farther one, and
-   * that rule is right for every part that is a **solid**.
+   * A silverback's saddle, a blaze, a stripe, a patch of lichen, a brand. It has a *colour*
+   * and no *body*, and that difference has two consequences the renderer has to honour:
    *
-   * It is wrong for a part that is a **marking** — a silverback's saddle, a blaze, a stripe, a
-   * patch of lichen. A marking has no silhouette of its own; it is a region of the surface it
-   * lies on, and ringing it in ink is what turns grey hair into a painted badge. Worse, where
-   * a ragged marking's boundary folds back on itself the ring closes into a solid patch, which
-   * is what he saw: *"e esse buraco nas costas do gorila?"* — 18 px of ink in the upper back,
-   * against 6 px for the sample he ranked first.
+   * 1. **It never extends the silhouette.** A marking paints only where a solid already is.
+   *    Without that rule the saddle's lobed boundary stood three pixels proud of the chest it
+   *    lay on, and where the shoulder marking and the hip marking failed to meet, the gap
+   *    between them was **empty canvas with the outer outline traced around it** — a notch cut
+   *    into the animal's back. His words: *"as costas do gorila possui um vão na região da
+   *    cintura"*, and he had to say it twice because the first fix only addressed the ink.
+   * 2. **It gets no inner outline**, and casts none. The inner line says *these are two
+   *    things*; a marking is one thing wearing two colours, and ringing it in ink is what
+   *    turns grey hair into a painted badge.
    *
-   * Defaults to true, which is the null case: every part authored before this existed behaves
-   * exactly as it did. portable — the solid/marking distinction is older than pixel art.
+   * Markings paint after every solid, so a marking always has a body to lie on and never
+   * decides what the body's outline is.
+   *
+   * Defaults to false, which is the null case: every part authored before this existed
+   * renders byte-identical. portable — the solid/marking distinction is older than pixel art
+   * and every drawing system eventually needs it.
    */
-  readonly line?: boolean
+  readonly marking?: boolean
 }
 
 /** A named instant of the cycle. The gait is a set of named phases, never a bare sine. */

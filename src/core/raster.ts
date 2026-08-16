@@ -55,6 +55,8 @@ export function paintPart(
   rng: Rng | null,
   speckle: number,
   shift = 0,
+  /** A marking paints only where a solid already claimed the pixel. It adds no silhouette. */
+  clipToBody = false,
 ): void {
   const levels = ramp.length
   if (levels === 0) throw new Error('a ramp with no tones cannot paint')
@@ -132,6 +134,11 @@ export function paintPart(
       if (!hit.inside) continue
 
       const at = y * cw + x
+      // **A marking has no body of its own.** It recolours a surface, so it may only write
+      // where a solid already claimed the pixel — and it therefore adds nothing to the
+      // silhouette. Without this the saddle stood three pixels proud of the chest it lies on
+      // and cut a notch of empty canvas into the animal's back.
+      if (clipToBody && (painter.owners[at] as number) < 0) continue
       // **The depth test, and the reason this file changed.** `<=` rather than `<` is
       // deliberate: with every bone left on one plane, nearest-wins degenerates exactly
       // into paint order — which is the behaviour being replaced, and therefore the null

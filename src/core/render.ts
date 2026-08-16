@@ -36,8 +36,17 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
   // Pure in `t`: the same frame is reproducible without knowing its index in the strip.
   const rng = params.texture.speckle > 0 ? mulberry32((seed ^ Math.round(t * 65536)) >>> 0) : null
 
-  for (let i = 0; i < grammar.parts.length; i++) {
-    const part = grammar.parts[i] as Grammar['parts'][number]
+  /**
+   * **Solids first, then markings**, and the order is the whole of what makes a marking work:
+   * a marking paints only where a solid already is, so it must run after every solid or it
+   * would find nothing to lie on. Within each group, declaration order is preserved, so a
+   * grammar with no markings paints in exactly the sequence it always did.
+   */
+  const order = [
+    ...grammar.parts.map((p, i) => [p, i] as const).filter(([p]) => p.marking !== true),
+    ...grammar.parts.map((p, i) => [p, i] as const).filter(([p]) => p.marking === true),
+  ]
+  for (const [part, i] of order) {
     const ramp = grammar.palette.ramps.find((r) => r.material === part.material)
     if (ramp === undefined) {
       throw new Error(`part "${part.name}" wants material "${part.material}", absent from palette "${grammar.palette.name}"`)
@@ -47,7 +56,10 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     // The part's own depth rides on the bone's, scaled with it: a body that shrinks takes
     // its browridge along instead of leaving it floating where the head used to be.
     const xf = part.z === undefined ? bone : { ...bone, z: bone.z + bone.sz * part.z }
-    paintPart(painter, part.shape, xf, ramp.indices, params.light, params.fill, i, rng, params.texture.speckle, part.shift ?? 0)
+    paintPart(
+      painter, part.shape, xf, ramp.indices, params.light, params.fill, i, rng,
+      params.texture.speckle, part.shift ?? 0, part.marking === true,
+    )
   }
 
   // **Shadow, before every edge treatment.** It needs the finished depth buffer, so it
@@ -83,7 +95,7 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     // The inner line sits one step above the outer one, so the silhouette stays the darkest
     // thing on screen. With a single-tone ramp they collapse, and that is the ramp's fault.
     if (params.outline.inner) {
-      innerOutline(painter, (ramp.indices[1] ?? ramp.indices[0]) as number, grammar.parts.map((p) => p.line === false))
+      innerOutline(painter, (ramp.indices[1] ?? ramp.indices[0]) as number, grammar.parts.map((p) => p.marking === true))
     }
     if (params.outline.enabled) outline(painter, ramp.indices[0] as number)
   }

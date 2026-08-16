@@ -5,6 +5,8 @@ import { execute, loadParams } from '../src/io/load.ts'
 import { grammarByName } from '../src/grammars/index.ts'
 import { solve } from '../src/core/skeleton.ts'
 import { evaluate } from '../src/core/gait.ts'
+import { sprite } from '../src/core/render.ts'
+import type { Grammar } from '../src/core/types.ts'
 
 /**
  * **The three defects of his fifth reading, turned into instruments.**
@@ -194,6 +196,49 @@ function actors(): readonly (readonly [string, string])[] {
   }
   return [...out.values()]
 }
+
+/**
+ * **A marking may not change a silhouette, and this is the check that says so.**
+ *
+ * Render the body, then render it again with every marking deleted, and compare *which pixels
+ * are painted* — not their colours. The two must be identical: a marking recolours a surface,
+ * so it can neither add to an outline nor cut into one.
+ *
+ * **It is the defect he had to report twice.** The first fix stopped the inner outline ringing
+ * the silver saddle, which was real and was not what he was pointing at. The saddle's lobed
+ * boundary stood three pixels proud of the chest and hips it lay on, and where the two masses
+ * failed to meet the gap between them was empty canvas with the outer outline traced around it
+ * — *"as costas do gorila possui um vão na região da cintura"*. A notch cut into the back.
+ *
+ * Comparing silhouettes rather than pixels is what makes this catch it: the notch was never a
+ * hole a flood fill could find, because it opened onto the sky.
+ */
+describe('a marking recolours a body, it does not reshape one', () => {
+  for (const [name, tunables] of actors()) {
+    const g = grammarByName(name)
+    if (!g.parts.some((p) => p.marking === true)) continue
+
+    it(`${name}`, () => {
+      const params = loadParams(tunables)
+      const bare: Grammar = { ...g, parts: g.parts.filter((p) => p.marking !== true) }
+      for (let f = 0; f < params.frames.walk; f++) {
+        const t = f / params.frames.walk
+        const withMark = sprite(g, params, 1, t).buf
+        const without = sprite(bare, params, 1, t).buf
+        let added = 0
+        let removed = 0
+        for (let i = 0; i < withMark.data.length; i++) {
+          const a = (withMark.data[i] as number) !== 0
+          const b = (without.data[i] as number) !== 0
+          if (a && !b) added++
+          if (b && !a) removed++
+        }
+        expect(added, `${name} frame ${f}: the markings add ${added} px to the silhouette`).toBe(0)
+        expect(removed, `${name} frame ${f}: the markings cut ${removed} px out of the silhouette`).toBe(0)
+      }
+    })
+  }
+})
 
 describe('a body has no holes in it', () => {
   for (const [name, tunables] of actors()) {
