@@ -4,9 +4,8 @@ import { execute, loadParams } from '../src/io/load.ts'
 import { PAIRS, grammarByName } from '../src/grammars/index.ts'
 import { measure } from '../src/core/metrics.ts'
 import { strip } from '../src/core/render.ts'
-import { GROUND_RGB } from '../src/core/color.ts'
+import { GROUND_RGB, luminance } from '../src/core/color.ts'
 import { OWNER_OUTLINE } from '../src/core/raster.ts'
-import { GROUND } from '../src/viewer/page.ts'
 
 /**
  * **The silhouette and value locks**, the two that round zero deferred with the note "the
@@ -31,11 +30,29 @@ const BLOB_SHARE = 0.9
 const SAMPLES = ['probe-a', 'probe-b', 'probe-c-line', 'probe-c-value', 'probe-d'] as const
 
 describe('silhouette and value', () => {
-  it('the ground the locks measure against is the ground the eye sees', () => {
-    // The core may not import the viewer, so the two constants are pinned by this test
-    // instead. A lock measuring contrast against a different grey measures nothing.
-    const hex = `#${GROUND_RGB.map((c) => c.toString(16).padStart(2, '0')).join('')}`
-    expect(hex).toBe(GROUND)
+  /**
+   * **This test used to pin two constants together and now it pins one to a property, and the
+   * demotion is stated rather than hidden.**
+   *
+   * The edge-contrast lock measures a sprite's boundary against `GROUND_RGB`. That number used
+   * to be duplicated in the bench page, so the two were pinned to each other here: a lock
+   * measuring contrast against a different grey than the one on screen measures nothing.
+   *
+   * **The bench page was deleted on 16/08** — drawing only makes sense inside a game scene — so
+   * there is no second constant left to agree with, and no page anybody looks at. `GROUND_RGB`
+   * is now a **measurement reference** rather than a surface: it says how hard an edge pushes
+   * against a neutral mid grey, which is a proxy for "does this silhouette read at all".
+   *
+   * What survives is the property that makes the proxy honest: **the reference must sit in the
+   * middle of the range.** Against black, every light sprite passes; against white, every dark
+   * one does. A lock calibrated at either end measures the palette instead of the drawing.
+   */
+  it('the reference the locks measure against is neutral and mid-range', () => {
+    const [r, g, b] = GROUND_RGB
+    expect(Math.max(r, g, b) - Math.min(r, g, b), 'the reference is not neutral').toBeLessThanOrEqual(2)
+    const l = luminance(GROUND_RGB)
+    expect(l).toBeGreaterThan(0.35)
+    expect(l).toBeLessThan(0.65)
   })
 
   it('every shipped sample reads against the ground, in every frame', () => {

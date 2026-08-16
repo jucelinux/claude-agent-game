@@ -254,8 +254,12 @@ He is the tiebreaker and the one who sets the bar — not an inspector. Rules in
     look: every route renders from current code on every request, with no cache and no build
     step.
   - **The shelf renders live from current code**, so every engine improvement reaches every
-    micro game ever made. That is the opposite of the gallery's rule and deliberately so:
-    the gallery is the record and freezes, the shelf is the product and moves.
+    micro game ever made. **It is the only surface, since 16/08.** The frozen gallery that used
+    to sit beside it was deleted at his instruction — *"só faz sentido desenhar se for em uma
+    cena de jogo... o subproduto aqui deva ser uma única coisa"* — and with it the live sprite
+    bench, the gate sheet and the viewer. What survived is the **terminal** eye: the contact
+    sheet and the findings channel, which are how the model perceives its own output and are not
+    a surface anybody looks at.
   - **Nothing is ever removed from the shelf.** He revisits it.
   - `dist/history-2026-08-15.html` is the frozen snapshot of everything up to the change.
   - **Three tracks feed it**, his words: improve the drawing system, improve the engine's

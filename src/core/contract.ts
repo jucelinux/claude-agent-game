@@ -12,7 +12,7 @@
  * a Godot or LÖVE dev would get nothing. A fixed-size indexed atlas with named phases and
  * declared anchors is the currency every engine already speaks. portable.
  */
-import type { Grammar, Params, RGB } from '../core/types.ts'
+import type { Grammar, Params, RGB } from './types.ts'
 
 export type Manifest = {
   readonly name: string

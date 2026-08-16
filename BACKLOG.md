@@ -386,9 +386,9 @@ sample since — `outline.rim` is on in every shipped tunables file. §3b.4, and
 - [x] ~~**A 4 px enclosed pocket between the gorilla's legs.**~~ → **Closed by him, 16/08:**
       *"Não percebo isso visualmente, nem precisamos revisitar isso."* A defect nobody can see
       is not a defect; it is a number I found. Kept in `DECISIONS.md` and off this list.
-- [ ] **`compose.ts` and `layers.ts` are still two paths and still uncompared** — for every
-      scene that is not a climb. The climb resolved its own half by refusing outright, which is
-      honest and is not the general fix.
+- [x] ~~**`compose.ts` and `layers.ts` are two paths and nothing compares them.**~~ →
+      **Closed 16/08 by deletion, on his call.** I had proposed a lock to keep the two honest;
+      the right answer was that one of them should not exist.
 - [x] ~~**Every clip of a subject renders twice under two cache keys.**~~ → **Fixed 16/08 at
       his instruction:** *"Isso é ruim. Em jogos mais robustos vai custar caro esse desperdício.
       Vamos resolver isso."* The scale is resolved above the main build instead of below it, so
@@ -436,22 +436,34 @@ without both is a rumour.
 | **difficulty, and it is a PAIR because one number is not a reading** | never aims: **6.1 m then falls** · aims at the nearest shelf: **67 m in a minute, still climbing** | `npx vitest run tests/climb.test.ts` | 16/08, after his note |
 | every hero's on-screen height | forest 132 px · moon 141 px · climb 132 px, all at a 3 px pixel | `node bin/micro.ts --static` | 16/08, after his note |
 | outline as a share of painted pixels | kitten 28%, gorilla 27% — the drawing was never the difference | `node bin/bench.ts --grammar cat-rise --tunables cat` | 16/08 |
-| gate page, tells found by grep | 0 | `node bin/gate.ts runs/probe-b.run.json && grep -cE "fixture\|label\|keydown\|button\|http\|seed" sheet/gate.html` | 15/08 |
+| lines of TypeScript, source and locks | 9 693 source, 3 564 locks | `find src bin -name '*.ts' \| xargs wc -l` | 16/08, after the deletion |
 
 ## The harness, as of 14/08
 
-Four commands, and the second is the loop.
+**Five commands, and the deletion of 16/08 took eight of them away.**
+
+His call: *"vamos manter apenas o que for vital para a continuidade deste repo. Se você precisa
+do olho, o mantenha. Isso se aplica a qualquer outro resquício de código."*
 
 | command | what it is |
 |---|---|
-| `node bin/serve.ts [runs…] [--set …]` | **the surface.** Open it once: the live run first, every kept generation behind it, `/selftest` for the viewer's null case |
-| `npm test` | the locks. Determinism, baseline, tunables, both channels' null cases, the animation family, the export contract, the live bench |
-| `node bin/bench.ts [run] [--set …]` | one bench turn in the terminal: contact sheet, 25% silhouette, counts, elapsed |
+| `node bin/micro.ts` | **the product.** The shelf on `/`, one game per route, live from current code on every request |
+| `npm test` | the locks. Determinism, baseline, tunables, the findings channel's null cases, the animation family, the sprite contract, three game loops run headless |
+| `node bin/bench.ts [run] [--set …]` | **my eye.** One bench turn in the terminal: contact sheet, 25% silhouette, findings, counts, elapsed |
 | `node bin/run.ts <run.json>` | headless: state hash and metrics, no presentation layer |
-| `node bin/keep.ts <run.json> [--topic …] [--note …]` | keep a generation by hand. The live bench does it on every swap |
-| `node bin/publish.ts` | the whole history as one static file → `dist/index.html`, deployable by dropping the folder |
 | `node bin/record.ts <out.json> [--set …]` | capture what you are looking at into a replayable run file |
-| `node bin/gate.ts <run.json>` | the gate sheet → `sheet/gate.html`. **The one page that is still a file**, and gitignored |
+
+**Deleted 16/08, and named here so nobody hunts for them:** `bin/serve.ts` (the live sprite
+bench), `bin/gate.ts` (the gate sheet), `bin/keep.ts` and `bin/publish.ts` (the frozen gallery),
+`bin/shell.ts`, `bin/scene.ts`, `src/viewer/`, `src/io/gallery.ts`, `src/scene/compose.ts`,
+`src/scene/gallery-scene.ts`, and the 33 kept generations. All of it showed drawing **outside a
+game**, which is the one thing this project has decided it does not deliver. Every one of them
+is in git history if a reason to want them back ever arrives.
+
+**`src/export/contract.ts` moved to `src/core/contract.ts` rather than dying.** The exporter is
+dead and the folder named a feature that does not exist, but its eight locks are not dead: they
+assert every grammar keeps one frame rect, a pivot on the grid, named phases landing on real
+frames, and timing in whole milliseconds. Those are facts about the art, not about exporting.
 
 Nothing is written to `.out` any more, and nothing has to be regenerated to be looked at:
 the page is served, the history is on disk, and both are always current.
@@ -468,65 +480,12 @@ In a batch, with samples attached. **Every item carries the five lines of `CLAUD
 what to open, what to do, how long, what a pass looks like, what each answer changes.**
 Written for him, so no method vocabulary crosses into this section.
 
-- [ ] 🟡 **Your sentence reaches further than the file I just deleted. How far?** Asked 16/08.
-      · *What happened:* you said drawing only makes sense inside a game scene, and that the
-      subproduct should be one thing. I deleted the second renderer. That was clearly right and
-      it is done.
-      · *What is left:* **962 lines that still show drawing outside a game.** They are three
-      different things and they are not equally guilty:
-        1. **My eye** — the terminal contact sheet and the findings channel. This is how I see my
-           own work without a browser. If it goes, I go blind. It is not a product surface and I
-           recommend keeping it.
-        2. **The live sprite bench and the gate sheet** — a web page showing sprites in cells,
-           out of any scene. This is a second surface by your definition. 616 lines.
-        3. **The frozen gallery** — 33 kept generations, 2.7 MB on disk. It is the only record of
-           what the art looked like on a past day. Git keeps the *code*, never the picture.
-      · *Do:* say **"tudo"**, **"só o bench e o gate"**, or **"nada mais"**.
-      · *Time:* thirty seconds.
-      · *Answer changes:* how much I delete. If you say "tudo", what is lost is the ability to
-      ever look at what a subject used to look like. I will not delete the gallery without you
-      saying so, because that destroys a record rather than a code path.
-
-- [x] ~~Check four things on the self-test page~~ → **all four confirmed by the human,
-      14/08.** The viewer's null case now has the one link the headless locks cannot cover.
-- [x] ~~**Approve, change or reject the new gate reading.**~~ → **Answered.** Adopted 14/08
-      as written below, then amended by him on 15/08: the end condition is the date, not a
-      strike count. Both are in `CLAUDE.md`'s gate block. _(Ticked 15/08 at a cycle open —
-      it had sat open in this file for a day after being settled twice. §3b.4.)_
-
-- [x] ~~The five reference loops~~ → **no longer needed.** Gate v3 needs no reference files
-      at all; it needs one sentence of commission and one word of verdict.
-
-- [x] ~~🟡 **Should the gorilla, the photographer and the trees be asked the seam question?**~~
-      → **Answered 16/08: LEAVE IT.** *"Não vamos mais mexer nesse micro game. Deixemos como
-      está."* The 135 hidden lines stay. They are recorded here and in `DECISIONS.md` so that
-      whoever lightens that coat one day knows what is under it. Asked 16/08:
-      · *Open:* nothing. This is a yes/no about work you have already approved.
-      · *What it is:* you told me the gorilla's limb contours were handled on purpose. They were
-      not. The gorilla has 135 of those internal lines, exactly like the cat had — you cannot see
-      them because the animal is black and the line is nearly black. The cat's are twice as
-      strong against ginger fur, which is why they jumped out at you there.
-      · *Do:* say **leave it** or **clean it**. "Leave it" means the gorilla keeps its hidden
-      lines and I do nothing. "Clean it" means I remove them, which changes 135 pixels of 837 by
-      an amount you probably cannot see today — but it stops the defect coming back if that
-      animal ever gets a lighter coat.
-      · *Time:* ten seconds.
-      · *Answer changes:* only whether I touch three subjects you already passed. Either answer
-      is fine and I am not asking because I think one is better.
-
-- [x] ~~🟡 **Run 8 — one jump, three inks.** Asked 15/08.~~ → **Answered 15/08.** He ranked
-      Chrono first; Stardew and the incumbent tied last. The verdict is compiled into
-      `TASTE.md` §1 and §1b and into every palette authored since. _(Ticked 16/08 at a cycle
-      open: it still said "this is the open round" a day after it was settled and acted on.
-      §3b.4.)_
-      · *Open:* `node bin/serve.ts`. Top row, three cells, same jump in three inks.
-      · *Do:* put them in order, best first, and say one sentence about the worst one.
-      · *Time:* two minutes.
-      · *A pass looks like:* one of them clearly looks more like a game you have played.
-      · *Answer changes:* which ink every future sample is authored in, including a
-      re-render of the walk and the attack. If the incumbent wins, my reading of your
-      "a tinta precisa aprimorar" was wrong and I go hunting the real cause among the four
-      others I listed — palette range, speckle, light direction, or missing cast shadow.
+- [x] ~~🟡 **Your sentence reaches further than the file I just deleted. How far?**~~ →
+      **Answered 16/08: all of it.** *"Vamos manter apenas o que for vital para a continuidade
+      deste repo. Se você precisa do olho, o mantenha. Isso se aplica a qualquer outro resquício
+      de código que estiver presente e sem uso."* The bench page, the gate sheet, the viewer and
+      the 33 frozen generations are gone. The terminal eye and the findings channel stayed,
+      because without them I cannot see my own output at all.
 
 - [ ] **Run 7 — the jump, the attack, and the walk as control.** SUPERSEDED, kept for the record. Asked 15/08.
       · *Open:* `node bin/serve.ts`. Three loops, top row, labelled jump / attack / walk.

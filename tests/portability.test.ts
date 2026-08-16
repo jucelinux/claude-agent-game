@@ -3,8 +3,8 @@ import { loadParams } from '../src/io/load.ts'
 import { strip } from '../src/core/render.ts'
 import { fixture } from '../src/grammars/fixture.ts'
 import { GRAMMARS, PAIRS } from '../src/grammars/index.ts'
-import { describe as manifestOf, validate } from '../src/export/contract.ts'
-import type { Manifest } from '../src/export/contract.ts'
+import { describe as manifestOf, validate } from '../src/core/contract.ts'
+import type { Manifest } from '../src/core/contract.ts'
 
 /**
  * **The artifact stays exportable.** The exporter ships at the vertical slice; these locks

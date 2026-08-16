@@ -56,7 +56,10 @@ describe('determinism — the blocker (HARNESS §2.5)', () => {
    * cannot change what was drawn — and if one ever did, the determinism hash above catches
    * it, which is the guarantee this lock is only the cheap early warning for.
    */
-  const CONSUMERS = ['src/micro/app.ts', 'src/viewer/page.ts']
+  // One consumer now, and it used to be two. The bench page that showed sprites in cells was
+  // deleted on 16/08 at his instruction: drawing only makes sense inside a game scene, so the
+  // only thing allowed to read a clock is the thing that runs one.
+  const CONSUMERS = ['src/micro/app.ts']
 
   it('no ambient randomness anywhere, and no clock below the consumers', () => {
     const always = [/Math\.random/, /Date\.now/, /new Date\b/]
