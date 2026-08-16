@@ -56,6 +56,16 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     // The part's own depth rides on the bone's, scaled with it: a body that shrinks takes
     // its browridge along instead of leaving it floating where the head used to be.
     const xf = part.z === undefined ? bone : { ...bone, z: bone.z + bone.sz * part.z }
+    /**
+     * **A marking on the far side of its bone is not drawn at all.**
+     *
+     * A decal has a place on a body, and half the places on a body face away from you. The
+     * marking's own depth offset says which half it is on: negative is toward the viewer.
+     * Rotate the body and that offset rotates with it, so a visor authored on the front of a
+     * helmet disappears round the back on its own — which is the whole reason a body can now
+     * be turned without hand-authoring what each facing shows.
+     */
+    if (part.marking === true && (part.z ?? 0) > 0) continue
     paintPart(
       painter, part.shape, xf, ramp.indices, params.light, params.fill, i, rng,
       params.texture.speckle, part.shift ?? 0, part.marking === true,

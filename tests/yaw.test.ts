@@ -4,6 +4,7 @@ import { execute, loadParams } from '../src/io/load.ts'
 import { sprite } from '../src/core/render.ts'
 import { hashBuffers } from '../src/core/hash.ts'
 import { grammarByName } from '../src/grammars/index.ts'
+import { findings } from '../src/perception/structure.ts'
 import { ASTRONAUT } from '../src/grammars/run14/astronaut.ts'
 
 /**
@@ -90,8 +91,19 @@ describe('the eight facings are eight different pictures', () => {
       for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (data[y * w + x] !== 0) { if (x < x0) x0 = x; if (x > x1) x1 = x }
       width[f] = x1 - x0 + 1
     }
-    expect(width['n'], 'a body seen from behind is not narrower than one seen from the side').toBeLessThan(width['e'] as number)
-    expect(width['n'], 'the body collapsed when turned').toBeGreaterThan(12)
+    /**
+     * **Not "narrower", which is what this asserted first and it was simply wrong about
+     * bodies.** A person is *wider* seen from the front than from the side: shoulders are
+     * further apart than a chest is deep. The astronaut proved it the moment his arms were
+     * pushed out to where a suit actually holds them, and the test failed on a fix.
+     *
+     * What a turn must do is *change the silhouette*, and no facing may collapse. A body with
+     * no depth yaws into a line, and that is the failure this is really watching for.
+     */
+    const w = Object.values(width)
+    expect(Math.min(...w), 'a facing collapsed').toBeGreaterThan(12)
+    expect(Math.max(...w) / Math.min(...w), 'every facing is the same width, so nothing turned')
+      .toBeGreaterThan(1.2)
     // Every facing is a distinct picture; two that render alike are one facing wearing two names.
     const hashes = facings.map((f) => execute({ grammar: `astro-idle-${f}`, tunables: 'astronaut', seed: 1 }).hash)
     expect(new Set(hashes).size, 'two facings render identically').toBe(facings.length)
@@ -129,6 +141,34 @@ describe('the eight facings are eight different pictures', () => {
         .toBeGreaterThan(side / 3)
     }
   })
+})
+
+/**
+ * **Every facing keeps every limb**, and it is the lock his fifth reading asked for.
+ *
+ * *"quando ando com S, não visualizo os braços"* · *"quando ando AS... vejo apenas o braço
+ * direito"* · *"quando ando SD, eu nem consigo descrever o que está errado"*. Three ways of
+ * reporting the same measurable thing: a part that renders zero pixels.
+ *
+ * The findings channel has asked this question since round zero. Nothing had ever asked it
+ * **per facing**, because until this morning a body had one.
+ *
+ * **The far arm behind the body in a pure side view is exempt, and it is the only exemption.**
+ * That one is correct: it is what "behind" means. Every other facing shows some of both arms
+ * or the turn is lying about where the limbs are.
+ */
+describe('a turned body keeps its limbs', () => {
+  for (const clip of ['idle', 'lope', 'leap']) {
+    for (const facing of ['ne', 'n', 'se', 's']) {
+      it(`astro-${clip}-${facing}`, () => {
+        const name = `astro-${clip}-${facing}`
+        const run = execute({ grammar: name, tunables: 'astronaut', seed: 1 })
+        const gone = findings(run.frames, grammarByName(name))
+          .filter((f) => f.check === 'absent' && /arm[FN][UL]/.test(f.message))
+        expect(gone.map((f) => f.message), `${name} loses a limb entirely`).toEqual([])
+      })
+    }
+  }
 })
 
 describe('which way he is looking', () => {

@@ -116,9 +116,12 @@ export const earth: Grammar = {
  * and a shadowed bowl. On the moon a crater is the only relief there is, and it is what stops
  * a grey plane from being a grey plane.
  *
- * They are authored **flat** — much wider than tall — because the camera looks down at the
- * surface at a shallow angle, and a circle seen that way is an ellipse. That single ratio is
- * the whole of the perspective in this scene.
+ * They are authored as a **circle seen at an angle** — his correction of 16/08: *"o solo lunar
+ * é mais memorável por suas crateras... trocar essas pedras maiores por crateras circulares"*.
+ * The first version was 0.42 as tall as it was wide, which is a circle viewed almost edge-on
+ * and reads as a puddle. 0.66 is a circle seen from about forty degrees above, and that single
+ * ratio is the whole of the perspective in this scene — it has to agree with how much floor
+ * the astronaut can walk into, and it now does.
  */
 function makeCrater(name: string, r: number, seed: number): Grammar {
   return {
@@ -127,7 +130,7 @@ function makeCrater(name: string, r: number, seed: number): Grammar {
     skeleton: { bones: [{ name: 'c', parent: null, x: 0, y: 0, z: 0, angle: 0 }] },
     parts: [
       // The bowl: a shallow dish, one step down from the plain.
-      { name: 'bowl', bone: 'c', material: 'regolith', shift: -1, shape: { kind: 'lobed', cx: 0, cy: 0, rx: r, ry: r * 0.42, rz: r * 0.3, lobes: 6, depth: 0.09, phase: seed, octaves: 2 } },
+      { name: 'bowl', bone: 'c', material: 'regolith', shift: -1, shape: { kind: 'lobed', cx: 0, cy: 0, rx: r, ry: r * 0.66, rz: r * 0.5, lobes: 6, depth: 0.09, phase: seed, octaves: 2 } },
       /**
        * **The rim and the shadow, and both now agree with the lamp.**
        *
@@ -142,8 +145,8 @@ function makeCrater(name: string, r: number, seed: number): Grammar {
        * These are markings rather than solids, so a crater is a hole in the ground rather than
        * a lid on it, and none of the three rings draws an inner line.
        */
-      { name: 'rim', bone: 'c', material: 'regolith', marking: true, shift: 1, z: -1, shape: { kind: 'lobed', cx: -r * 0.1, cy: -r * 0.2, rx: r * 0.96, ry: r * 0.36, rz: r * 0.26, lobes: 6, depth: 0.09, phase: seed + 0.3, octaves: 2 } },
-      { name: 'shade', bone: 'c', material: 'regolith', marking: true, shift: -2, z: -2, shape: { kind: 'lobed', cx: -r * 0.2, cy: -r * 0.04, rx: r * 0.62, ry: r * 0.24, rz: r * 0.2, lobes: 5, depth: 0.12, phase: seed + 1.7, octaves: 2 } },
+      { name: 'rim', bone: 'c', material: 'regolith', marking: true, shift: 1, z: -1, shape: { kind: 'lobed', cx: -r * 0.1, cy: -r * 0.2, rx: r * 0.96, ry: r * 0.58, rz: r * 0.44, lobes: 6, depth: 0.09, phase: seed + 0.3, octaves: 2 } },
+      { name: 'shade', bone: 'c', material: 'regolith', marking: true, shift: -2, z: -2, shape: { kind: 'lobed', cx: -r * 0.2, cy: -r * 0.04, rx: r * 0.62, ry: r * 0.38, rz: r * 0.34, lobes: 5, depth: 0.12, phase: seed + 1.7, octaves: 2 } },
     ],
     gait: STILL,
   }
@@ -163,12 +166,19 @@ function makeRock(name: string, r: number, seed: number): Grammar {
   }
 }
 
+/**
+ * **Six craters and two small rocks**, and the ratio is his: *"acho válido manter algumas
+ * pedras, e trocar essas pedras maiores por crateras circulares"*. A boulder on the moon is a
+ * rare thing; a crater is what the ground is made of.
+ */
 export const MOON: readonly Grammar[] = [
   earth,
   makeCrater('crater-a', 26, 0.4),
   makeCrater('crater-b', 17, 2.2),
   makeCrater('crater-c', 38, 4.1),
+  makeCrater('crater-d', 12, 5.6),
+  makeCrater('crater-e', 31, 1.9),
+  makeCrater('crater-f', 21, 3.3),
   makeRock('rock-a', 7, 1.3),
   makeRock('rock-b', 4.5, 3.7),
-  makeRock('rock-c', 10, 5.9),
 ]

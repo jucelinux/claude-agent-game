@@ -95,24 +95,27 @@ export const moonScene: Scene = {
     // is drawn before everything: it is not far away, it is *behind the world*.
     { grammar: 'earth', tunables: 'earth', x: 236, y: 40, sky: true },
 
-    // The far rim: craters at the horizon, where the surface curves out of sight.
-    { grammar: 'crater-c', tunables: 'regolith', x: 60, depth: FAR },
-    { grammar: 'crater-a', tunables: 'regolith', x: 196, depth: FAR },
-    { grammar: 'rock-c', tunables: 'regolith', x: 128, depth: FAR },
-    { grammar: 'rock-a', tunables: 'regolith', x: 288, depth: FAR },
+    // **The far rim: craters at the horizon**, where the surface curves out of sight.
+    { grammar: 'crater-c', tunables: 'regolith', x: 56, depth: FAR },
+    { grammar: 'crater-e', tunables: 'regolith', x: 196, depth: FAR },
+    { grammar: 'crater-d', tunables: 'regolith', x: 128, depth: FAR },
+    { grammar: 'crater-b', tunables: 'regolith', x: 286, depth: FAR },
 
-    { grammar: 'crater-b', tunables: 'regolith', x: 26, depth: MID },
-    { grammar: 'crater-c', tunables: 'regolith', x: 174, depth: MID },
-    { grammar: 'rock-b', tunables: 'regolith', x: 106, depth: MID },
-    { grammar: 'rock-c', tunables: 'regolith', x: 252, depth: MID },
+    { grammar: 'crater-a', tunables: 'regolith', x: 26, depth: MID },
+    { grammar: 'crater-c', tunables: 'regolith', x: 176, depth: MID },
+    { grammar: 'crater-f', tunables: 'regolith', x: 100, depth: MID },
+    { grammar: 'crater-d', tunables: 'regolith', x: 254, depth: MID },
+    { grammar: 'rock-b', tunables: 'regolith', x: 310, depth: MID },
 
-    { grammar: 'crater-a', tunables: 'regolith', x: 88, depth: NEAR },
-    { grammar: 'rock-c', tunables: 'regolith', x: 210, depth: NEAR },
+    { grammar: 'crater-e', tunables: 'regolith', x: 84, depth: NEAR },
+    { grammar: 'crater-b', tunables: 'regolith', x: 212, depth: NEAR },
     { grammar: 'rock-a', tunables: 'regolith', x: 300, depth: NEAR },
 
-    { grammar: 'crater-b', tunables: 'regolith', x: 150, depth: FRONT },
-    { grammar: 'rock-b', tunables: 'regolith', x: 40, depth: FRONT },
-    { grammar: 'rock-c', tunables: 'regolith', x: 272, depth: FRONT },
+    // **The front rank**, and it is deliberately sparse: this is the floor the player walks
+    // on and a boulder standing in it is a boulder hiding him.
+    { grammar: 'crater-c', tunables: 'regolith', x: 148, depth: FRONT },
+    { grammar: 'crater-f', tunables: 'regolith', x: 34, depth: FRONT },
+    { grammar: 'crater-a', tunables: 'regolith', x: 280, depth: FRONT },
 
     /**
      * **The astronaut**, and every clip name here is a *family*: the runtime appends the

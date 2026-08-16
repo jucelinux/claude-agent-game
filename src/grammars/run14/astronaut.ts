@@ -96,20 +96,39 @@ const bones: Bone[] = [
   { name: 'torso', parent: 'pelvis', x: 0, y: -2, z: 0, angle: 0 },
   { name: 'neck', parent: 'torso', x: 0, y: -12, z: 0, angle: 0 },
   { name: 'head', parent: 'neck', x: 0.5, y: -4, z: 0, angle: 0 },
-  // Far limbs first. ±5 against a torso 5.5 deep, so a near limb stands proud of the barrel
-  // and a far one is genuinely behind it — and both keep that relationship when turned.
+  /**
+   * Far limbs first. **±7.6 against a torso 5.4 wide**, and the number is set by the facing he
+   * could not read rather than by the one he could.
+   *
+   * In a side view the arms overlap the barrel and any offset past 5.5 works. Turned to face
+   * the camera those same offsets become the shoulders' width on screen, and at ±5 the arms
+   * cleared the torso by two pixels and vanished behind it — *"quando ando com S, não
+   * visualizo os braços"*. At ±7.6 they stand five pixels clear of the barrel and, more
+   * importantly, clear of the THIGH — which sits at ±3.4 and was eating the forearm at the
+   * three-quarter facings. A suit holds the arms out; this is that, said in the only axis a
+   * side-on body has for saying it.
+   */
   // **Both arms hang the same way and differ only in PHASE.** They were mirrored — the far
   // one splayed forward and the near one back — which is a natural thing to type and an
   // impossible thing for a body. It is the third time this project has shipped that defect,
   // after probe D and the photographer, and the first time it was caught by a lock.
-  { name: 'armFU', parent: 'torso', x: 0, y: -10, z: 5, angle: -0.03 },
-  { name: 'armFL', parent: 'armFU', x: 0, y: 7, z: 0, angle: -0.04 },
+  { name: 'armFU', parent: 'torso', x: 0, y: -10, z: 7.6, angle: -0.03 },
+  /**
+   * **The forearm splays outboard, and that offset only exists because the body can turn.**
+   *
+   * A pressure suit's shoulder cannot bring the arms to the sides — they are held out. In the
+   * authored side view "out" is the depth axis, so it is invisible there and it costs nothing;
+   * turned to face the camera it is the only thing keeping the forearm clear of the barrel.
+   * Without it the elbow drifted back behind the torso and disappeared: *"quando ando com S,
+   * não visualizo os braços"*.
+   */
+  { name: 'armFL', parent: 'armFU', x: 0, y: 7, z: 2.6, angle: -0.04 },
   { name: 'legFU', parent: 'pelvis', x: 0, y: 1, z: 3.4, angle: 0 },
   { name: 'legFL', parent: 'legFU', x: 0, y: 8.5, z: 0, angle: 0.02 },
   { name: 'legNU', parent: 'pelvis', x: 0, y: 1, z: -3.4, angle: 0 },
   { name: 'legNL', parent: 'legNU', x: 0, y: 8.5, z: 0, angle: 0.02 },
-  { name: 'armNU', parent: 'torso', x: 0, y: -10, z: -5, angle: -0.03 },
-  { name: 'armNL', parent: 'armNU', x: 0, y: 7, z: 0, angle: -0.04 },
+  { name: 'armNU', parent: 'torso', x: 0, y: -10, z: -7.6, angle: -0.03 },
+  { name: 'armNL', parent: 'armNU', x: 0, y: 7, z: -2.6, angle: -0.04 },
 ]
 
 /**
@@ -144,8 +163,15 @@ const parts: Part[] = [
    * has turned away, so it is the silhouette cue the whole eight-way walk rests on. A rect
    * rather than an ellipse because it is the only hard-edged thing on the figure and that
    * contrast is what makes it read as equipment.
+   *
+   * **It carries NO depth offset, and that is the correction.** It had `z: 5.6` — a lie, told
+   * so it would draw behind the torso in a side view where nobody could check it. A pack is
+   * centred across a person's back; it sits *behind* them in x and nowhere in z. Turned a
+   * quarter, the lie put it five pixels to one side and on top of an arm: *"quando ando com o
+   * W o braço do astronauta está atrás da mochila"*. Its depth now comes from its own `d`,
+   * which is what a solid's depth is for.
    */
-  { name: 'pack', bone: 'torso', material: 'gear', z: 5.6, shift: -1, shape: { kind: 'rect', x: -7.4, y: -13, w: 6.4, h: 12, d: 6.4 } },
+  { name: 'pack', bone: 'torso', material: 'gear', shift: -1, shape: { kind: 'rect', x: -7.2, y: -13, w: 6.2, h: 12, d: 7.4 } },
   { name: 'neck', bone: 'neck', material: 'gear', shape: { kind: 'capsule', x0: 0, y0: -0.5, x1: 0, y1: 1.5, r: 2.6 } },
   // The helmet: a sphere, and the one part of this body that is genuinely the same from every
   // angle. It is also the largest single mass, which is what makes the figure read at 40 px.
@@ -161,14 +187,27 @@ const parts: Part[] = [
   // **The visor**, and it is a marking: gold on the front of the helmet, not a lump attached
   // to it. Its depth is what turns it — at `n` it rotates round the sphere and disappears,
   // which is precisely how a person can tell which way he is looking.
-  { name: 'visor', bone: 'head', material: 'visor', marking: true, z: -3.6, shape: { kind: 'ellipse', cx: 2.2, cy: 0.2, rx: 3.4, ry: 3.6, rz: 2.4 } },
+  /**
+   * **The visor, and its position is now honest.** It had `cx: 2.2, z: -3.6` — half of it
+   * forward and half of it shoved at the camera to clear the skull. The shove is a position,
+   * so it rotated: a quarter turn to the south sent it 3.6 px to the *left* and he saw it
+   * *"olhando para a esquerda"*.
+   *
+   * A visor is on the front of a helmet and nowhere in depth. It goes forward in `cx`, and the
+   * decal rule in `render.ts` hides it when the turn carries it round the back. `z: -0.2` is
+   * the smallest negative that keeps it on the near half at the authored facing — a marking
+   * needs a side, and zero has none.
+   */
+  { name: 'visor', bone: 'head', material: 'visor', marking: true, z: -0.2, shape: { kind: 'ellipse', cx: 3.4, cy: 0.2, rx: 3.6, ry: 3.8, rz: 2.4 } },
   // The joint rings: the only places a suit is *supposed* to show a seam.
-  { name: 'ringW', bone: 'torso', material: 'gear', marking: true, z: -4.4, shape: { kind: 'ellipse', cx: 0, cy: 0.6, rx: 5.2, ry: 1.3, rz: 5.2 } },
-  { name: 'ringN', bone: 'neck', material: 'gear', marking: true, z: -3, shape: { kind: 'ellipse', cx: 0, cy: 1.4, rx: 3.2, ry: 1.2, rz: 3.2 } },
+    // The joint rings run all the way round the body, so they sit on the centre plane and turn
+  // with it. -0.2 rather than 0 for the same reason as the visor: a decal needs a side.
+  { name: 'ringW', bone: 'torso', material: 'gear', marking: true, z: -0.2, shape: { kind: 'ellipse', cx: 0, cy: 0.6, rx: 5.5, ry: 1.4, rz: 5.5 } },
+  { name: 'ringN', bone: 'neck', material: 'gear', marking: true, z: -0.2, shape: { kind: 'ellipse', cx: 0, cy: 1.4, rx: 3.4, ry: 1.3, rz: 3.4 } },
   // The shoulder patch. Three pixels of saturated red on a body with none, so the eye finds
   // the figure against a grey plain instantly — which matters more here than on any subject
   // so far, because the player has to keep track of him while he moves in eight directions.
-  { name: 'flag', bone: 'armNU', material: 'flag', marking: true, z: -2.6, shape: { kind: 'ellipse', cx: -0.4, cy: 1.6, rx: 1.7, ry: 2, rz: 1.6 } },
+  { name: 'flag', bone: 'armNU', material: 'flag', marking: true, z: -2.4, shape: { kind: 'ellipse', cx: -0.4, cy: 1.6, rx: 1.8, ry: 2.1, rz: 1.4 } },
 ]
 
 const PHASES = [
@@ -214,10 +253,10 @@ const LOPE: Gait = {
      * restrained; nine is broken. **A fact about a subject is not a licence to stop animating
      * it**, and that is the general form of the mistake.
      */
-    { bone: 'armNU', channel: 'angle', keys: [-0.16, -0.3, -0.44, -0.3] },
-    { bone: 'armNL', channel: 'angle', keys: [-0.3, -0.34, -0.38, -0.34] },
-    { bone: 'armFU', channel: 'angle', keys: [-0.44, -0.3, -0.16, -0.3] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.38, -0.34, -0.3, -0.34] },
+    { bone: 'armNU', channel: 'angle', keys: [0.01, -0.13, -0.27, -0.13] },
+    { bone: 'armNL', channel: 'angle', keys: [-0.15, -0.19, -0.23, -0.19] },
+    { bone: 'armFU', channel: 'angle', keys: [-0.27, -0.13, 0.01, -0.13] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.23, -0.19, -0.15, -0.19] },
     { bone: 'head', channel: 'angle', keys: [0.01, -0.01, 0.01, -0.01] },
   ],
 }
@@ -239,10 +278,10 @@ const IDLE: Gait = {
     { bone: 'pelvis', channel: 'y', keys: [0, -0.12, 0, 0.1] },
     { bone: 'torso', channel: 'angle', keys: [0.02, 0.01, 0.02, 0.03] },
     { bone: 'head', channel: 'angle', keys: [0.02, -0.03, -0.01, 0.04] },
-    { bone: 'armNU', channel: 'angle', keys: [-0.22, -0.24, -0.22, -0.2] },
-    { bone: 'armNL', channel: 'angle', keys: [-0.3, -0.32, -0.3, -0.28] },
-    { bone: 'armFU', channel: 'angle', keys: [-0.19, -0.21, -0.19, -0.17] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.25, -0.27, -0.25, -0.23] },
+    { bone: 'armNU', channel: 'angle', keys: [-0.13, -0.15, -0.13, -0.11] },
+    { bone: 'armNL', channel: 'angle', keys: [-0.17, -0.19, -0.17, -0.15] },
+    { bone: 'armFU', channel: 'angle', keys: [-0.11, -0.13, -0.11, -0.09] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.14, -0.16, -0.14, -0.12] },
     { bone: 'legNU', channel: 'angle', keys: [0.01, 0.02, 0.01, 0] },
     { bone: 'legFU', channel: 'angle', keys: [0, 0.01, 0.02, 0.01] },
   ],
@@ -271,10 +310,10 @@ const LEAP: Gait = {
     { bone: 'legNL', channel: 'angle', keys: [0.5, 0.06, 0.46, 0.16] },
     { bone: 'legFU', channel: 'angle', keys: [0.36, -0.24, 0.28, 0.06] },
     { bone: 'legFL', channel: 'angle', keys: [0.46, 0.04, 0.4, 0.1] },
-    { bone: 'armNU', channel: 'angle', keys: [-0.14, -0.44, -0.4, -0.34] },
-    { bone: 'armNL', channel: 'angle', keys: [-0.4, -0.26, -0.24, -0.3] },
-    { bone: 'armFU', channel: 'angle', keys: [-0.1, -0.4, -0.36, -0.3] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.36, -0.22, -0.2, -0.26] },
+    { bone: 'armNU', channel: 'angle', keys: [-0.04, -0.28, -0.25, -0.2] },
+    { bone: 'armNL', channel: 'angle', keys: [-0.24, -0.14, -0.12, -0.17] },
+    { bone: 'armFU', channel: 'angle', keys: [-0.02, -0.25, -0.22, -0.18] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.21, -0.12, -0.1, -0.15] },
     { bone: 'head', channel: 'angle', keys: [0.04, -0.02, -0.03, -0.01] },
   ],
 }
@@ -291,7 +330,9 @@ export const ASTRO_CLIPS = { idle: IDLE, lope: LOPE, leap: LEAP } as const
  */
 export const ASTRONAUT: readonly Grammar[] = Object.entries(ASTRO_CLIPS).flatMap(([clip, gait]) =>
   (['e', 'ne', 'n', 'se', 's'] as const).map((f) =>
-    yaw(base(`astro-${clip}-${f}`, gait), YAW_OF[f], `astro-${clip}-${f}`),
+    // The amplitudes come from `tunables/astronaut.json`, repeated here because `src/core`
+    // may not read a tunables file and a unit conversion that guesses its units is a bug.
+    yaw(base(`astro-${clip}-${f}`, gait), YAW_OF[f], `astro-${clip}-${f}`, 0.26, 7),
   ),
 )
 

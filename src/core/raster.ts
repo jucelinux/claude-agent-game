@@ -144,7 +144,22 @@ export function paintPart(
       // into paint order — which is the behaviour being replaced, and therefore the null
       // case that proves the solver is what is doing the work (`HARNESS.md` §5).
       const z = xf.z + xf.sz * hit.dz
-      if (z > (depth[at] as number)) continue
+      /**
+       * **A marking wins the depth test against the surface it lies on, and that is what
+       * makes it a decal rather than a solid.**
+       *
+       * Its own geometry has already decided whether it is visible at all: `paintPart` is
+       * given `clipToBody` only when the marking sits on the near half of its bone, and is
+       * not called otherwise. So a marking that is being drawn is a marking that faces the
+       * viewer, and it must not then lose to the sphere three pixels behind it.
+       *
+       * **This is what made a turnable body possible.** Before it, a marking had to be pushed
+       * artificially toward the camera to clear the solid beneath it — and that push is a
+       * *position*, so it rotated with everything else, and a visor pushed 3.6 units at the
+       * viewer became a visor 3.6 units to the left when the body turned a quarter. His
+       * reading: *"quando ando com S... o visor está olhando para a esquerda"*.
+       */
+      if (!clipToBody && z > (depth[at] as number)) continue
 
       // Brightness: outward normal against the direction the light comes from, bent by the
       // ramp curve before it is quantised. A linear map is physics; a ramp is a decision.

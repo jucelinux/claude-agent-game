@@ -38,8 +38,14 @@
  */
 import type { Bone, Gait, Grammar, Part, Shape, Track } from './types.ts'
 
-/** How far a limb reaches from its joint, in bone units. Sets how much depth a swing buys. */
-const LIMB = 10
+/**
+ * **How far a limb reaches from its joint, in bone units.**
+ *
+ * A rotation only becomes a *translation* in depth once you multiply it by a radius, and this
+ * is that radius. 7.5 is measured rather than picked: the upper arm and the thigh of every
+ * body in this project run between 7 and 8.5 units.
+ */
+const LIMB = 7.5
 
 const yawPoint = (x: number, z: number, c: number, s: number): { x: number; z: number } => ({
   x: x * c - z * s,
@@ -113,8 +119,11 @@ function yawPart(part: Part, c: number, s: number): Part {
  * is not linear in the key: a limb at 10 degrees barely shortens and one at 60 shortens by
  * half. A track key is a fraction of an amplitude, so turning one into a length needs the
  * amplitude. It is passed rather than read, because `src/core` may not load a tunables file.
+ *
+ * `depth` is the same story for the other end: the `z` channel's keys are read back through
+ * `gait.depth` in pixels, so a distance has to be divided by it to become a key.
  */
-export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26): Grammar {
+export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26, depth = 7): Grammar {
   const a = turns * Math.PI * 2
   const c = Math.cos(a)
   const s = Math.sin(a)
@@ -132,7 +141,7 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26)
    */
   const bones: Bone[] = grammar.skeleton.bones.map((b) => {
     const p = yawPoint(b.x, b.z ?? 0, c, s)
-    return { ...b, x: p.x, z: p.z + b.angle * s * LIMB, angle: b.angle * c }
+    return { ...b, x: p.x, z: p.z + Math.sin(b.angle * Math.PI * 2) * LIMB * s, angle: b.angle * c }
   })
 
   const parts: Part[] = grammar.parts.map((p) => yawPart(p, c, s))
@@ -150,6 +159,21 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26)
    * `gait.swing` (turns), so the conversion has to go through both. It is done at the ratio
    * the tunables declare, which keeps the decomposition anchored rather than tuned.
    */
+  /**
+   * **The conversion runs through BOTH amplitudes, and the first version ran through
+   * neither.** It read `key × sin θ × 10`, and the runtime then multiplied that by
+   * `gait.depth`. So a key of -0.22 — an arm hanging twenty degrees out — became **eleven
+   * pixels of depth travel** on a body whose limb rows are six and a half apart. Every limb in
+   * every turned facing was flung clean through the torso, which is why he could not even
+   * describe what was wrong with the south-east view.
+   *
+   * A track key is a *fraction of an amplitude*. Turning one into a distance needs the
+   * amplitude it is a fraction of (`swing`, in turns), the radius the rotation acts at
+   * (`LIMB`), and the amplitude the answer will be read back through (`depth`, in pixels).
+   * Leaving any of the three out is a unit error wearing a plausible number.
+   */
+  const toDepth = (k: number): number => (Math.sin(k * swing * Math.PI * 2) * LIMB * s) / depth
+
   const tracks: Track[] = []
   for (const t of grammar.gait.tracks) {
     if (t.channel !== 'angle' || Math.abs(s) < 1e-6) {
@@ -159,7 +183,7 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26)
     if (Math.abs(c) > 1e-6) tracks.push({ ...t, keys: t.keys.map((k) => k * c) })
     // A turn of exactly a quarter leaves no on-screen rotation at all, and pushing a zeroed
     // track would be a track that paints nothing but still costs a lookup.
-    tracks.push({ bone: t.bone, channel: 'z', keys: t.keys.map((k) => k * s * LIMB) })
+    tracks.push({ bone: t.bone, channel: 'z', keys: t.keys.map(toDepth) })
     /**
      * **The third component, and leaving it out was the first version's real defect.**
      *

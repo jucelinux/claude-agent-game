@@ -45,13 +45,13 @@
   },
   "canvas": {
     "w": 104,
-    "h": 64,
+    "h": 80,
     "originX": 48,
-    "originY": 40
+    "originY": 48
   },
   "_anchors": {
     "canvas.w": "104. The widest crater is `crater-c` at 38 units of radius - 78 px across after the lobed rim's crests - and 96 clipped it on both sides; the outline lock named it. A crater is authored flat because the camera looks down at the surface at a shallow angle, and that one ratio is the whole of the perspective in this scene.",
-    "canvas.h": "64. A crater is authored around its own centre, so half its 34 px of height sits BELOW the origin — and at 56 with the origin at 40 the largest one reached the last row of the cell. The outline lock named it at 43,55.",
+    "canvas.h": "80. A crater is authored around its own centre and is now a circle seen from about forty degrees rather than one seen edge-on, so it is 0.66 as tall as it is wide instead of 0.42 — the largest is 50 px tall against 34. At 64 the outline lock caught it at row 63.",
     "canvas.originX": "canvas.w / 2. Every subject in this project centres horizontally in its cell, so a facing swap or a scale change never slides the body sideways.",
     "tones.perMaterial": "5, the Chrono idiom he ranked first on 15/08.",
     "frames.walk": "2, the minimum a gait accepts. Nothing in the lunar sky or on its surface moves: the moon is tidally locked, so from a landing site the Earth hangs in one place forever, and a rock is a rock. Two identical frames is the honest way to say 'still' in a vocabulary whose unit is a cycle.",
@@ -77,6 +77,6 @@
     "fill.y": "+0.7, from BELOW. This is bounce off the regolith, which on the moon is the ONLY bounce there is.",
     "fill.z": "-0.2, barely on the viewer side.",
     "fill.weight": "0.03, the lowest in the project by a factor of five. A fill stands in for sky bounce and there is no sky; what remains is regolith bounce, which is why it is not zero.",
-    "canvas.originY": "40, canvas.h - 24. A crater's origin is the middle of its bowl, which is where the hole meets the plain; a rock's is the ground under it. Both place by origin rather than by foot, because the ground contact of a depression IS its centre and its lowest painted pixel is its far rim."
+    "canvas.originY": "48, canvas.h - 32. A crater's origin is the middle of its bowl, which is where the hole meets the plain; a rock's is the ground under it. Both place by origin rather than by foot, because the ground contact of a depression IS its centre and its lowest painted pixel is its near rim."
   }
 }
