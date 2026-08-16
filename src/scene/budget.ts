@@ -110,13 +110,24 @@ export function budgetOf(stage: Stage, gzipBytes = 0): Budget {
       : stage.w * stage.h + c.motes.count +
         (Math.ceil(stage.h / c.bandH) + 2) * c.perBand * sprites
 
+  /**
+   * **The runner's own loop, and it is the second time this instrument was blind to a whole draw
+   * path.** The climb taught the lesson and the fix was applied only to the climb; a week-old
+   * finding does not generalise itself. One backdrop stamp, one stone per visible slot, the
+   * reaper and the runner.
+   */
+  const n = stage.runner
+  const onScreen = n === null ? 0 : Math.ceil(stage.w / (n.spacing - n.jitterX)) + 2
+  const runCalls = n === null ? 0 : 1 + onScreen + 2
+  const runPixels = n === null ? 0 : screen + onScreen * sprites
+
   return {
     perFrame: {
-      // backdrop + rain + subjects + the climb's own loops + the final blit
-      drawCalls: 1 + rainCalls + stage.placed.length + climbCalls + 1,
-      pixels: screen + sprites + climbPixels,
+      // backdrop + rain + subjects + the climb's or the runner's own loops + the final blit
+      drawCalls: 1 + rainCalls + stage.placed.length + climbCalls + runCalls + 1,
+      pixels: screen + sprites + climbPixels + runPixels,
       blitPixels: stage.w * stage.scale * stage.h * stage.scale,
-      overdraw: (screen + sprites + climbPixels) / screen,
+      overdraw: (screen + sprites + climbPixels + runPixels) / screen,
     },
     load: {
       decodePixels,
