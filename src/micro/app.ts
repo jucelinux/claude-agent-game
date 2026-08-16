@@ -46,7 +46,7 @@ const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
     w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
     groundRamp: stage.groundRamp, floor: stage.floor, rain: stage.rain, interactive, meter: interactive,
     layers: stage.layers.map((l) => ({
-      w: l.w, h: l.h, ox: l.ox, oy: l.oy, n: l.frames, ms: l.msPerFrame,
+      w: l.w, h: l.h, ox: l.ox, oy: l.oy, foot: l.footOff, n: l.frames, ms: l.msPerFrame,
       palette: l.palette, indices: Buffer.from(l.indices).toString('base64'),
     })),
     placed: stage.placed,
@@ -136,6 +136,19 @@ function mount(el, S) {
 
   /** How long a clip runs, in seconds. The sprite owns its own rate; the state does not. */
   function span(ix) { var L = S.layers[ix]; return L.n * L.ms / 1000 }
+
+  /**
+   * **Where a layer's crop goes, given the row its subject stands on.**
+   *
+   * 'origin' puts the sprite's own origin on the row — right when the author put the origin
+   * at the ground contact, which is every tree. 'foot' puts the lowest painted pixel there —
+   * right when the origin is somewhere else, like a person's pelvis.
+   *
+   * **It is applied per LAYER, and that is the fix.** It used to be resolved once against a
+   * subject's main clip, so a photographer who stands with his feet 21 px below his pelvis
+   * and lies down with them beside it was drawn lying down at standing height — floating.
+   */
+  function rowOf(D, L) { return D.anchor === 'foot' ? D.y + L.oy - L.foot : D.y + L.oy }
 
   /**
    * **The blow.** Anything prone within reach, on the side he is facing, gets up and runs.
@@ -331,7 +344,7 @@ function mount(el, S) {
         f = P.state === 'attack'
           ? Math.min(L.n - 1, Math.floor(own / L.ms))
           : Math.floor(own / L.ms) % L.n
-        dx = Math.round(P.x) + L.ox; dy = D.y + L.oy
+        dx = Math.round(P.x) + L.ox; dy = rowOf(D, L)
       } else if (D.approach) {
         var me = null
         for (var c = 0; c < crew.length; c++) if (crew[c].at === i) me = crew[c]
@@ -341,15 +354,15 @@ function mount(el, S) {
         L = S.layers[li]
         f = Math.floor(me.clock / L.ms) % L.n
         dx = Math.round(me.x) + L.ox
-        // Every clip is anchored by its own lowest painted pixel at build time, so a body
-        // that lies down keeps its feet on the same floor as the body that walked in.
-        dy = D.y + L.oy
+        // Anchored against THIS clip's own feet, so the body that lies down meets the same
+        // floor as the body that walked in.
+        dy = rowOf(D, L)
         if (me.state === 'away') continue
         if (me.flash !== undefined && t - me.flash < 0.07) flash = 1
       } else {
         L = S.layers[li]
         f = Math.floor(t * 1000 / L.ms + D.phase * L.n) % L.n
-        dx = D.x + L.ox; dy = D.y + L.oy
+        dx = D.x + L.ox; dy = rowOf(D, L)
         if (D.motion) {
           // Continuous in seconds, so there is no loop point to be seamless at. The sway
           // term is what makes the speed rise and fall: a cloud that travels at one rate is

@@ -173,6 +173,9 @@ const WALK: Gait = {
     { bone: 'armFU', channel: 'angle', keys: [0.17, -0.01, -0.19, -0.01] },
     { bone: 'armFL', channel: 'angle', keys: [-0.19, -0.15, -0.19, -0.23] },
     { bone: 'head', channel: 'angle', keys: [0.02, 0, -0.02, 0] },
+    // Aimed down and in, hanging at the chest: a camera nobody is looking through points at
+    // the ground. Without a track it inherits the forearm and swings like a lantern.
+    { bone: 'cam', channel: 'angle', keys: [0.42, 0.4, 0.44, 0.41] },
   ],
 }
 
@@ -200,24 +203,36 @@ const PRONE: Gait = {
     { name: 'breathe', at: 0.75 },
   ],
   tracks: [
-    // A quarter turn is 0.25, and `gait.swing` is what scales it — so the amplitude in the
-    // tunables is authored against THIS gait and the walk's keys are small fractions of it.
+    // A quarter turn lays the spine flat and takes the legs with it. 0.86 x 0.29 = 0.249, so
+    // the pelvis lands on 90 degrees exactly.
     { bone: 'pelvis', channel: 'angle', keys: [0.86, 0.86, 0.86, 0.86] },
     { bone: 'pelvis', channel: 'y', keys: [0, -0.06, 0, 0.06] },
-    // The chest lifts off the ground and settles: propped on the elbows, breathing.
-    { bone: 'torso', channel: 'angle', keys: [-0.5, -0.62, -0.58, -0.52] },
-    { bone: 'neck', channel: 'angle', keys: [-0.34, -0.42, -0.4, -0.36] },
-    { bone: 'head', channel: 'angle', keys: [-0.2, -0.26, -0.24, -0.22] },
-    // Legs trail, slightly apart, one ankle idly crossing.
-    { bone: 'legNU', channel: 'angle', keys: [0.32, 0.3, 0.34, 0.31] },
-    { bone: 'legNL', channel: 'angle', keys: [-0.5, -0.62, -0.48, -0.58] },
-    { bone: 'legFU', channel: 'angle', keys: [0.2, 0.22, 0.18, 0.21] },
-    { bone: 'legFL', channel: 'angle', keys: [-0.3, -0.24, -0.36, -0.28] },
-    // Elbows planted, camera to the eye.
-    { bone: 'armNU', channel: 'angle', keys: [-0.72, -0.78, -0.76, -0.74] },
-    { bone: 'armNL', channel: 'angle', keys: [-0.86, -0.9, -0.88, -0.87] },
-    { bone: 'armFU', channel: 'angle', keys: [-0.66, -0.7, -0.68, -0.67] },
-    { bone: 'armFL', channel: 'angle', keys: [-0.8, -0.84, -0.82, -0.81] },
+    // **The spine is nearly horizontal, and the first draft had it at 52 degrees.** That is a
+    // man kneeling, not a man on his belly, and it put his head 8 px in front of his pelvis
+    // where a prone body puts it 20. The chest rises 15 degrees off the floor, propped on the
+    // elbows, and breathes about two.
+    { bone: 'torso', channel: 'angle', keys: [-0.24, -0.27, -0.26, -0.25] },
+    { bone: 'neck', channel: 'angle', keys: [-0.15, -0.17, -0.16, -0.158] },
+    { bone: 'head', channel: 'angle', keys: [-0.1, -0.12, -0.11, -0.105] },
+    // **Legs trail nearly straight.** They were folding 43 degrees at the knee, backwards —
+    // a leg does not do that, and it is what made them read as inverted. A prone leg is a
+    // straight line with the boot flat on the floor.
+    { bone: 'legNU', channel: 'angle', keys: [0.06, 0.055, 0.065, 0.058] },
+    { bone: 'legNL', channel: 'angle', keys: [-0.02, -0.04, -0.01, -0.03] },
+    { bone: 'legFU', channel: 'angle', keys: [0.03, 0.035, 0.025, 0.032] },
+    { bone: 'legFL', channel: 'angle', keys: [0, 0.015, -0.01, 0.008] },
+    // Elbows planted on the floor in front of the chest, forearms up to the eye.
+    { bone: 'armNU', channel: 'angle', keys: [-0.89, -0.91, -0.9, -0.895] },
+    { bone: 'armNL', channel: 'angle', keys: [-0.95, -0.97, -0.96, -0.955] },
+    { bone: 'armFU', channel: 'angle', keys: [-0.85, -0.87, -0.86, -0.855] },
+    { bone: 'armFL', channel: 'angle', keys: [-0.92, -0.94, -0.93, -0.925] },
+    // **The camera is aimed, not carried, and that is why it has a track of its own.**
+    //
+    // Without one it inherits the forearm's angle, and a forearm folded back to the eye
+    // points the lens at the photographer's own face — which is exactly what it did. A wrist
+    // is the joint that separates where a hand IS from where it points, and this is that
+    // joint. Every gait aims it; none of them let it drift.
+    { bone: 'cam', channel: 'angle', keys: [1.26, 1.28, 1.27, 1.265] },
   ],
 }
 
@@ -245,6 +260,8 @@ const RUN: Gait = {
     { bone: 'armFU', channel: 'angle', keys: [-0.2, -0.26, -0.22, -0.28] },
     { bone: 'armFL', channel: 'angle', keys: [-0.46, -0.42, -0.5, -0.44] },
     { bone: 'head', channel: 'angle', keys: [-0.06, -0.02, -0.06, -0.02] },
+    // Clutched in and turned down, protected against the chest.
+    { bone: 'cam', channel: 'angle', keys: [0.66, 0.68, 0.65, 0.67] },
   ],
 }
 

@@ -26,7 +26,7 @@
  * about half its cell and the margin is pure transfer.
  */
 import type { RGB } from '../core/types.ts'
-import { execute } from '../io/load.ts'
+import { execute, loadParams } from '../io/load.ts'
 import type { Placement, Scene } from './compose.ts'
 import { floorDepth, hazeAt, paintOrder, standRow } from './compose.ts'
 
@@ -39,6 +39,18 @@ export type Layer = {
   /** Where the crop sits relative to the sprite's own origin. */
   readonly ox: number
   readonly oy: number
+  /**
+   * The row just below the lowest painted pixel, relative to the origin. **Per layer, because
+   * it is per pose.**
+   *
+   * A photographer standing has his feet 21 px below his pelvis and lying down has them
+   * beside it, so a subject anchored by its feet cannot be placed once and then have every
+   * clip drawn at that offset — which is exactly what happened, and it left the prone
+   * photographer floating at standing height.
+   */
+  readonly footOff: number
+  /** The `body.scale` this render used. A subject's clips must all agree; a lock says so. */
+  readonly scale: number
   readonly frames: number
   readonly msPerFrame: number
   /** Index 0 is transparent. Already hazed by the placement's `recede`. */
@@ -50,9 +62,20 @@ export type Layer = {
 /** A layer placed in the world, with whatever makes it move. */
 export type Placed = {
   readonly layer: number
-  /** Where the sprite's origin lands. */
   readonly x: number
+  /**
+   * **The contact row, not a pre-computed sprite offset.** Whoever draws applies the anchor,
+   * using the *drawn layer's* own `footOff` — because which pose is on screen decides where
+   * that pose's feet are.
+   */
   readonly y: number
+  readonly anchor: 'origin' | 'foot'
+  /**
+   * The `body.scale` every clip of this subject was rendered at. Recorded rather than implied,
+   * because it is the answer to "did the engine make the clips agree" and a lock has to be
+   * able to read it.
+   */
+  readonly scale: number
   readonly phase: number
   readonly motion?: Placement['motion']
   /**
@@ -166,7 +189,10 @@ function layerOf(
   // the moment it turns round.
   const ox = flipLight ? originX - b.x1 : b.x0 - originX
   return {
-    layer: { id, w, h, ox, oy: b.y0 - originY, frames: n, msPerFrame: lit.params.playback.msPerFrame, palette, indices },
+    layer: {
+      id, w, h, ox, oy: b.y0 - originY, footOff: b.y1 + 1 - originY, scale: lit.params.body.scale,
+      frames: n, msPerFrame: lit.params.playback.msPerFrame, palette, indices,
+    },
     foot: b.y1 + 1,
     origin: { x: originX, y: originY },
   }
@@ -206,20 +232,27 @@ export function toStage(scene: Scene): Stage {
     const recede = p.sky === true ? 0 : hazeAt(scene, p.depth ?? 0)
     const main = build(p, recede, false)
 
-    // Depth gives the contact row; `anchor` says how the sprite meets it. `origin` is exact,
-    // `foot` measures the lowest painted pixel. Same rule as the compositor, by the same
-    // functions, because two implementations of one rule is two rules eventually.
+    // Depth gives the contact row and nothing here adjusts it. `anchor` is passed through so
+    // the draw applies it against whichever clip is on screen — resolving it once, against the
+    // main clip, is what put the prone photographer 21 px in the air.
     const row = p.sky === true ? (p.y ?? 0) : standRow(scene, p.depth ?? 0)
-    const y = p.anchor === 'foot' ? row - main.foot + main.origin.y : row
 
+    /**
+     * **Every clip of one subject renders at one scale, and the subject decides which.**
+     *
+     * `gorilla-attack` was authored at `body.scale` 0.88 so it would sit on a sheet beside the
+     * jump; `gorilla` and `gorilla-idle` are at 1. Nothing noticed until the three became one
+     * character, and then the animal visibly shrank every time it swung. A clip's tunables own
+     * its lighting and its timing; **they do not get to own how big the body is**, because
+     * that is a fact about the subject and not about the action.
+     */
+    const scale = p.scale ?? loadParams(p.tunables).body.scale
     let clips: Placed['clips']
     if (p.clips !== undefined) {
       const built: Record<string, { right: number; left: number }> = {}
       for (const [name, spec] of Object.entries(p.clips)) {
-        built[name] = {
-          right: build(spec, recede, false).layer,
-          left: build(spec, recede, true).layer,
-        }
+        const sized = { ...spec, scale }
+        built[name] = { right: build(sized, recede, false).layer, left: build(sized, recede, true).layer }
       }
       clips = built
     }
@@ -227,7 +260,9 @@ export function toStage(scene: Scene): Stage {
     placed.push({
       layer: main.layer,
       x: p.x,
-      y,
+      y: row,
+      anchor: p.anchor ?? 'origin',
+      scale,
       phase: p.phase ?? 0,
       ...(p.motion === undefined ? {} : { motion: p.motion }),
       ...(clips === undefined ? {} : { clips }),

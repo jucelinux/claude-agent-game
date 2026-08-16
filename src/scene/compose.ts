@@ -469,9 +469,10 @@ export function compose(scene: Scene): Composed {
       const map = maps.get(run.name) as Uint8Array
       const { w: sw, h: sh, data: src } = frame.buf
       const ox = p.x - run.result.params.canvas.originX
-      // `origin` is exact and measures nothing; `foot` measures the lowest painted pixel.
-      // Which one is right depends on where the sprite's author put its origin, and getting
-      // that wrong is what put five trees in the air and then one below the gorilla.
+      // `origin` is exact and measures nothing; `foot` measures the lowest painted pixel of
+      // the frames actually being drawn. Which one is right depends on where the sprite's
+      // author put its origin, and getting that wrong put five trees in the air, then one
+      // below the gorilla, then a photographer lying down at standing height.
       const row = p.sky === true ? (p.y ?? 0) : standRow(scene, p.depth ?? 0)
       const oy = p.anchor === 'foot' ? row - run.footOffset : row - run.result.params.canvas.originY
       for (let sy = 0; sy < sh; sy++) {
