@@ -166,3 +166,73 @@ human's roles can conflict, and the gate is the role that has to bend.
 Things the method does not answer and does not currently pretend to.
 
 - [ ]
+
+---
+
+## Proposal, 16/08 — **the commission is one artifact and should be two readings**
+
+_Raised by him, and explicitly not ordered: "não estou ordenando que tenha que ser assim, mas
+estou tentando relativizar o que estamos fazendo aqui com desenvolvimento ágil."_
+
+**His shape:**
+
+1. we agree a character, he gives the details
+2. the model builds it and decides for itself whether the sample can be presented
+3. the scene is built with that new resource in it, and he brings feedback
+
+**The evidence that he is describing a rule the method already has, and that we broke it.**
+§3.6: *human review in batches, bounded by attributability — as much as one sitting can
+attribute, no more*, and it names both failure modes, the second being **accumulation**.
+
+Gate v3 was designed so the reading costs him one sentence and one word, and its
+no-back-and-forth property is what makes it cheap. **That same property forces accumulation:**
+a whole commission lands in one reading, so a body, a gait, a light source and a ground arrive
+together. Batch 1 came back with **five separate failures in one message**, spread across three
+subsystems, and he had to write the list. That is the accumulation failure, arriving through the
+gate's own design rather than in spite of it.
+
+Batch 2 accidentally ran his shape and it worked: the cat was read, shipped, and *then* two
+notes arrived about the scene and the drawing separately. Each was attributable in one line.
+
+**The cost, and it is a real rule this would collide with.** `CLAUDE.md` §4 binds: *"tudo que eu
+lhe pedir daqui pra frente nasce como um objeto que pertence a um jogo"* — a cloud is delivered
+as a sky a cloud crosses, because a sprite judged alone is judged against itself, which is the
+sprite shelf he retired.
+
+**The resolution that keeps both:** two readings over **one** artifact, never two artifacts. The
+resource is still shown in motion and still shown in a scene — just a bare one that is not
+itself the deliverable of that reading. Reading 1 asks *is this the character*. Reading 2 asks
+*is this the game*. Neither is a still and neither is a sprite in a cell.
+
+**Status:** not adopted. It costs him one extra reading per commission and buys attribution. The
+number to watch is whether his notes get shorter, not whether there are fewer of them.
+
+---
+
+## Note, 16/08 — **on convergence, and why the model should stop aiming at it**
+
+His framing: *"ambos os sensores (os meus e os seus) são limitados. Não há empatia aqui em
+relação a como eu me sinto quando jogo e como você se sente quando joga. Esse trabalho é uma
+tentativa de encontrar essa convergência."*
+
+**The evidence from this project says the two channels are complementary rather than
+convergent, and that this is the better arrangement.** One case, same day, same defect:
+
+| | what it found | what it could not |
+|---|---|---|
+| the model's robot driver | **the tower was locked** — a periodic orbit that four tuning sweeps could not explain | that a climbable tower was boring |
+| him, playing | *"é difícil errar um salto assim"* | why, or where |
+
+**The robot measured a property; he measured an experience.** No instrument converts one into
+the other, and a model that tried would be building the judge before the artifact for the fourth
+time in this project's history.
+
+**What actually accumulates is not empathy, it is `TASTE.md`.** Every verdict compiles into a
+knob, a lock, or a line, and the file is the only thing that gets closer to his eye over time.
+The mechanism already exists and this session used it four times.
+
+**One thing worth promoting to a rule, because it is what makes the asymmetry productive:** when
+a verdict is about *feel*, the model owes a **number that moved with it**. He said "too easy";
+the number was *aiming buys eleven times the height*, and it is a lock now. Done every time, his
+feel becomes the model's instrument — which is convergence in the only direction that is
+available.

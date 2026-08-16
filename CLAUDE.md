@@ -321,3 +321,35 @@ He is the tiebreaker and the one who sets the bar — not an inspector. Rules in
   rule enforced by blindness instead of by discipline, and it is very likely *why* text
   perception improved the drawing in his other repos. Enrich it toward **answering
   questions about parts**, never toward showing a better image.
+
+  **Amended 16/08, by him, and the amendment is narrow on purpose.** He asked whether the
+  no-image rule is still the most efficient arrangement, given that the model routinely writes
+  code to see around it. The evidence from this repo says the code and the eye are **not
+  substitutes**: 14 defects were found by counting and several were *invisible in a picture* —
+  a limb that is absent leaves no trace to see, and a wrong grey is a plausible grey. Every one
+  of the 10 defects only his eye found was the other class: **the thing does not look like what
+  it is supposed to be.** The proof that the second class cannot be compiled is the `swallowed`
+  check of 16/08 — an attempt to measure it in pixels fired on 237 parts across 69 approved
+  subjects, because occlusion is normal and **intent is not in the picture**.
+
+  So the arrangement is now:
+
+  | | rule |
+  |---|---|
+  | **the bench loop, dozens per round** | **blind. Non-negotiable.** It finds what sight cannot |
+  | **once, at the round boundary** | the model may look at **one** rendered sample before it reaches him |
+
+  **The hard rule that makes the look safe: look to decide WHETHER TO SHIP, never to decide
+  WHAT TO CHANGE.** A change is still named from the findings channel and still lands in the
+  grammar, because the grammar is still the only tool there is — the no-retouching rule is
+  untouched, and the blindness that used to enforce it is now enforced by having nothing else
+  to edit. **The model reports what it saw, never what it concluded**: `TASTE.md` §2a records
+  three separate occasions of a verdict written before he looked, and sight makes that easier
+  rather than harder.
+
+  **It is measured, and it is retired if it does not pay.** Every look records what it caught
+  that the channel did not. If three rounds pass with no change to the hit rate and no change
+  to his cost per batch, the amendment goes. **Cost is not the argument in either direction:**
+  one image is one to two thousand tokens against a round that spends hundreds of thousands.
+  What his original rule was right about is a **per-iteration image judge** — rung 4, the most
+  expensive and least reliable oracle in the ladder — and nothing here proposes one.
