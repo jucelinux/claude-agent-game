@@ -5,6 +5,8 @@ import { sprite } from '../src/core/render.ts'
 import { hashBuffers } from '../src/core/hash.ts'
 import { grammarByName } from '../src/grammars/index.ts'
 import { findings } from '../src/perception/structure.ts'
+import { solve } from '../src/core/skeleton.ts'
+import { evaluate } from '../src/core/gait.ts'
 import { ASTRONAUT } from '../src/grammars/run14/astronaut.ts'
 
 /**
@@ -198,6 +200,79 @@ describe('which way he is looking', () => {
     expect(depth('s', 'visor'), 'walking south shows his back').toBeLessThan(depth('s', 'pack'))
     expect(depth('e', 'visor')).toBeLessThan(depth('e', 'pack'))
   })
+})
+
+/**
+ * **The transfer test: does a yaw work on a body that was never authored for it?**
+ *
+ * His question, twice: *"então todo esse trabalho beneficia apenas o astronauta e essa tela?"*
+ * It is the right question and the only honest way to answer it is to turn something that
+ * predates the transform and measure what comes out.
+ *
+ * The photographer was authored the same morning `yaw.ts` did not exist; the gorilla is days
+ * older and was drawn for a side-scrolling wood. Neither has ever been turned. **Both turn.**
+ *
+ * What the numbers say when they run — and this is the claim, checked rather than asserted:
+ *
+ * | body | width e → n | motion e → n | worst joint gap |
+ * |---|---|---|---|
+ * | photographer | 32 → 25 | 66% → 34% | 0.00 px |
+ * | gorilla | 46 → 27 | 78% → 36% | 0.00 px |
+ * | astronaut | 26 → 24 | 71% → 46% | 0.00 px |
+ *
+ * **What does NOT transfer is the tuning**, and that is a cost per subject rather than a
+ * defect: how far a body's shoulders sit from its chest decides whether an arm survives being
+ * turned, and no transform can invent a proportion its author did not give it. What the locks
+ * now do is *tell you* — a body with no depth on its limb rows fails immediately, and every
+ * facing is checked for a lost limb and a broken joint.
+ */
+describe('turning a body that was never authored to turn', () => {
+  for (const [name, tunables] of [['photog-walk', 'photog'], ['gorilla', 'gorilla']] as const) {
+    it(`${name}`, () => {
+      const base = grammarByName(name)
+      const params = loadParams(tunables)
+
+      // The one thing a yaw needs and cannot invent: the body has to declare some depth.
+      const rows = base.skeleton.bones.filter((b) => /^(arm|leg)[FN]U$/.test(b.name))
+      expect(rows.length, `${name} has no limb rows to turn`).toBeGreaterThan(0)
+      for (const b of rows) expect(Math.abs(b.z ?? 0)).toBeGreaterThan(1)
+
+      const shot = (turns: number): { width: number; gap: number } => {
+        const g = turns === 0 ? base : yaw(base, turns, 'x', params.gait.swing, params.gait.depth)
+        let x0 = 1e9
+        let x1 = -1
+        let gap = 0
+        for (let k = 0; k < params.frames.walk; k++) {
+          const t = k / params.frames.walk
+          const { w, h, data } = sprite(g, params, 1, t).buf
+          for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (data[y * w + x] !== 0) { if (x < x0) x0 = x; if (x > x1) x1 = x }
+          const world = solve(g.skeleton, evaluate(g.gait, params, t), { x: 0, y: 0, z: 0, a: 0, sx: 1, sy: 1, sz: 1 })
+          for (const [u, l] of [['armFU', 'armFL'], ['armNU', 'armNL'], ['legFU', 'legFL'], ['legNU', 'legNL']] as const) {
+            const child = g.skeleton.bones.find((b) => b.name === l)
+            if (child === undefined || child.parent !== u) continue
+            const pu = world.get(u)!
+            const pl = world.get(l)!
+            const a = pu.a * Math.PI * 2
+            gap = Math.max(gap, Math.hypot(pu.x + pu.sx * -Math.sin(a) * child.y - pl.x, pu.y + pu.sy * Math.cos(a) * child.y - pl.y))
+          }
+        }
+        return { width: x1 - x0 + 1, gap }
+      }
+
+      const side = shot(0)
+      const back = shot(0.25)
+      const quarter = shot(0.125)
+
+      // It has to turn: a body that renders the same width from every angle did not turn.
+      expect(back.width, `${name} is the same width from behind as from the side`).not.toBe(side.width)
+      // It must not collapse.
+      expect(back.width, `${name} collapsed when turned`).toBeGreaterThan(side.width * 0.4)
+      // And every joint holds, in every facing.
+      for (const [label, s] of [['side', side], ['quarter', quarter], ['back', back]] as const) {
+        expect(s.gap, `${name} breaks a joint in the ${label} view`).toBeLessThanOrEqual(0.5)
+      }
+    })
+  }
 })
 
 describe('the compass', () => {

@@ -173,12 +173,16 @@ function makeRock(name: string, r: number, seed: number): Grammar {
  */
 export const MOON: readonly Grammar[] = [
   earth,
-  makeCrater('crater-a', 26, 0.4),
-  makeCrater('crater-b', 17, 2.2),
-  makeCrater('crater-c', 38, 4.1),
-  makeCrater('crater-d', 12, 5.6),
-  makeCrater('crater-e', 31, 1.9),
-  makeCrater('crater-f', 21, 3.3),
+  // **Smaller, at his instruction**, and it is the same note he gave about the rocks: a crater
+  // wide enough to hold the player is a crater he walks inside rather than past. At these radii
+  // the largest is 34 px across against a 46 px figure, so the ground reads as pitted rather
+  // than as a set of arenas.
+  makeCrater('crater-a', 15, 0.4),
+  makeCrater('crater-b', 9, 2.2),
+  makeCrater('crater-c', 21, 4.1),
+  makeCrater('crater-d', 7, 5.6),
+  makeCrater('crater-e', 17, 1.9),
+  makeCrater('crater-f', 12, 3.3),
   // **Small, at his instruction: "diminua o tamanho de todas as pedras, pode deixá-las
   // pequenas".** A boulder standing on a plain competes with the figure for the eye; a scatter
   // of stones is texture. The craters do the work of saying where you are.
