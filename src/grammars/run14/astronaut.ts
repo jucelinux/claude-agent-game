@@ -114,21 +114,25 @@ const bones: Bone[] = [
   // after probe D and the photographer, and the first time it was caught by a lock.
   { name: 'armFU', parent: 'torso', x: 0, y: -10, z: 7.6, angle: -0.03 },
   /**
-   * **The forearm splays outboard, and that offset only exists because the body can turn.**
+   * **The forearm hangs straight from the elbow, and the splay it briefly had was a joint
+   * break wearing a disguise.**
    *
-   * A pressure suit's shoulder cannot bring the arms to the sides — they are held out. In the
-   * authored side view "out" is the depth axis, so it is invisible there and it costs nothing;
-   * turned to face the camera it is the only thing keeping the forearm clear of the barrel.
-   * Without it the elbow drifted back behind the torso and disappeared: *"quando ando com S,
-   * não visualizo os braços"*.
+   * I gave `armFL`/`armNL` a depth offset of 2.6 to hold the forearm outboard, because a
+   * pressure suit does hold the arms out. In the authored side view that offset is pure depth
+   * and invisible. Turned a quarter it becomes **2.6 px of screen displacement at the elbow**,
+   * and he read it in one look: *"os antebraços parecem estar desconectados dos braços"*.
+   *
+   * It is the same lesson as the visor, one joint further down: **anything authored purely in
+   * depth is unfalsifiable in the view it was authored in.** A real arm's segments touch. The
+   * splay has to come from where the shoulder is, and the shoulder is already at 7.6.
    */
-  { name: 'armFL', parent: 'armFU', x: 0, y: 7, z: 2.6, angle: -0.04 },
+  { name: 'armFL', parent: 'armFU', x: 0, y: 7, z: 0, angle: -0.04 },
   { name: 'legFU', parent: 'pelvis', x: 0, y: 1, z: 3.4, angle: 0 },
   { name: 'legFL', parent: 'legFU', x: 0, y: 8.5, z: 0, angle: 0.02 },
   { name: 'legNU', parent: 'pelvis', x: 0, y: 1, z: -3.4, angle: 0 },
   { name: 'legNL', parent: 'legNU', x: 0, y: 8.5, z: 0, angle: 0.02 },
   { name: 'armNU', parent: 'torso', x: 0, y: -10, z: -7.6, angle: -0.03 },
-  { name: 'armNL', parent: 'armNU', x: 0, y: 7, z: -2.6, angle: -0.04 },
+  { name: 'armNL', parent: 'armNU', x: 0, y: 7, z: 0, angle: -0.04 },
 ]
 
 /**
@@ -144,7 +148,10 @@ const bones: Bone[] = [
 const parts: Part[] = [
   { name: 'armFU', bone: 'armFU', material: 'suit', shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 2.9, r1: 2.6 } },
   { name: 'armFL', bone: 'armFL', material: 'suit', shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6.5, r: 2.6, r1: 2.3 } },
-  { name: 'gloveF', bone: 'armFL', material: 'gear', shift: -1, shape: { kind: 'ellipse', cx: 0, cy: 7.4, rx: 2.6, ry: 2.4, rz: 2.6 } },
+    // The glove sits past the end of the sleeve rather than inside it. At cy 7.4 the forearm's
+  // own end cap — which reaches 9.0 — swallowed it in three of the turned facings, and a hand
+  // that vanishes is an arm that ends in nothing.
+  { name: 'gloveF', bone: 'armFL', material: 'gear', shift: -1, shape: { kind: 'ellipse', cx: 0.3, cy: 8.6, rx: 2.8, ry: 2.6, rz: 2.8 } },
   { name: 'legFU', bone: 'legFU', material: 'suit', shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8.5, r: 3.3, r1: 3 } },
   { name: 'legFL', bone: 'legFL', material: 'suit', shift: -1, shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 3, r1: 2.7 } },
   { name: 'bootF', bone: 'legFL', material: 'gear', shift: -1, shape: { kind: 'ellipse', cx: 0.9, cy: 8.6, rx: 3.6, ry: 2.3, rz: 3.4 } },
@@ -182,7 +189,7 @@ const parts: Part[] = [
   { name: 'bootN', bone: 'legNL', material: 'gear', shape: { kind: 'ellipse', cx: 0.9, cy: 8.6, rx: 3.8, ry: 2.4, rz: 3.6 } },
   { name: 'armNU', bone: 'armNU', material: 'suit', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 3.1, r1: 2.8 } },
   { name: 'armNL', bone: 'armNL', material: 'suit', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 6.5, r: 2.8, r1: 2.5 } },
-  { name: 'gloveN', bone: 'armNL', material: 'gear', shape: { kind: 'ellipse', cx: 0, cy: 7.4, rx: 2.8, ry: 2.6, rz: 2.8 } },
+  { name: 'gloveN', bone: 'armNL', material: 'gear', shape: { kind: 'ellipse', cx: 0.3, cy: 8.6, rx: 3, ry: 2.8, rz: 3 } },
 
   // **The visor**, and it is a marking: gold on the front of the helmet, not a lump attached
   // to it. Its depth is what turns it — at `n` it rotates round the sphere and disappears,

@@ -262,6 +262,55 @@ const HINGES: readonly (readonly [string, string])[] = [
   ['armFL', 'armFU'], ['armNL', 'armNU'], ['legFL', 'legFU'], ['legNL', 'legNU'],
 ]
 
+/**
+ * **A limb's segments touch, in every facing and every frame.**
+ *
+ * His reading of 16/08: *"W, S: os antebraços parecem estar desconectados dos braços"* — a
+ * 2.6 px gap at the elbow, and it was there because I had held the forearm outboard with a
+ * depth offset. **In the authored side view that offset is pure depth and invisible.** Turned
+ * a quarter it is screen displacement, and a joint that does not touch is a broken body.
+ *
+ * The general form, and it is the whole lesson of the last two readings: **anything authored
+ * purely in depth is unfalsifiable in the view it was authored in.** A body that can turn has
+ * no such hiding place, so the check has to run over every facing.
+ *
+ * Half a pixel of slack, for the rounding in a bone's own scale.
+ */
+const JOINT_GAP_MAX = 0.5
+
+describe('a limb stays joined to itself', () => {
+  /** Upper segment, lower segment, and how long the upper one is in bone units. */
+  const CHAINS: readonly (readonly [string, string])[] = [
+    ['armFU', 'armFL'], ['armNU', 'armNL'], ['legFU', 'legFL'], ['legNU', 'legNL'],
+  ]
+
+  for (const [name, tunables] of actors()) {
+    const g = grammarByName(name)
+    if (!CHAINS.some(([u]) => g.skeleton.bones.some((b) => b.name === u))) continue
+
+    it(`${name}`, () => {
+      const params = loadParams(tunables)
+      for (const [upper, lower] of CHAINS) {
+        const child = g.skeleton.bones.find((b) => b.name === lower)
+        if (child === undefined || child.parent !== upper) continue
+        const reach = child.y
+        for (let f = 0; f < params.frames.walk; f++) {
+          const w = solve(g.skeleton, evaluate(g.gait, params, f / params.frames.walk), { x: 0, y: 0, z: 0, a: 0, sx: 1, sy: 1, sz: 1 })
+          const u = w.get(upper)!
+          const l = w.get(lower)!
+          const a = u.a * Math.PI * 2
+          // Where the parent's own length ends, in world space.
+          const tipX = u.x + u.sx * -Math.sin(a) * reach
+          const tipY = u.y + u.sy * Math.cos(a) * reach
+          const gap = Math.hypot(tipX - l.x, tipY - l.y)
+          expect(gap, `${name} frame ${f}: ${lower} starts ${gap.toFixed(1)} px away from the end of ${upper}`)
+            .toBeLessThanOrEqual(JOINT_GAP_MAX)
+        }
+      }
+    })
+  }
+})
+
 describe('no joint bends both ways', () => {
   for (const [name, tunables] of drawn()) {
     const g = grammarByName(name)
