@@ -388,13 +388,13 @@ sample since — `outline.rim` is on in every shipped tunables file. §3b.4, and
       grammar is also one of its clips: once without a scale in the key and once with it. One
       duplicate 41×32×8 layer on the climb, and the moon and the forest carry it too. Costs
       wire and a decode, changes no pixel.
-- [ ] **The "sprite in situ" axis** — the loop inside a real scene, with camera, parallax
-      and neighbours. This is where a game engine finally earns its place. Trigger: after
-      the gate has taken a reading, never before — it adds a variable the published loops
-      do not have, and the error would flatter mine.
-- [ ] **Image cells** — his five reference loops decoded into the *same* blit path as mine,
-      so the sheet never compares two renderers. Unbuilt: it cannot be null-cased without
-      the files. Needed for the first gate reading.
+- [x] ~~**The "sprite in situ" axis**~~ → **done, and content asked for it rather than a plan.**
+      Three micro games, each a loop inside a real scene with a camera, parallax and
+      neighbours. _(Ticked 16/08 at a cycle open; it had sat open through all three. §3b.4.)_
+- [x] ~~**Image cells** — his five reference loops in the same blit path as mine~~ →
+      **dissolved 16/08**, not solved. It belonged to gate v2, which was retired on 15/08, and
+      gate v3 needs no reference files at all. _(§3b.4: it survived the gate that needed it by
+      a day and a half.)_
 
 - [x] ~~🔴 THE GATE HAS NEVER FIRED, and `refs/` does not exist~~ → **dissolved 15/08**, not
       solved: gate v2 was retired with the scope redefinition, so the five files it needed
@@ -486,7 +486,11 @@ Written for him, so no method vocabulary crosses into this section.
       · *Answer changes:* only whether I touch three subjects you already passed. Either answer
       is fine and I am not asking because I think one is better.
 
-- [ ] 🟡 **Run 8 — one jump, three inks.** Asked 15/08. **This is the open round.**
+- [x] ~~🟡 **Run 8 — one jump, three inks.** Asked 15/08.~~ → **Answered 15/08.** He ranked
+      Chrono first; Stardew and the incumbent tied last. The verdict is compiled into
+      `TASTE.md` §1 and §1b and into every palette authored since. _(Ticked 16/08 at a cycle
+      open: it still said "this is the open round" a day after it was settled and acted on.
+      §3b.4.)_
       · *Open:* `node bin/serve.ts`. Top row, three cells, same jump in three inks.
       · *Do:* put them in order, best first, and say one sentence about the worst one.
       · *Time:* two minutes.
