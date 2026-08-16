@@ -75,7 +75,7 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     id: 'forest',
     title: 'The forest',
     blurb:
-      'Nine trees from one grammar, none of them alike. Loaded clouds drifting over them and rain falling through. Three mechanisms: makeTree turns run 9 into a function, the lobed primitive built for foliage pays a second time as cloud, and the rain is a field — the first thing here that is not a body.',
+      'Fourteen trees from one recursive grammar, no two the same structure. A branch is a smaller tree, so a crown is a consequence of its branching rather than a layout placed near it — which is what the first pass could not express and why every crown came out alike. Depth is haze rather than position, so every tree stands on the floor, and each one sits at its own point in the same gust.',
     date: '2026-08-15',
     scene: forestScene,
   },

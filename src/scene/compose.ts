@@ -56,6 +56,29 @@ export type Placement = {
    * a placement is a position **at a time** rather than a position.
    */
   readonly drift?: number
+  /**
+   * **Aerial perspective: how far toward the sky's colour this subject's whole palette is
+   * pulled, 0 to 1.** Distance, expressed the way distance actually reaches an eye.
+   *
+   * It exists because of a defect he found in the first wood: *"tem árvores que nem estão
+   * posicionadas no solo"*. He was right, and the cause was that I had faked depth by
+   * **raising the far trees' feet above the ground line** — which does not read as far
+   * away, it reads as floating, because a side-on scene has no receding floor to raise them
+   * onto. Fake depth by position was the only tool available, so it got used past where it
+   * works.
+   *
+   * Haze is the tool that actually exists in nature: air between the eye and a thing
+   * scatters light, so a far thing loses contrast toward the colour of the sky rather than
+   * changing shape. That is one lerp per palette entry, it needs no new geometry, and it
+   * lets every tree stand on the same floor — which is where trees stand.
+   *
+   * **Declared cost, and it is paid in the cohesion reading.** A receded subject cannot
+   * share palette entries with an un-receded one, so each distinct value of this field
+   * multiplies the wood's 25 colours again. Two haze bands cost 50 extra entries out of
+   * 256. That is why it is a small set of *bands* rather than a per-subject number: subjects
+   * at the same distance share, and the reading stays honest about what depth cost.
+   */
+  readonly recede?: number
 }
 
 export type Scene = {
@@ -119,15 +142,27 @@ export type Composed = {
 
 const key = (c: RGB): string => `${c[0]},${c[1]},${c[2]}`
 
+/** One lerp toward the sky. Haze does not change a colour's hue relationships, it dilutes them. */
+const haze = (c: RGB, sky: RGB, k: number): RGB => [
+  Math.round(c[0] + (sky[0] - c[0]) * k),
+  Math.round(c[1] + (sky[1] - c[1]) * k),
+  Math.round(c[2] + (sky[2] - c[2]) * k),
+]
+
 /**
  * **Merge every subject's palette into one, and count what that cost.**
  *
  * Exact-match dedupe only. Nothing here quietly nudges two nearly-equal colours together:
  * that would manufacture the cohesion the reading exists to measure, which is the shape of
  * instrument defect `HARNESS.md` §5 warns about — the flattering kind.
+ *
+ * A subject's `recede` is part of its key, so two trees in the same haze band share every
+ * entry and two in different bands share none. The reading therefore reports the true price
+ * of depth rather than hiding it.
  */
 function mergePalettes(
-  runs: readonly { readonly name: string; readonly grammar: Grammar }[],
+  runs: readonly { readonly name: string; readonly grammar: Grammar; readonly recede: number }[],
+  sky: RGB,
 ): { palette: RGB[]; maps: Map<string, Uint8Array>; cohesion: Composed['cohesion'] } {
   const palette: RGB[] = [[0, 0, 0]]
   const seen = new Map<string, number>()
@@ -140,8 +175,8 @@ function mergePalettes(
     let own = 0
     let shared = 0
     for (let i = 1; i < colours.length; i++) {
-      const c = colours[i] as RGB
-      const k = key(c)
+      const c = run.recede === 0 ? (colours[i] as RGB) : haze(colours[i] as RGB, sky, run.recede)
+      const k = `${key(c)}@${run.recede}`
       const already = seen.get(k)
       if (already === undefined) {
         palette.push(c)
@@ -186,10 +221,10 @@ export function compose(scene: Scene): Composed {
         if (any) { if (y + 1 > footOffset) footOffset = y + 1; break }
       }
     }
-    return { name: `${p.grammar}#${i}`, grammar: result.grammar, result, placement: p, footOffset }
+    return { name: `${p.grammar}#${i}`, grammar: result.grammar, result, placement: p, footOffset, recede: p.recede ?? 0 }
   })
 
-  const { palette, maps, cohesion } = mergePalettes(runs)
+  const { palette, maps, cohesion } = mergePalettes(runs, scene.sky)
 
   // The ground and sky enter the same palette as everything else. A scene whose backdrop
   // lives outside the locked palette is a scene that cannot be exported as one image.
@@ -246,9 +281,13 @@ export function compose(scene: Scene): Composed {
       }
       fieldAt += field.colors.length
     }
-    // Back to front by where a subject's feet are: lower on screen is nearer the viewer.
-    // Stable, because ties fall back to placement order.
+    // Back to front. **Haze outranks the foot row**, because haze is now the scene's
+    // statement about distance and the foot row is only its consequence: two trees in the
+    // same band are separated by where they stand, but a hazier tree is behind a clearer
+    // one whatever their feet do. Stable, because ties fall back to placement order.
     const order = runs.map((r, i) => i).sort((a, b) => {
+      const dr = runs[b]!.recede - runs[a]!.recede
+      if (dr !== 0) return dr
       const ay = runs[a]!.placement.footY ?? runs[a]!.placement.y ?? 0
       const by = runs[b]!.placement.footY ?? runs[b]!.placement.y ?? 0
       const dy = ay - by

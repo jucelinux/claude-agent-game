@@ -1,9 +1,9 @@
 {
   "canvas": {
-    "w": 104,
-    "h": 104,
-    "originX": 52,
-    "originY": 88
+    "w": 136,
+    "h": 120,
+    "originX": 68,
+    "originY": 100
   },
   "tones": {
     "perMaterial": 5
@@ -39,10 +39,10 @@
     "scale": 3
   },
   "_anchors": {
-    "canvas.w": "104, derived from the wood rather than guessed: the widest form is the umbrella at 78 px across, and a cell has to hold it with the outline ring. At 80 four of the nine clipped and the outline lock named all four.",
-    "canvas.h": "square with canvas.w. The tallest form is the conifer at 75 px.",
+    "canvas.w": "136, derived from the wood rather than guessed: the widest tree is tree-broad, whose limbs reach 0.85 of its 28-unit height and then fork twice more, measuring 104 px across at 104 wide - which is to say it was clipped on both sides. 136 leaves 16 px of margin on the widest tree with its outline ring.",
+    "canvas.h": "120, and it is set by tree-spruce and tree-tall, both of which measured exactly 88 px above the trunk base at the old origin - which is the origin, so both were cut off at the top. 104 px of headroom clears the tallest by 15.",
     "canvas.originX": "canvas.w / 2",
-    "canvas.originY": "canvas.h - 14, the base of the trunk, with room below for the root flare of the thickest trunk and the ring.",
+    "canvas.originY": "canvas.h - 20, the base of the trunk. It was h-16 and the outline lock failed on tree-broad and tree-bush at row 119, the last row of the cell: a low whorl that droops carries its foliage BELOW the trunk base. 20 px of skirt clears the widest one, and the two trees that needed more than that had their lowest whorl lifted instead - foliage below the trunk base is foliage underground once the scene puts the tree on a floor.",
     "tones.perMaterial": "5. One more than the control and three fewer than the incumbent. TASTE.md 1b names Chrono as the bar for silhouette and value separation, and separation is what a short ramp over a wide value range buys - the same eight tones spread over a narrow dark range is what it does not.",
     "frames.walk": "16, and every phase lands on a whole frame at sixteenths (3/16, 5/16, 8/16, 11/16, 13/16). Sixteen rather than twelve because the wind carries three staggered leaf falls, and each needs enough frames to read as a fall rather than as a jump cut.",
     "light.x": "unit vector from the upper left, held identical across all four probe samples",
