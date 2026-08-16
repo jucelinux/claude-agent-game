@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { MICRO_GAMES } from '../src/micro/registry.ts'
 import { toStage } from '../src/scene/layers.ts'
-import { loadParams } from '../src/io/load.ts'
+import { execute, loadParams } from '../src/io/load.ts'
 import { grammarByName } from '../src/grammars/index.ts'
 import { solve } from '../src/core/skeleton.ts'
 import { evaluate } from '../src/core/gait.ts'
@@ -93,6 +93,118 @@ function landmarks(): Record<string, { x: number; y: number }> {
   }
 }
 
+/** Every grammar any micro game actually draws, with the tunables it draws it under. */
+function drawn(): readonly (readonly [string, string])[] {
+  const out = new Map<string, readonly [string, string]>()
+  for (const game of MICRO_GAMES) {
+    for (const p of game.scene.placements) {
+      out.set(`${p.grammar}|${p.tunables}`, [p.grammar, p.tunables])
+      for (const spec of Object.values(p.clips ?? {})) out.set(`${spec.grammar}|${spec.tunables}`, [spec.grammar, spec.tunables])
+    }
+  }
+  return [...out.values()]
+}
+
+/**
+ * **A body has no holes in it.**
+ *
+ * His reading of 16/08: *"e esse buraco nas costas do gorila?"* — and it was not a hole in the
+ * usual sense. Nothing was transparent. It was the inner outline **ringing the silver saddle**,
+ * and where a ragged marking's boundary folds back on itself the ring closes into a solid
+ * patch. Ink deep inside a body reads as a gap whatever colour the gap technically is.
+ *
+ * **The measurement:** the largest connected mass of outline whose pixels sit three or more
+ * pixels from any transparent one, over the whole cycle. A real inner line is a *ring* and
+ * stays near an edge; a closed ring is a *disc* and does not.
+ *
+ * **Calibrated in both directions, which is the only way a threshold is worth anything
+ * (`HARNESS.md` §5):**
+ *
+ * | sample | px |
+ * |---|---|
+ * | `gorilla-jump-chrono`, the idiom he ranked first | 83 |
+ * | the gorilla with the saddle un-ringed — after the fix | 75–81 |
+ * | **the gorilla with the saddle ringed — the defect he saw** | **101–111** |
+ *
+ * 90 sits between the worst healthy sample and the best sick one. The first draft of this
+ * check used 12, taken from one frame of one pose, and it failed every subject in the project
+ * including the one he ranked first — a threshold read off a single sample measures that
+ * sample.
+ *
+ * A marking opts out with `Part.line = false`: a saddle, a blaze, a stripe. A region of a
+ * surface rather than a solid, and grey hair does not have an edge drawn around it.
+ */
+const INTERIOR_INK_MAX = 90
+
+function interiorInk(grammar: string, tunables: string): number {
+  const run = execute({ grammar, tunables, seed: 1 })
+  const g = grammarByName(grammar)
+  const ramp = g.palette.ramps.find((r) => r.material === run.params.outline.material)
+  if (ramp === undefined || !run.params.outline.enabled) return 0
+  const ink = new Set<number>(ramp.indices)
+
+  let worst = 0
+  for (const frame of run.frames) {
+    const { w, h, data } = frame.buf
+    // Chessboard distance from every pixel to the nearest transparent one, in two passes.
+    const dist = new Int32Array(w * h).fill(1e6)
+    for (let i = 0; i < w * h; i++) if (data[i] === 0) dist[i] = 0
+    const relax = (i: number, j: number): void => { if ((dist[j] as number) + 1 < (dist[i] as number)) dist[i] = (dist[j] as number) + 1 }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x
+      if (x > 0) relax(i, i - 1); if (y > 0) relax(i, i - w)
+      if (x > 0 && y > 0) relax(i, i - w - 1); if (x < w - 1 && y > 0) relax(i, i - w + 1) }
+    for (let y = h - 1; y >= 0; y--) for (let x = w - 1; x >= 0; x--) { const i = y * w + x
+      if (x < w - 1) relax(i, i + 1); if (y < h - 1) relax(i, i + w)
+      if (x < w - 1 && y < h - 1) relax(i, i + w + 1); if (x > 0 && y < h - 1) relax(i, i + w - 1) }
+
+    const seen = new Uint8Array(w * h)
+    for (let i = 0; i < w * h; i++) {
+      if (seen[i] === 1 || !ink.has(data[i] as number)) continue
+      let deep = 0
+      const stack = [i]
+      while (stack.length > 0) {
+        const j = stack.pop() as number
+        if (seen[j] === 1 || !ink.has(data[j] as number)) continue
+        seen[j] = 1
+        if ((dist[j] as number) >= 3) deep++
+        const x = j % w, y = (j / w) | 0
+        if (x > 0) stack.push(j - 1); if (x < w - 1) stack.push(j + 1)
+        if (y > 0) stack.push(j - w); if (y < h - 1) stack.push(j + w)
+      }
+      if (deep > worst) worst = deep
+    }
+  }
+  return worst
+}
+
+/**
+ * The clips of every actor — the subjects a state machine drives. **Not the scenery**, and the
+ * first draft of the hole check did not make that distinction and was wrong for it: a tree of
+ * 97 branches carries hundreds of pixels of ink deep inside its own outline and every one of
+ * them is a branch, not a hole. A cloud does not even outline in ink. The metric is about a
+ * body built from a few big masses, so it is scoped to bodies.
+ */
+function actors(): readonly (readonly [string, string])[] {
+  const out = new Map<string, readonly [string, string]>()
+  for (const game of MICRO_GAMES) {
+    for (const p of game.scene.placements) {
+      if (p.clips === undefined) continue
+      for (const spec of Object.values(p.clips)) out.set(`${spec.grammar}|${spec.tunables}`, [spec.grammar, spec.tunables])
+    }
+  }
+  return [...out.values()]
+}
+
+describe('a body has no holes in it', () => {
+  for (const [name, tunables] of actors()) {
+    it(`${name}`, () => {
+      const deep = interiorInk(name, tunables)
+      expect(deep, `${name} carries ${deep} px of outline three or more pixels inside its own silhouette`)
+        .toBeLessThanOrEqual(INTERIOR_INK_MAX)
+    })
+  }
+})
+
 /**
  * **A hinge bends to one side of straight and never through it.**
  *
@@ -114,18 +226,6 @@ const HINGE_TOL = 3
 const HINGES: readonly (readonly [string, string])[] = [
   ['armFL', 'armFU'], ['armNL', 'armNU'], ['legFL', 'legFU'], ['legNL', 'legNU'],
 ]
-
-/** Every grammar any micro game actually draws, with the tunables it draws it under. */
-function drawn(): readonly (readonly [string, string])[] {
-  const out = new Map<string, readonly [string, string]>()
-  for (const game of MICRO_GAMES) {
-    for (const p of game.scene.placements) {
-      out.set(`${p.grammar}|${p.tunables}`, [p.grammar, p.tunables])
-      for (const spec of Object.values(p.clips ?? {})) out.set(`${spec.grammar}|${spec.tunables}`, [spec.grammar, spec.tunables])
-    }
-  }
-  return [...out.values()]
-}
 
 describe('no joint bends both ways', () => {
   for (const [name, tunables] of drawn()) {

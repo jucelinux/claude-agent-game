@@ -165,6 +165,24 @@ export type Part = {
    * different material. portable.
    */
   readonly shift?: number
+  /**
+   * **Whether this part gets an inner outline. A marking does not.**
+   *
+   * The inner line exists to say *these are two things*: a limb across a chest, a fist against
+   * a torso, a plate on a hull. It is drawn wherever a nearer part borders a farther one, and
+   * that rule is right for every part that is a **solid**.
+   *
+   * It is wrong for a part that is a **marking** — a silverback's saddle, a blaze, a stripe, a
+   * patch of lichen. A marking has no silhouette of its own; it is a region of the surface it
+   * lies on, and ringing it in ink is what turns grey hair into a painted badge. Worse, where
+   * a ragged marking's boundary folds back on itself the ring closes into a solid patch, which
+   * is what he saw: *"e esse buraco nas costas do gorila?"* — 18 px of ink in the upper back,
+   * against 6 px for the sample he ranked first.
+   *
+   * Defaults to true, which is the null case: every part authored before this existed behaves
+   * exactly as it did. portable — the solid/marking distinction is older than pixel art.
+   */
+  readonly line?: boolean
 }
 
 /** A named instant of the cycle. The gait is a set of named phases, never a bare sine. */

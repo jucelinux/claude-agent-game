@@ -169,9 +169,14 @@ export const gorilla: Grammar = {
      *
      * They sit at z -1 so they are proud of the mass they lie on. Any deeper and the chest
      * swallows them, which is the defect `Part.z` was added for in the first place.
+     *
+     * **`line: false`, and that is his hole.** A marking has no silhouette of its own, so the
+     * inner outline must not ring it — and where a ragged boundary folds back on itself the
+     * ring closes into a solid patch. 18 px of ink in the upper back, against 6 px for the
+     * sample he ranked first. Grey hair does not have an edge drawn around it.
      */
-    { name: 'saddleB', bone: 'chest', material: 'silver', z: -1, shape: { kind: 'lobed', cx: -2.6, cy: -5.2, rx: 9.4, ry: 6.2, rz: 9.5, lobes: 5, depth: 0.17, phase: 0.7, octaves: 2 } },
-    { name: 'saddleH', bone: 'hips', material: 'silver', z: -1, shape: { kind: 'lobed', cx: -0.6, cy: -4.6, rx: 7.8, ry: 4.8, rz: 8, lobes: 4, depth: 0.2, phase: 2.4, octaves: 2 } },
+    { name: 'saddleB', bone: 'chest', material: 'silver', z: -1, line: false, shape: { kind: 'lobed', cx: -2.6, cy: -5.2, rx: 9.4, ry: 6.2, rz: 9.5, lobes: 5, depth: 0.17, phase: 0.7, octaves: 2 } },
+    { name: 'saddleH', bone: 'hips', material: 'silver', z: -1, line: false, shape: { kind: 'lobed', cx: -0.6, cy: -4.6, rx: 7.8, ry: 4.8, rz: 8, lobes: 4, depth: 0.2, phase: 2.4, octaves: 2 } },
 
     { name: 'legNU', bone: 'legNU', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 8, r: 4, r1: 3.3 } },
     { name: 'legNL', bone: 'legNL', material: 'fur', shape: { kind: 'capsule', x0: 0, y0: 0, x1: 0, y1: 7, r: 3.2, r1: 2.8 } },

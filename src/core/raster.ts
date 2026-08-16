@@ -197,20 +197,26 @@ export function paintPart(
  *
  * portable.
  */
-export function innerOutline(painter: Painter, index: number): void {
+export function innerOutline(painter: Painter, index: number, marking: readonly boolean[] = []): void {
   const { w, h, data } = painter.buf
   const { owners, depth } = painter
   // Collected first, applied after: a line drawn during the scan would seed the next one.
   const behind: number[] = []
+  /**
+   * A marking is skipped on **both** sides of the test: it neither casts a line onto what it
+   * lies on, nor receives one from what lies on it. Half a rule would leave the saddle ringed
+   * from underneath, which is the same badge drawn from the other direction.
+   */
   const inFront = (n: number, owner: number, z: number): boolean => {
     const other = owners[n] as number
-    return other >= 0 && other !== owner && (depth[n] as number) < z
+    if (other < 0 || other === owner || marking[other] === true) return false
+    return (depth[n] as number) < z
   }
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const at = y * w + x
       const owner = owners[at] as number
-      if (owner < 0) continue
+      if (owner < 0 || marking[owner] === true) continue
       const z = depth[at] as number
       const touchesInFront =
         (x > 0 && inFront(at - 1, owner, z)) ||
