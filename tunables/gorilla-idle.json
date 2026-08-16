@@ -1,0 +1,82 @@
+{
+  "canvas": {
+    "w": 64,
+    "h": 64,
+    "originX": 26,
+    "originY": 36
+  },
+  "tones": {
+    "perMaterial": 8
+  },
+  "frames": {
+    "walk": 16
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "z": -0.35,
+    "curve": 1.25
+  },
+  "outline": {
+    "enabled": false,
+    "material": "hide",
+    "inner": true,
+    "rim": true
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.1,
+    "lift": 2.2,
+    "depth": 8
+  },
+  "texture": {
+    "speckle": 0.18
+  },
+  "playback": {
+    "msPerFrame": 110,
+    "scale": 3
+  },
+  "_anchors": {
+    "canvas.w": "64, twice the control. This sample is the direction my bias pulls toward, and it is here to be knocked down by looking rather than by argument (BACKLOG).",
+    "canvas.h": "square with canvas.w",
+    "canvas.originX": "canvas.w * 0.41: the hips sit back of centre because the chest, the arms and the head all reach forward of them",
+    "canvas.originY": "canvas.h * 0.56, so a body that hangs below the hips still lands inside the frame",
+    "tones.perMaterial": "8, above the knob's declared 3-6 range on purpose: this is the sample that spends everything, so the round can see what spending buys",
+    "frames.walk": "16, two per named phase, and a multiple of the idle's eight phases so every key pose lands on a real frame. Twice the walk's eight because an idle carries three motions on periods that do not divide each other, and eight frames cannot hold three of those without one of them stepping.",
+    "light.x": "unit vector from the upper left, held identical across all four probe samples",
+    "light.curve": "1.25. Dark fur has almost no ramp to spare above the middle, so the curve stays close to linear or the animal turns grey.",
+    "light.y": "the y half of light.x's unit vector",
+    "outline.enabled": "off. The idiom he singled out had no outer line, and this run keeps that look - the edge is carried by outline.rim instead, which is what the silhouette locks measure.",
+    "outline.inner": "on, even with the outer outline off: this sample drops the silhouette line but still needs the joints, which is the pairing a gradient idiom lives or dies on",
+    "outline.rim": "ON. Without it this idiom fails the edge-contrast lock at 0.058, which is where the same idiom failed before. The rim is what lets a no-outline sample keep a readable silhouette.",
+    "outline.material": "the hide ramp: this body has no ink, and the darkest hide tone is what the rim reaches for at the shadow edge",
+    "body.scale": "1: these bodies are authored at 64 px directly rather than scaled up from the 48 px arthropod",
+    "gait.swing": "0.10 turn on a 23 px arm: about 14 px of hand travel, which is the stride of a knuckle walker - long arms take long steps",
+    "gait.lift": "2.2 px = chest height (2 * ry = 19) / 8.6, the eighth-of-the-body rule at this mass",
+    "texture.speckle": "0.18. Fur is the one surface in this project where per-pixel noise is the material rather than dirt - it is what a coat looks like without drawing a single hair.",
+    "playback.msPerFrame": "110 ms. 16 x 110 = 1760 ms, three times the walk's 600. An idle near the walk's rate reads as walking on the spot, and that is the single most common way a standing pose fails.",
+    "playback.scale": "3, because 64 x 3 = 192 px on screen, the shared cell size",
+    "light.z": "the lamp sits slightly on the viewer's side. Backfilled when the depth solver arrived: at -1 every surface faces the light and the body flattens to one tone, at 0 the light grazes and the far half goes black. -0.35 puts the centre of a mass around two thirds up its ramp and still leaves the lit and shadow edges at the two ends.",
+    "gait.depth": "canvas.w / 8 = 8 px. Backfilled with the depth solver; no track in this sample uses the z channel, so it is inert here. It is the body's half-width rather than 0 so that it already means something the day a depth track is added.",
+    "shadow.steps": "8 px, and it is measured rather than chosen: a sweep at 6, 10, 16 and 24 returns the same shadow area from 6 onward. Past a few pixels the ray has left the body and there is nothing more to block it. 8 keeps a small margin over the saturation point.",
+    "shadow.bias": "0.25 px of depth, and its job changed. It used to guard against a surface shadowing itself, and it could not: acne scales with curvature, so a lone sphere of radius 18 self-shadowed 198 px and still self-shadowed at eight times the tolerance. That case is now settled by identity - a convex part cannot cast onto itself - so the bias only arbitrates a tie between two DIFFERENT parts whose surfaces meet at nearly the same depth. A quarter of a pixel is enough for that, and acne measures zero at every radius and every bias.",
+    "shadow.strength": "1 ramp step. On a five-tone ramp that is a fifth of the whole range, which is a readable value drop with a hard edge - the shape the ink verdict of 15/08 selected. 0 disables the pass.",
+    "fill.x": "+0.5, opposite the key lamp on the horizontal. A fill placed on the same side as the key lifts the half that is already lit and does nothing for the half that needs it.",
+    "fill.y": "+0.7, from BELOW. This is bounce: light off the ground back up into the underside of a body. Every fill in painting and photography comes from lower than the key for that reason.",
+    "fill.z": "-0.2, barely on the viewer side. A fill that faces the viewer as hard as the key does flattens the form it exists to recover.",
+    "fill.weight": "0.15, and it is the measured edge rather than a taste. His ink verdict of 15/08 requires BOTH a wide value range and clustered tone regions, and this knob moves them in opposite directions. Swept at 0, 0.10, 0.13, 0.15, 0.17, 0.19 and 0.22: regions improve monotonically, and the tree loses 23% of its value range between 0.15 and 0.17 (0.654 down to 0.504). 0.15 is the largest weight that costs no range on either subject, and it still buys a 7% gain in region size."
+  },
+  "shadow": {
+    "steps": 8,
+    "bias": 0.25,
+    "strength": 1
+  },
+  "fill": {
+    "x": 0.5,
+    "y": 0.7,
+    "z": -0.2,
+    "weight": 0.15
+  }
+}

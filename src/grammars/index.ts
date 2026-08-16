@@ -12,6 +12,8 @@ import { gorillaJumpChrono, gorillaJumpStardew } from './run8/idioms.ts'
 import { tree } from './run9/tree.ts'
 import { FOREST } from './run12/forest.ts'
 import { CLOUDS } from './run12/cloud.ts'
+import { PHOTOGRAPHER } from './run13/photographer.ts'
+import { gorillaIdle } from './run13/idle.ts'
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   fixture,
@@ -32,6 +34,8 @@ export const GRAMMARS: Readonly<Record<string, Grammar>> = {
   tree,
   ...Object.fromEntries(FOREST.map((g) => [g.name, g])),
   ...Object.fromEntries(CLOUDS.map((g) => [g.name, g])),
+  'gorilla-idle': gorillaIdle,
+  ...Object.fromEntries(PHOTOGRAPHER.map((g) => [g.name, g])),
 }
 
 /**
@@ -58,6 +62,8 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: 'tree', tunables: 'tree' },
   ...FOREST.map((g) => ({ grammar: g.name, tunables: 'wood' })),
   ...CLOUDS.map((g) => ({ grammar: g.name, tunables: 'sky' })),
+  { grammar: 'gorilla-idle', tunables: 'gorilla-idle' },
+  ...PHOTOGRAPHER.map((g) => ({ grammar: g.name, tunables: 'photog' })),
 ]
 
 export function grammarByName(name: string): Grammar {

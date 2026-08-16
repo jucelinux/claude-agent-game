@@ -1,0 +1,82 @@
+{
+  "canvas": {
+    "w": 72,
+    "h": 72,
+    "originX": 36,
+    "originY": 46
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 12
+  },
+  "light": {
+    "x": -0.6,
+    "y": -0.8,
+    "z": -0.2,
+    "curve": 0.85
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.29,
+    "lift": 6,
+    "depth": 4
+  },
+  "texture": {
+    "speckle": 0
+  },
+  "shadow": {
+    "steps": 8,
+    "bias": 0.25,
+    "strength": 1
+  },
+  "fill": {
+    "x": 0.5,
+    "y": 0.7,
+    "z": -0.2,
+    "weight": 0.15
+  },
+  "playback": {
+    "msPerFrame": 70,
+    "scale": 3
+  },
+  "_anchors": {
+    "canvas.w": "72. Set by the PRONE gait, not by the standing one: lying down the body runs horizontally and measures about 52 px end to end with the lens out in front. Standing he is 18 px wide. One cell has to hold both, because the three gaits are one subject and the runtime swaps between them at a fixed origin.",
+    "canvas.h": "72, square with the width. Standing he is 50 px tall.",
+    "canvas.originX": "canvas.w / 2",
+    "canvas.originY": "46, and it is NOT the feet. The origin is the pelvis, because that is the one point on this body that means the same thing in all three gaits — standing, the feet are 21 px below it; prone, they are behind it. The scene anchors him by his lowest painted pixel (`anchor: 'foot'`), which is what that field exists for: a body whose contact point MOVES between gaits cannot be placed by its origin, and a tree, whose does not, must be.",
+    "tones.perMaterial": "5, the wood's budget. He stands in that wood and a subject carrying a different tone count reads as a different game.",
+    "frames.walk": "12, and every named phase lands on a whole frame at quarters. Twelve rather than the wood's sixteen because a stride is faster than wind and three frames per phase is the floor for a leg swing to read as a swing.",
+    "light.x": "-0.6, the wood's lamp. A character lit differently from the trees he stands among is a character pasted onto them.",
+    "light.y": "the y half of the wood's unit vector",
+    "light.z": "-0.2, the wood's",
+    "light.curve": "0.85, a little above the wood's 0.75. The trees are dark bodies with a narrow bright edge; he is a mid-value body and needs more of the ramp spent on the lit half or the vest and the trousers stop separating.",
+    "outline.enabled": "ON, the wood's. He has to hold against a busy forest at 50 px.",
+    "outline.inner": "on. A person is joints; the line is what says knee, elbow, camera.",
+    "outline.rim": "OFF, the project's standing answer — a line and a rim are two answers to one question.",
+    "outline.material": "the ink ramp, a cool black.",
+    "body.scale": "1. Every subject in this scene is authored at its own true size and none is scaled to fake distance.",
+    "gait.swing": "0.29 turn = 104 deg, and it is set by the LARGEST motion across the three gaits, which is the prone pose laying the spine flat. A quarter turn is 0.25 and the key is authored at 0.86 of the amplitude, so the pelvis lands at 0.25 exactly. The walk's leg swing then rides the same channel at about a third of it, which is run 7's lesson applied inside one subject: one amplitude, keys authored as fractions of it.",
+    "gait.lift": "6 px. The pelvis rises about 2 px through a stride and drops about 2 px through a run's flight; the keys are authored as thirds of the amplitude.",
+    "gait.depth": "4 px = the limb row separation on this body, arms at 6 and legs at 5 against a torso 5 deep. Nothing in these three gaits travels in depth yet, so it is the null case and it is set to the body's own scale so the first gait that needs it starts from a number that means something.",
+    "texture.speckle": "0. Every pixel is placed.",
+    "playback.msPerFrame": "70 ms. 12 x 70 = 840 ms for a stride, against the gorilla's 8 x 75 = 600. A person's stride is longer than a knuckle-walking gorilla's and the two have to disagree or they read as one animation on two bodies.",
+    "playback.scale": "3, the scene's",
+    "shadow.steps": "8 px, the project's measured saturation point.",
+    "shadow.bias": "0.25 px, the project's.",
+    "shadow.strength": "1 ramp step. A fifth of a five-tone ramp, a readable drop with a hard edge.",
+    "fill.x": "+0.5, opposite the key lamp, the project's.",
+    "fill.y": "+0.7, bounce from the ground.",
+    "fill.z": "-0.2, barely on the viewer side.",
+    "fill.weight": "0.15, the measured edge from 15/08: the largest weight that costs no value range."
+  }
+}

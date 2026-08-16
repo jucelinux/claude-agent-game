@@ -51,33 +51,26 @@ const CANOPY: readonly [number, number, number][] = [
  * and the middle of the wood stays behind. That is a placement, not a special case.
  */
 /**
- * **Seven planes, and the gaps between them are the measurement that matters.**
+ * **Six planes, and every tree is on one of the five behind the player.**
  *
- * A subject paints a few pixels below its contact row — a root, an outline ring, the round
- * cap of a capsule — and the worst of those overhangs in this wood is 5 px. **Two planes
- * closer together than that produce a picture the eye cannot order**, because the difference
- * in what two trees overhang swallows the difference in where they stand. That is exactly the
- * defect he found and could not name.
+ * His instruction of 16/08: *"mova todas as árvores para o plano de fundo do gorila. No
+ * primeiro plano o jogador precisará de visibilidade de todo o plano frontal."* It is a game
+ * design decision rather than a picture one and it outranks the picture: the front sixteen
+ * rows are where the mechanic happens, and a trunk standing in them is a trunk hiding a
+ * photographer. The wood loses its foreground framing and the player gains a stage.
  *
- * So the rule is: **every gap between two planes exceeds the largest overhang standing on
- * them.** These are 6 to 12 px apart against an overhang of 5, and the lock checks every pair
- * rather than trusting the arithmetic.
- *
- * **A band is two planes rather than one**, because trees on a single row read as a rank. Six
- * pixels is the smallest step that clears the rule, and it is enough — the first attempt used
- * three and the lock caught two trees whose bases landed on the same row.
- *
- * The gorilla walks on his own plane between the middle and the front, so near trunks pass in
- * front of him and the middle of the wood stays behind. That is a placement, not a special
- * case: he obeys the same arithmetic as a tree.
+ * **The gaps are the measurement that matters.** A subject paints a few pixels below its
+ * contact row — a root, an outline ring, the round cap of a capsule — and the worst of those
+ * overhangs is 5 px. Two planes closer together than that produce a picture the eye cannot
+ * order, which was his fourth finding. These are 8 px apart, and 12 between the last tree and
+ * the player, and a lock checks every pair.
  */
-const FAR_A = 0.962   // row 128
-const FAR_B = 0.846   // row 134
-const MID_A = 0.615   // row 146
-const MID_B = 0.5     // row 152
-const ACTOR = 0.308   // row 162
-const NEAR_A = 0.154  // row 170
-const NEAR_B = 0.038  // row 178
+const T1 = 0.962  // row 128
+const T2 = 0.808  // row 136
+const T3 = 0.654  // row 144
+const T4 = 0.5    // row 152
+const T5 = 0.346  // row 160
+const ACTOR = 0.115 // row 172
 
 /**
  * **Every tree gets its own place in the gust.** The first pass gave all fourteen the same
@@ -143,40 +136,91 @@ export const forestScene: Scene = {
     { grammar: 'cloud-a', tunables: 'sky', x: 205, y: 14, sky: true, motion: { speed: 3.2, swayX: 5, bobY: 2.5, period: 29, at: 0.37 } },
     { grammar: 'cloud-b', tunables: 'sky', x: 300, y: 34, sky: true, motion: { speed: 8.0, swayX: 9, bobY: 4.5, period: 17, at: 0.68 } },
 
-    // **Far: the tall thin ones.** Conifers and slim broadleaves, half dissolved into the
+    // **The back of the wood: the tall thin ones.** Conifers and slim broadleaves, half dissolved into the
     // sky. They are the tallest trees in the wood and they are the furthest away, so the
     // canopy line rises behind the near trunks instead of running level with them — which is
     // the thing he could not see happening in the first pass.
-    { grammar: 'tree-spruce', tunables: 'wood', x: 18, depth: FAR_A, phase: phaseOf(0) },
-    { grammar: 'tree-pine', tunables: 'wood', x: 88, depth: FAR_B, phase: phaseOf(1) },
-    { grammar: 'tree-tall', tunables: 'wood', x: 152, depth: FAR_A, phase: phaseOf(2) },
-    { grammar: 'tree-airy', tunables: 'wood', x: 222, depth: FAR_B, phase: phaseOf(3) },
-    { grammar: 'tree-birch', tunables: 'wood', x: 292, depth: FAR_A, phase: phaseOf(4) },
+    { grammar: 'tree-spruce', tunables: 'wood', x: 18, depth: T1, phase: phaseOf(0) },
+    { grammar: 'tree-pine', tunables: 'wood', x: 88, depth: T2, phase: phaseOf(1) },
+    { grammar: 'tree-tall', tunables: 'wood', x: 152, depth: T1, phase: phaseOf(2) },
+    { grammar: 'tree-airy', tunables: 'wood', x: 222, depth: T2, phase: phaseOf(3) },
+    { grammar: 'tree-birch', tunables: 'wood', x: 292, depth: T1, phase: phaseOf(4) },
 
-    // **Mid: the middle of the wood.** Where the crowns start to read as separate masses.
-    { grammar: 'tree-crown', tunables: 'wood', x: 4, depth: MID_A, phase: phaseOf(5) },
-    { grammar: 'tree-elm', tunables: 'wood', x: 70, depth: MID_B, phase: phaseOf(6) },
-    { grammar: 'tree-snag', tunables: 'wood', x: 138, depth: MID_A, phase: phaseOf(7) },
-    { grammar: 'tree-maple', tunables: 'wood', x: 208, depth: MID_B, phase: phaseOf(8) },
-    { grammar: 'tree-sapling', tunables: 'wood', x: 268, depth: MID_A, phase: phaseOf(9) },
+    // **The middle of the wood.** Where the crowns start to read as separate masses.
+    { grammar: 'tree-crown', tunables: 'wood', x: 4, depth: T3, phase: phaseOf(5) },
+    { grammar: 'tree-elm', tunables: 'wood', x: 70, depth: T4, phase: phaseOf(6) },
+    { grammar: 'tree-snag', tunables: 'wood', x: 138, depth: T3, phase: phaseOf(7) },
+    { grammar: 'tree-maple', tunables: 'wood', x: 208, depth: T4, phase: phaseOf(8) },
+    { grammar: 'tree-sapling', tunables: 'wood', x: 268, depth: T3, phase: phaseOf(9) },
 
-    // **Near: the trunks.** Full strength, standing lowest, and chosen for girth rather than
-    // for height — the foreground of a forest is bark, not canopy.
-    { grammar: 'tree-broad', tunables: 'wood', x: 34, depth: NEAR_A, phase: phaseOf(10) },
-    { grammar: 'tree-oak', tunables: 'wood', x: 146, depth: NEAR_B, phase: phaseOf(11) },
-    { grammar: 'tree-willow', tunables: 'wood', x: 258, depth: NEAR_A, phase: phaseOf(12) },
-    { grammar: 'tree-bush', tunables: 'wood', x: 210, depth: NEAR_B, phase: phaseOf(13) },
+    // **The last rank of trees, and it is still behind the player.** These were the
+    // foreground until 16/08; they are the closest thing the wood is now allowed to be.
+    { grammar: 'tree-broad', tunables: 'wood', x: 34, depth: T5, phase: phaseOf(10) },
+    { grammar: 'tree-oak', tunables: 'wood', x: 146, depth: T5, phase: phaseOf(11) },
+    { grammar: 'tree-willow', tunables: 'wood', x: 258, depth: T5, phase: phaseOf(12) },
+    { grammar: 'tree-bush', tunables: 'wood', x: 210, depth: T5, phase: phaseOf(13) },
 
-    // **The gorilla, and he is his now.** Left and right only, which is what he asked for.
+    // **The photographers**, and they enter from opposite edges on periods that do not divide
+    // each other — 11 and 17 seconds — so the player is never given a rhythm to memorise.
     //
-    // He walks in front of the near trunks and behind the bush, because the paint order is
-    // the one the scene already had — haze, then the row he stands on. No case was added for
-    // the actor, which is the test of whether the depth rule was the right one.
+    // They are drawn BEFORE the gorilla and on his own plane: same distance, so which of them
+    // overlaps is arbitrary, and putting the player last means the character a person is
+    // steering is never hidden behind anything.
     {
-      grammar: 'gorilla', tunables: 'gorilla', x: 96, depth: ACTOR, anchor: 'foot',
-      // 46 px/s. A stride is 8 frames at 90 ms, so he covers about 33 px per cycle — close to
-      // his own body length, which is what stops a walk from looking like a skate.
-      control: { speed: 46, minX: 14, maxX: 306, idleFrame: 0 },
+      grammar: 'photog-walk', tunables: 'photog', x: 0, depth: ACTOR, anchor: 'foot',
+      clips: {
+        walk: { grammar: 'photog-walk', tunables: 'photog' },
+        prone: { grammar: 'photog-prone', tunables: 'photog' },
+        run: { grammar: 'photog-run', tunables: 'photog' },
+      },
+      approach: {
+        walk: 'walk', prone: 'prone', flee: 'run', from: 'left',
+        // 34 px/s walking against the gorilla's 46: he can always be reached. 92 fleeing,
+        // which is twice the gorilla — being struck is the only thing that makes him quick.
+        walkSpeed: 34, fleeSpeed: 92,
+        // 46 px is just outside the gorilla's 40 px reach, so the player has to step in.
+        standoff: 46,
+        delay: 2.5, period: 11, shutter: 2.4,
+      },
+    },
+    {
+      grammar: 'photog-walk', tunables: 'photog', x: 0, depth: ACTOR, anchor: 'foot',
+      clips: {
+        walk: { grammar: 'photog-walk', tunables: 'photog' },
+        prone: { grammar: 'photog-prone', tunables: 'photog' },
+        run: { grammar: 'photog-run', tunables: 'photog' },
+      },
+      approach: {
+        walk: 'walk', prone: 'prone', flee: 'run', from: 'right',
+        walkSpeed: 34, fleeSpeed: 92, standoff: 46,
+        delay: 7, period: 17, shutter: 2.4,
+      },
+    },
+
+    // **The gorilla: three clips and a state, and the state is the game.**
+    //
+    // `idle` was his ask of 16/08 and it is not a nicety — a released key used to hold frame
+    // 0 of the walk, and a held frame reads as a crash rather than as standing still.
+    {
+      grammar: 'gorilla-idle', tunables: 'gorilla-idle', x: 160, depth: ACTOR, anchor: 'foot',
+      clips: {
+        idle: { grammar: 'gorilla-idle', tunables: 'gorilla-idle' },
+        walk: { grammar: 'gorilla', tunables: 'gorilla' },
+        hit: { grammar: 'gorilla-attack', tunables: 'gorilla-attack' },
+      },
+      player: {
+        // 46 px/s. A stride is 8 frames at 75 ms, so he covers about 28 px per cycle — close
+        // to his own body length, which is what stops a walk from looking like a skate.
+        speed: 46, minX: 16, maxX: 304,
+        idle: 'idle', walk: 'walk', attack: 'hit',
+        // 40 px is the fist at full extension plus a little. Reach is a promise: anything the
+        // player can see the arm touch has to be a thing the arm hits.
+        reach: 40,
+        // 0.55 through the clip. Run 7 authored the attack with anticipation longer than
+        // impact, so the blow lands past the middle — a hit registered on frame 0 registers
+        // before the arm has moved and reads as a miss that worked.
+        hitAt: 0.55,
+      },
     },
   ],
 }

@@ -95,46 +95,142 @@ function mount(el, S) {
     bx.fillStyle = rgb(S.floor[y]); bx.fillRect(0, S.ground + y, S.w, 1)
   }
 
-  // The actor: the one subject whose position is state rather than data.
-  var actor = null
+  /**
+   * **The state, and it is the whole of what makes this a game rather than a picture.**
+   *
+   * The player holds a position, a facing and a named state; each photographer holds the
+   * same plus a timer. Nothing here is in the sprites — a clip is chosen by the state, and
+   * the sprites have never heard of a state.
+   */
+  var P = null, crew = []
   for (var i = 0; i < S.placed.length; i++) {
-    if (S.placed[i].control) actor = { p: S.placed[i], x: S.placed[i].x, face: 1, clock: 0, moving: false }
+    var pl = S.placed[i]
+    if (pl.player) P = { at: i, x: pl.x, face: 1, state: 'idle', walk: 0, atk: 0, hit: false }
+    if (pl.approach) {
+      var a = pl.approach
+      crew.push({
+        at: i, p: pl, a: a, x: a.from === 'left' ? -80 : S.w + 80,
+        face: a.from === 'left' ? 1 : -1, state: 'away', clock: 0, next: a.delay, shot: 0,
+      })
+    }
   }
+
   var keys = {}
-  if (S.interactive && actor) {
+  if (S.interactive) {
     var down = function (e, v) {
       var k = e.key
       if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = v; e.preventDefault() }
       if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = v; e.preventDefault() }
+      // **A press is latched, not sampled.** A tap that begins and ends between two animation
+      // frames is invisible to a loop that only reads the key's current state — and at 60 fps
+      // that is a 16 ms window a person hits regularly. The edge is consumed by the loop, so
+      // the input survives the gap between frames rather than falling into it.
+      if (k === ' ' || k === 'x' || k === 'X' || k === 'z' || k === 'Z') {
+        if (v && !keys.hit) keys.tap = true
+        keys.hit = v; e.preventDefault()
+      }
     }
     window.addEventListener('keydown', function (e) { down(e, true) })
     window.addEventListener('keyup', function (e) { down(e, false) })
   }
 
+  /** How long a clip runs, in seconds. The sprite owns its own rate; the state does not. */
+  function span(ix) { var L = S.layers[ix]; return L.n * L.ms / 1000 }
+
   /**
-   * **A drop is a sprite, stamped once per column.** It used to be one 'fillRect' per drop
+   * **The blow.** Anything prone within reach, on the side he is facing, gets up and runs.
+   * It fires once per attack, at 'hitAt' through the clip — anticipation is longer than
+   * impact, and a hit that registers on frame 0 registers before the arm has moved.
+   */
+  function strike() {
+    for (var c = 0; c < crew.length; c++) {
+      var n = crew[c]
+      if (n.state !== 'prone') continue
+      var dx = n.x - P.x
+      if (Math.abs(dx) > S.placed[P.at].player.reach) continue
+      if (dx * P.face < 0) continue
+      n.state = 'out'; n.clock = 0
+      n.face = n.a.from === 'left' ? -1 : 1
+    }
+  }
+
+  function think(t, dt) {
+    if (!P) return
+    var pd = S.placed[P.at].player
+    if (P.state === 'attack') {
+      P.atk += dt
+      var dur = span(S.placed[P.at].clips[pd.attack].right)
+      if (!P.hit && P.atk >= dur * pd.hitAt) { P.hit = true; strike() }
+      if (P.atk >= dur) { P.state = 'idle'; P.hit = false }
+    } else if (keys.hit || keys.tap) {
+      keys.tap = false
+      P.state = 'attack'; P.atk = 0; P.hit = false
+    } else {
+      var dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
+      if (dir !== 0) {
+        P.face = dir; P.state = 'walk'
+        P.x = Math.max(pd.minX, Math.min(pd.maxX, P.x + dir * pd.speed * dt))
+        // The walk clock only runs while he walks, so the stride resumes where it stopped
+        // instead of carrying on behind a standing pose.
+        P.walk += dt * 1000
+      } else { P.state = 'idle' }
+    }
+
+    for (var c = 0; c < crew.length; c++) {
+      var n = crew[c], a = n.a
+      if (n.state === 'away') {
+        if (t >= n.next) {
+          n.state = 'in'; n.clock = 0
+          n.x = a.from === 'left' ? -40 : S.w + 40
+          n.face = a.from === 'left' ? 1 : -1
+        }
+      } else if (n.state === 'in') {
+        // He stops a fixed distance short, on his own side of the gorilla. Walking THROUGH
+        // the subject is the failure this one number prevents.
+        var goal = P ? P.x + (a.from === 'left' ? -a.standoff : a.standoff) : n.x
+        var step = a.walkSpeed * dt
+        n.face = n.x < goal ? 1 : -1
+        n.clock += dt * 1000
+        if (Math.abs(n.x - goal) <= step) { n.x = goal; n.state = 'prone'; n.shot = t + 0.6 }
+        else { n.x += (goal > n.x ? 1 : -1) * step }
+      } else if (n.state === 'prone') {
+        n.clock += dt * 1000
+        // Lying still, he still tracks the animal: the lens follows the subject, which is
+        // the one thing a photographer does that a rock does not.
+        if (P) n.face = P.x > n.x ? 1 : -1
+        if (t >= n.shot) { n.shot = t + a.shutter; n.flash = t }
+      } else {
+        n.clock += dt * 1000
+        n.x += n.face * a.fleeSpeed * dt
+        if (n.x < -60 || n.x > S.w + 60) { n.state = 'away'; n.next = t + a.period }
+      }
+    }
+  }
+
+  /**
+   * **A drop is a sprite, stamped once per column.** It used to be one fillRect per drop
    * pixel — 240 calls a frame against 19 for every subject in the wood put together, and a
    * canvas call costs the same whether it moves one pixel or a thousand. 48 now.
    *
-   * The stamp is byte-identical to the per-pixel version because 'x0' and the row index are
-   * both integers: 'round(x0 + k*slant)' equals 'x0 + round(k*slant)' for integer 'x0', so
-   * baking the slant into the stamp changes nothing. It is a cheaper way to say the same
-   * thing, not a cheaper-looking rain.
+   * The stamp is byte-identical to the per-pixel version because x0 and the row index are
+   * both integers: round(x0 + k*slant) equals x0 + round(k*slant) for integer x0, so baking
+   * the slant into the stamp changes nothing. It is a cheaper way to say the same thing, not
+   * a cheaper-looking rain.
    */
   var drops = null
   if (S.rain) {
     drops = []
     for (var ci = 0; ci < S.rain.colors.length; ci++) {
       var xs = [], lo = 0, hi = 0
-      for (var k = 0; k < S.rain.length; k++) {
-        var off = Math.round(k * S.rain.slant); xs.push(off)
+      for (var dk = 0; dk < S.rain.length; dk++) {
+        var off = Math.round(dk * S.rain.slant); xs.push(off)
         if (off < lo) lo = off
         if (off > hi) hi = off
       }
-      var st = cv(hi - lo + 1, S.rain.length), sx2 = st.getContext('2d')
-      sx2.fillStyle = rgb(S.rain.colors[ci])
-      for (var k2 = 0; k2 < S.rain.length; k2++) sx2.fillRect(xs[k2] - lo, k2, 1, 1)
-      drops.push({ canvas: st, ox: lo })
+      var stamp = cv(hi - lo + 1, S.rain.length), stx = stamp.getContext('2d')
+      stx.fillStyle = rgb(S.rain.colors[ci])
+      for (var dj = 0; dj < S.rain.length; dj++) stx.fillRect(xs[dj] - lo, dj, 1, 1)
+      drops.push({ canvas: stamp, ox: lo })
     }
   }
 
@@ -189,6 +285,13 @@ function mount(el, S) {
     meter.gaps = []; meter.work = []
   }
 
+  /**
+   * Which slot each blit in the last frame belongs to, in call order. A subject that is off
+   * screen is not drawn at all, so position in the call list is not position in the scene —
+   * and any harness reading the loop from outside needs to be told which is which.
+   */
+  var drawn = []
+
   var t0 = null, prev = 0
   function frame(now) {
     var began = clock()
@@ -200,46 +303,73 @@ function mount(el, S) {
     if (prev > 0) { meter.gaps.push((t - prev) * 1000); if (meter.gaps.length > 120) meter.gaps.shift() }
     prev = t
 
-    if (actor) {
-      var dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
-      actor.moving = dir !== 0
-      if (dir !== 0) {
-        actor.face = dir
-        actor.x = Math.max(actor.p.control.minX, Math.min(actor.p.control.maxX, actor.x + dir * actor.p.control.speed * dt))
-        // The walk clock only runs while he walks, so the cycle resumes where it stopped
-        // instead of carrying on behind a standing pose.
-        actor.clock += dt * 1000
-      }
-    }
+    think(t, dt)
 
     ox.drawImage(bg, 0, 0)
     rain(t)
 
+    var flash = 0
+    drawn.length = 0
     for (var i = 0; i < S.placed.length; i++) {
-      var P = S.placed[i], li = P.layer, L, f, dx, dy
-      if (P.control && actor) {
-        li = actor.face < 0 ? P.control.flip : P.layer
+      var D = S.placed[i], li = D.layer, L, f, dx, dy
+
+      if (D.player && P) {
+        // The state names a clip; the clip names a layer. Nothing about which animation runs
+        // has ever reached the sprites, which is why an idle cost a gait and not a rewrite.
+        var pd = D.player
+        var name = P.state === 'attack' ? pd.attack : P.state === 'walk' ? pd.walk : pd.idle
+        var pair = D.clips[name]
+        li = P.face < 0 ? pair.left : pair.right
         L = S.layers[li]
-        f = actor.moving ? Math.floor(actor.clock / L.ms) % L.n : P.control.idleFrame % L.n
-        dx = Math.round(actor.x) + L.ox; dy = P.y + L.oy
+        var own = P.state === 'attack' ? P.atk * 1000 : P.state === 'walk' ? P.walk : t * 1000
+        // The attack plays ONCE and holds its last frame until the state clears, or a fast
+        // clip loops back to the wind-up mid-swing and the blow appears to be thrown twice.
+        f = P.state === 'attack'
+          ? Math.min(L.n - 1, Math.floor(own / L.ms))
+          : Math.floor(own / L.ms) % L.n
+        dx = Math.round(P.x) + L.ox; dy = D.y + L.oy
+      } else if (D.approach) {
+        var me = null
+        for (var c = 0; c < crew.length; c++) if (crew[c].at === i) me = crew[c]
+        var cn = me.state === 'in' ? D.approach.walk : me.state === 'prone' ? D.approach.prone : D.approach.flee
+        var pr = D.clips[cn]
+        li = me.face < 0 ? pr.left : pr.right
+        L = S.layers[li]
+        f = Math.floor(me.clock / L.ms) % L.n
+        dx = Math.round(me.x) + L.ox
+        // Every clip is anchored by its own lowest painted pixel at build time, so a body
+        // that lies down keeps its feet on the same floor as the body that walked in.
+        dy = D.y + L.oy
+        if (me.state === 'away') continue
+        if (me.flash !== undefined && t - me.flash < 0.07) flash = 1
       } else {
         L = S.layers[li]
-        f = Math.floor(t * 1000 / L.ms + P.phase * L.n) % L.n
-        dx = P.x + L.ox; dy = P.y + L.oy
-        if (P.motion) {
+        f = Math.floor(t * 1000 / L.ms + D.phase * L.n) % L.n
+        dx = D.x + L.ox; dy = D.y + L.oy
+        if (D.motion) {
           // Continuous in seconds, so there is no loop point to be seamless at. The sway
           // term is what makes the speed rise and fall: a cloud that travels at one rate is
           // a cutout on a rail.
-          var M = P.motion, u = 6.283185 * (t / M.period + M.at)
+          var M = D.motion, u = 6.283185 * (t / M.period + M.at)
           dx += M.speed * t + M.swayX * Math.sin(u)
           dy += M.bobY * Math.sin(u * 0.61 + 2.3)
           // Wrap with a whole sprite width of margin off each edge, so it leaves and returns
           // entirely off screen rather than reappearing cut in half.
-          var span = S.w + L.w
-          dx = ((dx + L.w) % span + span) % span - L.w
+          var span2 = S.w + L.w
+          dx = ((dx + L.w) % span2 + span2) % span2 - L.w
         }
       }
+      drawn.push(i)
       ox.drawImage(sheets[li], 0, f * L.h, L.w, L.h, Math.round(dx), Math.round(dy), L.w, L.h)
+    }
+
+    // **The shutter.** One rectangle, and it is the cheapest possible way to say a photograph
+    // was taken — which is the whole state the player is being asked to prevent. A flash the
+    // player cannot see is a mechanic with no feedback.
+    if (flash) {
+      ox.globalAlpha = 0.34
+      ox.fillStyle = '#ffffff'; ox.fillRect(0, 0, S.w, S.h)
+      ox.globalAlpha = 1
     }
 
     vx.drawImage(off, 0, 0, view.width, view.height)
@@ -249,7 +379,7 @@ function mount(el, S) {
   }
   el.appendChild(view)
   requestAnimationFrame(frame)
-  return view
+  return { view: view, drawn: drawn }
 }
 `
 
@@ -347,13 +477,13 @@ export function shelfPage(games: readonly AppGame[]): string {
 
 /** **One game, big, and playable.** Input is bound on this route and nowhere else. */
 export function gamePage(game: AppGame): string {
-  const playable = game.stage.placed.some((p) => p.control !== undefined)
+  const playable = game.stage.placed.some((p) => p.player !== undefined)
   return shell(
     `${game.title} · claude-ink-2d`,
     `<a class="back" href="/">← shelf</a><h1>${esc(game.title)}</h1><span class="sub mono">${esc(game.id)}</span>`,
     `<div class="stage"><div id="stage"></div></div>
      <div class="meter mono"><span class="tag">measured</span><span id="meter">warming up…</span></div>
-     ${playable ? `<div class="keys"><b>←</b> <b>→</b> or <b>A</b> <b>D</b> to walk</div>` : ''}
+     ${playable ? `<div class="keys"><b>←</b> <b>→</b> walk &nbsp;·&nbsp; <b>space</b> attack &nbsp;·&nbsp; drive the photographers off before they get the shot</div>` : ''}
      <div class="about">
        <p>${esc(game.blurb)}</p>
        <div class="facts mono"><span class="tag">budget</span>${budgetFacts(budgetOf(game.stage, game.gzipBytes ?? 0))
@@ -361,6 +491,6 @@ export function gamePage(game: AppGame): string {
          .join('')}</div>
        <div class="facts mono">${game.meta.map((m) => `<span>${esc(m)}</span>`).join('')}</div>
      </div>`,
-    `mount(document.getElementById('stage'), ${payloadOf(game.stage, game.stage.scale, true)});`,
+    `var __last = mount(document.getElementById('stage'), ${payloadOf(game.stage, game.stage.scale, true)});`,
   )
 }

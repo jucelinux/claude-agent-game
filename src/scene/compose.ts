@@ -112,29 +112,71 @@ export type Placement = {
     readonly at: number
   }
   /**
-   * **This subject is driven by the player**, which is the first thing in this project that
-   * a person can change while it is running.
+   * **The clips a subject can play.** Named animations over one body — the gorilla's idle,
+   * walk and attack; the photographer's walk, prone and run.
    *
-   * It forces the runtime to stop being a frame player: input, state and draw have to happen
-   * per animation frame, and the scene can no longer be a list of pre-composited pictures.
-   * The sprites stay pre-rendered — a walk cycle is still a pure function of the grammar —
-   * and what moved into the browser is only the *composition*, which is exactly the split
+   * Each clip is a separate grammar sharing the same skeleton and parts, which is the shape
+   * run 7 established and the reason an action costs a gait rather than a redrawing. The
+   * runtime holds a *state*, and the state names a clip; nothing about which animation plays
+   * lives in the sprites.
+   */
+  readonly clips?: Readonly<Record<string, { readonly grammar: string; readonly tunables: string }>>
+  /**
+   * **Driven by the keyboard**, and the first thing in this project a person can change while
+   * it is running.
+   *
+   * It forces the runtime to stop being a frame player: input, state and draw happen per
+   * animation frame, and the scene can no longer be a list of pre-composited pictures. The
+   * sprites stay pre-rendered — a walk cycle is still a pure function of its grammar — and
+   * what moved into the browser is only the *composition*, which is exactly the split
    * `HARNESS.md` §2.1 already requires between a deterministic core and its consumers.
    *
-   * **Facing costs a second render, not a flip.** Mirroring a sprite mirrors its lighting,
-   * so a body lit from the upper left becomes a body lit from the upper right and the whole
-   * wood disagrees with it. The subject is rendered again with the lamp mirrored and then
-   * flipped, which puts the light back where the scene keeps it. That is cheap here and
-   * impossible for a painted sprite sheet, so it is one of the few places where generating
-   * the art is straightforwardly better than drawing it.
+   * **Facing costs a second render, not a flip.** Mirroring a sprite mirrors its lighting, so
+   * a body lit from the upper left becomes a body lit from the upper right and the whole wood
+   * disagrees with it. The subject is rendered again with the lamp mirrored and then flipped,
+   * which puts the light back where the scene keeps it. Cheap here and impossible for a
+   * painted sprite sheet, so it is one of the few places where generating the art is
+   * straightforwardly better than drawing it.
    */
-  readonly control?: {
+  readonly player?: {
     /** Scene pixels per second. */
     readonly speed: number
     readonly minX: number
     readonly maxX: number
-    /** The frame held when standing still. */
-    readonly idleFrame: number
+    readonly idle: string
+    readonly walk: string
+    readonly attack: string
+    /** How far in front of him the blow reaches, in scene pixels. */
+    readonly reach: number
+    /** Where in the attack clip the blow lands, 0..1. Anticipation is longer than impact. */
+    readonly hitAt: number
+  }
+  /**
+   * **A subject that walks in from an edge, settles at a distance from the player, and runs
+   * home when it is struck.** The photographer, and it is named for the behaviour rather than
+   * for the character.
+   *
+   * **It is deliberately not a framework.** `CLAUDE.md` §5 says harvest generality, never
+   * design it: this is the first non-player behaviour in the project, and a behaviour tree
+   * written for a sample of one is the judge built before the artifact all over again. When
+   * there is a second, whatever the two share becomes the mechanism and this becomes one of
+   * its cases.
+   */
+  readonly approach?: {
+    readonly walk: string
+    readonly prone: string
+    readonly flee: string
+    /** The edge it comes from and returns to. */
+    readonly from: 'left' | 'right'
+    readonly walkSpeed: number
+    readonly fleeSpeed: number
+    /** Scene pixels from the player it settles at. */
+    readonly standoff: number
+    /** Seconds before its first entrance, and between one exit and the next entrance. */
+    readonly delay: number
+    readonly period: number
+    /** Seconds between shutter flashes once it is prone. */
+    readonly shutter: number
   }
 }
 

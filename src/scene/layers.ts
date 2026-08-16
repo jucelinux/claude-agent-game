@@ -55,8 +55,15 @@ export type Placed = {
   readonly y: number
   readonly phase: number
   readonly motion?: Placement['motion']
-  /** Present on a controlled subject. `flip` is the layer to draw when it faces left. */
-  readonly control?: Placement['control'] & { readonly flip: number }
+  /**
+   * Layer index per clip name, one for each facing. Present on anything with `clips`.
+   *
+   * **Both facings are real renders.** `left` is the same body with the lamp mirrored and the
+   * pixels flipped, so the two mirrors cancel on the light and compose on the shape.
+   */
+  readonly clips?: Readonly<Record<string, { readonly right: number; readonly left: number }>>
+  readonly player?: Placement['player']
+  readonly approach?: Placement['approach']
 }
 
 export type Stage = {
@@ -116,19 +123,25 @@ function box(frames: readonly { readonly buf: { w: number; h: number; data: Uint
  * then mirrors the pixels, which is how a subject faces the other way **without** its light
  * turning round with it.
  */
-function layerOf(p: Placement, id: string, sky: RGB, recede: number, flipLight: boolean): { layer: Layer; foot: number; origin: { x: number; y: number } } {
+function layerOf(
+  spec: { grammar: string; tunables: string; scale?: number; msPerFrame?: number; seed?: number },
+  id: string,
+  sky: RGB,
+  recede: number,
+  flipLight: boolean,
+): { layer: Layer; foot: number; origin: { x: number; y: number } } {
   const overrides: Record<string, number> = {}
-  if (p.scale !== undefined) overrides['body.scale'] = p.scale
-  if (p.msPerFrame !== undefined) overrides['playback.msPerFrame'] = p.msPerFrame
-  const run = execute({ grammar: p.grammar, tunables: p.tunables, seed: p.seed ?? 1 })
+  if (spec.scale !== undefined) overrides['body.scale'] = spec.scale
+  if (spec.msPerFrame !== undefined) overrides['playback.msPerFrame'] = spec.msPerFrame
+  const run = execute({ grammar: spec.grammar, tunables: spec.tunables, seed: spec.seed ?? 1 })
   const lit = flipLight
     ? execute({
-        grammar: p.grammar, tunables: p.tunables, seed: p.seed ?? 1,
+        grammar: spec.grammar, tunables: spec.tunables, seed: spec.seed ?? 1,
         overrides: { ...overrides, 'light.x': -run.params.light.x, 'fill.x': -run.params.fill.x },
       })
     : Object.keys(overrides).length === 0
       ? run
-      : execute({ grammar: p.grammar, tunables: p.tunables, seed: p.seed ?? 1, overrides })
+      : execute({ grammar: spec.grammar, tunables: spec.tunables, seed: spec.seed ?? 1, overrides })
 
   const { originX, originY } = lit.params.canvas
   const b = box(lit.frames)
@@ -163,10 +176,35 @@ export function toStage(scene: Scene): Stage {
   const layers: Layer[] = []
   const placed: (Placed & { readonly order: number })[] = []
 
+  /**
+   * **One render per distinct (grammar, tunables, haze, facing), shared by everyone who wants
+   * it.** Two photographers entering from two edges are two behaviours over one set of
+   * sprites, and rendering the body twice would double the largest cost on the page for a
+   * picture nobody could tell apart.
+   */
+  const cache = new Map<string, { layer: number; foot: number; origin: { x: number; y: number } }>()
+  const build = (
+    spec: { grammar: string; tunables: string; scale?: number; msPerFrame?: number; seed?: number },
+    recede: number,
+    flip: boolean,
+  ): { layer: number; foot: number; origin: { x: number; y: number } } => {
+    // **The key is also the id.** A shared layer must not claim to belong to the first
+    // placement that happened to ask for it — two photographers on one set of sprites is the
+    // case, and a layer named after one of them is a layer that lies about the other.
+    const key = `${spec.grammar}@${spec.tunables}${spec.scale === undefined ? '' : `×${spec.scale}`}` +
+      `${spec.msPerFrame === undefined ? '' : `/${spec.msPerFrame}ms`}${spec.seed === undefined || spec.seed === 1 ? '' : `#${spec.seed}`}` +
+      `${recede === 0 ? '' : `~${recede.toFixed(3)}`}${flip ? ':left' : ''}`
+    const hit = cache.get(key)
+    if (hit !== undefined) return hit
+    const made = layerOf(spec, key, scene.sky, recede, flip)
+    const entry = { layer: layers.push(made.layer) - 1, foot: made.foot, origin: made.origin }
+    cache.set(key, entry)
+    return entry
+  }
+
   for (const [i, p] of scene.placements.entries()) {
     const recede = p.sky === true ? 0 : hazeAt(scene, p.depth ?? 0)
-    const main = layerOf(p, `${p.grammar}#${i}`, scene.sky, recede, false)
-    const index = layers.push(main.layer) - 1
+    const main = build(p, recede, false)
 
     // Depth gives the contact row; `anchor` says how the sprite meets it. `origin` is exact,
     // `foot` measures the lowest painted pixel. Same rule as the compositor, by the same
@@ -174,19 +212,27 @@ export function toStage(scene: Scene): Stage {
     const row = p.sky === true ? (p.y ?? 0) : standRow(scene, p.depth ?? 0)
     const y = p.anchor === 'foot' ? row - main.foot + main.origin.y : row
 
-    let control: Placed['control']
-    if (p.control !== undefined) {
-      const flip = layers.push(layerOf(p, `${p.grammar}#${i}:left`, scene.sky, recede, true).layer) - 1
-      control = { ...p.control, flip }
+    let clips: Placed['clips']
+    if (p.clips !== undefined) {
+      const built: Record<string, { right: number; left: number }> = {}
+      for (const [name, spec] of Object.entries(p.clips)) {
+        built[name] = {
+          right: build(spec, recede, false).layer,
+          left: build(spec, recede, true).layer,
+        }
+      }
+      clips = built
     }
 
     placed.push({
-      layer: index,
+      layer: main.layer,
       x: p.x,
       y,
       phase: p.phase ?? 0,
       ...(p.motion === undefined ? {} : { motion: p.motion }),
-      ...(control === undefined ? {} : { control }),
+      ...(clips === undefined ? {} : { clips }),
+      ...(p.player === undefined ? {} : { player: p.player }),
+      ...(p.approach === undefined ? {} : { approach: p.approach }),
       order: paintOrder(p, i),
     })
   }
