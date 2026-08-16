@@ -42,15 +42,38 @@ describe('determinism — the blocker (HARNESS §2.5)', () => {
     expect(hashBuffers(forward)).toBe(hashBuffers([...backward].reverse()))
   })
 
-  it('no ambient randomness anywhere below the core', () => {
-    const banned = [/Math\.random/, /Date\.now/, /new Date\b/, /process\.hrtime/, /performance\.now/]
+  /**
+   * **The two files that emit browser runtime code may read a clock, and nothing else may.**
+   *
+   * `HARNESS.md` §2.1 makes rendering a *consumer* of the deterministic core, and a consumer
+   * running an animation loop has to know what time it is — both of these already take a
+   * timestamp from `requestAnimationFrame`. What was added on 16/08 is a frame-time meter,
+   * which needs a second reading inside the frame to measure the work between them.
+   *
+   * **The exemption is a clock and only a clock.** `Math.random`, `Date.now` and `new Date`
+   * stay banned in every file in the tree without exception, because those are the ones that
+   * would make output differ run to run. A clock that measures how long the drawing took
+   * cannot change what was drawn — and if one ever did, the determinism hash above catches
+   * it, which is the guarantee this lock is only the cheap early warning for.
+   */
+  const CONSUMERS = ['src/micro/app.ts', 'src/viewer/page.ts']
+
+  it('no ambient randomness anywhere, and no clock below the consumers', () => {
+    const always = [/Math\.random/, /Date\.now/, /new Date\b/]
+    const clocks = [/process\.hrtime/, /performance\.now/]
+    let exempted = 0
     for (const file of sourcesUnder('src')) {
       // Comments are stripped first: the lock hunts the defect, not prose that names it.
       const text = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
-      for (const pattern of banned) {
+      const isConsumer = CONSUMERS.some((c) => file.endsWith(c))
+      if (isConsumer) exempted++
+      for (const pattern of [...always, ...(isConsumer ? [] : clocks)]) {
         expect(pattern.test(text), `${file} contains ${pattern}`).toBe(false)
       }
     }
+    // The exemption list must name files that exist, or it silently stops exempting anything
+    // and silently stops meaning anything.
+    expect(exempted, 'the consumer exemption names files that are not in the tree').toBe(CONSUMERS.length)
   })
 })
 

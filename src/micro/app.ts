@@ -24,6 +24,7 @@
  */
 import type { RGB } from '../core/types.ts'
 import type { Stage } from '../scene/layers.ts'
+import { budgetFacts, budgetOf } from '../scene/budget.ts'
 
 export type AppGame = {
   readonly id: string
@@ -32,6 +33,8 @@ export type AppGame = {
   readonly date: string
   readonly meta: readonly string[]
   readonly stage: Stage
+  /** Filled in by whoever served the page, since only it knows what compression achieved. */
+  readonly gzipBytes?: number
 }
 
 const esc = (s: string): string =>
@@ -41,7 +44,7 @@ const esc = (s: string): string =>
 const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
   JSON.stringify({
     w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
-    groundRamp: stage.groundRamp, floor: stage.floor, rain: stage.rain, interactive,
+    groundRamp: stage.groundRamp, floor: stage.floor, rain: stage.rain, interactive, meter: interactive,
     layers: stage.layers.map((l) => ({
       w: l.w, h: l.h, ox: l.ox, oy: l.oy, n: l.frames, ms: l.msPerFrame,
       palette: l.palette, indices: Buffer.from(l.indices).toString('base64'),
@@ -79,7 +82,9 @@ function mount(el, S) {
   var view = cv(S.w * S.scale, S.h * S.scale)
   var vx = view.getContext('2d'); vx.imageSmoothingEnabled = false
   var off = cv(S.w, S.h), ox = off.getContext('2d')
+  var decodeAt = (typeof performance !== 'undefined' && performance.now) ? performance.now() : 0
   var sheets = S.layers.map(decode)
+  var decodeMs = ((typeof performance !== 'undefined' && performance.now) ? performance.now() : 0) - decodeAt
 
   // The backdrop never changes, so it is drawn once and copied. The floor's colour per row
   // arrives already computed: the recede is one rule and it is applied in one place, or the
@@ -106,6 +111,33 @@ function mount(el, S) {
     window.addEventListener('keyup', function (e) { down(e, false) })
   }
 
+  /**
+   * **A drop is a sprite, stamped once per column.** It used to be one 'fillRect' per drop
+   * pixel — 240 calls a frame against 19 for every subject in the wood put together, and a
+   * canvas call costs the same whether it moves one pixel or a thousand. 48 now.
+   *
+   * The stamp is byte-identical to the per-pixel version because 'x0' and the row index are
+   * both integers: 'round(x0 + k*slant)' equals 'x0 + round(k*slant)' for integer 'x0', so
+   * baking the slant into the stamp changes nothing. It is a cheaper way to say the same
+   * thing, not a cheaper-looking rain.
+   */
+  var drops = null
+  if (S.rain) {
+    drops = []
+    for (var ci = 0; ci < S.rain.colors.length; ci++) {
+      var xs = [], lo = 0, hi = 0
+      for (var k = 0; k < S.rain.length; k++) {
+        var off = Math.round(k * S.rain.slant); xs.push(off)
+        if (off < lo) lo = off
+        if (off > hi) hi = off
+      }
+      var st = cv(hi - lo + 1, S.rain.length), sx2 = st.getContext('2d')
+      sx2.fillStyle = rgb(S.rain.colors[ci])
+      for (var k2 = 0; k2 < S.rain.length; k2++) sx2.fillRect(xs[k2] - lo, k2, 1, 1)
+      drops.push({ canvas: st, ox: lo })
+    }
+  }
+
   function rain(t) {
     var R = S.rain; if (!R) return
     var span = S.h + R.length * 2
@@ -120,21 +152,53 @@ function mount(el, S) {
       var hsh = ((c + R.seed) * 2654435761) >>> 0; hsh = (hsh ^ (hsh >>> 13)) >>> 0
       var ph = (hsh % 1024) / 1024
       var x0 = c * R.spacing + (hsh % R.spacing)
-      ox.fillStyle = rgb(R.colors[hsh % R.colors.length])
+      var d = drops[hsh % drops.length]
       var fall = (((t * R.speed / span) + ph) % 1) * span - R.length
-      for (var k = 0; k < R.length; k++) {
-        var yy = Math.round(fall + k); if (yy < 0 || yy >= S.h) continue
-        var xx = Math.round(x0 + k * R.slant); if (xx < 0 || xx >= S.w) continue
-        ox.fillRect(xx, yy, 1, 1)
-      }
+      ox.drawImage(d.canvas, x0 + d.ox, Math.round(fall))
     }
+  }
+
+  /**
+   * **The meter: what the machine actually did**, against the budget's prediction of what it
+   * would be asked to do. The pairing is the point — a budget that says cheap next to a meter
+   * that says 30 fps is a budget measuring the wrong thing ('HARNESS.md' section 5).
+   *
+   * Two separate numbers, because they answer different questions. **fps** comes from the
+   * gaps between animation frames and includes everything the browser does; **work** is the
+   * time spent inside this loop and is the only part this code owns. A page at 60 fps with
+   * 14 ms of work has no headroom left even though nothing is dropping yet.
+   */
+  var clock = (typeof performance !== 'undefined' && performance.now)
+    ? function () { return performance.now() } : function () { return 0 }
+  var meter = { gaps: [], work: [], at: 0, worst: 0, decode: 0 }
+  meter.decode = decodeMs
+
+  function report(now) {
+    if (!S.meter || now - meter.at < 500) return
+    meter.at = now
+    var el = document.getElementById('meter'); if (!el) return
+    var g = meter.gaps, w = meter.work
+    if (g.length === 0) return
+    var sg = 0, sw = 0, mx = 0
+    for (var i = 0; i < g.length; i++) { sg += g[i]; sw += w[i]; if (w[i] > mx) mx = w[i] }
+    el.textContent =
+      Math.round(1000 / (sg / g.length)) + ' fps' +
+      '  ·  work ' + (sw / w.length).toFixed(2) + ' ms, worst ' + mx.toFixed(2) + ' ms' +
+      '  ·  budget 16.67 ms' +
+      '  ·  decode ' + meter.decode.toFixed(0) + ' ms'
+    meter.gaps = []; meter.work = []
   }
 
   var t0 = null, prev = 0
   function frame(now) {
+    var began = clock()
     if (t0 === null) t0 = now
     var t = (now - t0) / 1000
-    var dt = Math.min(0.05, t - prev); prev = t
+    var dt = Math.min(0.05, t - prev)
+    // 120 frames is two seconds at 60 fps: long enough that one slow frame does not dominate
+    // the average, short enough that a stall shows up while it is still happening.
+    if (prev > 0) { meter.gaps.push((t - prev) * 1000); if (meter.gaps.length > 120) meter.gaps.shift() }
+    prev = t
 
     if (actor) {
       var dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
@@ -179,6 +243,8 @@ function mount(el, S) {
     }
 
     vx.drawImage(off, 0, 0, view.width, view.height)
+    meter.work.push(clock() - began); if (meter.work.length > 120) meter.work.shift()
+    report(now)
     requestAnimationFrame(frame)
   }
   el.appendChild(view)
@@ -228,6 +294,11 @@ const STYLE = `
   .about { max-width: 860px; margin: 0 auto }
   .about p { margin: 0 0 14px; color: var(--dim) }
   .facts { display: flex; gap: 22px; flex-wrap: wrap; color: #6c6a68; font-size: 12px; border-top: 1px solid var(--line); padding-top: 14px }
+  .meter { max-width: 860px; margin: 0 auto 14px; display: flex; gap: 18px; flex-wrap: wrap;
+           align-items: center; color: var(--ink); background: #10131a;
+           border: 1px solid var(--line); border-radius: 8px; padding: 11px 16px; font-size: 12.5px }
+  .tag { color: #6c6a68; text-transform: uppercase; letter-spacing: .09em; font-size: 10.5px }
+  .facts .tag { margin-right: -8px }
   .keys { margin: 0 auto 20px; max-width: 860px; text-align: center;
           color: var(--ink); font-size: 13px; background: var(--card);
           border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px }
@@ -281,9 +352,13 @@ export function gamePage(game: AppGame): string {
     `${game.title} · claude-ink-2d`,
     `<a class="back" href="/">← shelf</a><h1>${esc(game.title)}</h1><span class="sub mono">${esc(game.id)}</span>`,
     `<div class="stage"><div id="stage"></div></div>
+     <div class="meter mono"><span class="tag">measured</span><span id="meter">warming up…</span></div>
      ${playable ? `<div class="keys"><b>←</b> <b>→</b> or <b>A</b> <b>D</b> to walk</div>` : ''}
      <div class="about">
        <p>${esc(game.blurb)}</p>
+       <div class="facts mono"><span class="tag">budget</span>${budgetFacts(budgetOf(game.stage, game.gzipBytes ?? 0))
+         .map((m) => `<span>${esc(m)}</span>`)
+         .join('')}</div>
        <div class="facts mono">${game.meta.map((m) => `<span>${esc(m)}</span>`).join('')}</div>
      </div>`,
     `mount(document.getElementById('stage'), ${payloadOf(game.stage, game.stage.scale, true)});`,

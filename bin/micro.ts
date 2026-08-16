@@ -45,7 +45,18 @@ function buildGame(id: string): AppGame | undefined {
   }
 }
 
-const buildAll = (): AppGame[] => MICRO_GAMES.map((g) => buildGame(g.id)).filter((g): g is AppGame => g !== undefined)
+/**
+ * **The served size, measured rather than estimated.** The page prints its own wire cost, and
+ * the only way to know it is to compress the page — which needs the page, which needs the
+ * number. So it is built twice: once to measure, once to print. The first build is thrown
+ * away and it costs a gzip of a couple of megabytes, which is milliseconds.
+ */
+function withWireCost(game: AppGame): AppGame {
+  return { ...game, gzipBytes: gzipSync(Buffer.from(gamePage(game)), { level: 6 }).length }
+}
+
+const buildAll = (): AppGame[] =>
+  MICRO_GAMES.map((g) => buildGame(g.id)).filter((g): g is AppGame => g !== undefined).map(withWireCost)
 
 if (process.argv.includes('--static')) {
   const games = buildAll()
@@ -81,7 +92,7 @@ if (process.argv.includes('--static')) {
       // A miss goes back to the shelf rather than to a dead end: he navigates by refreshing,
       // and a stale URL after an id changes should land somewhere useful.
       if (game === undefined) return send(shelfPage(buildAll()), 404)
-      return send(gamePage(game))
+      return send(gamePage(withWireCost(game)))
     } catch (err) {
       return send(`<pre style="color:#e88;background:#131316;padding:32px;font:13px monospace">${String((err as Error).stack ?? err)}</pre>`, 500)
     }
