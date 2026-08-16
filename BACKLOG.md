@@ -28,10 +28,45 @@ turns a reactive scene into a game.* He read it and chose it over the 3D work.
 
 | batch | commissions | shipped | hit rate | cycles per shipped piece |
 |---|---|---|---|---|
-| 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading from him |
-| 2 | 1 | **1 — ships** | **1/1** | 1 model cycle, 2 readings from him |
+| 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
+| 2 | 1 | **1 — ships** | 1/1 | 1 model cycle, 3 readings |
+| 3 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
 
-**Running: 1 of 2.**
+**Running: 1 of 3.**
+
+### Batch 3 verdict, 16/08, unsoftened
+
+> *"Essa primeira versão ficou ruim. Primeiro, a caveira: isso não é uma caveira. Nem de longe
+> lembra uma... A movimentação da corrida está bem acelerada, parece que ela está correndo em
+> supervelocidade... O obstáculo não está no mesmo nível da caveira, está na altura da cintura...
+> A movimentação de pulo e o pulo duplo ficaram ok, mas a projeção do pulo duplo deveria garantir
+> mais altura."*
+
+**Four defects, and three of them are measured rather than argued:**
+
+| his words | the number |
+|---|---|
+| the stone is at waist height | his feet land on row **127** and the ground is **112**. `drawRunner` ignores the `anchor: 'foot'` the placement declares — the climb applies it, this path does not |
+| running at super speed | **9.9 stride cycles per second** at the speed cap. A sprint is about 2.5. The frame is picked from distance over a fixed divisor, with no bound |
+| the double jump should gain more | apex 22 → 36 px. The second press buys 14 px, which is less than half a body |
+| **it is not a skull** | not a bug. See below — it is the capability the miss specifies |
+
+### The capability this miss specifies: **subtraction**
+
+**A skull is read by its holes.** Eye sockets, a nasal cavity, the gap between teeth. Every
+primitive in this grammar is a **solid**, and a body is their *union* — so the vocabulary can add
+mass and cannot remove any. The socket I drew is a `marking`, which recolours the surface it lies
+on: a dark patch painted on a white ball, not a cavity in a bone.
+
+**That is why it read as a helmet with two lights in it.** The failure is not resolution, not
+part count and not the palette; it is that **a skull is defined by subtraction and this grammar
+only adds.**
+
+It is the same shape as run 9's finding — a tree was not hard, it was *inexpressible*, because
+every primitive was convex — and it produced the lobed primitive. This one asks for a `cut`.
+
+---
+
 
 ### His verdict, 16/08, unsoftened
 
