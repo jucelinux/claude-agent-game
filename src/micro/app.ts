@@ -41,7 +41,7 @@ const esc = (s: string): string =>
 const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
   JSON.stringify({
     w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
-    groundRamp: stage.groundRamp, rain: stage.rain, interactive,
+    groundRamp: stage.groundRamp, floor: stage.floor, rain: stage.rain, interactive,
     layers: stage.layers.map((l) => ({
       w: l.w, h: l.h, ox: l.ox, oy: l.oy, n: l.frames, ms: l.msPerFrame,
       palette: l.palette, indices: Buffer.from(l.indices).toString('base64'),
@@ -81,14 +81,13 @@ function mount(el, S) {
   var off = cv(S.w, S.h), ox = off.getContext('2d')
   var sheets = S.layers.map(decode)
 
-  // The backdrop never changes, so it is drawn once and copied. The lightest ground tone is
-  // a one-pixel lit strip along the top edge and the rest steps down.
+  // The backdrop never changes, so it is drawn once and copied. The floor's colour per row
+  // arrives already computed: the recede is one rule and it is applied in one place, or the
+  // page and the compositor put the horizon in two different rows.
   var bg = cv(S.w, S.h), bx = bg.getContext('2d')
   bx.fillStyle = rgb(S.sky); bx.fillRect(0, 0, S.w, S.h)
-  for (var y = S.ground; y < S.h; y++) {
-    var d = y - S.ground
-    var step = d === 0 ? S.groundRamp.length - 1 : Math.max(0, S.groundRamp.length - 2 - Math.floor(d / 6))
-    bx.fillStyle = rgb(S.groundRamp[step]); bx.fillRect(0, y, S.w, 1)
+  for (var y = 0; y < S.floor.length; y++) {
+    bx.fillStyle = rgb(S.floor[y]); bx.fillRect(0, S.ground + y, S.w, 1)
   }
 
   // The actor: the one subject whose position is state rather than data.

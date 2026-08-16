@@ -25,7 +25,12 @@ export const galleryScene: Scene = {
   frames: 24,
   msPerFrame: 50,
   scale: 2,
-  ground: 80,
+  ground: 79,
+  // This scene predates the depth model and keeps its own rows: `nearRow` is set to the row
+  // its front rank already stood on, and `haze` is 0 because it is the frozen record of
+  // eight subjects and adding aerial perspective to it now would rewrite what it recorded.
+  nearRow: 91,
+  haze: 0,
   /**
    * **[104, 116, 138], and it was measured rather than picked.** Four candidate skies were
    * tested against every subject's edge contrast: a dark sky loses four of the eight, a
@@ -49,19 +54,19 @@ export const galleryScene: Scene = {
   ],
   placements: [
     // Back row: the tree is the only thing here that is scenery rather than a character.
-    { grammar: 'tree', tunables: 'tree', x: 40, footY: 79, scale: fit(72, 58, 0.78) },
+    { grammar: 'tree', tunables: 'tree', x: 40, depth: 1.000, anchor: 'foot', scale: fit(72, 58, 0.78) },
 
     // Middle row: the characters, all on the same floor.
-    { grammar: 'probe-d', tunables: 'probe-d', x: 100, footY: 81, scale: fit(29, 44, 1) },
-    { grammar: 'gorilla', tunables: 'gorilla', x: 140, footY: 81, scale: fit(31, 42, 1) },
+    { grammar: 'probe-d', tunables: 'probe-d', x: 100, depth: 0.833, anchor: 'foot', scale: fit(29, 44, 1) },
+    { grammar: 'gorilla', tunables: 'gorilla', x: 140, depth: 0.833, anchor: 'foot', scale: fit(31, 42, 1) },
     // 16 frames at 75 ms = 1200 ms, one whole cycle: retimed from its own 1760.
-    { grammar: 'gorilla-mech', tunables: 'gorilla-mech', x: 182, footY: 81, scale: fit(33, 46, 1), msPerFrame: 75 },
+    { grammar: 'gorilla-mech', tunables: 'gorilla-mech', x: 182, depth: 0.833, anchor: 'foot', scale: fit(33, 46, 1), msPerFrame: 75 },
     // 12 frames at 50 ms = 600 ms, two cycles: retimed from its own 780.
-    { grammar: 'gorilla-jump-chrono', tunables: 'gorilla-jump-chrono', x: 222, footY: 81, scale: fit(33, 56, 0.88), msPerFrame: 50 },
+    { grammar: 'gorilla-jump-chrono', tunables: 'gorilla-jump-chrono', x: 222, depth: 0.833, anchor: 'foot', scale: fit(33, 56, 0.88), msPerFrame: 50 },
 
     // Front row: the arthropods, lower on screen so the y-sort puts them nearest.
-    { grammar: 'beetle', tunables: 'beetle', x: 62, footY: 89, scale: fit(15, 42, 1) },
-    { grammar: 'mantis', tunables: 'mantis', x: 122, footY: 91, scale: fit(16, 43, 1) },
-    { grammar: 'scorpion', tunables: 'scorpion', x: 196, footY: 90, scale: fit(15, 39, 1) },
+    { grammar: 'beetle', tunables: 'beetle', x: 62, depth: 0.167, anchor: 'foot', scale: fit(15, 42, 1) },
+    { grammar: 'mantis', tunables: 'mantis', x: 122, depth: 0.000, anchor: 'foot', scale: fit(16, 43, 1) },
+    { grammar: 'scorpion', tunables: 'scorpion', x: 196, depth: 0.083, anchor: 'foot', scale: fit(15, 39, 1) },
   ],
 }

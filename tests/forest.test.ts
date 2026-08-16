@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { execute } from '../src/io/load.ts'
 import { FOREST, makeTree } from '../src/grammars/run12/forest.ts'
 import { forestScene } from '../src/micro/forest-scene.ts'
+import { standRow } from '../src/scene/compose.ts'
+import { toStage } from '../src/scene/layers.ts'
 
 /**
  * **The two locks his third reading asked for**, and they are the same request twice:
@@ -26,21 +28,28 @@ import { forestScene } from '../src/micro/forest-scene.ts'
 /** The stoutest real tree — a baobab, a veteran open-grown oak — is about a quarter. */
 const BASE_MAX_MEASURED = 0.25
 
+/**
+ * How far below its contact row a subject may paint. Measured, not chosen: the trunk's base
+ * capsule used to reach 12 px below the origin and the depth planes were 11 px apart, so a
+ * tree's ground footprint swallowed the whole distance between two depths.
+ */
+const OVERHANG_MAX = 5
+
 type Read = { readonly diameter: number; readonly height: number; readonly base: number; readonly foot: number }
 
-/** Trunk diameter at the base and total painted height, both from pixels. */
+/**
+ * Trunk diameter and total painted height, both from pixels.
+ *
+ * **The diameter is read at a tenth of the tree's height, not at the very bottom**, and that
+ * is the forester's convention rather than a convenience: at ground level you are measuring
+ * the *root flare*, which is one and a half to two times the trunk and varies with species
+ * far more than the trunk does. Diameter at breast height is the number every published
+ * trunk-to-height ratio is quoted against, so it has to be the number this lock reads.
+ */
 function readTree(name: string): Read {
   const run = execute({ grammar: name, tunables: 'wood', seed: 1 })
   const { originX, originY } = run.params.canvas
   const f = run.frames[0]!.buf
-
-  // The contiguous painted run through the origin column, two rows above the base. Through
-  // the origin, so it measures the trunk and not a branch that happens to cross that row.
-  const row = originY - 2
-  let left = originX
-  let right = originX
-  while (left > 0 && f.data[row * f.w + left - 1] !== 0) left--
-  while (right < f.w - 1 && f.data[row * f.w + right + 1] !== 0) right++
 
   // Painted extent over the whole cycle: a tree in wind is taller in some frames.
   let top = f.h
@@ -53,7 +62,17 @@ function readTree(name: string): Read {
       if (any) { if (y < top) top = y; if (y > bottom) bottom = y }
     }
   }
-  return { diameter: right - left + 1, height: bottom - top + 1, base: originY, foot: bottom + 1 }
+  const height = bottom - top + 1
+
+  // The contiguous painted run through the origin column, clear of the root flare. Through
+  // the origin, so it measures the trunk and not a branch that happens to cross that row.
+  const row = originY - Math.max(3, Math.round(height * 0.1))
+  let left = originX
+  let right = originX
+  while (left > 0 && f.data[row * f.w + left - 1] !== 0) left--
+  while (right < f.w - 1 && f.data[row * f.w + right + 1] !== 0) right++
+
+  return { diameter: right - left + 1, height, base: originY, foot: bottom + 1 }
 }
 
 describe('the physical limits of a tree', () => {
@@ -85,21 +104,75 @@ describe('the physical limits of a tree', () => {
 })
 
 describe('the wood stands on the ground', () => {
-  it('every tree in the scene has its trunk base at or below the ground line', () => {
+  it('every tree places by its origin, and its origin is on the floor', () => {
     for (const p of forestScene.placements) {
       if (!p.grammar.startsWith('tree-')) continue
-      const { base, foot } = readTree(p.grammar)
-      expect(p.baseY, `${p.grammar} places by footY or y; a tree's origin is its ground contact, so it places by baseY`)
+      expect(p.depth, `${p.grammar} has no depth, so its row and its haze are two facts that can disagree`)
         .toBeTypeOf('number')
-      const row = (p.baseY as number) - base + base // the origin lands exactly on baseY
-      expect(
-        row,
-        `${p.grammar}: trunk base lands on row ${row}, above the ground line ${forestScene.ground}`,
-      ).toBeGreaterThanOrEqual(forestScene.ground)
-      // And what hangs below the base has to be short enough to read as root rather than as
-      // a tree standing in a hole.
-      const buried = foot - base
-      expect(buried, `${p.grammar}: ${buried} px hang below the trunk base, which buries the flare`).toBeLessThanOrEqual(18)
+      expect(p.anchor, `${p.grammar} anchors by foot; a tree's origin IS its ground contact`).toBeUndefined()
+      const row = standRow(forestScene, p.depth as number)
+      expect(row, `${p.grammar} stands on row ${row}, above the horizon ${forestScene.ground}`)
+        .toBeGreaterThanOrEqual(forestScene.ground)
+    }
+  })
+
+  it('nothing paints more than a few pixels below the row it stands on', () => {
+    // **This is the number that made his last finding possible.** A subject that paints far
+    // below its contact row has an ambiguous ground footprint, and two subjects whose
+    // footprints overlap cannot be ordered by the eye however carefully they are ordered by
+    // the code. It was 12 px against depth planes 11 px apart, and it is now 5 px against
+    // planes 15 px apart.
+    for (const grammar of FOREST) {
+      const { base, foot } = readTree(grammar.name)
+      const over = foot - base
+      expect(over, `${grammar.name}: ${over} px of paint below its contact row`).toBeLessThanOrEqual(OVERHANG_MAX)
+    }
+  })
+
+  it('the depth planes are further apart than anything standing on them overhangs', () => {
+    const depths = [...new Set(forestScene.placements.filter((p) => p.depth !== undefined).map((p) => p.depth as number))]
+    const rows = depths.map((d) => standRow(forestScene, d)).sort((a, b) => a - b)
+    for (let i = 1; i < rows.length; i++) {
+      const gap = (rows[i] as number) - (rows[i - 1] as number)
+      expect(gap, `two depth planes are ${gap} px apart, inside the ${OVERHANG_MAX} px a subject can overhang`)
+        .toBeGreaterThan(OVERHANG_MAX)
+    }
+  })
+})
+
+describe('the picture cannot contradict itself about distance', () => {
+  it('anything drawn behind another thing has its base above it', () => {
+    // **His fourth finding, as an invariant.** He could not name what was wrong and this is
+    // it: a subject drawn behind another whose base sits LOWER on screen says "further away"
+    // with its haze and "nearer" with its position. The scene must never be able to say both.
+    const stage = toStage(forestScene)
+    const floor = stage.placed
+      .map((p, i) => ({ i, p, layer: stage.layers[p.layer] as (typeof stage.layers)[number] }))
+      .filter(({ p }) => stage.placed.indexOf(p) >= 0)
+
+    // **Only across different depths.** Two subjects on the same plane are the same distance
+    // away, so which of them overlaps the other is arbitrary and their base rows carry no
+    // claim about distance at all. The first version of this lock compared every consecutive
+    // pair and failed on two trees in the same band — which is the lock being wrong, not the
+    // scene. A depth invariant has to be stated between depths.
+    const read = floor
+      .map(({ p, layer }) => {
+        const source = forestScene.placements.find((q, j) => `${q.grammar}#${j}` === layer.id.replace(':left', ''))
+        return { name: layer.id, depth: source?.depth ?? 0, sky: source?.sky === true, bottom: p.y + layer.oy + layer.h - 1 }
+      })
+      .filter((r) => !r.sky)
+
+    for (let a = 0; a < read.length; a++) {
+      for (let b = a + 1; b < read.length; b++) {
+        const back = read[a] as (typeof read)[number]
+        const front = read[b] as (typeof read)[number]
+        if (back.depth <= front.depth) continue
+        expect(
+          front.bottom,
+          `${back.name} is further away than ${front.name} and is drawn behind it, but its base is ` +
+            `${back.bottom - front.bottom} px LOWER — the picture says further with its haze and nearer with its position`,
+        ).toBeGreaterThan(back.bottom)
+      }
     }
   })
 })

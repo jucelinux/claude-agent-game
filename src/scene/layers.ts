@@ -28,6 +28,7 @@
 import type { RGB } from '../core/types.ts'
 import { execute } from '../io/load.ts'
 import type { Placement, Scene } from './compose.ts'
+import { floorDepth, hazeAt, paintOrder, standRow } from './compose.ts'
 
 /** One sprite's whole cycle, cropped, in index space. */
 export type Layer = {
@@ -66,6 +67,8 @@ export type Stage = {
   readonly ground: number
   readonly sky: RGB
   readonly groundRamp: readonly RGB[]
+  /** One colour per floor row, from `ground` down. The recede is already in it. */
+  readonly floor: readonly RGB[]
   /** Rain, retimed from passes-per-loop into pixels per second — there is no loop now. */
   readonly rain: {
     readonly colors: readonly RGB[]
@@ -113,7 +116,7 @@ function box(frames: readonly { readonly buf: { w: number; h: number; data: Uint
  * then mirrors the pixels, which is how a subject faces the other way **without** its light
  * turning round with it.
  */
-function layerOf(p: Placement, id: string, sky: RGB, flipLight: boolean): { layer: Layer; foot: number; origin: { x: number; y: number } } {
+function layerOf(p: Placement, id: string, sky: RGB, recede: number, flipLight: boolean): { layer: Layer; foot: number; origin: { x: number; y: number } } {
   const overrides: Record<string, number> = {}
   if (p.scale !== undefined) overrides['body.scale'] = p.scale
   if (p.msPerFrame !== undefined) overrides['playback.msPerFrame'] = p.msPerFrame
@@ -144,7 +147,6 @@ function layerOf(p: Placement, id: string, sky: RGB, flipLight: boolean): { laye
       }
     }
   }
-  const recede = p.recede ?? 0
   const palette = lit.grammar.palette.colors.map((c, i) => (i === 0 || recede === 0 ? c : haze(c, sky, recede)))
 
   // A flip mirrors the crop about the origin column too, or the sprite would jump sideways
@@ -162,19 +164,19 @@ export function toStage(scene: Scene): Stage {
   const placed: (Placed & { readonly order: number })[] = []
 
   for (const [i, p] of scene.placements.entries()) {
-    const main = layerOf(p, `${p.grammar}#${i}`, scene.sky, false)
+    const recede = p.sky === true ? 0 : hazeAt(scene, p.depth ?? 0)
+    const main = layerOf(p, `${p.grammar}#${i}`, scene.sky, recede, false)
     const index = layers.push(main.layer) - 1
 
-    // `baseY` aligns the origin and needs no measurement; `footY` aligns the lowest painted
-    // pixel and does. Same rule as the compositor, and the same reason it exists.
-    const y =
-      p.baseY !== undefined ? p.baseY
-      : p.footY !== undefined ? p.footY - main.foot + main.origin.y
-      : (p.y ?? 0)
+    // Depth gives the contact row; `anchor` says how the sprite meets it. `origin` is exact,
+    // `foot` measures the lowest painted pixel. Same rule as the compositor, by the same
+    // functions, because two implementations of one rule is two rules eventually.
+    const row = p.sky === true ? (p.y ?? 0) : standRow(scene, p.depth ?? 0)
+    const y = p.anchor === 'foot' ? row - main.foot + main.origin.y : row
 
     let control: Placed['control']
     if (p.control !== undefined) {
-      const flip = layers.push(layerOf(p, `${p.grammar}#${i}:left`, scene.sky, true).layer) - 1
+      const flip = layers.push(layerOf(p, `${p.grammar}#${i}:left`, scene.sky, recede, true).layer) - 1
       control = { ...p.control, flip }
     }
 
@@ -185,9 +187,7 @@ export function toStage(scene: Scene): Stage {
       phase: p.phase ?? 0,
       ...(p.motion === undefined ? {} : { motion: p.motion }),
       ...(control === undefined ? {} : { control }),
-      // Haze outranks the foot row: a hazier subject is behind a clearer one whatever their
-      // feet do. Identical to the compositor's rule, and it has to be.
-      order: (1 - (p.recede ?? 0)) * 10000 + (p.baseY ?? p.footY ?? p.y ?? 0) + i * 0.001,
+      order: paintOrder(p, i),
     })
   }
   placed.sort((a, b) => a.order - b.order)
@@ -205,12 +205,25 @@ export function toStage(scene: Scene): Stage {
           seed: field.seed,
         }
 
+  // **The floor as one colour per row.** Computed here rather than in the browser, so the
+  // runtime and the compositor cannot disagree about where the horizon is — the recurring
+  // failure in this file's history is two consumers each doing the same arithmetic.
+  const floorTone = scene.groundRamp[0] as RGB
+  const floor: RGB[] = []
+  for (let y = scene.ground; y < scene.h; y++) {
+    floor.push(
+      y === scene.ground
+        ? (scene.groundRamp[scene.groundRamp.length - 1] as RGB)
+        : haze(floorTone, scene.sky, scene.haze * floorDepth(scene, y)),
+    )
+  }
+
   const seen = new Set<string>()
   for (const l of layers) for (let i = 1; i < l.palette.length; i++) seen.add(String(l.palette[i]))
 
   return {
     name: scene.name, w: scene.w, h: scene.h, scale: scene.scale, ground: scene.ground,
-    sky: scene.sky, groundRamp: scene.groundRamp, rain,
+    sky: scene.sky, groundRamp: scene.groundRamp, rain, floor,
     layers, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
   }
 }

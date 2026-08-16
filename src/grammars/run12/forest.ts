@@ -240,6 +240,16 @@ const SEGS = 5
 const BASE_MAX = 0.17
 
 /**
+ * **How far past vertical any branch may ever point, accumulated over every fork.**
+ *
+ * 0.27 turn is 97 degrees — just past horizontal, so a weeping form still hangs and nothing
+ * grows into the ground. It is a bound on the **world** angle rather than on one fork,
+ * because divergence, droop and jitter all add generation after generation and bounding each
+ * of them separately bounds nothing.
+ */
+const DOWN = 0.27
+
+/**
  * Build a tree. Everything is derived from the arguments — there is no branch of this
  * function that special-cases a particular tree, because the moment there is, a forest
  * stops being generated and starts being typed out again.
@@ -289,14 +299,27 @@ export function makeTree(opts: TreeOpts): Grammar {
       z: 0,
       angle: i === 0 ? 0 : lean + wander * jitter(seed, i * 31),
     })
+    // **The bottom segment stops SHORT of the origin, and that is a correction.**
+    //
+    // A capsule has a round cap, so an endpoint at y carries the paint another `r` below it.
+    // The base segment used to end at y = +2 with a radius of 8, so a tree placed by its
+    // origin actually painted **ten pixels lower than where it said it stood** — and the
+    // whole wood's depth ordering is decided by that row. His fourth reading found the
+    // result: trees drawn behind the gorilla with their bases below his feet.
+    //
+    // At -0.62r the cap bottoms out about 0.38r below the origin, which is three pixels
+    // rather than ten. It cannot be zero: this vocabulary has no flat bottom, every solid in
+    // it is round. What it can be is **smaller than the distance between two depths**, and
+    // that is the property the scene actually needs.
+    const r0 = radiusAt(i / SEGS)
     parts.push({
       name: `${nm}p`,
       bone: nm,
       material: 'bark',
       shape: {
         kind: 'capsule',
-        x0: 0, y0: i === 0 ? 2 : 0, x1: 0, y1: -segLen,
-        r: radiusAt(i / SEGS), r1: radiusAt((i + 1) / SEGS),
+        x0: 0, y0: i === 0 ? -r0 * 0.62 : 0, x1: 0, y1: -segLen,
+        r: r0, r1: radiusAt((i + 1) / SEGS),
       },
     })
     // The trunk carries the gust with almost no amplitude and no lag: it is the thing
@@ -306,10 +329,12 @@ export function makeTree(opts: TreeOpts): Grammar {
 
   // Roots, in front of the trunk so the flare reads. Behind it the trunk's own mass wins.
   // They scale with `flare`, so a tree with no swell has no visible root either.
+  // The roots spread sideways rather than downward, for the same reason as the trunk cap:
+  // what a tree paints below its contact row is what makes its depth ambiguous.
   const rootR = girth * (1 + flare)
   parts.push(
-    { name: 'rootL', bone: 't0', material: 'bark', z: -2, shift: -1, shape: { kind: 'capsule', x0: 1, y0: -3, x1: -rootR * 1.25, y1: 4, r: rootR * 0.46 } },
-    { name: 'rootR', bone: 't0', material: 'bark', z: -2, shift: -1, shape: { kind: 'capsule', x0: -1, y0: -3, x1: rootR * 1.25, y1: 4, r: rootR * 0.42 } },
+    { name: 'rootL', bone: 't0', material: 'bark', z: -2, shift: -1, shape: { kind: 'capsule', x0: 1, y0: -5, x1: -rootR * 1.3, y1: -1, r: rootR * 0.4 } },
+    { name: 'rootR', bone: 't0', material: 'bark', z: -2, shift: -1, shape: { kind: 'capsule', x0: -1, y0: -5, x1: rootR * 1.3, y1: -1, r: rootR * 0.36 } },
   )
 
   let n = 0
@@ -356,7 +381,7 @@ export function makeTree(opts: TreeOpts): Grammar {
    * deliberate darkening of the far side, `Part.shift` — has to be decided while the parts
    * are being written and the solver has not run yet.
    */
-  const grow = (host: string, ox: number, oy: number, angle: number, len: number, rad: number, level: number, zAcc: number): void => {
+  const grow = (host: string, ox: number, oy: number, angle: number, len: number, rad: number, level: number, zAcc: number, world: number): void => {
     const my = `b${++n}`
     const dz = jitter(seed, n * 7) * rad * 1.6
     bones.push({ name: my, parent: host, x: ox, y: oy, z: dz, angle })
@@ -378,8 +403,14 @@ export function makeTree(opts: TreeOpts): Grammar {
     }
     for (let k = 0; k < split; k++) {
       const t = split === 1 ? 0 : k / (split - 1) - 0.5
-      const a = t * 2 * divergence + droop + jitter(seed, n * 101 + k) * divergence * 0.5
-      grow(my, 0, -len, a, len * shorten * (0.9 + 0.2 * Math.abs(jitter(seed, n * 53 + k))), rad * 0.72, level + 1, zAcc + dz)
+      const want = t * 2 * divergence + droop + jitter(seed, n * 101 + k) * divergence * 0.5
+      // **The accumulated angle is what matters, and clamping each fork separately never
+      // bounded it.** Divergence, droop and jitter all add, generation after generation, so a
+      // limb three forks out could pass horizontal and grow downward — and its foliage then
+      // painted below the trunk base, which is what made the wood's depth ordering ambiguous.
+      // `DOWN` is just past horizontal, so a weeping form still hangs and nothing digs.
+      const a = Math.max(-DOWN, Math.min(DOWN, world + want)) - world
+      grow(my, 0, -len, a, len * shorten * (0.9 + 0.2 * Math.abs(jitter(seed, n * 53 + k))), rad * 0.72, level + 1, zAcc + dz, world + a)
     }
   }
 
@@ -407,8 +438,11 @@ export function makeTree(opts: TreeOpts): Grammar {
       // Each tier is rotated against the last by the golden angle, so no two tiers stack
       // their limbs in the same places and the trunk never shows a ladder.
       const spin = Math.cos(w * GOLDEN + k * 2.1)
-      const a = t * 2 * wide + droop * 0.6 + jitter(seed, w * 211 + k) * divergence * 0.7
-      grow(`t${si}`, Math.sign(t || spin) * radiusAt(u) * 0.6, local, a, limb, rad, 1, spin * radiusAt(u) * 1.4)
+      // Clamped AFTER the jitter, not before. The 68 degree cap was applied to the base
+      // angle and then up to 25 degrees of jitter was added on top of it, so tree-pine's
+      // outer limbs left the trunk pointing downward.
+      const a = Math.max(-DOWN, Math.min(DOWN, t * 2 * wide + droop * 0.6 + jitter(seed, w * 211 + k) * divergence * 0.7))
+      grow(`t${si}`, Math.sign(t || spin) * radiusAt(u) * 0.6, local, a, limb, rad, 1, spin * radiusAt(u) * 1.4, a)
     }
   }
 
@@ -432,7 +466,7 @@ export const FOREST: readonly Grammar[] = [
   // Excurrent: a leader that runs the whole height under seven tiers of short limbs.
   // Nothing but `taperPow` and `whorls` separates it from the oak above.
   makeTree({ name: 'tree-pine', height: 62, girth: 5, taperPow: 0.5, flare: 0.32, bulge: 0, wander: 0.003, lean: -0.002,
-    first: 0.12, whorls: 8, perWhorl: 2, levels: 1, split: 2, divergence: 0.1, shorten: 0.62, reach: 0.3, droop: 0.035,
+    first: 0.2, whorls: 8, perWhorl: 2, levels: 1, split: 2, divergence: 0.1, shorten: 0.62, reach: 0.3, droop: 0.035,
     crown: 5.6, leaf: 'leafC', seed: 1.7, windGain: 0.6 }),
 
   // Slim, tall, waisted, and it wanders: a birch reads by its trunk, not its crown.
@@ -496,7 +530,7 @@ export const FOREST: readonly Grammar[] = [
 
   // A sapling: the same growth at a tenth of the mass, which is what a young tree is.
   makeTree({ name: 'tree-sapling', height: 20, girth: 2, taperPow: 1.2, flare: 0.2, bulge: 0, wander: 0.016, lean: 0.012,
-    first: 0.4, whorls: 2, perWhorl: 2, levels: 2, split: 2, divergence: 0.1, shorten: 0.7, reach: 0.55, droop: -0.01,
+    first: 0.5, whorls: 2, perWhorl: 2, levels: 2, split: 2, divergence: 0.1, shorten: 0.7, reach: 0.5, droop: -0.02,
     crown: 5.3, leaf: 'leafA', seed: 10.4, windGain: 1.8 }),
 
   // Old and dying: bare forks and a thin scatter of leaf on them, so the structure of the

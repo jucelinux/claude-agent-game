@@ -34,65 +34,51 @@ export type Placement = {
   readonly tunables: string
   /** Where this subject's own origin lands in the scene. */
   readonly x: number
-  /** Only used when `footY` is absent: aligns the subject's own origin to this row. */
+  /** Only for a `sky` subject, which has no contact row: places the origin outright. */
   readonly y?: number
   /** Overrides `body.scale`, so subjects can agree about how big they are. */
   readonly scale?: number
   /** Overrides the subject's own frame duration, to make its cycle divide the scene's. */
   readonly msPerFrame?: number
   /**
-   * Row the subject's lowest painted pixel lands on. Right for a subject whose author put
-   * the origin somewhere that is not the floor — the hips, on the gorilla.
+   * **Distance, and it is the only statement of it: 0 at the camera, 1 at the horizon.**
    *
-   * **Wrong for anything whose origin IS its ground contact, and that mistake cost two
-   * readings.** A tree's origin is the base of its trunk. Its lowest *painted* pixel is a
-   * root, a drooping branch or the outline ring, seven to thirteen pixels lower — so
-   * aligning the lowest pixel to the ground line lifts the trunk base that far off it. Five
-   * of fourteen trees floated on the second pass, and the check I wrote to catch it asked
-   * whether `footY >= ground`, which is the number I had set rather than the number that
-   * matters. Use `baseY` when the origin is the contact point.
+   * The row this subject stands on, how much haze it carries and where it falls in the paint
+   * order are all *derived* from this one number. That is the correction his fourth reading
+   * asked for, and it is a correction to the engine rather than to the scene.
+   *
+   * **What it replaces and why.** Distance used to be stated twice — `recede` for the haze
+   * and `baseY` for the row — with nothing tying them together. Two independent fields for
+   * one fact means the two can disagree, and they did: trees drawn behind the gorilla with
+   * their bases below his feet, which is a picture saying "further away" and "nearer" about
+   * the same object. **The fix is not to check for the contradiction. It is to remove the
+   * ability to express it.**
    */
-  readonly footY?: number
+  readonly depth?: number
   /**
-   * Row the subject's own **origin** lands on. Exact, and measured from nothing.
+   * How the sprite meets the row its depth puts it on.
    *
-   * For every subject whose author placed the origin at the ground contact — every tree —
-   * this is the correct field and `footY` is not. Whatever hangs below the origin then hangs
-   * below the floor, which is where roots go.
+   * - `origin` — the sprite's own origin lands there. Right when the author put the origin at
+   *   the ground contact, which is every tree. Exact, and it measures nothing.
+   * - `foot` — the lowest painted pixel lands there. Right when the origin is somewhere else:
+   *   the gorilla's is his hips.
+   *
+   * The distinction cost two readings on its own. `foot` on a tree lifts the trunk base by
+   * however much its roots paint below it; `origin` on the gorilla buries him to the waist.
    */
-  readonly baseY?: number
+  readonly anchor?: 'origin' | 'foot'
+  /**
+   * **Above the world rather than in it.** No floor, no ground haze, drawn before everything.
+   *
+   * A cloud is the case. It has no contact row, so `y` places it directly, and hazing it with
+   * the *forest's* haze would be wrong twice over — thirty kilometres of air is not fifty
+   * metres of trees, and a cloud is not behind the canopy because it is far, it is behind it
+   * because it is sky.
+   */
+  readonly sky?: boolean
   /** Offset into its own cycle, 0..1, so two of the same subject are not in lockstep. */
   readonly phase?: number
   readonly seed?: number
-  /**
-   * Screen pixels this subject travels sideways over one scene cycle, wrapping at the
-   * edges. A cloud is a body that moves; it needed no new concept, only the admission that
-   * a placement is a position **at a time** rather than a position.
-   */
-  readonly drift?: number
-  /**
-   * **Aerial perspective: how far toward the sky's colour this subject's whole palette is
-   * pulled, 0 to 1.** Distance, expressed the way distance actually reaches an eye.
-   *
-   * It exists because of a defect he found in the first wood: *"tem árvores que nem estão
-   * posicionadas no solo"*. He was right, and the cause was that I had faked depth by
-   * **raising the far trees' feet above the ground line** — which does not read as far
-   * away, it reads as floating, because a side-on scene has no receding floor to raise them
-   * onto. Fake depth by position was the only tool available, so it got used past where it
-   * works.
-   *
-   * Haze is the tool that actually exists in nature: air between the eye and a thing
-   * scatters light, so a far thing loses contrast toward the colour of the sky rather than
-   * changing shape. That is one lerp per palette entry, it needs no new geometry, and it
-   * lets every tree stand on the same floor — which is where trees stand.
-   *
-   * **Declared cost, and it is paid in the cohesion reading.** A receded subject cannot
-   * share palette entries with an un-receded one, so each distinct value of this field
-   * multiplies the wood's 25 colours again. Two haze bands cost 50 extra entries out of
-   * 256. That is why it is a small set of *bands* rather than a per-subject number: subjects
-   * at the same distance share, and the reading stays honest about what depth cost.
-   */
-  readonly recede?: number
   /**
    * **Continuous motion, in seconds rather than in frames.** For a subject with no floor,
    * which so far means a cloud.
@@ -160,10 +146,22 @@ export type Scene = {
   readonly frames: number
   readonly msPerFrame: number
   readonly scale: number
-  /** Row where the ground starts. Everything below it is ground. */
+  /**
+   * **The floor, as a plane rather than a line.** `ground` is the row a subject at depth 1
+   * stands on and where the floor starts painting; `nearRow` is the row a subject at depth 0
+   * stands on. Everything between is the floor receding away from the camera.
+   *
+   * The scene used to declare only `ground` and leave the rest of the band undifferentiated,
+   * which is why depth was not readable in it: rows 128 to 176 were one flat colour, so
+   * nothing told the eye that lower meant nearer. It does now, by the same haze the subjects
+   * carry — one rule for the floor and the things standing on it.
+   */
   readonly ground: number
+  readonly nearRow: number
+  /** How far a subject at depth 1 is pulled toward the sky's colour. */
+  readonly haze: number
   readonly sky: RGB
-  /** Dark to light, and the lightest is the lit strip at the very top of the ground. */
+  /** Dark to light. The lightest is the lit strip along the very edge of the floor. */
   readonly groundRamp: readonly RGB[]
   readonly placements: readonly Placement[]
   /**
@@ -210,6 +208,44 @@ export type Composed = {
     readonly perSubject: readonly { readonly name: string; readonly colours: number; readonly shared: number }[]
   }
 }
+
+/**
+ * **Everything about distance, derived from one number, in one place.**
+ *
+ * Both consumers — this compositor and `layers.ts` — call these rather than each doing the
+ * arithmetic. Two implementations of a rule is two rules eventually.
+ */
+export const standRow = (s: Scene, depth: number): number =>
+  Math.round(s.nearRow - (s.nearRow - s.ground) * depth)
+
+/**
+ * **Haze, quantised to four bands.**
+ *
+ * Every distinct haze value is a distinct copy of a subject's whole palette — 25 entries for
+ * a tree — so a haze that varies continuously with depth spends the 256 indices on air. Seven
+ * depth planes cost 171 colours before this; four bands cost about a hundred.
+ *
+ * The cost is declared rather than hidden: two planes that share a haze band are separated by
+ * their **row** alone, which is exactly what separates two trees standing side by side in any
+ * case. It is the same trade the floor makes with its eight steps, and the same one indexed
+ * colour has made everywhere in this project since round zero.
+ */
+const HAZE_STEPS = 4
+export const hazeAt = (s: Scene, depth: number): number =>
+  (s.haze * Math.round(depth * HAZE_STEPS)) / HAZE_STEPS
+
+/**
+ * Where a subject falls in the paint order. Sky first, then far to near.
+ *
+ * `depth` is the whole of it, which is the point: when the row and the haze are both derived
+ * from the same number, the order cannot disagree with either.
+ */
+export const paintOrder = (p: Placement, i: number): number =>
+  (p.sky === true ? -1 : 1 - (p.depth ?? 0)) * 1000 + i * 0.001
+
+/** How far the floor at row `y` has receded. 1 at the horizon, 0 at the near edge. */
+export const floorDepth = (s: Scene, y: number): number =>
+  Math.max(0, Math.min(1, (s.nearRow - y) / Math.max(1, s.nearRow - s.ground)))
 
 const key = (c: RGB): string => `${c[0]},${c[1]},${c[2]}`
 
@@ -292,7 +328,10 @@ export function compose(scene: Scene): Composed {
         if (any) { if (y + 1 > footOffset) footOffset = y + 1; break }
       }
     }
-    return { name: `${p.grammar}#${i}`, grammar: result.grammar, result, placement: p, footOffset, recede: p.recede ?? 0 }
+    return {
+      name: `${p.grammar}#${i}`, grammar: result.grammar, result, placement: p, footOffset,
+      recede: p.sky === true ? 0 : hazeAt(scene, p.depth ?? 0),
+    }
   })
 
   const { palette, maps, cohesion } = mergePalettes(runs, scene.sky)
@@ -301,8 +340,21 @@ export function compose(scene: Scene): Composed {
   // lives outside the locked palette is a scene that cannot be exported as one image.
   const skyIndex = palette.length
   palette.push(scene.sky)
-  const groundBase = palette.length
-  for (const c of scene.groundRamp) palette.push(c)
+  /**
+   * **The floor recedes, by the same haze its trees carry.** One lit strip at the horizon,
+   * then the floor's own dark tone pulled toward the sky in proportion to how far away that
+   * row is. Quantised to eight steps, because every distinct tone is a palette entry and a
+   * smooth gradient would spend a third of the 256 on ground nobody looks at.
+   */
+  const FLOOR_STEPS = 8
+  const floorBase = palette.length
+  const floorTone = scene.groundRamp[0] as RGB
+  palette.push(scene.groundRamp[scene.groundRamp.length - 1] as RGB)
+  for (let k = 0; k <= FLOOR_STEPS; k++) {
+    palette.push(haze(floorTone, scene.sky, (scene.haze * k) / FLOOR_STEPS))
+  }
+  const floorIndex = (y: number): number =>
+    y === scene.ground ? floorBase : floorBase + 1 + Math.round(floorDepth(scene, y) * FLOOR_STEPS)
 
   // Fields paint after the ground and before the subjects, so weather sits behind what it
   // falls on. A layer in front would need depth it does not have.
@@ -320,9 +372,7 @@ export function compose(scene: Scene): Composed {
     // rest steps down. Three tones is enough for a flat plane and more would compete with
     // the subjects standing on it.
     for (let y = scene.ground; y < scene.h; y++) {
-      const depth = y - scene.ground
-      const step = depth === 0 ? scene.groundRamp.length - 1 : Math.max(0, scene.groundRamp.length - 2 - Math.floor(depth / 6))
-      data.fill(groundBase + step, y * scene.w, (y + 1) * scene.w)
+      data.fill(floorIndex(y), y * scene.w, (y + 1) * scene.w)
     }
 
     const sceneT = f / scene.frames
@@ -361,14 +411,9 @@ export function compose(scene: Scene): Composed {
     // statement about distance and the foot row is only its consequence: two trees in the
     // same band are separated by where they stand, but a hazier tree is behind a clearer
     // one whatever their feet do. Stable, because ties fall back to placement order.
-    const order = runs.map((r, i) => i).sort((a, b) => {
-      const dr = runs[b]!.recede - runs[a]!.recede
-      if (dr !== 0) return dr
-      const ay = runs[a]!.placement.baseY ?? runs[a]!.placement.footY ?? runs[a]!.placement.y ?? 0
-      const by = runs[b]!.placement.baseY ?? runs[b]!.placement.footY ?? runs[b]!.placement.y ?? 0
-      const dy = ay - by
-      return dy !== 0 ? dy : a - b
-    })
+    const order = runs
+      .map((r, i) => i)
+      .sort((a, b) => paintOrder(runs[a]!.placement, a) - paintOrder(runs[b]!.placement, b))
 
     for (const i of order) {
       const run = runs[i]!
@@ -381,27 +426,21 @@ export function compose(scene: Scene): Composed {
       const frame = run.result.frames[Math.floor(t * own) % own] as Frame
       const map = maps.get(run.name) as Uint8Array
       const { w: sw, h: sh, data: src } = frame.buf
-      const wrap = p.drift === undefined ? 0 : Math.round(p.drift * sceneT)
-      const ox = p.x + wrap - run.result.params.canvas.originX
-      // `baseY` aligns the origin, `footY` aligns the lowest painted pixel, `y` aligns the
-      // origin to a raw row. The first is exact; the second is measured; the third is neither
-      // and survives only for subjects with no floor at all, which is what a cloud is.
-      const oy =
-        p.baseY !== undefined
-          ? p.baseY - run.result.params.canvas.originY
-          : p.footY !== undefined
-            ? p.footY - run.footOffset
-            : (p.y ?? 0) - run.result.params.canvas.originY
+      const ox = p.x - run.result.params.canvas.originX
+      // `origin` is exact and measures nothing; `foot` measures the lowest painted pixel.
+      // Which one is right depends on where the sprite's author put its origin, and getting
+      // that wrong is what put five trees in the air and then one below the gorilla.
+      const row = p.sky === true ? (p.y ?? 0) : standRow(scene, p.depth ?? 0)
+      const oy = p.anchor === 'foot' ? row - run.footOffset : row - run.result.params.canvas.originY
       for (let sy = 0; sy < sh; sy++) {
         const dy = oy + sy
         if (dy < 0 || dy >= scene.h) continue
         for (let sx = 0; sx < sw; sx++) {
           const v = src[sy * sw + sx] as number
           if (v === 0) continue
-          // A drifting subject wraps rather than leaving: a cloud that sails off the right
-          // has to arrive on the left, or the sky empties over one cycle.
-          let dx = ox + sx
-          if (p.drift !== undefined) dx = ((dx % scene.w) + scene.w) % scene.w
+          // The compositor is the frozen path now: continuous motion belongs to the live
+          // runtime, which has elapsed time to move things with. A cloud stands still here.
+          const dx = ox + sx
           if (dx < 0 || dx >= scene.w) continue
           data[dy * scene.w + dx] = map[v] as number
         }
