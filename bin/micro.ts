@@ -15,8 +15,9 @@
  * `node:http` and `node:fs` only. Nothing added to the stack.
  */
 import { createServer } from 'node:http'
+import { gzipSync } from 'node:zlib'
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { compose } from '../src/scene/compose.ts'
+import { toStage } from '../src/scene/layers.ts'
 import { MICRO_GAMES } from '../src/micro/registry.ts'
 import { gamePage, shelfPage } from '../src/micro/app.ts'
 import type { AppGame } from '../src/micro/app.ts'
@@ -24,33 +25,23 @@ import type { AppGame } from '../src/micro/app.ts'
 function buildGame(id: string): AppGame | undefined {
   const game = MICRO_GAMES.find((g) => g.id === id)
   if (game === undefined) return undefined
-  const composed = compose(game.scene)
-  const own = composed.cohesion.perSubject.reduce((a, s) => a + s.colours, 0)
-  const shared = composed.cohesion.perSubject.reduce((a, s) => a + s.shared, 0)
-  const cycle = composed.scene.frames * composed.scene.msPerFrame
+  const stage = toStage(game.scene)
+  const bytes = stage.layers.reduce((a, l) => a + l.indices.length, 0)
   return {
     id: game.id,
     title: game.title,
     blurb: game.blurb,
     date: game.date,
     meta: [
-      `${composed.scene.w}×${composed.scene.h}`,
-      `×${composed.scene.scale}`,
-      `${composed.buffers.length} frames`,
-      `${cycle} ms cycle`,
-      `${composed.scene.placements.length} subjects`,
-      `${composed.cohesion.totalColours} colours`,
-      `${Math.round((100 * shared) / Math.max(1, own + shared))}% palette reuse`,
+      `${stage.w}\u00d7${stage.h}`,
+      `\u00d7${stage.scale}`,
+      `${stage.placed.length} subjects`,
+      `${stage.layers.length} layers`,
+      `${stage.colours} colours`,
+      `${(bytes / 1024).toFixed(0)} KB of indices`,
       game.date,
     ],
-    cell: {
-      w: composed.scene.w,
-      h: composed.scene.h,
-      scale: composed.scene.scale,
-      msPerFrame: composed.scene.msPerFrame,
-      frames: composed.buffers.map((b) => b.data),
-      palette: composed.palette.colors,
-    },
+    stage,
   }
 }
 
@@ -73,9 +64,16 @@ if (process.argv.includes('--static')) {
   const port = flag >= 0 ? Number(process.argv[flag + 1]) : 5177
   const server = createServer((req, res) => {
     const path = (req.url ?? '/').split('?')[0]!.replace(/\/+$/, '')
+    // Gzip, and it is not a nicety: a stage ships every sprite's own frames instead of one
+    // flattened list, and indexed art with wide transparent margins compresses about ten to
+    // one. Without it the page is megabytes and the refresh loop stops being a loop.
     const send = (html: string, code = 200): void => {
-      res.writeHead(code, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' })
-      res.end(html)
+      const accepts = String(req.headers['accept-encoding'] ?? '').includes('gzip')
+      const head: Record<string, string> = { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' }
+      if (!accepts) { res.writeHead(code, head); res.end(html); return }
+      const body = gzipSync(Buffer.from(html), { level: 6 })
+      res.writeHead(code, { ...head, 'content-encoding': 'gzip', 'content-length': String(body.length) })
+      res.end(body)
     }
     try {
       if (path === '' || path === '/') return send(shelfPage(buildAll()))

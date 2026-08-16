@@ -212,6 +212,34 @@ function jitter(seed: number, i: number): number {
 const SEGS = 5
 
 /**
+ * **The physical ceiling on a trunk, and it throws rather than clamps.**
+ *
+ * His reading of the third pass: *"você exagerou na base do tronco... precisamos garantir os
+ * limites físicos dessa diversidade"*. He was pointing at `tree-broad`, whose flared base
+ * measured **0.57 of the whole tree's height** — five times past a baobab, which is the
+ * stoutest tree that exists.
+ *
+ * Real base diameter over total height:
+ *
+ * | tree | ratio |
+ * |---|---|
+ * | forest conifer | 0.02 – 0.04 |
+ * | open-grown oak | 0.06 – 0.10 |
+ * | veteran, baobab | 0.15 – 0.25 |
+ *
+ * Pixel art runs stouter than life and should, so the bound is set at the *upper* end of
+ * what exists rather than at the middle. `BASE_MAX` is against the **trunk** height, which
+ * is always less than the tree's, and the lock in `tests/forest.test.ts` checks the
+ * measured ratio against the whole tree — argument here, pixels there.
+ *
+ * **It throws.** A clamp would quietly redraw a tree the author asked for and the author
+ * would never learn, which is how `tree-broad` survived a reading. The skeleton's
+ * parent-before-child rule is the precedent: a loud failure at build time found a defect
+ * that a compiler could not.
+ */
+const BASE_MAX = 0.17
+
+/**
  * Build a tree. Everything is derived from the arguments — there is no branch of this
  * function that special-cases a particular tree, because the moment there is, a forest
  * stops being generated and starts being typed out again.
@@ -223,6 +251,15 @@ export function makeTree(opts: TreeOpts): Grammar {
     crown, leaf, seed,
   } = opts
   const gain = opts.windGain ?? 1
+
+  const base = girth * (1 + flare)
+  if (base > BASE_MAX * height) {
+    throw new Error(
+      `${name}: flared base radius ${base.toFixed(1)} is ${(base / height).toFixed(3)} of the ` +
+        `trunk height ${height}, past the physical ceiling of ${BASE_MAX}. A tree is made wide ` +
+        `by its branches, not by its trunk — raise \`height\` or \`reach\`, or lower \`girth\`.`,
+    )
+  }
 
   const bones: Bone[] = []
   const parts: Part[] = []
@@ -388,7 +425,7 @@ export function makeTree(opts: TreeOpts): Grammar {
 export const FOREST: readonly Grammar[] = [
   // A big decurrent broadleaf: the leader gives up early and two high tiers carry a
   // heavy crown. The reference image's foreground trees are this.
-  makeTree({ name: 'tree-oak', height: 46, girth: 7, taperPow: 1.6, flare: 0.5, bulge: 0.12, wander: 0.006, lean: 0.004,
+  makeTree({ name: 'tree-oak', height: 54, girth: 5.6, taperPow: 1.6, flare: 0.45, bulge: 0.12, wander: 0.006, lean: 0.004,
     first: 0.48, whorls: 2, perWhorl: 3, levels: 2, split: 2, divergence: 0.075, shorten: 0.7, reach: 0.5, droop: -0.005,
     crown: 9.5, leaf: 'leafB', seed: 0.13, windGain: 0.75 }),
 
@@ -405,13 +442,13 @@ export const FOREST: readonly Grammar[] = [
 
   // Weeping: the same recursion with a positive droop, so every generation turns further
   // down and the crown hangs instead of standing.
-  makeTree({ name: 'tree-willow', height: 34, girth: 5.5, taperPow: 1.25, flare: 0.55, bulge: 0.06, wander: 0.008, lean: -0.008,
+  makeTree({ name: 'tree-willow', height: 42, girth: 4.4, taperPow: 1.25, flare: 0.45, bulge: 0.06, wander: 0.008, lean: -0.008,
     first: 0.46, whorls: 2, perWhorl: 3, levels: 2, split: 2, divergence: 0.1, shorten: 0.82, reach: 0.58, droop: 0.075,
     crown: 7, leaf: 'leafA', seed: 3.4, windGain: 1.5 }),
 
   // A vase: one high tier of four limbs that lift as they fork. Three levels, so this is
   // the densest crown in the wood.
-  makeTree({ name: 'tree-elm', height: 44, girth: 6, taperPow: 1.45, flare: 0.4, bulge: 0.1, wander: 0.005, lean: 0.003,
+  makeTree({ name: 'tree-elm', height: 48, girth: 5.2, taperPow: 1.45, flare: 0.35, bulge: 0.1, wander: 0.005, lean: 0.003,
     first: 0.62, whorls: 1, perWhorl: 4, levels: 3, split: 2, divergence: 0.068, shorten: 0.66, reach: 0.6, droop: -0.022,
     crown: 6.4, leaf: 'leafB', seed: 4.1, windGain: 0.85 }),
 
@@ -421,7 +458,7 @@ export const FOREST: readonly Grammar[] = [
     crown: 5.7, leaf: 'leafC', seed: 5.2, windGain: 0.5 }),
 
   // Round and dense: three mid tiers of three, short forks, fat tips. The tips fuse.
-  makeTree({ name: 'tree-maple', height: 38, girth: 5.4, taperPow: 1.35, flare: 0.42, bulge: 0.14, wander: 0.007, lean: -0.005,
+  makeTree({ name: 'tree-maple', height: 42, girth: 4.6, taperPow: 1.35, flare: 0.38, bulge: 0.14, wander: 0.007, lean: -0.005,
     first: 0.42, whorls: 3, perWhorl: 3, levels: 2, split: 2, divergence: 0.09, shorten: 0.68, reach: 0.42, droop: 0,
     crown: 8, leaf: 'leafA', seed: 6.6, windGain: 1 }),
 
@@ -430,22 +467,31 @@ export const FOREST: readonly Grammar[] = [
     first: 0.88, whorls: 1, perWhorl: 5, levels: 1, split: 2, divergence: 0.13, shorten: 0.76, reach: 0.5, droop: 0.055,
     crown: 6, leaf: 'leafB', seed: 7.3, windGain: 1.2 }),
 
-  // Squat and broad, on a huge flared base: it spends its height on width.
+  // **Broad means wide branches, not a fat trunk** — his correction of the third pass, and
+  // the tree that provoked it. It was height 28 on a girth of 8 with a 0.75 flare, so its
+  // base measured 0.57 of the whole tree's height. The width stays; the trunk goes back
+  // inside what a trunk can be.
+  //
+  // **`reach` came down with the trunk, and the first attempt forgot that it had to.**
+  // `reach` is a fraction of `height`, so raising the trunk to clear the girth ceiling
+  // stretched every limb by the same 57% and the tree filled the whole cell edge to edge.
+  // Two arguments, one number underneath — which is the shape of coupling the outline lock
+  // exists to catch.
   //
   // **Its lowest whorl was at 0.34 and drooping, and the outline lock caught what that
   // means.** A limb that leaves low and turns down carries its foliage below the trunk base
   // — which is below the ground once a scene stands the tree on a floor, so the trunk gets
   // pushed up off it. That is the floating-tree defect arriving by a second route, and no
   // amount of cell height fixes it. The whorl goes up and the droop goes flat.
-  makeTree({ name: 'tree-broad', height: 28, girth: 8, taperPow: 1.5, flare: 0.75, bulge: 0.16, wander: 0.009, lean: 0.006,
-    first: 0.44, whorls: 2, perWhorl: 4, levels: 2, split: 2, divergence: 0.11, shorten: 0.74, reach: 0.85, droop: -0.005,
+  makeTree({ name: 'tree-broad', height: 44, girth: 4.8, taperPow: 1.5, flare: 0.5, bulge: 0.16, wander: 0.009, lean: 0.006,
+    first: 0.44, whorls: 2, perWhorl: 4, levels: 2, split: 2, divergence: 0.11, shorten: 0.74, reach: 0.58, droop: -0.005,
     crown: 8.4, leaf: 'leafB', seed: 8.8, windGain: 0.8 }),
 
   // A shrub: no trunk to speak of, tiers starting almost at the ground. Same correction as
   // tree-broad, and it is the tree the correction matters most on — a shrub has the least
   // height to spare between its lowest branch and the floor.
-  makeTree({ name: 'tree-bush', height: 12, girth: 2.8, taperPow: 1.4, flare: 0.3, bulge: 0.1, wander: 0.012, lean: -0.01,
-    first: 0.32, whorls: 2, perWhorl: 3, levels: 2, split: 2, divergence: 0.135, shorten: 0.74, reach: 1.5, droop: -0.012,
+  makeTree({ name: 'tree-bush', height: 16, girth: 2, taperPow: 1.4, flare: 0.25, bulge: 0.1, wander: 0.012, lean: -0.01,
+    first: 0.42, whorls: 2, perWhorl: 3, levels: 2, split: 2, divergence: 0.135, shorten: 0.74, reach: 1.0, droop: -0.012,
     crown: 5.8, leaf: 'leafA', seed: 9.5, windGain: 1.6 }),
 
   // A sapling: the same growth at a tenth of the mass, which is what a young tree is.
@@ -461,7 +507,7 @@ export const FOREST: readonly Grammar[] = [
   // which is the measurement that says "this is noise, not shading". Foliage smaller than
   // its own outline cannot make a region. Two levels and a wider tip, and the structure is
   // still the subject.
-  makeTree({ name: 'tree-snag', height: 40, girth: 5, taperPow: 1.55, flare: 0.45, bulge: -0.06, wander: 0.013, lean: -0.011,
+  makeTree({ name: 'tree-snag', height: 40, girth: 4.5, taperPow: 1.55, flare: 0.4, bulge: -0.06, wander: 0.013, lean: -0.011,
     first: 0.5, whorls: 2, perWhorl: 3, levels: 2, split: 2, divergence: 0.095, shorten: 0.66, reach: 0.52, droop: 0.01,
     crown: 3.9, leaf: 'leafC', seed: 11.2, windGain: 0.9 }),
 

@@ -75,7 +75,7 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     id: 'forest',
     title: 'The forest',
     blurb:
-      'Fourteen trees from one recursive grammar, no two the same structure. A branch is a smaller tree, so a crown is a consequence of its branching rather than a layout placed near it — which is what the first pass could not express and why every crown came out alike. Depth is haze rather than position, so every tree stands on the floor, and each one sits at its own point in the same gust.',
+      'Walk the gorilla with the arrow keys. Fourteen trees from one recursive grammar — a branch is a smaller tree, so a crown is a consequence of its branching rather than a layout placed near it. Depth is haze rather than position, every trunk obeys a physical ceiling on its girth, and the clouds drift in real seconds rather than in frames, so there is no loop point left for them to jump at.',
     date: '2026-08-15',
     scene: forestScene,
   },

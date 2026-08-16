@@ -41,12 +41,26 @@ export type Placement = {
   /** Overrides the subject's own frame duration, to make its cycle divide the scene's. */
   readonly msPerFrame?: number
   /**
-   * Row the subject's lowest painted pixel lands on. **This is how a game places things and
-   * `y` is not**: a sprite's origin is wherever its author put it — the hips on the gorilla,
-   * the base of the trunk on the tree — so aligning origins puts nothing on the floor. With
-   * a foot row the compositor measures each subject and does the arithmetic.
+   * Row the subject's lowest painted pixel lands on. Right for a subject whose author put
+   * the origin somewhere that is not the floor — the hips, on the gorilla.
+   *
+   * **Wrong for anything whose origin IS its ground contact, and that mistake cost two
+   * readings.** A tree's origin is the base of its trunk. Its lowest *painted* pixel is a
+   * root, a drooping branch or the outline ring, seven to thirteen pixels lower — so
+   * aligning the lowest pixel to the ground line lifts the trunk base that far off it. Five
+   * of fourteen trees floated on the second pass, and the check I wrote to catch it asked
+   * whether `footY >= ground`, which is the number I had set rather than the number that
+   * matters. Use `baseY` when the origin is the contact point.
    */
   readonly footY?: number
+  /**
+   * Row the subject's own **origin** lands on. Exact, and measured from nothing.
+   *
+   * For every subject whose author placed the origin at the ground contact — every tree —
+   * this is the correct field and `footY` is not. Whatever hangs below the origin then hangs
+   * below the floor, which is where roots go.
+   */
+  readonly baseY?: number
   /** Offset into its own cycle, 0..1, so two of the same subject are not in lockstep. */
   readonly phase?: number
   readonly seed?: number
@@ -79,6 +93,63 @@ export type Placement = {
    * at the same distance share, and the reading stays honest about what depth cost.
    */
   readonly recede?: number
+  /**
+   * **Continuous motion, in seconds rather than in frames.** For a subject with no floor,
+   * which so far means a cloud.
+   *
+   * It replaces `drift`, and the reason is his third reading: *"vamos deixar o movimento da
+   * nuvem mais natural, cadenciado e fluído"*. `drift` was a fraction of the **scene's
+   * frame loop**, so a cloud could only return to its start by crossing the entire scene in
+   * one cycle — 320 px in 1200 ms, which is seamless and reads as a jet. Anything slower
+   * jumped at the loop point.
+   *
+   * The frame loop was the whole problem. A pre-rendered frame list has no elapsed time, so
+   * every motion in it had to be periodic in 24 frames. `speed` is scene pixels per
+   * **second**, evaluated live, and it wraps a full sprite width off each edge — so there is
+   * no loop point to be seamless at.
+   *
+   * `swayX`, `bobY` and `period` are the cadence: the cloud gains and loses a little speed
+   * and rises and falls, on its own period. Two clouds with different periods never pulse
+   * together, which is what stops a sky of three from reading as one object with three
+   * parts.
+   */
+  readonly motion?: {
+    /** Scene pixels per second, positive to the right. */
+    readonly speed: number
+    /** Sideways cadence amplitude, in pixels. It is what makes the speed vary. */
+    readonly swayX: number
+    /** Vertical cadence amplitude, in pixels. */
+    readonly bobY: number
+    /** Seconds in one cadence. */
+    readonly period: number
+    /** Offset into the cadence, 0..1. */
+    readonly at: number
+  }
+  /**
+   * **This subject is driven by the player**, which is the first thing in this project that
+   * a person can change while it is running.
+   *
+   * It forces the runtime to stop being a frame player: input, state and draw have to happen
+   * per animation frame, and the scene can no longer be a list of pre-composited pictures.
+   * The sprites stay pre-rendered — a walk cycle is still a pure function of the grammar —
+   * and what moved into the browser is only the *composition*, which is exactly the split
+   * `HARNESS.md` §2.1 already requires between a deterministic core and its consumers.
+   *
+   * **Facing costs a second render, not a flip.** Mirroring a sprite mirrors its lighting,
+   * so a body lit from the upper left becomes a body lit from the upper right and the whole
+   * wood disagrees with it. The subject is rendered again with the lamp mirrored and then
+   * flipped, which puts the light back where the scene keeps it. That is cheap here and
+   * impossible for a painted sprite sheet, so it is one of the few places where generating
+   * the art is straightforwardly better than drawing it.
+   */
+  readonly control?: {
+    /** Scene pixels per second. */
+    readonly speed: number
+    readonly minX: number
+    readonly maxX: number
+    /** The frame held when standing still. */
+    readonly idleFrame: number
+  }
 }
 
 export type Scene = {
@@ -264,8 +335,13 @@ export function compose(scene: Scene): Composed {
         const cols = Math.ceil(scene.w / field.spacing) + 2
         for (let c = 0; c < cols; c++) {
           // An integer hash, so the sheet is irregular and identical on every run.
+          // The trailing >>> 0 is load-bearing. XOR yields a SIGNED 32-bit integer in JS, so
+          // without it `hsh` goes negative and `hsh % colors.length` returns -1 — which wrote
+          // the palette entry BEFORE the rain's, silently, for about half the columns. Found
+          // by the micro runtime's headless lock, not by looking: the wrong colour is a
+          // plausible grey and the right one is a plausible grey.
           let hsh = ((c + field.seed) * 2654435761) >>> 0
-          hsh ^= hsh >>> 13
+          hsh = (hsh ^ (hsh >>> 13)) >>> 0
           const phase = (hsh % 1024) / 1024
           const tone = hsh % field.colors.length
           const x0 = c * field.spacing + (hsh % field.spacing)
@@ -288,8 +364,8 @@ export function compose(scene: Scene): Composed {
     const order = runs.map((r, i) => i).sort((a, b) => {
       const dr = runs[b]!.recede - runs[a]!.recede
       if (dr !== 0) return dr
-      const ay = runs[a]!.placement.footY ?? runs[a]!.placement.y ?? 0
-      const by = runs[b]!.placement.footY ?? runs[b]!.placement.y ?? 0
+      const ay = runs[a]!.placement.baseY ?? runs[a]!.placement.footY ?? runs[a]!.placement.y ?? 0
+      const by = runs[b]!.placement.baseY ?? runs[b]!.placement.footY ?? runs[b]!.placement.y ?? 0
       const dy = ay - by
       return dy !== 0 ? dy : a - b
     })
@@ -307,7 +383,15 @@ export function compose(scene: Scene): Composed {
       const { w: sw, h: sh, data: src } = frame.buf
       const wrap = p.drift === undefined ? 0 : Math.round(p.drift * sceneT)
       const ox = p.x + wrap - run.result.params.canvas.originX
-      const oy = p.footY === undefined ? (p.y ?? 0) - run.result.params.canvas.originY : p.footY - run.footOffset
+      // `baseY` aligns the origin, `footY` aligns the lowest painted pixel, `y` aligns the
+      // origin to a raw row. The first is exact; the second is measured; the third is neither
+      // and survives only for subjects with no floor at all, which is what a cloud is.
+      const oy =
+        p.baseY !== undefined
+          ? p.baseY - run.result.params.canvas.originY
+          : p.footY !== undefined
+            ? p.footY - run.footOffset
+            : (p.y ?? 0) - run.result.params.canvas.originY
       for (let sy = 0; sy < sh; sy++) {
         const dy = oy + sy
         if (dy < 0 || dy >= scene.h) continue

@@ -2,28 +2,28 @@
  * **The micro-game webapp.** His surface, 15/08: a shelf on the home route and one route
  * per game, so iterating means refreshing.
  *
- * Two pages, one blit path. The blit rules are the project's and they are not negotiable
- * anywhere a sprite reaches a screen: **nearest neighbour, integer scale, index 0 fully
- * transparent, and one accumulator for the whole page.** A cell may own a rate; it may never
- * own a clock. Those are the same rules the bench viewer compiles, and they are repeated
- * here rather than imported because this app is a *product surface* and the bench is an
- * instrument — but if the two ever disagree about a pixel, this file is the one that is
- * wrong.
+ * **It stopped being a frame player on 15/08**, because two of his findings could not be
+ * answered by one: a cloud that jumps at the loop point, and a gorilla nobody can steer.
+ * Both are the same limitation — the *composition* was done ahead of time — and neither is
+ * about the drawing. So the page now receives **layers and an arrangement**, and composes
+ * every animation frame itself from live state and real elapsed time.
+ *
+ * What did not change, and must not: **the sprites are still pre-rendered by the
+ * deterministic core.** A walk cycle is a pure function of its grammar, hashed and locked,
+ * and it crosses the wire as indexed bytes plus a palette exactly as everywhere else here.
+ * The browser is a *consumer* of the core (`HARNESS.md` §2.1); what moved into it is
+ * arrangement, not drawing.
+ *
+ * The blit rules are the project's and they are not negotiable anywhere a sprite reaches a
+ * screen: **nearest neighbour, integer scale, index 0 fully transparent, one clock for the
+ * page.** Everything is drawn into an offscreen buffer at the scene's own resolution and
+ * blitted once, so no sprite is ever sampled through a fractional scale.
  *
  * **Every route renders from current code on every request.** No cache, no build step: a
- * refresh is the whole iteration loop. The gallery freezes its entries on purpose and this
- * does the opposite on purpose.
+ * refresh is the whole iteration loop.
  */
 import type { RGB } from '../core/types.ts'
-
-export type AppCell = {
-  readonly w: number
-  readonly h: number
-  readonly scale: number
-  readonly msPerFrame: number
-  readonly frames: readonly Uint8Array[]
-  readonly palette: readonly RGB[]
-}
+import type { Stage } from '../scene/layers.ts'
 
 export type AppGame = {
   readonly id: string
@@ -31,74 +31,161 @@ export type AppGame = {
   readonly blurb: string
   readonly date: string
   readonly meta: readonly string[]
-  readonly cell: AppCell
+  readonly stage: Stage
 }
-
-const b64 = (frames: readonly Uint8Array[]): string =>
-  Buffer.concat(frames.map((f) => Buffer.from(f))).toString('base64')
 
 const esc = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
-/** Payload for one canvas. `n` is the frame count; the bytes are all frames concatenated. */
-const payloadOf = (cell: AppCell): string =>
+/** The stage as JSON, with each layer's indices base64'd. */
+const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
   JSON.stringify({
-    w: cell.w,
-    h: cell.h,
-    n: cell.frames.length,
-    scale: cell.scale,
-    ms: cell.msPerFrame,
-    palette: cell.palette,
-    indices: b64(cell.frames),
+    w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
+    groundRamp: stage.groundRamp, rain: stage.rain, interactive,
+    layers: stage.layers.map((l) => ({
+      w: l.w, h: l.h, ox: l.ox, oy: l.oy, n: l.frames, ms: l.msPerFrame,
+      palette: l.palette, indices: Buffer.from(l.indices).toString('base64'),
+    })),
+    placed: stage.placed,
   })
 
 /**
- * The shared runtime. It decodes indexed bytes once into `ImageData`, then every frame is a
- * `putImageData` plus one scaled `drawImage` — which is why the scale has to be an integer:
- * pixel art through a fractional scale is judged through mud.
+ * **The runtime.** Input, state, draw — the three things a game loop is, and the first time
+ * this project has had one.
+ *
+ * Each layer decodes once into a vertical strip canvas, so a frame is a `drawImage` with a
+ * source rectangle rather than a per-pixel copy. Everything lands in an offscreen buffer at
+ * the scene's own resolution and is blitted once at an integer scale.
  */
 const RUNTIME = `
-function mount(el, D) {
-  var view = document.createElement('canvas');
-  view.width = D.w * D.scale; view.height = D.h * D.scale;
-  var ctx = view.getContext('2d'); ctx.imageSmoothingEnabled = false;
-  var off = document.createElement('canvas'); off.width = D.w; off.height = D.h;
-  var octx = off.getContext('2d');
-  var raw = atob(D.indices), per = D.w * D.h, images = [];
-  for (var f = 0; f < D.n; f++) {
-    var img = octx.createImageData(D.w, D.h);
-    for (var i = 0; i < per; i++) {
-      var idx = raw.charCodeAt(f * per + i), o = i * 4;
-      if (idx === 0) { img.data[o + 3] = 0; continue; }
-      var c = D.palette[idx];
-      img.data[o] = c[0]; img.data[o+1] = c[1]; img.data[o+2] = c[2]; img.data[o+3] = 255;
+function rgb(c){ return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')' }
+function cv(w,h){ var c = document.createElement('canvas'); c.width=w; c.height=h; return c }
+
+/** One layer's whole cycle as a vertical strip. Decoded once, drawn from thereafter. */
+function decode(L){
+  var c = cv(L.w, L.h * L.n), x = c.getContext('2d')
+  var img = x.createImageData(L.w, L.h * L.n), raw = atob(L.indices), per = L.w * L.h * L.n
+  for (var i = 0; i < per; i++) {
+    var idx = raw.charCodeAt(i), o = i * 4
+    if (idx === 0) { img.data[o+3] = 0; continue }
+    var p = L.palette[idx]
+    img.data[o] = p[0]; img.data[o+1] = p[1]; img.data[o+2] = p[2]; img.data[o+3] = 255
+  }
+  x.putImageData(img, 0, 0)
+  return c
+}
+
+function mount(el, S) {
+  var view = cv(S.w * S.scale, S.h * S.scale)
+  var vx = view.getContext('2d'); vx.imageSmoothingEnabled = false
+  var off = cv(S.w, S.h), ox = off.getContext('2d')
+  var sheets = S.layers.map(decode)
+
+  // The backdrop never changes, so it is drawn once and copied. The lightest ground tone is
+  // a one-pixel lit strip along the top edge and the rest steps down.
+  var bg = cv(S.w, S.h), bx = bg.getContext('2d')
+  bx.fillStyle = rgb(S.sky); bx.fillRect(0, 0, S.w, S.h)
+  for (var y = S.ground; y < S.h; y++) {
+    var d = y - S.ground
+    var step = d === 0 ? S.groundRamp.length - 1 : Math.max(0, S.groundRamp.length - 2 - Math.floor(d / 6))
+    bx.fillStyle = rgb(S.groundRamp[step]); bx.fillRect(0, y, S.w, 1)
+  }
+
+  // The actor: the one subject whose position is state rather than data.
+  var actor = null
+  for (var i = 0; i < S.placed.length; i++) {
+    if (S.placed[i].control) actor = { p: S.placed[i], x: S.placed[i].x, face: 1, clock: 0, moving: false }
+  }
+  var keys = {}
+  if (S.interactive && actor) {
+    var down = function (e, v) {
+      var k = e.key
+      if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = v; e.preventDefault() }
+      if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = v; e.preventDefault() }
     }
-    images.push(img);
+    window.addEventListener('keydown', function (e) { down(e, true) })
+    window.addEventListener('keyup', function (e) { down(e, false) })
   }
-  el.appendChild(view);
-  return { ctx: ctx, octx: octx, off: off, view: view, images: images, n: D.n, ms: D.ms };
-}
-var CELLS = [], elapsed = 0, paused = false, last = null;
-function draw() {
-  for (var i = 0; i < CELLS.length; i++) {
-    var c = CELLS[i], k = Math.floor(elapsed / c.ms) % c.n;
-    c.octx.putImageData(c.images[k], 0, 0);
-    c.ctx.clearRect(0, 0, c.view.width, c.view.height);
-    c.ctx.drawImage(c.off, 0, 0, c.view.width, c.view.height);
-    if (c.tag) c.tag.textContent = 'frame ' + k + ' / ' + c.n;
+
+  function rain(t) {
+    var R = S.rain; if (!R) return
+    var span = S.h + R.length * 2
+    var cols = Math.ceil(S.w / R.spacing) + 2
+    for (var c = 0; c < cols; c++) {
+      // The same integer hash the compositor used, so the sheet is irregular and identical
+      // on every machine. What changed is only that its phase now advances in seconds.
+      // The trailing >>> 0 is load-bearing: XOR in JS yields a SIGNED 32-bit integer, so
+      // without it hsh goes negative and hsh % colors.length returns -1. That indexed one
+      // slot before the rain's palette in the compositor and had done since the rain was
+      // written — silently, because the wrong entry is a plausible grey.
+      var hsh = ((c + R.seed) * 2654435761) >>> 0; hsh = (hsh ^ (hsh >>> 13)) >>> 0
+      var ph = (hsh % 1024) / 1024
+      var x0 = c * R.spacing + (hsh % R.spacing)
+      ox.fillStyle = rgb(R.colors[hsh % R.colors.length])
+      var fall = (((t * R.speed / span) + ph) % 1) * span - R.length
+      for (var k = 0; k < R.length; k++) {
+        var yy = Math.round(fall + k); if (yy < 0 || yy >= S.h) continue
+        var xx = Math.round(x0 + k * R.slant); if (xx < 0 || xx >= S.w) continue
+        ox.fillRect(xx, yy, 1, 1)
+      }
+    }
   }
+
+  var t0 = null, prev = 0
+  function frame(now) {
+    if (t0 === null) t0 = now
+    var t = (now - t0) / 1000
+    var dt = Math.min(0.05, t - prev); prev = t
+
+    if (actor) {
+      var dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
+      actor.moving = dir !== 0
+      if (dir !== 0) {
+        actor.face = dir
+        actor.x = Math.max(actor.p.control.minX, Math.min(actor.p.control.maxX, actor.x + dir * actor.p.control.speed * dt))
+        // The walk clock only runs while he walks, so the cycle resumes where it stopped
+        // instead of carrying on behind a standing pose.
+        actor.clock += dt * 1000
+      }
+    }
+
+    ox.drawImage(bg, 0, 0)
+    rain(t)
+
+    for (var i = 0; i < S.placed.length; i++) {
+      var P = S.placed[i], li = P.layer, L, f, dx, dy
+      if (P.control && actor) {
+        li = actor.face < 0 ? P.control.flip : P.layer
+        L = S.layers[li]
+        f = actor.moving ? Math.floor(actor.clock / L.ms) % L.n : P.control.idleFrame % L.n
+        dx = Math.round(actor.x) + L.ox; dy = P.y + L.oy
+      } else {
+        L = S.layers[li]
+        f = Math.floor(t * 1000 / L.ms + P.phase * L.n) % L.n
+        dx = P.x + L.ox; dy = P.y + L.oy
+        if (P.motion) {
+          // Continuous in seconds, so there is no loop point to be seamless at. The sway
+          // term is what makes the speed rise and fall: a cloud that travels at one rate is
+          // a cutout on a rail.
+          var M = P.motion, u = 6.283185 * (t / M.period + M.at)
+          dx += M.speed * t + M.swayX * Math.sin(u)
+          dy += M.bobY * Math.sin(u * 0.61 + 2.3)
+          // Wrap with a whole sprite width of margin off each edge, so it leaves and returns
+          // entirely off screen rather than reappearing cut in half.
+          var span = S.w + L.w
+          dx = ((dx + L.w) % span + span) % span - L.w
+        }
+      }
+      ox.drawImage(sheets[li], 0, f * L.h, L.w, L.h, Math.round(dx), Math.round(dy), L.w, L.h)
+    }
+
+    vx.drawImage(off, 0, 0, view.width, view.height)
+    requestAnimationFrame(frame)
+  }
+  el.appendChild(view)
+  requestAnimationFrame(frame)
+  return view
 }
-function tick(now) {
-  if (last === null) last = now;
-  if (!paused) elapsed += now - last;
-  last = now; draw(); requestAnimationFrame(tick);
-}
-requestAnimationFrame(tick);
-document.addEventListener('keydown', function (e) {
-  if (e.key === ' ') { paused = !paused; e.preventDefault(); }
-  if (e.key === ',') { paused = true; elapsed = Math.max(0, elapsed - CELLS[0].ms); draw(); }
-  if (e.key === '.') { paused = true; elapsed += CELLS[0].ms; draw(); }
-});
 `
 
 const STYLE = `
@@ -113,7 +200,7 @@ const STYLE = `
     -webkit-font-smoothing: antialiased;
   }
   code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px }
-  canvas { image-rendering: pixelated; display: block }
+  canvas { image-rendering: pixelated; display: block; max-width: 100% }
   a { color: inherit; text-decoration: none }
   header {
     border-bottom: 1px solid var(--line); padding: 22px 32px;
@@ -137,13 +224,15 @@ const STYLE = `
   .card p { margin: 0; color: var(--dim); font-size: 13.5px; line-height: 1.5 }
   .card .meta { margin-top: 12px; color: #6c6a68; font-size: 11.5px; letter-spacing: .02em }
 
-  .stage { display: flex; justify-content: center; padding: 8px 0 26px }
+  .stage { display: flex; justify-content: center; padding: 8px 0 20px }
   .stage > div { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #0e0e11 }
-  .about { max-width: 760px; margin: 0 auto }
-  .about h2 { margin: 0 0 8px; font-size: 20px; font-weight: 600 }
+  .about { max-width: 860px; margin: 0 auto }
   .about p { margin: 0 0 14px; color: var(--dim) }
   .facts { display: flex; gap: 22px; flex-wrap: wrap; color: #6c6a68; font-size: 12px; border-top: 1px solid var(--line); padding-top: 14px }
-  .keys { margin-top: 18px; color: #6c6a68; font-size: 12px }
+  .keys { margin: 0 auto 20px; max-width: 860px; text-align: center;
+          color: var(--ink); font-size: 13px; background: var(--card);
+          border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px }
+  .keys b { color: var(--accent); font-family: ui-monospace, Menlo, monospace }
   .back { color: var(--dim); font-size: 13px }
   .back:hover { color: var(--accent) }
   .empty { color: var(--dim); text-align: center; padding: 60px 0 }
@@ -160,11 +249,7 @@ const shell = (title: string, head: string, body: string, script: string): strin
 <script>${RUNTIME}${script}</script>
 `
 
-/**
- * **The shelf.** Cards decimate their frames — every third one — because a card is a
- * thumbnail and the whole shelf otherwise ships three times the bytes to say the same thing.
- * The rate is scaled to match, so a card runs at the speed the game runs at.
- */
+/** **The shelf.** Cards run the same runtime with input off, at scale 1. */
 export function shelfPage(games: readonly AppGame[]): string {
   const cards = games
     .map(
@@ -180,43 +265,28 @@ export function shelfPage(games: readonly AppGame[]): string {
     )
     .join('')
 
-  const mounts = games
-    .map((g, i) => {
-      const every = 3
-      const frames = g.cell.frames.filter((_, k) => k % every === 0)
-      const thumb: AppCell = {
-        ...g.cell,
-        frames,
-        scale: Math.max(1, Math.min(2, g.cell.scale)),
-        msPerFrame: g.cell.msPerFrame * every,
-      }
-      return `CELLS.push(mount(document.getElementById('t${i}'), ${payloadOf(thumb)}));`
-    })
-    .join('\n')
+  const mounts = games.map((g, i) => `mount(document.getElementById('t${i}'), ${payloadOf(g.stage, 1, false)});`).join('\n')
 
   return shell(
     'claude-ink-2d · micro games',
     `<h1>claude-ink-2d</h1><span class="sub">micro games — every object here belongs to a scene, never to a cell</span>`,
-    games.length === 0
-      ? `<div class="empty">nothing on the shelf yet</div>`
-      : `<div class="shelf">${cards}</div>`,
+    games.length === 0 ? `<div class="empty">nothing on the shelf yet</div>` : `<div class="shelf">${cards}</div>`,
     mounts,
   )
 }
 
-/** **One game, big.** Full frame count, the scene's own scale, nothing else on the page. */
+/** **One game, big, and playable.** Input is bound on this route and nowhere else. */
 export function gamePage(game: AppGame): string {
+  const playable = game.stage.placed.some((p) => p.control !== undefined)
   return shell(
     `${game.title} · claude-ink-2d`,
     `<a class="back" href="/">← shelf</a><h1>${esc(game.title)}</h1><span class="sub mono">${esc(game.id)}</span>`,
     `<div class="stage"><div id="stage"></div></div>
+     ${playable ? `<div class="keys"><b>←</b> <b>→</b> or <b>A</b> <b>D</b> to walk</div>` : ''}
      <div class="about">
        <p>${esc(game.blurb)}</p>
-       <div class="facts mono">${game.meta.map((m) => `<span>${esc(m)}</span>`).join('')}<span id="tag"></span></div>
-       <div class="keys mono">space pauses · , and . step one frame · refresh re-renders from current code</div>
+       <div class="facts mono">${game.meta.map((m) => `<span>${esc(m)}</span>`).join('')}</div>
      </div>`,
-    `var c = mount(document.getElementById('stage'), ${payloadOf(game.cell)});
-     c.tag = document.getElementById('tag');
-     CELLS.push(c);`,
+    `mount(document.getElementById('stage'), ${payloadOf(game.stage, game.stage.scale, true)});`,
   )
 }

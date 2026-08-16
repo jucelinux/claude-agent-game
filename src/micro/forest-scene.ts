@@ -23,11 +23,11 @@
  * strength. That is the arrangement of the reference he sent and it is also just what a
  * forest is: you see the trunks of what is close and the silhouette of what is not.
  *
- * **Known, and not fixed here.** A cloud still jumps at the loop point. Continuity needs
- * drift measured from real elapsed time, and a pre-rendered frame list has no elapsed time
- * — so it is the live runtime's job, which is the next piece and the same piece the gorilla
- * needs. Faking it inside the frame model would mean a cloud crossing the whole scene in
- * one 1200 ms cycle, which is seamless and looks like a jet.
+ * **The third pass built the runtime the second one had named.** The cloud that jumped at
+ * the loop point and the gorilla nobody could steer were one limitation — composition done
+ * ahead of time — and `src/scene/layers.ts` is the answer to both. The page now receives
+ * layers and an arrangement, and composes each animation frame from real elapsed time.
+ * `frames` and `msPerFrame` below survive only for the frozen gallery path.
  */
 import type { Scene } from '../scene/compose.ts'
 
@@ -46,6 +46,14 @@ const CANOPY: readonly [number, number, number][] = [
 const FAR = { recede: 0.5, ground: 131 }
 const MID = { recede: 0.26, ground: 145 }
 const NEAR = { recede: 0, ground: 163 }
+
+/**
+ * **A tree places by `baseY`, never by `footY`, and that is the fix for the last tree he
+ * found off the ground.** `footY` aligns the lowest painted pixel; a tree's lowest painted
+ * pixel is a root or the outline ring, seven to thirteen pixels below the trunk base — so
+ * five of these stood that far in the air while the check I had written reported none.
+ * `baseY` aligns the trunk base itself, which needs no measurement and cannot drift.
+ */
 
 /**
  * **Every tree gets its own place in the gust.** The first pass gave all fourteen the same
@@ -94,36 +102,51 @@ export const forestScene: Scene = {
     },
   ],
   placements: [
-    // The sky.
-    { grammar: 'cloud-c', tunables: 'sky', x: 60, y: 24, drift: 96 },
-    { grammar: 'cloud-a', tunables: 'sky', x: 205, y: 14, drift: 72 },
-    { grammar: 'cloud-b', tunables: 'sky', x: 300, y: 34, drift: 120 },
+    // **The sky, and it is the first thing here that is not periodic.** Speed is scene pixels
+    // per second, so a cloud simply keeps going and wraps a full sprite width off each edge —
+    // there is no loop point left to be seamless at.
+    //
+    // The three cadences are deliberately not multiples of each other: 17, 23 and 29 seconds.
+    // Clouds on the same period rise and fall together and the sky reads as one object with
+    // three parts, which is the same mistake the wood made with its wind.
+    { grammar: 'cloud-c', tunables: 'sky', x: 60, y: 24, motion: { speed: 5.5, swayX: 7, bobY: 3.5, period: 23, at: 0.0 } },
+    { grammar: 'cloud-a', tunables: 'sky', x: 205, y: 14, motion: { speed: 3.2, swayX: 5, bobY: 2.5, period: 29, at: 0.37 } },
+    { grammar: 'cloud-b', tunables: 'sky', x: 300, y: 34, motion: { speed: 8.0, swayX: 9, bobY: 4.5, period: 17, at: 0.68 } },
 
     // **Far: the tall thin ones.** Conifers and slim broadleaves, half dissolved into the
     // sky. They are the tallest trees in the wood and they are the furthest away, so the
     // canopy line rises behind the near trunks instead of running level with them — which is
     // the thing he could not see happening in the first pass.
-    { grammar: 'tree-spruce', tunables: 'wood', x: 18, footY: FAR.ground + 1, recede: FAR.recede, phase: phaseOf(0) },
-    { grammar: 'tree-pine', tunables: 'wood', x: 88, footY: FAR.ground - 1, recede: FAR.recede, phase: phaseOf(1) },
-    { grammar: 'tree-tall', tunables: 'wood', x: 152, footY: FAR.ground + 2, recede: FAR.recede, phase: phaseOf(2) },
-    { grammar: 'tree-airy', tunables: 'wood', x: 222, footY: FAR.ground, recede: FAR.recede, phase: phaseOf(3) },
-    { grammar: 'tree-birch', tunables: 'wood', x: 292, footY: FAR.ground + 3, recede: FAR.recede, phase: phaseOf(4) },
+    { grammar: 'tree-spruce', tunables: 'wood', x: 18, baseY: FAR.ground + 1, recede: FAR.recede, phase: phaseOf(0) },
+    { grammar: 'tree-pine', tunables: 'wood', x: 88, baseY: FAR.ground - 1, recede: FAR.recede, phase: phaseOf(1) },
+    { grammar: 'tree-tall', tunables: 'wood', x: 152, baseY: FAR.ground + 2, recede: FAR.recede, phase: phaseOf(2) },
+    { grammar: 'tree-airy', tunables: 'wood', x: 222, baseY: FAR.ground, recede: FAR.recede, phase: phaseOf(3) },
+    { grammar: 'tree-birch', tunables: 'wood', x: 292, baseY: FAR.ground + 3, recede: FAR.recede, phase: phaseOf(4) },
 
     // **Mid: the middle of the wood.** Where the crowns start to read as separate masses.
-    { grammar: 'tree-crown', tunables: 'wood', x: 4, footY: MID.ground - 2, recede: MID.recede, phase: phaseOf(5) },
-    { grammar: 'tree-elm', tunables: 'wood', x: 70, footY: MID.ground + 1, recede: MID.recede, phase: phaseOf(6) },
-    { grammar: 'tree-snag', tunables: 'wood', x: 138, footY: MID.ground - 1, recede: MID.recede, phase: phaseOf(7) },
-    { grammar: 'tree-maple', tunables: 'wood', x: 208, footY: MID.ground + 3, recede: MID.recede, phase: phaseOf(8) },
-    { grammar: 'tree-sapling', tunables: 'wood', x: 268, footY: MID.ground + 4, recede: MID.recede, phase: phaseOf(9) },
+    { grammar: 'tree-crown', tunables: 'wood', x: 4, baseY: MID.ground - 2, recede: MID.recede, phase: phaseOf(5) },
+    { grammar: 'tree-elm', tunables: 'wood', x: 70, baseY: MID.ground + 1, recede: MID.recede, phase: phaseOf(6) },
+    { grammar: 'tree-snag', tunables: 'wood', x: 138, baseY: MID.ground - 1, recede: MID.recede, phase: phaseOf(7) },
+    { grammar: 'tree-maple', tunables: 'wood', x: 208, baseY: MID.ground + 3, recede: MID.recede, phase: phaseOf(8) },
+    { grammar: 'tree-sapling', tunables: 'wood', x: 268, baseY: MID.ground + 4, recede: MID.recede, phase: phaseOf(9) },
 
     // **Near: the trunks.** Full strength, standing lowest, and chosen for girth rather than
     // for height — the foreground of a forest is bark, not canopy.
-    { grammar: 'tree-broad', tunables: 'wood', x: 34, footY: NEAR.ground + 3, recede: NEAR.recede, phase: phaseOf(10) },
-    { grammar: 'tree-oak', tunables: 'wood', x: 146, footY: NEAR.ground - 2, recede: NEAR.recede, phase: phaseOf(11) },
-    { grammar: 'tree-willow', tunables: 'wood', x: 258, footY: NEAR.ground + 1, recede: NEAR.recede, phase: phaseOf(12) },
-    { grammar: 'tree-bush', tunables: 'wood', x: 210, footY: NEAR.ground + 8, recede: NEAR.recede, phase: phaseOf(13) },
+    { grammar: 'tree-broad', tunables: 'wood', x: 34, baseY: NEAR.ground + 3, recede: NEAR.recede, phase: phaseOf(10) },
+    { grammar: 'tree-oak', tunables: 'wood', x: 146, baseY: NEAR.ground - 2, recede: NEAR.recede, phase: phaseOf(11) },
+    { grammar: 'tree-willow', tunables: 'wood', x: 258, baseY: NEAR.ground + 1, recede: NEAR.recede, phase: phaseOf(12) },
+    { grammar: 'tree-bush', tunables: 'wood', x: 210, baseY: NEAR.ground + 8, recede: NEAR.recede, phase: phaseOf(13) },
 
-    // The gorilla, walking the floor of the wood. Placed for now; his hands take it next.
-    { grammar: 'gorilla', tunables: 'gorilla', x: 96, footY: NEAR.ground + 2 },
+    // **The gorilla, and he is his now.** Left and right only, which is what he asked for.
+    //
+    // He walks in front of the near trunks and behind the bush, because the paint order is
+    // the one the scene already had — haze, then the row he stands on. No case was added for
+    // the actor, which is the test of whether the depth rule was the right one.
+    {
+      grammar: 'gorilla', tunables: 'gorilla', x: 96, footY: NEAR.ground + 2,
+      // 46 px/s. A stride is 8 frames at 90 ms, so he covers about 33 px per cycle — close to
+      // his own body length, which is what stops a walk from looking like a skate.
+      control: { speed: 46, minX: 14, maxX: 306, idleFrame: 0 },
+    },
   ],
 }
