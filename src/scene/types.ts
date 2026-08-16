@@ -386,6 +386,13 @@ export type Runner = {
   /** Upward speed the first press buys, and the second. */
   readonly jump: number
   readonly flip: number
+  /**
+   * **How far the body travels in one stride cycle, in scene pixels.** The run animation
+   * advances with distance over this, so the legs and the ground always agree however fast the
+   * world is moving. It was a hand-picked divisor and the cycle then hit **9.9 strides a second**
+   * at the speed cap — *"parece que ela está correndo em supervelocidade"*.
+   */
+  readonly strideLen: number
   /** Obstacle grammars. The hash picks one per slot. */
   readonly stones: readonly { readonly grammar: string; readonly tunables: string }[]
   /** Base distance between obstacles, and how much of that the hash may add. */

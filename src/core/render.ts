@@ -42,9 +42,17 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
    * would find nothing to lie on. Within each group, declaration order is preserved, so a
    * grammar with no markings paints in exactly the sequence it always did.
    */
+  /**
+   * **Solids, then cuts, then markings**, and each pass depends on the one before it. A cut has
+   * to find a solid to remove from; a marking has to find a surface to lie on, and a marking
+   * inside a hollow is a decal on the inside of a skull, which is right.
+   */
+  const pass = (keep: (p: (typeof grammar.parts)[number]) => boolean) =>
+    grammar.parts.map((p, i) => [p, i] as const).filter(([p]) => keep(p))
   const order = [
-    ...grammar.parts.map((p, i) => [p, i] as const).filter(([p]) => p.marking !== true),
-    ...grammar.parts.map((p, i) => [p, i] as const).filter(([p]) => p.marking === true),
+    ...pass((p) => p.marking !== true && p.cut !== true),
+    ...pass((p) => p.cut === true),
+    ...pass((p) => p.marking === true && p.cut !== true),
   ]
   for (const [part, i] of order) {
     const ramp = grammar.palette.ramps.find((r) => r.material === part.material)
@@ -68,7 +76,7 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     if (part.marking === true && (part.z ?? 0) > 0) continue
     paintPart(
       painter, part.shape, xf, ramp.indices, params.light, params.fill, i, rng,
-      params.texture.speckle, part.shift ?? 0, part.marking === true,
+      params.texture.speckle, part.shift ?? 0, part.marking === true, part.cut === true,
     )
   }
 

@@ -229,6 +229,45 @@ export type Part = {
    * byte-identical. portable — the solid/surface distinction outlives this project.
    */
   readonly weld?: boolean
+  /**
+   * **A hole. The first primitive here that REMOVES instead of adding.**
+   *
+   * His reading of batch 3, 16/08: *"isso não é uma caveira. Nem de longe lembra uma."* And the
+   * cause was not the palette, the part count or the resolution.
+   *
+   * **A skull is read by its holes** — the sockets, the nasal cavity, the gap between teeth.
+   * Every primitive in this vocabulary is a *solid* and a body is their **union**, so the
+   * grammar could add mass and could not remove any. What I drew as an eye socket was a
+   * `marking`: a dark patch painted on a white ball, not a cavity in a bone. It read as a helmet
+   * with two lights in it, which is exactly what it was.
+   *
+   * **This is run 9's finding in a second shape.** A tree was not hard, it was *inexpressible*,
+   * because every primitive was convex — and that produced the lobed primitive. A skull is not
+   * hard either. It was inexpressible while the grammar only added.
+   *
+   * ## What a cut does, and the declared approximation
+   *
+   * Where a cut covers a surface that is already painted, it writes the **darkest tone of its
+   * material** and pushes the depth buffer back to its own far side. So the pixel stops being
+   * the outside of the skull and becomes the inside of a hollow, the outer outline still wraps
+   * the body rather than the hole, and the inner outline traces the rim — which is the bone edge
+   * around a socket.
+   *
+   * **Declared: it paints a flat floor rather than the true inner surface.** A real CSG
+   * subtraction would keep marching the ray to where it leaves the cut and re-enters the solid,
+   * and light *that*. For an ellipsoid and a capsule that is reachable — the sampler already
+   * computes the near surface and the far one is the same square root with the other sign — and
+   * it is not built, because at the scale a socket is actually drawn (three pixels across) a lit
+   * inner wall and a flat dark floor are the same picture.
+   *
+   * **A cut never extends a silhouette and never creates one.** It paints only where a solid
+   * already is, exactly as a marking does, so a cut hanging off the edge of a body removes
+   * nothing and adds nothing.
+   *
+   * Defaults to false: every part authored before this renders byte-identical. portable — the
+   * solid/void distinction is older than pixel art and every modelling vocabulary needs it.
+   */
+  readonly cut?: boolean
 }
 
 /** A named instant of the cycle. The gait is a set of named phases, never a bare sine. */

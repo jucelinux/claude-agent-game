@@ -119,7 +119,16 @@ export const cryptScene: Scene = {
      * these two numbers rather than the other way round.
      */
     jump: 137,
-    flip: 110,
+    /**
+     * **150, and it was 110.** His reading: *"a projeção do pulo duplo deveria garantir mais
+     * altura, concorda?"* — and yes. At 110 the second press bought 14 px on top of 22, which is
+     * less than half a body: a player pressed twice and could not see what the second press had
+     * done. At 150 it buys 26 and the apex reaches **48 px**, which is a body and a half.
+     */
+    flip: 150,
+    // 41 px: a sprinting figure covers about 1.2 of its own height per stride, and he is 34.
+    // That gives 2.6 strides a second at the starting speed and 4.3 at the cap.
+    strideLen: 41,
     stones: [
       { grammar: 'tomb-broken', tunables: 'crypt' },
       { grammar: 'tomb-slab', tunables: 'crypt' },

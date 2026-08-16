@@ -57,6 +57,12 @@ export function paintPart(
   shift = 0,
   /** A marking paints only where a solid already claimed the pixel. It adds no silhouette. */
   clipToBody = false,
+  /**
+   * **A cut removes instead of adding.** Where it covers a painted surface it writes the darkest
+   * tone of its ramp and pushes the depth back to its own far side, so the pixel becomes the
+   * inside of a hollow. See `Part.cut`.
+   */
+  carve = false,
 ): void {
   const levels = ramp.length
   if (levels === 0) throw new Error('a ramp with no tones cannot paint')
@@ -134,6 +140,18 @@ export function paintPart(
       if (!hit.inside) continue
 
       const at = y * cw + x
+      if (carve) {
+        // A hole in nothing is nothing: a cut paints only where a solid already is, so it can
+        // neither extend a silhouette nor invent one.
+        if ((painter.owners[at] as number) < 0) continue
+        const front = xf.z + xf.sz * hit.dz
+        if (front > (depth[at] as number)) continue
+        data[at] = ramp[0] as number
+        painter.owners[at] = partId
+        // The far side of the cut, so a solid deeper than the hollow can still win the pixel.
+        depth[at] = xf.z + xf.sz * -hit.dz
+        continue
+      }
       // **A marking has no body of its own.** It recolours a surface, so it may only write
       // where a solid already claimed the pixel — and it therefore adds nothing to the
       // silhouette. Without this the saddle stood three pixels proud of the chest it lies on

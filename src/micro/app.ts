@@ -540,7 +540,7 @@ function mount(el, S) {
         // Each shelf is offset into the sway cycle by its own band and slot, so a screen of
         // fifteen of them never leans as one object. Same rule as the three clouds.
         var f = Math.floor(t * 1000 / L.ms + (k * 0.37 + s * 1.9)) % L.n
-        stampWrapped(sheets[li], 0, f * L.h, L.w, L.h, b.x + L.ox, b.y + L.oy - K.cam)
+        stampWrapped(sheets[li], 0, f * L.h, L.w, L.h, b.x + L.ox, rowOf({ anchor: 'origin', y: b.y }, L) - K.cam)
       }
     }
 
@@ -557,7 +557,7 @@ function mount(el, S) {
     drawn.push(K.at)
     stampWrapped(
       sheets[ci], 0, cf * CL.h, CL.w, CL.h,
-      K.x + CL.ox, (D.anchor === 'foot' ? K.y + CL.oy - CL.foot : K.y + CL.oy) - K.cam,
+      K.x + CL.ox, rowOf({ anchor: D.anchor, y: K.y }, CL) - K.cam,
     )
 
     if (K.over) {
@@ -719,7 +719,8 @@ function mount(el, S) {
       var li = N.stones[st.v], L = S.layers[li]
       var sx = N.holdX + (st.x - R.dist) + L.ox
       if (sx > S.w + 40 || sx < -40) continue
-      ox.drawImage(sheets[li], 0, 0, L.w, L.h, Math.round(sx), Math.round(N.groundRow + L.oy), L.w, L.h)
+      ox.drawImage(sheets[li], 0, 0, L.w, L.h, Math.round(sx),
+        Math.round(rowOf({ anchor: 'origin', y: N.groundRow }, L)), L.w, L.h)
     }
 
     /**
@@ -730,7 +731,7 @@ function mount(el, S) {
     var rx = N.fromX + (N.holdX - 14 - N.fromX) * R.menace
     var rf = Math.floor(t * 1000 / D2.ms) % D2.n
     ox.drawImage(sheets[N.reaper.layer], 0, rf * D2.h, D2.w, D2.h,
-      Math.round(rx + D2.ox), Math.round(N.groundRow + D2.oy), D2.w, D2.h)
+      Math.round(rx + D2.ox), Math.round(rowOf({ anchor: 'origin', y: N.groundRow }, D2)), D2.w, D2.h)
 
     // The runner. The state names a clip; the clip names a layer.
     var D = S.placed[R.at]
@@ -743,11 +744,34 @@ function mount(el, S) {
      * false is for: the pose at the end of a somersault is a whole turn from where it started,
      * so a clip that looped would put the body back where it began halfway through the jump.
      */
+    /**
+     * **The stride advances with DISTANCE over a stride length, not over a magic divisor.**
+     *
+     * It was 'dist / 2.2', which at the speed cap is 9.9 stride cycles a second — *"parece que
+     * ela está correndo em supervelocidade"*. The divisor was a number I picked, so the animation
+     * accelerated without bound while the body did not.
+     *
+     * 'strideLen' is derived: a sprinting figure covers about 1.2 of its own height per stride,
+     * and this one is 34 px. So the cycle is 2.6 strides a second at the starting speed and 4.3
+     * at the cap, which is what a sprinter actually does.
+     */
     var rfr = R.state === 'run'
-      ? Math.floor(R.dist / 2.2) % RL.n
+      ? Math.floor(R.dist / (N.strideLen / RL.n)) % RL.n
       : Math.min(RL.n - 1, Math.floor(R.clip * 1000 / RL.ms))
+    /**
+     * **One placement rule, and this path used to compute its own.**
+     *
+     * He asked for this at the engine level after the forest: a subject anchored by its feet was
+     * drawn by its origin, so it sat below the things it should stand beside. It was fixed in
+     * 'rowOf' and then a THIRD draw path reimplemented the arithmetic without it — his feet
+     * landed on row 127 with the ground at 112, which is why a gravestone appeared at his waist.
+     *
+     * A rule copied into three places is three rules. Every path calls this one now, and a lock
+     * greps the source to keep it that way.
+     */
+    var stand = { anchor: D.anchor, y: N.groundRow }
     ox.drawImage(sheets[ri], 0, rfr * RL.h, RL.w, RL.h,
-      Math.round(N.holdX + RL.ox), Math.round(N.groundRow + RL.oy - R.y), RL.w, RL.h)
+      Math.round(N.holdX + RL.ox), Math.round(rowOf(stand, RL) - R.y), RL.w, RL.h)
 
     if (R.over) {
       ox.globalAlpha = 0.5

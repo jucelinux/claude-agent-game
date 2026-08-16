@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import type { Grammar, Part } from '../src/core/types.ts'
 import { execute } from '../src/io/load.ts'
@@ -125,5 +126,82 @@ describe('a weld says two shapes are one surface', () => {
         ).toString('base64'),
       )
     }
+  })
+})
+
+/**
+ * **`Part.cut`: the first primitive here that removes.**
+ *
+ * His verdict on batch 3: *"isso não é uma caveira. Nem de longe lembra uma."* The cause was that
+ * every primitive was a solid and a body was their union, so an eye socket could only ever be a
+ * marking — paint on a ball rather than a cavity in a bone.
+ */
+describe('a cut removes instead of adding', () => {
+  /** The same body with the cuts REMOVED, not converted: a cut turned into a solid is a dark
+   *  blob, which is a different picture rather than the absence of one. */
+  const bare = (g: Grammar): Grammar => ({ ...g, parts: g.parts.filter((p) => p.cut !== true) })
+
+  /** It fires: without the cuts the skull is a solid mass again. */
+  it('fires: the sockets are holes, and stripping them fills the skull back in', () => {
+    const g = grammarByName('bones-run')
+    const params = loadParams('bones')
+    // Pixels the skull owns that STOPPED being bone once the holes were cut. That is what a
+    // hole is: surface that is no longer surface.
+    const bone = new Set(g.palette.ramps.find((r) => r.material === 'bone')!.indices)
+    const withCuts = sprite(g, params, 1, 0).buf.data
+    const without = sprite(bare(g), params, 1, 0).buf.data
+    let removed = 0
+    for (let i = 0; i < withCuts.length; i++) {
+      if (bone.has(without[i] as number) && !bone.has(withCuts[i] as number)) removed++
+    }
+    expect(removed, 'the cuts removed no surface at all').toBeGreaterThan(8)
+  })
+
+  /**
+   * **And it stays quiet: a cut cannot invent a silhouette.** It paints only where a solid
+   * already is, so the body's painted area may shrink or hold and may never grow.
+   */
+  it('stays quiet: no cut ever adds a pixel to a body', () => {
+    for (const name of ['bones-run', 'bones-leap', 'bones-flip']) {
+      const g = grammarByName(name)
+      const params = loadParams(name === 'bones-run' ? 'bones' : name)
+      const ink = (gg: Grammar): number => {
+        const { data } = sprite(gg, params, 1, 0).buf
+        return data.reduce<number>((a, v) => a + (v === 0 ? 0 : 1), 0)
+      }
+      expect(ink(g), name).toBeLessThanOrEqual(ink(bare(g)))
+    }
+  })
+
+  /** Every subject that predates the field renders byte-identical. */
+  it('the null case is the back catalogue', () => {
+    for (const { grammar: g } of PAIRS) {
+      if (g.startsWith('bones-')) continue
+      expect(grammarByName(g).parts.every((p) => p.cut === undefined), `${g} gained a cut`).toBe(true)
+    }
+  })
+})
+
+/**
+ * **One placement rule, and he asked for this at the engine level after the forest.**
+ *
+ * A subject anchored by its feet was drawn by its origin, so it sat below the things it should
+ * stand beside. It was fixed in `rowOf` — and then a third draw path reimplemented the same
+ * arithmetic without it, and his gravestones appeared at the runner's waist.
+ *
+ * **A rule copied into three places is three rules.** This greps the runtime for the arithmetic
+ * itself, because a behavioural test only catches the path that happens to be exercised.
+ */
+describe('one placement rule', () => {
+  it('no draw path computes a subject row from a layer offset itself', () => {
+    const src = readFileSync(new URL('../src/micro/app.ts', import.meta.url), 'utf8')
+    const runtime = src.slice(src.indexOf('const RUNTIME = `'), src.lastIndexOf('`'))
+    const body = runtime.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
+    // `rowOf` is the one place allowed to add a layer's own oy to a contact row.
+    const offenders = body
+      .split('\n')
+      .filter((l) => /\+\s*\w+\.oy\b/.test(l) && !/function rowOf/.test(l))
+      .filter((l) => !/D\.y \+ L\.oy/.test(l))
+    expect(offenders, 'a draw path is computing its own placement again').toEqual([])
   })
 })
