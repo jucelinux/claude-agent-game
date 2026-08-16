@@ -13,12 +13,42 @@ open (`TASTE-LOOP.md` §3b).
 He names an object and an animation in one sentence. I deliver with no back-and-forth. He
 answers in one word, plus one word of *why* on a miss. Full definition in `CLAUDE.md`.
 
-**No batch given yet.** The table below is the running record; it is written in the same
-turn a reading arrives.
+**Batch 1 given 16/08.** His sentence, verbatim:
+
+> *"Eu quero que você crie para mim um astronauta. Quero ser capaz de pular e andar em todas
+> as direções com ele. O ambiente: o solo lunar, similar a vista da lua com a terra ao fundo."*
 
 | batch | commissions | shipped | hit rate | cycles per shipped piece |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| 1 | 1 | *awaiting his word* | — | — |
+
+### My prediction, recorded before he looks
+
+**I predict a MISS**, and the reason is one specific half of the sentence.
+
+*"andar em todas as direções"* lands squarely on the gap named on 15/08 and never built:
+**facing — one direction is rendered.** Everything else here is reachable with what exists.
+A suited body is bulky primitives; lunar ground is a plane and a field; the Earth is a
+sphere with a terminator; a jump is gravity in the runtime, which is twenty lines.
+
+Eight directions is not. The plan is to **yaw the body** — rotate every bone offset and every
+solid about the vertical axis, which the 2.5D vocabulary can express exactly for a capsule
+and near enough for an ellipsoid. That produces a silhouette from any angle from one authored
+body, and I believe that part works.
+
+**What I expect to fail is the WALK, not the body.** A stride is authored as limb rotation in
+the *screen plane*. Yawed to face the camera, that same rotation swings the legs sideways
+instead of forward, and the fix — decomposing each swing into `angle × cos(yaw)` plus
+`z × sin(yaw)` — is an approximation I have never tested. A front-facing walk that reads as a
+side walk seen head-on is the specific way I expect this to come back.
+
+**Confidence: 60/40 toward a miss.** The one thing running in its favour is the subject: a
+pressure suit is close to rotationally symmetric, so front and side silhouettes differ less
+than they would on any other body. That is luck rather than design, and it should be counted
+as luck when the verdict arrives.
+
+**If it misses, the capability it specifies is:** *a gait that survives being turned* — which
+is a bigger and more useful thing than eight sprites of an astronaut.
 
 **Neither column kills anything** — his correction, 15/08. They are evidence for a judgment
 he holds himself and will not reduce to a metric. **A miss is a specification, not a
