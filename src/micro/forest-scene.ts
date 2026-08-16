@@ -57,21 +57,22 @@ export const forestScene: Scene = {
     { grammar: 'cloud-a', tunables: 'sky', x: 190, y: 18, drift: 72 },
     { grammar: 'cloud-b', tunables: 'sky', x: 268, y: 34, drift: 120 },
 
-    // The wood, back row first: shorter trees standing a little further up the ground.
-    { grammar: 'tree-d', tunables: 'wood', x: 26, footY: 122 },
-    { grammar: 'tree-g', tunables: 'wood', x: 96, footY: 122 },
-    { grammar: 'tree-i', tunables: 'wood', x: 168, footY: 123 },
-    { grammar: 'tree-b', tunables: 'wood', x: 246, footY: 122 },
+    // **The wood, and the placement no longer cancels the heights.** His reading of the
+    // first pass: *"na forma como vejo todas elas estão no mesmo nível de altura"*. They
+    // were — the tall trees had been put nearest, which lowered their tops back into line
+    // with the short ones. Now height decides where a tree stands: the tallest go furthest
+    // back and the shortest come forward, so the canopy line rises and falls.
+    { grammar: 'tree-e', tunables: 'wood', x: 44, footY: 120 },
+    { grammar: 'tree-b', tunables: 'wood', x: 152, footY: 120 },
+    { grammar: 'tree-a', tunables: 'wood', x: 236, footY: 121 },
 
-    // Middle.
-    { grammar: 'tree-f', tunables: 'wood', x: 58, footY: 129 },
-    { grammar: 'tree-h', tunables: 'wood', x: 138, footY: 130 },
-    { grammar: 'tree-c', tunables: 'wood', x: 214, footY: 129 },
+    { grammar: 'tree-i', tunables: 'wood', x: 96, footY: 127 },
+    { grammar: 'tree-c', tunables: 'wood', x: 196, footY: 128 },
+    { grammar: 'tree-f', tunables: 'wood', x: 268, footY: 127 },
 
-    // Front: the tallest, nearest the viewer, and they overlap the middle row on purpose —
-    // a wood you can see through in one glance is not dense.
-    { grammar: 'tree-a', tunables: 'wood', x: 16, footY: 140 },
-    { grammar: 'tree-e', tunables: 'wood', x: 188, footY: 141 },
+    { grammar: 'tree-h', tunables: 'wood', x: 20, footY: 134 },
+    { grammar: 'tree-d', tunables: 'wood', x: 128, footY: 141 },
+    { grammar: 'tree-g', tunables: 'wood', x: 224, footY: 142 },
 
     // The gorilla, walking the floor of the wood. Placed for now; his hands take it next.
     { grammar: 'gorilla', tunables: 'gorilla', x: 118, footY: 138 },

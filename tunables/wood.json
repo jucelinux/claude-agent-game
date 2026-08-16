@@ -1,9 +1,9 @@
 {
   "canvas": {
-    "w": 80,
-    "h": 80,
-    "originX": 40,
-    "originY": 68
+    "w": 104,
+    "h": 104,
+    "originX": 52,
+    "originY": 88
   },
   "tones": {
     "perMaterial": 5
@@ -39,10 +39,10 @@
     "scale": 3
   },
   "_anchors": {
-    "canvas.w": "80, wider than the project cell. A wood is authored per tree and composited, and the widest tree here spreads 22 units of branch on each side of its trunk. The scene decides the final size; this cell only has to hold one tree with room for its outline.",
-    "canvas.h": "square with canvas.w. The tallest tree in the wood is 34 units of trunk plus its crown.",
-    "canvas.originX": "canvas.w / 2. A tree is bilaterally symmetric about its trunk.",
-    "canvas.originY": "canvas.h - 12, the base of the trunk. Derived rather than guessed: the widest tree has a girth of 6.5 and its trunk capsule starts 2 units below the origin, so the mass reaches 8.5 below it and the outline ring needs one more. At 74 every one of the nine clipped the bottom edge and the outline lock said so.",
+    "canvas.w": "104, derived from the wood rather than guessed: the widest form is the umbrella at 78 px across, and a cell has to hold it with the outline ring. At 80 four of the nine clipped and the outline lock named all four.",
+    "canvas.h": "square with canvas.w. The tallest form is the conifer at 75 px.",
+    "canvas.originX": "canvas.w / 2",
+    "canvas.originY": "canvas.h - 14, the base of the trunk, with room below for the root flare of the thickest trunk and the ring.",
     "tones.perMaterial": "5. One more than the control and three fewer than the incumbent. TASTE.md 1b names Chrono as the bar for silhouette and value separation, and separation is what a short ramp over a wide value range buys - the same eight tones spread over a narrow dark range is what it does not.",
     "frames.walk": "16, and every phase lands on a whole frame at sixteenths (3/16, 5/16, 8/16, 11/16, 13/16). Sixteen rather than twelve because the wind carries three staggered leaf falls, and each needs enough frames to read as a fall rather than as a jump cut.",
     "light.x": "unit vector from the upper left, held identical across all four probe samples",
