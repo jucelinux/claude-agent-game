@@ -110,7 +110,12 @@ export type StageRunner = Omit<Runner, 'stones' | 'reaper' | 'drift'> & {
 
 /** The descent, with every grammar name already resolved to a layer index. */
 export type StageDescent = Omit<Descent, 'stones' | 'ridge' | 'clouds'> & {
-  readonly stones: readonly number[]
+  /**
+   * **Per variant, one layer per scale band** — `stones[v][s]` matches `scales[s]`. Each band
+   * is a full render at its own `body.scale`, so a distant snowman is a small crisp drawing
+   * and never a resampled big one. Collision heights read from band 0, the full size.
+   */
+  readonly stones: readonly (readonly number[])[]
   readonly ridge: (Omit<NonNullable<Descent['ridge']>, 'puffs'> & { readonly puffs: readonly number[] }) | null
   readonly clouds: (Omit<NonNullable<Descent['clouds']>, 'grammar' | 'tunables'> & { readonly layer: number }) | null
 }
@@ -382,7 +387,15 @@ export function toStage(scene: Scene): Stage {
     const { stones, ridge, clouds, ...rest } = scene.descent
     descent = {
       ...rest,
-      stones: stones.map((o) => build({ grammar: o.grammar, tunables: o.tunables }, 0, false).layer),
+      stones: stones.map((o) =>
+        rest.scales.map((s) =>
+          build({
+            grammar: o.grammar,
+            tunables: s <= (rest.farBelow ?? 0) && rest.farTunables !== undefined ? rest.farTunables : o.tunables,
+            ...(s === 1 ? {} : { scale: s }),
+          }, 0, false).layer,
+        ),
+      ),
       ridge:
         ridge === undefined
           ? null

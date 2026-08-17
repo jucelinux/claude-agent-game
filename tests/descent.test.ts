@@ -29,7 +29,8 @@ const D = stage.descent!
 const page = gamePage({ id: 'descent', title: 'The descent', blurb: '', date: '', meta: [], stage })
 
 /** Heights above the snow line, read from each obstacle's own art. */
-const heights = D.stones.map((i) => -stage.layers[i]!.oy)
+// Band 0 is the full-size render; collision heights read from it alone.
+const heights = D.stones.map((v) => -stage.layers[v[0]!]!.oy)
 
 // ---------------------------------------------------------------------------
 // The instrument: true rigid composition vs the engine's scalar accumulation.
@@ -236,35 +237,43 @@ describe('the mountain', () => {
     expect(high.length, `everything jumpable: heights ${heights.join()}`).toBeGreaterThan(0)
   })
 
-  it('a lane change costs a third of the warning the slope gives', () => {
-    const forward = stage.h - D.holdY
-    const warning = forward / D.maxSpeed
+  it('a lane change costs a fraction of the warning the horizon gives', () => {
+    const warning = D.range / D.maxSpeed
     const laneChange = (D.stoneHalfW + D.bodyHalfW) / D.steer
-    expect(warning / laneChange).toBeGreaterThan(2)
+    expect(warning / laneChange).toBeGreaterThan(4)
   })
 
-  it('every slot whose crop touches the screen is inside the drawn window — the batch-5 property, vertical', () => {
-    const slopeAt = (k: number): { d: number; x: number; v: number } => {
+  it('every slot inside the perspective window is drawn — the batch-5 property, on the new curve', () => {
+    const slopeAt = (k: number): { d: number } => {
       let a = ((k + D.seed) * 2654435761) >>> 0
       a = (a ^ (a >>> 13)) >>> 0
-      let b = (a * 1597334677) >>> 0
-      b = (b ^ (b >>> 15)) >>> 0
-      return { d: D.leadIn + k * D.spacingD + (a % D.jitterD), x: D.minX + (b % (D.maxX - D.minX)), v: (b >>> 9) % D.stones.length }
+      return { d: D.leadIn + k * D.spacingD + (a % D.jitterD) }
     }
-    for (let dist = 0; dist < 9000; dist += 41) {
-      const kFirst = Math.max(0, Math.floor((dist - D.holdY - 60 - D.jitterD - D.leadIn) / D.spacingD))
-      const kLast = Math.floor((dist + (stage.h - D.holdY) + 60 - D.leadIn) / D.spacingD) + 1
+    const behind = D.zNear * 1.6
+    for (let dist = 0; dist < 12000; dist += 41) {
+      const kFirst = Math.max(0, Math.floor((dist - behind - D.jitterD - D.leadIn) / D.spacingD))
+      const kLast = Math.floor((dist + D.range - D.leadIn) / D.spacingD) + 1
       const kAround = Math.round(dist / D.spacingD)
-      for (let k = Math.max(0, kAround - 8); k <= kAround + 8; k++) {
-        const sl = slopeAt(k)
-        const L = stage.layers[D.stones[sl.v]!]!
-        const sy = D.holdY + (sl.d - dist)
-        const visible = sy + L.oy < stage.h && sy + L.oy + L.h > 0
-        if (!visible) continue
-        expect(k, `slot ${k} visible at dist ${dist} but outside [${kFirst}, ${kLast}]`).toBeGreaterThanOrEqual(kFirst)
+      for (let k = Math.max(0, kAround - 12); k <= kAround + 12; k++) {
+        const A = slopeAt(k).d - dist
+        // The runtime culls on the same ahead-window it walks, so the property is exact:
+        // anything the perspective can place is a slot the walk visits.
+        const inView = A <= D.range && A >= -behind
+        if (!inView) continue
+        expect(k, `slot ${k} in view at dist ${dist} but outside [${kFirst}, ${kLast}]`).toBeGreaterThanOrEqual(kFirst)
         expect(k).toBeLessThanOrEqual(kLast)
       }
     }
+  })
+
+  it('the perspective is monotone and calibrated at both ends', () => {
+    // factor 1 at the rider's row, shrinking toward the spawn — his sentence as arithmetic.
+    const persp = (A: number): number => D.zNear / Math.max(D.zNear * 0.28, A + D.zNear)
+    expect(persp(0)).toBeCloseTo(1, 5)
+    expect(persp(D.range)).toBeLessThan(0.2)
+    for (let A = 0; A < D.range; A += 40) expect(persp(A + 40)).toBeLessThan(persp(A))
+    // And every band the snap can pick is a real render: one layer per scale per variant.
+    for (const variant of D.stones) expect(variant.length).toBe(D.scales.length)
   })
 })
 

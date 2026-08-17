@@ -132,9 +132,9 @@ export function budgetOf(stage: Stage, gzipBytes = 0): Budget {
    * per visible slot, the shadow, the rider, and the snowfall is already in rainCalls.
    */
   const dd = stage.descent
-  const slopeOnScreen = dd === null ? 0 : Math.ceil((stage.h + 120) / dd.spacingD) + 2
-  const descCalls = dd === null ? 0 : 1 + slopeOnScreen + 2
-  const descPixels = dd === null ? 0 : screen + slopeOnScreen * sprites
+  const slopeOnScreen = dd === null ? 0 : Math.ceil((dd.range + dd.zNear * 1.6) / dd.spacingD) + 2
+  const descCalls = dd === null ? 0 : 1 + slopeOnScreen + 2 + (dd.dust?.count ?? 0)
+  const descPixels = dd === null ? 0 : screen + slopeOnScreen * sprites + (dd.dust?.count ?? 0) * 4
 
   return {
     perFrame: {

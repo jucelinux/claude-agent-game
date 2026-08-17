@@ -4,7 +4,8 @@
  * > *"Eu me recordo da sugestão desse microgame ter o objetivo de validar a relação da câmera no
  * > jogo, certo?"* — correct, and batch 6 had resolved that away silently. This game is the
  * > camera: the first new view since the moon, looking down the slope from high behind the
- * > rider. New terrain enters at the bottom edge and rises as the camera advances.
+ * > rider — who travels INTO the screen, so terrain is born small at the horizon and grows
+ * > down the perspective curve toward him (the batch-7 correction, his words compiled).
  *
  * ## What is under test
  *
@@ -85,8 +86,26 @@ export const descentScene: Scene = {
     /** The horizon: sky and ridge above, piste below — the scene's own `ground`, restated
      * here because the descent path owns its backdrop. */
     horizonRow: 34,
-    /** Held above the middle: the run is downhill, so the forward view is BELOW the rider. */
-    holdY: 56,
+    /**
+     * **Held near the BOTTOM — the batch-7 correction.** The rider travels INTO the screen,
+     * so the forward view is everything between him and the horizon: obstacles are born small
+     * at the vanishing point and grow down the perspective curve toward his row.
+     */
+    holdY: 118,
+    /**
+     * **The divide's three numbers.** A thing A ahead draws at zNear/(A+zNear): half size at
+     * 130 px ahead, 0.13 at the 880 px spawn, snapped to a 0.2 floor — the look found the 0.15 band
+     * fragmenting into dots (a 1 px tier is not a tree), so the smallest render is 8 px and a
+     * thing is born whole. Seven crisp renders per obstacle, never a resample.
+     */
+    zNear: 130,
+    range: 880,
+    scales: [1, 0.78, 0.6, 0.45, 0.33, 0.26, 0.2],
+    /** Bands at 0.45 and under drop the drawn line — the look's finding, through the grammar. */
+    farTunables: 'piste-far',
+    farBelow: 0.45,
+    /** Flecks cycling down the perspective curve: the treadmill between obstacles. */
+    dust: { count: 42, colors: [[204, 220, 238], [178, 196, 222]], seed: 29 },
     minX: 16,
     maxX: 224,
     /** Fast enough to carve between lanes, slow enough that steering is a commitment. */
@@ -113,17 +132,17 @@ export const descentScene: Scene = {
       { grammar: 'piste-rock', tunables: 'piste' },
     ],
     /**
-     * **A slot every 64 slope px with 36 of jitter.** At the 190 cap a slot crosses the 94 px
-     * of forward view in 0.49 s; steering out of a lane costs 14 px of x at 92 px/s = 0.16 s.
-     * Three to one is the reaction margin, asserted in the locks.
+     * **A slot every 120 slope px with 70 of jitter** — the whole approach is visible from
+     * birth at the horizon, ~5 s of warning at the cap, so the game's pressure is lane
+     * planning rather than reaction. Asserted in the locks.
      */
     leadIn: 220,
-    spacingD: 64,
-    jitterD: 36,
+    spacingD: 120,
+    jitterD: 70,
     bodyHalfW: 7,
-    bodyHalfD: 5,
+    bodyHalfD: 6,
     stoneHalfW: 7,
-    stoneHalfD: 5,
+    stoneHalfD: 7,
     /** The rider's own height, as every score here. */
     pxPerMetre: 32,
     overText: 'you wiped out at ',

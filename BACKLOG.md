@@ -13,18 +13,24 @@ branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 | 4 | skate + kickflip (roll + pixel-art experiment) | **ships** | — (spec carried: environments are basic) | 1 cycle, 1 reading |
 | 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
 | 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | *open* | — | 1 cycle so far |
-| 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | *open* | — | 1 cycle so far |
+| 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | **miss → 2nd cycle** | **perspective: scale over distance, spawn at the vanishing point, the treadmill** | 2 cycles, 1 reading so far |
 
-**Batch 7 shipped 17/08 as `/descent` ("The descent"), one model cycle.** The camera exists —
-`Scene.descent`, the fourth game shape: terrain rises from the bottom edge, ridge and clouds
-baked on the horizon, the rider seen from high behind with a contact shadow. **And the
-composition has a number:** the carve's worst interleave (arms ±50° under a 21° chest roll under
-a 36° bank) lands the scalar accumulation **0.337 px** from matrix ground truth on a 34 px body;
-the roll-free glide measures exactly zero. The declared "will drift" is downgraded to "drifts by
-a third of a pixel at carve amplitude" — C closes as a measured validation. 522 locks.
+**Batch 7, cycle 1: MISS, his words unsoftened.** *"os obstáculos estão surgindo de trás do
+player… deveriam aparecer em escala, ao fundo, e crescerem conforme se aproximam… tudo parece
+estar parado e os obstáculos parecem estar numa cascata invertida."* The carve he validated; the
+view was inverted end to end. Prediction scored: called ships at 70/30 — wrong, and the 30 named
+the right axis (does the view feel right) with the wrong outcome.
 
-**Prediction (one line, before he looks):** SHIPS at 70/30 — the 30 is whether the new view
-FEELS fair (obstacle pace, lane pressure), the axis no instrument here reads.
+**Cycle 2, same day: the miss compiled.** Obstacles are born small at the horizon and grow down
+a perspective curve (factor zNear/(A+zNear), rows and lanes converging on the vanishing point),
+through **seven discrete scale bands, each its own crisp render** through the ordinary build
+cache — never a stretched sprite. Far bands drop the drawn line (a 1 px ring around a 5 px
+render is a black block — the look's catch); flowing piste dust carries the treadmill between
+obstacles. **What survives from cycle 1:** the composition number — worst drift **0.337 px** at
+carve amplitude against matrix truth, glide exactly zero — and the carve itself. 523 locks.
+
+**Prediction (one line, before he looks again):** SHIPS at 60/40 — the 40 is whether the
+band-snap growth reads as smooth approach, the pop-in axis only his eye rates.
 
 **Batch 5 verdict, 17/08, unsoftened — it ships.** *"O barrel roll funcionou muito bem! A
 estética do jogo respeitou o jogo anterior do skate, porém o parallax, as nuvens ao fundo e os
@@ -138,7 +144,7 @@ Every number carries the command that regenerates it and its date.
 | weave surface share (4×4 single-owner) | rider 0.000 · kitten 0.068 · kerb 0.432 | `[weave]` line of `node bin/bench.ts --grammar skate-roll --tunables skate` | 16/08 |
 | yaw collapse threshold | depth/width ≈ 0.45 | `npx vitest run tests/yaw.test.ts` | 16/08 |
 | TS lines, source + locks | 12 700 / 4 600 | `find src bin -name '*.ts' \| xargs wc -l` | 16/08 |
-| locks green | 522 | `npm test` | 17/08, after run 20 |
+| locks green | 523 | `npm test` | 17/08, after run 20 cycle 2 |
 | **the composition drift at carve amplitude** — the number test C exists for | worst **0.337 px** on a 34 px body (arms ±50° under 21° roll under 36° bank); glide exactly 0 | `npx vitest run tests/descent.test.ts` | 17/08 |
 | `/descent` budget | 13 layers, 50 colours, 34 calls/frame of 200, 41k px to decode, 33 KB wire | `node bin/micro.ts --static` | 17/08 |
 | the rodeo: board faces trading under a LEANING root | base 25→**119**→8 px · topsheet 32→0→**81**, half a turn apart, pale first | `node bin/bench.ts --grammar snow-rodeo --tunables snow-rodeo` | 17/08 |

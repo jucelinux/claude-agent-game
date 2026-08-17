@@ -223,7 +223,7 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     id: 'descent',
     title: 'The descent',
     blurb:
-      'Hold left or right to carve — the whole body banks past thirty degrees, inside hand brushing the snow — and space hops. The camera rides high behind you: the horizon is a strip of ridge pines and outlined clouds, and new terrain climbs into view from the bottom of the screen as you drop. Rocks and snowmen pass under the hop; saplings and pines do not, and the difference is only how tall each is drawn. One collision and you wipe out. The snowfall, the checker sky and the crayon line are the same winter as the rodeo — one mountain, two cameras.',
+      'Hold left or right to carve — the whole body banks past thirty degrees, inside hand brushing the snow — and space hops. You ride into the screen: everything ahead is born small at the horizon and grows down the perspective curve toward you, through seven crisp render sizes, converging lanes and flowing snow-dust — his batch-7 reading, compiled. Rocks and snowmen pass under the hop; saplings and pines do not, and the difference is only how tall each is drawn. One collision and you wipe out. The snowfall, the checker sky and the crayon line are the same winter as the rodeo — one mountain, two cameras.',
     date: '2026-08-17',
     keys: '← → carve · space hop · rocks and snowmen duck under the hop, pines never',
     scene: descentScene,

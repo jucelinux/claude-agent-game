@@ -1001,39 +1001,81 @@ function mount(el, S) {
       var sl = slopeAt(k)
       if (Math.abs(sl.d - DS.dist) >= D.stoneHalfD + D.bodyHalfD) continue
       if (Math.abs(sl.x - DS.x) >= D.stoneHalfW + D.bodyHalfW) continue
-      var SL = S.layers[D.stones[sl.v]]
+      // Height from band 0, the full-size render: collision truth never depends on which
+      // scale band happens to be on screen.
+      var SL = S.layers[D.stones[sl.v][0]]
       if (DS.y > 0 && -SL.oy < D.clearance) continue
       DS.over = true
     }
   }
+
+  /**
+   * **The divide, in one function — his batch-7 words compiled.** A thing A slope-pixels
+   * ahead of the rider shrinks by zNear/(A+zNear): factor 1 at the rider's own row, smaller
+   * toward the horizon. Its screen row and its lane converge by the same factor, so the
+   * horizon is a vanishing point rather than a shelf. Behind the rider (A < 0) the factor
+   * grows past 1 and the row runs off the bottom — a passed thing exits past the camera on
+   * the same curve it arrived by.
+   */
+  function persp(A) { return S.descent.zNear / Math.max(S.descent.zNear * 0.28, A + S.descent.zNear) }
+
+  function descentRow(f) { return S.descent.horizonRow + (S.descent.holdY - S.descent.horizonRow) * f }
 
   function drawDescent(t) {
     var D = S.descent
     ox.drawImage(descentBg, 0, 0)
 
     /**
-     * **The slot window maps SCREEN edges through leadIn and the jitter — his batch-5 lesson,
-     * applied at birth instead of learned again.** Screen y = holdY + (slotD - dist); terrain
-     * ahead is BELOW the rider and rises as the camera advances down the slope.
+     * **The piste dust: the treadmill made visible.** Hashed flecks cycling through the view
+     * range on the same perspective curve as everything else — between obstacles, they are
+     * the only thing saying the ground moves. Two tones, bigger and faster near the camera.
      */
-    var kFirst = Math.max(0, Math.floor((DS.dist - D.holdY - 60 - D.jitterD - D.leadIn) / D.spacingD))
-    var kLast = Math.floor((DS.dist + (S.h - D.holdY) + 60 - D.leadIn) / D.spacingD) + 1
+    if (D.dust) {
+      var mid = (D.minX + D.maxX) / 2
+      for (var di2 = 0; di2 < D.dust.count; di2++) {
+        var uh = ((di2 + D.dust.seed) * 2654435761) >>> 0; uh = (uh ^ (uh >>> 13)) >>> 0
+        var uh2 = (uh * 1597334677) >>> 0; uh2 = (uh2 ^ (uh2 >>> 15)) >>> 0
+        var ahead = (((uh % D.range) - DS.dist) % D.range + D.range) % D.range
+        var fd = persp(ahead)
+        var dxw = D.minX + (uh2 % (D.maxX - D.minX))
+        ox.fillStyle = rgb(D.dust.colors[uh2 % D.dust.colors.length])
+        var sz = fd > 0.7 ? 2 : 1
+        ox.fillRect(Math.round(mid + (dxw - mid) * fd) , Math.round(descentRow(fd)), sz, sz)
+      }
+    }
 
-    // Painter's order is slope order: far (up-screen) first, the rider spliced in at his row.
+    /**
+     * **Slots walk far to near, spawning at the horizon** — the batch-7 correction. Visible
+     * ahead-window is [-behind, range]: sd in [dist - behind, dist + range], through leadIn
+     * and the jitter as the batch-5 lesson demands.
+     */
+    var behind = D.zNear * 1.6
+    var kFirst = Math.max(0, Math.floor((DS.dist - behind - D.jitterD - D.leadIn) / D.spacingD))
+    var kLast = Math.floor((DS.dist + D.range - D.leadIn) / D.spacingD) + 1
+
+    // Painter's order: far first, so k DESCENDS (larger sd = further ahead = nearer horizon);
+    // the rider is spliced in when the walk crosses his own row.
     var riderDrawn = false
-    for (var k = kFirst; k <= kLast + 1; k++) {
-      var beyond = k > kLast
+    for (var k = kLast; k >= kFirst - 1; k--) {
+      var beyond = k < kFirst
       var sl = beyond ? null : slopeAt(k)
-      if (!riderDrawn && (beyond || sl.d >= DS.dist)) {
+      if (!riderDrawn && (beyond || sl.d <= DS.dist)) {
         riderDrawn = true
         drawRider(t)
       }
       if (beyond) break
-      var li = D.stones[sl.v], L = S.layers[li]
-      var sy = D.holdY + (sl.d - DS.dist)
-      var sx = sl.x + L.ox
-      // The crop's top through rowOf — the one function allowed to turn a row into a position.
-      var top = rowOf({ anchor: 'origin', y: sy }, L)
+      var A = sl.d - DS.dist
+      if (A > D.range || A < -behind) continue
+      var f = persp(A)
+      // Snap to the nearest rendered band: each is its own crisp drawing, never a resample.
+      var si = 0
+      for (var b2 = 1; b2 < D.scales.length; b2++) {
+        if (Math.abs(D.scales[b2] - f) < Math.abs(D.scales[si] - f)) si = b2
+      }
+      var li = D.stones[sl.v][si], L = S.layers[li]
+      var mid2 = (D.minX + D.maxX) / 2
+      var sx = mid2 + (sl.x - mid2) * f + L.ox
+      var top = rowOf({ anchor: 'origin', y: descentRow(f) }, L)
       if (top > S.h || top + L.h < 0) continue
       ox.drawImage(sheets[li], 0, 0, L.w, L.h, Math.round(sx), Math.round(top), L.w, L.h)
     }

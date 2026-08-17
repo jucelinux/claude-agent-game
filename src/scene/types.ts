@@ -516,6 +516,31 @@ export type Descent = {
   readonly clearance: number
   /** Slope pixels per glide/carve cycle — the animation advances with distance, as always. */
   readonly strideLen: number
+  /**
+   * **The perspective, and it is his batch-7 miss compiled into three numbers.**
+   *
+   * *"os objetos deveriam aparecer em escala, ao fundo, e crescerem conforme se aproximam."*
+   * The projection has no divide, so the divide lives here: a thing `A` slope-pixels ahead
+   * draws at factor `zNear / (A + zNear)` — 1 at the rider's own row, shrinking toward the
+   * horizon — and its row and lane converge toward the vanishing point by the same factor.
+   * `range` is how far ahead the piste is populated; past it a thing is the horizon's.
+   *
+   * **`scales` are the discrete bands the factor snaps to, and each band is its own crisp
+   * render** through the ordinary build cache — never a stretched sprite, because nearest
+   * neighbour through a fractional scale is the one thing the blit rules forbid.
+   */
+  readonly zNear: number
+  readonly range: number
+  readonly scales: readonly number[]
+  /**
+   * **Bands at or under `farBelow` render through `farTunables`** — in practice the same file
+   * with the drawn line off. The look caught why: a 1 px ink ring around a 5 px render is a
+   * black block, and the reference's own genre drops the line at distance.
+   */
+  readonly farTunables?: string
+  readonly farBelow?: number
+  /** Flowing piste dust: what makes the treadmill read between obstacles. */
+  readonly dust?: { readonly count: number; readonly colors: readonly RGB[]; readonly seed: number }
   readonly stones: readonly { readonly grammar: string; readonly tunables: string }[]
   /** Slope pixels between slots, the hash's own jitter along the slope. */
   readonly spacingD: number
