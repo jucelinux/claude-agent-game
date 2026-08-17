@@ -118,8 +118,13 @@ export function budgetOf(stage: Stage, gzipBytes = 0): Budget {
    */
   const n = stage.runner
   const onScreen = n === null ? 0 : Math.ceil(stage.w / (n.spacing - n.jitterX)) + 2
-  const runCalls = n === null ? 0 : 1 + onScreen + 2
-  const runPixels = n === null ? 0 : screen + onScreen * sprites
+  // Each drift band stamps one puff per visible slot — the stones' arithmetic at its own
+  // spacing. Left uncounted this would be the third time a whole draw path was invisible to
+  // this instrument, and instrument defects come in the flattering direction.
+  const driftStamps = n === null ? 0
+    : n.drift.reduce((sum, b) => sum + Math.ceil((stage.w + 160) / b.spacing) + 2, 0)
+  const runCalls = n === null ? 0 : 1 + onScreen + 2 + driftStamps
+  const runPixels = n === null ? 0 : screen + onScreen * sprites + driftStamps * sprites
 
   return {
     perFrame: {

@@ -445,6 +445,31 @@ export type Runner = {
   readonly stars?: { readonly count: number; readonly colors: readonly RGB[]; readonly seed: number; readonly below: number }
   /** The moon, and it is the only round thing in the picture. Absent in daylight. */
   readonly moon?: { readonly x: number; readonly y: number; readonly r: number; readonly color: RGB; readonly halo: RGB }
+  /**
+   * **Drifting bands: sprites that belong to the sky and scroll slower than the world.**
+   *
+   * The runner's backdrop is painted once and welded to the screen — that is the dither rule —
+   * so anything that has to MOVE with the world's travel cannot live in it. A drift band is the
+   * stones' own mechanism at a fraction of the speed: slot `k` yields a position, an altitude
+   * and a variant from one integer hash, nothing is stored, and `parallax` is how much of the
+   * world's distance the band travels. Far things travel little; that is the whole of depth in
+   * a sideways sky.
+   *
+   * Harvested, not designed: the forest's clouds already drift and the stones already hash —
+   * this is the two mechanisms meeting, needed by the first game whose scene is all sky.
+   */
+  readonly drift?: readonly {
+    readonly puffs: readonly { readonly grammar: string; readonly tunables: string; readonly scale?: number }[]
+    /** World pixels between slots, and how much of that the hash may add. */
+    readonly spacing: number
+    readonly jitterX: number
+    /** Screen rows the band's centres may occupy. */
+    readonly minY: number
+    readonly maxY: number
+    /** Fraction of the world's distance this band scrolls at. 0 is the backdrop; 1 is a stone. */
+    readonly parallax: number
+    readonly seed: number
+  }[]
   readonly seed: number
 }
 

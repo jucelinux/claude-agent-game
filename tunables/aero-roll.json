@@ -1,0 +1,88 @@
+{
+  "canvas": {
+    "w": 64,
+    "h": 48,
+    "originX": 32,
+    "originY": 26
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 13
+  },
+  "light": {
+    "x": -0.5,
+    "y": -0.55,
+    "z": -0.3,
+    "curve": 1.1
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.14,
+    "lift": 2.4,
+    "depth": 6,
+    "roll": 1
+  },
+  "texture": {
+    "speckle": 0,
+    "dither": 0,
+    "lattice": 2
+  },
+  "shadow": {
+    "steps": 7,
+    "bias": 0.25,
+    "strength": 2
+  },
+  "fill": {
+    "x": 0.45,
+    "y": 0.4,
+    "z": -0.3,
+    "weight": 0.1
+  },
+  "playback": {
+    "msPerFrame": 40,
+    "scale": 4
+  },
+  "_anchors": {
+    "canvas.w": "64, the subject's cell. Roll is about screen x, so the machine's LENGTH is invariant through the whole turn and the width needs no roll margin at all.",
+    "canvas.h": "48, and THIS clip is why: at the quarter turn the 30 px top-wing span stands vertical, 15 px either side of the hull axis. The cell is sized by this clip's worst frame and shared by the other two.",
+    "canvas.originX": "32, shared.",
+    "canvas.originY": "26 — the hull axis, which is the centre of the barrel roll. An off-centre origin would swing the machine out of its cell mid-turn: the skate's originY anchor, transferred.",
+    "tones.perMaterial": "5, the 15/08 idiom.",
+    "frames.walk": "13, the kickflip's arithmetic re-derived for a wing: (n-1) divisible by four for the five phases, and 30° between frames. The top wing is 1.2 px thick and 26 px deep — at 45° steps it would jump from edge to more than half its full face between two frames; at 30° each quarter turn shows three readable widths.",
+    "light.x": "-0.5, shared with the subject's other clips.",
+    "light.y": "-0.55, shared.",
+    "light.z": "-0.3, shared — and load-bearing here: both wing FACES must be legible as the roll trades them, which is what this front component buys.",
+    "light.curve": "1.1, shared.",
+    "gait.swing": "0.14 turn. The roll clip's largest angle key is 0.1 on the hull — 5° of climbing attitude under the turn. The rotation of this clip is NOT on this channel, which is the whole point of gait.roll existing.",
+    "gait.lift": "2.4 px, the climb's value: the runtime carries the arc.",
+    "gait.depth": "6 px, unused.",
+    "gait.roll": "1 turn — this file exists for this number, as skate-flip.json existed for its. At amplitude 1 a roll key IS a fraction of a revolution, so the hull's track runs 0 to -1 and means one whole barrel roll. THE TRANSFER: the same knob that turned a 10-part plank now turns a 21-part machine about its root.",
+    "body.scale": "1, the subject's scale.",
+    "texture.speckle": "0, retired 15/08.",
+    "texture.dither": "0, the body rule from the skate round, carried with its measurement.",
+    "texture.lattice": "2, unused at 0.",
+    "shadow.steps": "7, as the cruise: one sun on one subject.",
+    "shadow.bias": "0.25, project-wide since run 7.",
+    "shadow.strength": "2 ramp steps, the outdoor value.",
+    "fill.x": "0.45, opposite the key, as the cruise.",
+    "fill.y": "0.4, from below — and through the inverted half of the roll this IS the light that keeps the crimson top faces readable while they hang toward the ground.",
+    "fill.z": "-0.3, matching the key, as the cruise.",
+    "fill.weight": "0.1, the street's value, as the cruise.",
+    "playback.msPerFrame": "40: thirteen frames make a 520 ms roll. The second impulse buys roughly 0.75 s of air from where it is pressed, so the turn completes with margin and the hold on the last frame is a level plane, never a frozen half-roll.",
+    "playback.scale": "4, bench only.",
+    "outline.enabled": "true, the 15/08 ink verdict.",
+    "outline.material": "\"ink\", the subject's line.",
+    "outline.inner": "true, welds as the cruise.",
+    "outline.rim": "false, settled 15/08."
+  }
+}
