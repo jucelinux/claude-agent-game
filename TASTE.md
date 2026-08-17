@@ -52,6 +52,16 @@ Last distillation: none — the log does not exist yet._
   every axis. *"O contorno das formas"* turned out to be the grammar, on a defect the palette
   had been hiding on every earlier subject. Two notes in one message, two different layers, and
   neither was where the words pointed.
+- **[derived · 16/08 · batch 4, the skate]** **He grades a game, never a round.** The round was framed
+  as an experiment to prove a thesis — his framing — and his verdict named four things, all of them a
+  player's: the board obeying the button, the colours, the absence of positioning bugs, and
+  *"consistência de sua parte nessa run"*. **The thesis went unmentioned.** So "prove a concept" tells
+  me what the round is FOR; it does not change what he looks at.
+- **[derived · 16/08 · the same message]** **Consistency is a thing he names and rewards, and it is not
+  the same as quality.** *"a ausência de qualquer bug relacionado ao posicionamento do skate e dos
+  obstáculos, demonstrou consistência de sua parte nessa run."* Three of the four defects in batch 3
+  were placement bugs. He noticed their absence and said so — an axis where the score is zero when
+  nothing happens, which is the only axis here that behaves that way.
 - **[derived · 15/08 · probe D]** **He reads a defect through what it resembles, not
   through what it is:** "the sash plus the neck skin makes it look like a buggy arm". The
   location was exact and the cause was one level below the words — same material as the
@@ -190,6 +200,18 @@ _Fills from evidence. Every entry cites the artifact that produced it._
   grammar. Moving the check there took ten lines and it fired on nine subjects, all nine
   symmetric on purpose. **portable:** when a check over-fires on healthy work, the usual fault is
   not the threshold, it is that the invariant was asserted about the wrong artifact.
+
+- **[16/08 · batch 4, and my prediction was about a conversation he was not in] I predict his verdict
+  from the round's internal argument instead of from the artifact he meets.** I called a MISS at 60/40
+  and named the pixel-art half, reasoning that the weave was invisible on the rider and that "the
+  extreme was applied and the instrument refused it" would sound like an excuse. **He never mentioned
+  it.** He named the board obeying the button, the colours, the absence of positioning bugs and the
+  consistency of the run — four player's readings, none about the experiment. The thesis had been the
+  whole texture of my session and it was not in the room. `TASTE-LOOP.md` §4 forbids judging from
+  source because a reviewer rates effort; **I was predicting from source, which is the same error
+  aimed at myself.** portable, and the correction is cheap: write the prediction from what is on the
+  screen, and if a factor cannot be seen by someone who has read nothing, it cannot move the
+  prediction.
 
 - **[16/08 · the weave instrument, calibrated on a gradient and pointed at a body within the hour] I
   build an instrument, prove it on the easiest possible artifact, and then trust it on the hardest

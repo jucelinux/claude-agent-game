@@ -45,30 +45,66 @@ round is allowed to come back with a NO.
 A skater on a dusk street. Space ollies; space again in the air is a **kickflip**. The kerb and the
 cone fall to the ollie, the rail needs the flip. One collision ends the run.
 
-### My prediction, recorded before he looks
+### His verdict, 16/08, unsoftened — **it ships**
 
-**I predict a MISS, at 60/40, and I split the confidence unevenly across the two halves on
-purpose.**
+> *"Joguei todos os jogos e não percebi nenhuma piora."*
+>
+> *"A prancha virou de verdade, respeitando o comando, gostei muito!"*
+>
+> *"Eu gostei da representação do skatista e aprecio seus detalhes aplicados ao jogo: as cores, a
+> ausência de qualquer bug relacionado ao posicionamento do skate e dos obstáculos, demonstrou
+> consistência de sua parte nessa run."*
+>
+> *"Se fosse um microjogo que eu tivesse idealizado (ao invés de uma sugestão para provarmos um
+> conceito) eu trabalharia nos detalhes do ambiente e do skatista. Estão básicos, mas no geral o jogo
+> está ok!"*
 
-| half | what I expect | why |
-|---|---|---|
-| **the roll** | **passes** | It has an instrument. The board's wood face swells 47 → 106 px and its grip face 21 → 146 px across one flip, a quarter turn apart, and both nearly vanish at the edges. Nine locks in `tests/roll.test.ts` and five in `tests/skate.test.ts` assert it, including the null case that runs the whole marching path at a full turn and reproduces the closed form to 99% of pixels |
-| **the pixel art** | **misses, and I already know how** | It came back with a measured NO on the rider and I shipped that answer rather than a nicer one. The weave is on the sky and the road and OFF on the body. So the thing he asked to push to the extreme is not visible on the subject he commissioned, and "the extreme was applied and the instrument refused it" is a sentence that sounds like an excuse whether or not it is true |
-| **the ollie** | **the control** | Authored entirely on `Bone.angle`. If it reads worse than the crypt's leap, the roll work damaged the screen-plane path and it is a rollback rather than a tuning problem |
+**That is a ship, and the control passed with it.** Every earlier game renders from current code, so
+"nenhuma piora" is the only evidence that the roll work did not damage the screen-plane path — and it
+covers four scenes rather than the one ollie I had designated.
 
-**The specific way I expect the miss to arrive**: he looks at the rider and it is the same drawing as
-before. Not worse — the same. The only visible change on the body is the flip, and the sky.
+| batch | commissions | shipped | hit rate | cycles per shipped piece |
+|---|---|---|---|---|
+| 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
+| 2 | 1 | **1 — ships** | 1/1 | 1 model cycle, 3 readings |
+| 3 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
+| 4 | 1 | **1 — ships** | 1/1 | **1 model cycle, 1 reading** |
 
-**What I am NOT confident about and have no instrument for:** whether a 26 px board reads as a
-skateboard at all. The wheels are 4 px discs and the two kicks are 4 px rects at 20°. Every number
-about them is counted and none of it says "this looks like a skateboard" — and `TASTE.md` §2a's
-standing lesson is to put the confidence on the axis with the weakest instrument, which is this one
-and not the dither.
+**Running: 2 of 4.** Cost per shipped piece is the lowest the project has recorded: one cycle, one
+reading, no back-and-forth.
 
-**The mastery-ledger line, which the record says I owe at delivery.** This commission moves two
-mastered subjects onto axes they have not been read on: **a human head at 8 px** (the ledger's face
-entry is one round-skulled animal, one verdict) and **a prop a body stands on** (the props entry says
-"anything a body interacts with beyond standing on it" does not transfer, and a deck is exactly that).
+### Scoring the prediction — **wrong, and wrong in a way that is about me rather than about the work**
+
+| I predicted | what happened |
+|---|---|
+| a MISS at 60/40 | **ships** |
+| the roll passes | **passes**, and it is the thing he named first: *"gostei muito"* |
+| **the pixel-art half misses**, because the weave is not visible on the rider and "the instrument refused it" sounds like an excuse | **he never mentioned it.** Not positively, not negatively. He praised *"as cores"* and did not name the sky, the dusk or the dither |
+| the weakest instrument is whether a 26 px board reads as a skateboard | **it read.** He named the absence of positioning bugs on it, which is a stronger statement than "it reads" |
+
+**The bias, and it is new.** I predicted his verdict from **the round's internal argument** — the thesis
+I had spent the session proving, the honest NO I had to report, the sentence I was afraid would sound
+like an excuse. He graded **a game on a page**. Every single thing he named is a player's reading: the
+board obeying the button, the colours, the absence of bugs, the consistency across a run. Not one is
+about the experiment.
+
+`TASTE-LOOP.md` §4 says judge artifacts, never source, because source access converts a judge into a
+reviewer and reviewers rate effort. **I had been predicting from the source.** The round's narrative
+was vivid to me and invisible to him, which is exactly the asymmetry that rule exists to name.
+
+### The pixel-art thesis has NO verdict, and that is a result rather than an oversight
+
+He did not read it. It shipped inside a round that shipped, and those are not the same thing.
+
+So the honest state is: **the weave is measured and unjudged.** Measured, it works on a sky and is
+indistinguishable from dirt on a body — a 36 px character has 0.000 of its pixels inside a
+single-owner 4x4 cell. Judged, nothing. A reading would need the weave to be **the variable**, which is
+a probe with two samples of one scene, not a feature inside a game.
+
+**It is not proposed.** §3.0 says a probe is for the first round on an axis, and this axis has a
+measured answer already; spending his attention to confirm a number the channel can produce is the
+cost his own gate design exists to avoid. It goes in the record as unjudged and waits for a round
+where the surface is the subject — which is exactly what the procedural-environment work below is.
 
 ### Batch 3 verdict, 16/08, unsoftened
 
@@ -300,40 +336,55 @@ not gate readings:
 
 ---
 
-## Next round — **his word on batch 4**, and nothing after it is chosen
+## Next round — **the transfer tests, and the biplane goes first**
 
-- **What ships:** `node bin/micro.ts`, route `/skate`. A skater on a dusk street; space ollies, space
-  again in the air is a kickflip. The kerb and the cone fall to the ollie, the rail needs the flip,
-  one collision ends the run.
-- **What closes it:** one word from him, plus one or two words of why on a miss.
-- **My prediction is at the top of this file**, written before he looked and before the one permitted
-  look. It names the pixel-art half as the miss and the roll as the pass.
-- **He has already named what comes after, and it is not a feature:** the biplane's barrel roll and
-  the snowboarder's carve, *"para validar se consolidamos a técnica"*. Those are **transfer tests**
-  on the axis this round opened, which is exactly what `TASTE.md` §2b says a single-subject
-  capability needs before it can be spent freely.
+Batch 4 shipped. He named what comes next himself and asked whether I had a better idea:
 
-### What the look caught that the channel could not, recorded because the amendment is on trial
+> *"Podemos seguir com os outros testes de microjogos que você sugeriu ou você tem uma proposta
+> melhor?"*
 
-The 16/08 amendment allows one look at one rendered sample per round boundary, and says it is retired
-if three rounds pass with no change to the hit rate and no change to his cost. **Round one of three,
-and it paid — but not where I expected.**
+**The transfer tests are right, and their order is not arbitrary.** `TASTE.md` §2b: roll is proven on
+**one subject, one clip, one verdict**, and dominance transfers along the axis it was proven on and
+never across it. The skateboard is a rigid plate on a bone whose parent never rotates — the friendliest
+possible case for two accumulated scalars.
 
-| what the image reported | could the channel have said it? |
-|---|---|
-| the dithered dusk is strongly visible and reads as pixel art | **no.** There is no instrument for the backdrop at all — the weave measure reads sprites |
-| the asphalt is too dark for its own weave to show | **no.** Same reason |
-| neither rider has a contact shadow, so both float | **no.** The channel has no notion of the scene |
+| | **B — the biplane's barrel roll** | **C — the snowboarder's carve** |
+|---|---|---|
+| what it tests | roll on a subject whose **silhouette is the proof**: a wing goes from full width to a thin line and back. A plate cannot fake that | roll on a body that **leans while it travels**, which is roll composed with a screen-plane angle — the exact case my accumulation is only an approximation of |
+| camera | side or three-quarter. **The one that exists** | **needs a new camera looking down the slope.** In a side view a lean is a screen-plane rotation and the theme forces nothing. Named on 16/08 before he chose |
+| what else it exercises | a **sky**, which is all surface — so the unjudged weave gets a second scene without a probe. `CLOUDS` already exists from run 12 | a receding ground plane (mastered) and snow, which is the hardest dither case there is: a bright near-uniform field |
+| the declared risk it attacks | none of mine. It is a clean transfer | **`Bone.roll` accumulates as a scalar and does not commute with a parent's angle.** A carving body is where that drift becomes measurable |
 
-**All three are about the SCENE and none about the sprite.** That is a sharper claim than the
-amendment made for itself: the channel's blind spot was never pixels, it is the world a sprite is
-placed in. The amendment argued that the eye catches *"the thing does not look like what it is
-supposed to be"*; what it actually caught here is *"the thing is not lit or grounded like part of a
-place"*.
+**So B first and C second, and the reason is that C is worth more.** The snowboarder attacks the
+approximation I declared when roll was built, and it needs a camera. Running it second means the
+approximation is tested on a subject where I already know roll works — one variable, which is the
+structure run 7 used with the walk as control.
 
-**The asphalt was not touched, and that is the rule biting.** It is a knob and thirty seconds of
-work. Look to decide **whether to ship**, never **what to change** — a value range corrected by eye is
-the tuning the blindness used to prevent. It goes to him as a thing I saw.
+**What I am not proposing, and why:** a probe for the weave. It is measured and unjudged (above), and
+confirming a number with his attention is what gate v3 was designed to stop.
+
+---
+
+## Deferred by him — **procedural filling of environments**
+
+Recorded in his words, 16/08, so it is not rediscovered later as an idea of mine:
+
+> *"Eu sei que não é o momento ainda, mas sinto que em algum momento vamos entrar em algumas sessões
+> para avaliarmos formas procedurais para preencher os ambientes. Eu sei que não era o foco aqui, mas
+> esse preenchimento traz riqueza aos jogos e em breve vamos tratar isso."*
+
+**Three independent readings already agree on it**, which is why it is written down rather than left to
+his memory:
+
+1. **His verdict on batch 4:** *"eu trabalharia nos detalhes do ambiente e do skatista. Estão
+   básicos."*
+2. **His forward note above**, naming the mechanism he expects — procedural, not hand-placed.
+3. **My one permitted look**, which found the asphalt too dark for its own weave and no contact shadow
+   under either rider. Both are scene facts and the findings channel cannot see either.
+
+**It is also where the unjudged weave belongs.** A dithered surface needs surface, and filling an
+environment is the work that creates it — so the pixel-art answer and the richness answer are the same
+round, whenever he calls it. **His call, not mine, and he has said not yet.**
 
 ## Dead — **the exporter**
 
@@ -588,51 +639,39 @@ Written for him, so no method vocabulary crosses into this section.
       the 33 frozen generations are gone. The terminal eye and the findings channel stayed,
       because without them I cannot see my own output at all.
 
-- [ ] **Run 7 — the jump, the attack, and the walk as control.** SUPERSEDED, kept for the record. Asked 15/08.
-      · *Open:* `node bin/serve.ts`. Three loops, top row, labelled jump / attack / walk.
-      · *Do:* say which of the three you believe least, and one sentence on why.
-      · *Time:* two minutes.
-      · *A pass looks like:* the jump feels heavy landing, and the attack feels like it hits
-      something rather than waving.
-      · *Answer changes:* the walk is run 5's animation with nothing altered, so if the walk
-      looks worse than you remember, the new engine did that and I roll it back. If the walk
-      holds and an action is weak, the action is weak and the engine stays.
-      · *Read:* the proposal below.
-      · *Do:* say yes, or change a number, or name a different reading.
-      · *Time:* five minutes, and it is the highest-value five minutes in the project.
-      · *Answer changes:* everything downstream. Without a reading nothing can kill this,
-      and a project that cannot fail is being decorated.
+- [x] ~~**Run 7 — the jump, the attack, and the walk as control**~~ · ~~**the five reference
+      loops**~~ · ~~**is "ink" aspiration or direction?**~~ → **all three dissolved 16/08 at a cycle
+      open, and the pattern is why they are named here rather than deleted.**
 
-      **The reading, proposed:** six animated loops side by side, on the same tick — **five
-      from shipped games, which he picks himself and may study as much as he likes**, and
-      one of mine. He puts them in order by one question: *which of these would I believe
-      came from a game someone shipped?* First is the most believable, sixth the least.
-      · **Strike:** mine lands 5th or 6th.
-      · **Non-strike:** mine lands 1st to 4th.
-      · **Death:** three strikes in a row. The counter does not move.
-      · **Stop — ceiling reached:** three readings in a row at the same position with no
-      improvement. Not death: the grammar is finished, and where it stopped gets written
-      down (`TASTE-LOOP-LEARNING.md` P2).
-      · **Why it replaces the old one:** it needs no blindness at all, so it survives both
-      the hole he found and the fact that he is about to learn my hand by judging rounds.
-      · **What it costs:** he can be charitable to me in a way that pointing at an impostor
-      never allowed. Two guards — the five references are **fixed once and reused for every
-      reading**, so a movement in rank is my art moving and never the sheet moving; and
-      4th place still means beating two shipped loops.
-- [ ] **The five reference loops, once he approves the reading.** Asked 14/08.
-      · *Do:* pick five walking loops from games he rates, at the level he wants me held
-      to, and drop the files in `refs/`. Any format that plays.
-      · *Time:* however long picking five good ones takes; there is no rush and no probe
-      blocked on it.
-      · *Answer changes:* their size and frame rate set what my cell has to be for the
-      comparison to be honest. Picking weak references lowers the bar permanently, since
-      the same five are reused for every reading.
-- [ ] **Is "ink" in the name aspiration or direction?** Asked 14/08, waits for sample D.
-      · *Open:* four looping animations, sent together.
-      · *Do:* pick A or B. **(A)** the name is a wish, and the target stays Chrono Trigger.
-      **(B)** the drawn, varying line is what he actually wants, and the target is wrong.
-      · *Time:* two minutes.
-      · *Answer changes:* B rewrites `TASTE.md` §1b and reshapes the probe before it runs.
+      All three were asks written for machinery that no longer exists. The run 7 reading was answered
+      on 15/08 and its own entry said SUPERSEDED for a day. The five reference loops belonged to **gate
+      v2**, retired 15/08 — and asking for them three times without once saying what they were is the
+      recorded reason gate v3 has the shape it does. The ink question was answered by run 8's ranking:
+      he put five tones with a drawn line first, and `TASTE.md` §1b has carried that as derived ever
+      since.
+
+      **They sat in the section reserved for HIS attention for a day and a half after the thing that
+      needed them died.** A cold session reading this file would have asked him for files he does not
+      need, which is the exact failure `TASTE-LOOP.md` §3b.4 exists to catch and the second time it has
+      caught it here. The rule that follows: **an ask dies with the reading that motivated it, in the
+      same turn**, and the gate block in `CLAUDE.md` is where a reading's death is recorded.
+
+- [ ] 🟡 **One pendency, and it is 30 seconds of yours: is the skull a skull now?**
+      · *Open:* `node bin/micro.ts` → `/crypt`.
+      · *Do:* look at the runner's head for five seconds. Say yes or no.
+      · *Time:* thirty seconds.
+      · *Background:* batch 3 missed on one word — *"isso não é uma caveira. Nem de longe lembra
+      uma"*. That miss specified **subtraction**: every primitive here was a solid, so the eye sockets
+      were paint on a ball rather than holes in bone. `Part.cut` was built after your verdict and the
+      skull was re-authored around it — the sockets are cavities, the ember material is gone because a
+      skull's eyes are the darkest thing on it, and the cranium is now larger than the ribcage.
+      · *Why it is still open:* you played it this round and reported no regression. **That is not the
+      same question.** "Nothing got worse" and "this is a skull" are different readings, and only the
+      second one closes batch 3.
+      · *What each answer changes:* **yes** closes the miss and puts subtraction in the mastery ledger
+      with a verdict behind it. **no** means the cut was the wrong capability, or the right capability
+      badly spent — and either way the skull is the second subject to fail on the same axis, which is
+      worth more than a third primitive.
 
 ## Closed
 
