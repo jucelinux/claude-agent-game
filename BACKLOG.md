@@ -85,23 +85,6 @@ and the skate too.
   and the aesthetic vocabulary gains its first him-named reference target. **misses** → the
   word says whether the miss is the trick or the aesthetic, and that word is the next round.
 
-## Batch 7 — the REAL test C, his correction recorded
-
-Batch 6's reshaping was MY silent resolution of an ambiguity between two of his statements, and
-his question caught it: *"Eu me recordo da sugestão desse microgame ter o objetivo de validar a
-relação da câmera no jogo, certo?"* Correct. So batch 7 runs C as the record wrote it:
-
-1. **The down-slope camera** — the first new view since the moon: the world scrolls down the
-   fall line, the boarder is seen from high behind, obstacles rise from the bottom edge.
-2. **The composition at carve amplitude** — batch 6 exercised roll under a 7–10° lean, which is
-   weak evidence because the approximation's error grows with the parent angle. The carve banks
-   the root to ~36° WHILE rolled children fold, sustained through the loop — and the drift is
-   **measured against matrix ground truth**, not merely survived. The number enters the record
-   whichever way it comes out: small is a validation, large is a specification (`a matrix per
-   bone`), and both are results.
-
-The Yoshi's Island aesthetic carries over — his ask stands; only the intent was clarified.
-
 ## Deferred, by him
 
 - **Procedural filling of environments** — "em breve vamos tratar isso". Three readings
