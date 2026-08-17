@@ -90,7 +90,8 @@ the axis it was proven on, never across it.**
 | steerable body | gorilla, astronaut, kitten | nothing known — spend freely |
 | props (rocks, shelves) | moon, climb | interaction beyond standing |
 | body turned in depth (yaw) | astronaut + 2 transfer locks | depth/width < ~0.45 collapses — measured |
-| roll (out of screen plane) | skate kickflip **+ biplane barrel roll on a 21-part ROOT, his verdict 17/08** | composition with a parent's screen-plane angle (the declared approximation) — batch 6 tests it |
+| roll (out of screen plane) | kickflip + biplane root + rodeo-under-lean + carve at 36° | nothing known on shelf amplitudes — the composition is MEASURED at 0.337 px worst (tests/descent.test.ts); beyond carve amplitude, run the instrument before spending |
+| the down-slope camera & perspective (scale bands over distance, vanishing point) | `/descent`, his verdict 17/08 — "sensação de movimento e profundidade… crescimento suave" | one game shape; a second view (e.g. toward the camera) is untested |
 | face at small scale | kitten | any face not a round-skulled animal |
 | a game that can be lost | climb, crypt, skate | win conditions beyond "how far" |
 | subtraction (`cut`) | skull re-authored | **verdict pending** (BACKLOG) |

@@ -3,7 +3,7 @@
 What is **open**, as of 17/08 (distilled — closed items live in `DECISIONS.md` and on
 branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
-## Gate — v3, the commission test · running 3 of 5, batch 6 open
+## Gate — v3, the commission test · running 4 of 6, batch 6 open
 
 | batch | commission | verdict | capability the miss specified | cost |
 |---|---|---|---|---|
@@ -13,7 +13,7 @@ branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 | 4 | skate + kickflip (roll + pixel-art experiment) | **ships** | — (spec carried: environments are basic) | 1 cycle, 1 reading |
 | 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
 | 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | *open* | — | 1 cycle so far |
-| 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | **miss → 2nd cycle** | **perspective: scale over distance, spawn at the vanishing point, the treadmill** | 2 cycles, 1 reading so far |
+| 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | **ships** (cycle 2) | cycle 1 specified: **perspective — scale over distance, spawn at the vanishing point, the treadmill** | 2 cycles, 2 readings |
 
 **Batch 7, cycle 1: MISS, his words unsoftened.** *"os obstáculos estão surgindo de trás do
 player… deveriam aparecer em escala, ao fundo, e crescerem conforme se aproximam… tudo parece
@@ -29,8 +29,10 @@ render is a black block — the look's catch); flowing piste dust carries the tr
 obstacles. **What survives from cycle 1:** the composition number — worst drift **0.337 px** at
 carve amplitude against matrix truth, glide exactly zero — and the carve itself. 523 locks.
 
-**Prediction (one line, before he looks again):** SHIPS at 60/40 — the 40 is whether the
-band-snap growth reads as smooth approach, the pop-in axis only his eye rates.
+**Cycle 2 verdict, 17/08, unsoftened — it ships.** *"Gostei do resultado! De fato agora percebo
+a sensação de movimento e profundidade. Percebi o crescimento de forma suave, sem saltos."*
+Prediction scored: called ships at 60/40, right — and the 40 (does the band growth read smooth)
+is the exact thing he certified in his own words.
 
 **Batch 5 verdict, 17/08, unsoftened — it ships.** *"O barrel roll funcionou muito bem! A
 estética do jogo respeitou o jogo anterior do skate, porém o parallax, as nuvens ao fundo e os
