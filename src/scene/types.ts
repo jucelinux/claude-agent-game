@@ -207,6 +207,16 @@ export type Placement = {
     readonly tuck: string
   }
   /**
+   * **The rider: the descent's actor.** A fifth kind, for the fourth game shape: no horizontal
+   * world motion of its own (the world falls past), a steered lane, and a clip per state —
+   * gliding, carving (mirrored for the two edges by the clip-pair mechanism), airborne.
+   */
+  readonly rides?: {
+    readonly glide: string
+    readonly carve: string
+    readonly launch: string
+  }
+  /**
    * **The runner: a body that never stops and chooses only when to leave the ground.**
    *
    * A third actor kind after `player` and `climber`, and it is a third kind for the same reason
@@ -473,6 +483,79 @@ export type Runner = {
   readonly seed: number
 }
 
+/**
+ * **The descent: a world that scrolls down the fall line, and the first new camera since the
+ * moon.** His correction, 17/08: transfer test C was always about validating the camera
+ * relation, and batch 6 resolved that away silently. This is the camera, built.
+ *
+ * The view is high behind the rider: the horizon is a strip at the top, the piste fills the
+ * rest, and new terrain enters at the BOTTOM edge and rises as the camera advances down the
+ * slope. The projection stays the engine's 2.5D — no divide — so the world recedes by rows,
+ * the classic pixel idiom his reference's own genre uses.
+ *
+ * Obstacles are hashed 2D slots (a slope distance AND a lane), nothing stored. The one verb
+ * pair: steer (which banks the body into the composed carve) and a hop. **An airborne rider
+ * clears any obstacle whose art stands under `clearance`** — height read from the crop, so a
+ * rock is jumpable and a pine is lethal because of how each is DRAWN, never because of a flag.
+ */
+export type Descent = {
+  /** The screen row the rider's origin is held on. Terrain ahead is BELOW this row. */
+  readonly holdY: number
+  readonly minX: number
+  readonly maxX: number
+  /** Pixels per second across the slope. */
+  readonly steer: number
+  /** Down-slope speed: opening, gain per second, cap. */
+  readonly speed: number
+  readonly accel: number
+  readonly maxSpeed: number
+  /** The hop: upward speed a press buys, against gravity in px/s². */
+  readonly jump: number
+  readonly gravity: number
+  /** Art shorter than this many pixels is cleared while airborne. */
+  readonly clearance: number
+  /** Slope pixels per glide/carve cycle — the animation advances with distance, as always. */
+  readonly strideLen: number
+  readonly stones: readonly { readonly grammar: string; readonly tunables: string }[]
+  /** Slope pixels between slots, the hash's own jitter along the slope. */
+  readonly spacingD: number
+  readonly jitterD: number
+  readonly leadIn: number
+  readonly bodyHalfW: number
+  /** The rider's collision window along the slope. */
+  readonly bodyHalfD: number
+  readonly stoneHalfW: number
+  readonly stoneHalfD: number
+  readonly pxPerMetre: number
+  readonly overText?: string
+  readonly dither?: { readonly amount: number; readonly lattice: number }
+  /** Rows above this are sky; the piste ramp starts here. */
+  readonly horizonRow: number
+  readonly skyRamp: readonly RGB[]
+  /**
+   * **The ridge: a treeline baked ONCE into the backdrop.** A far ridge does not visibly move
+   * when you travel straight away from it, so it is static by honesty, not by cheapness —
+   * and static means the lattice under it cannot crawl.
+   */
+  readonly ridge?: {
+    readonly puffs: readonly { readonly grammar: string; readonly tunables: string; readonly scale?: number }[]
+    readonly spacing: number
+    readonly jitterX: number
+    readonly row: number
+    readonly seed: number
+  }
+  /** Clouds baked into the sky strip, same reasoning. */
+  readonly clouds?: {
+    readonly grammar: string
+    readonly tunables: string
+    readonly count: number
+    readonly minY: number
+    readonly maxY: number
+    readonly seed: number
+  }
+  readonly seed: number
+}
+
 export type Scene = {
   readonly name: string
   readonly w: number
@@ -542,6 +625,8 @@ export type Scene = {
   readonly climb?: Climb
   /** Present on an endless runner and absent on every other kind. See `Runner`. */
   readonly runner?: Runner
+  /** Present on a down-slope game and absent on every other kind. See `Descent`. */
+  readonly descent?: Descent
 }
 
 export type Field =

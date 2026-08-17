@@ -40,7 +40,8 @@ import { streetCone, streetKerb, streetRail } from './scenery/street.ts'
 import { aeroClimb, aeroCruise, aeroRoll } from './vehicles/aero.ts'
 import { skyBalloon, skyFlock, skyKite } from './scenery/aloft.ts'
 import { snowCarve, snowJump, snowRodeo } from './characters/boarder.ts'
-import { pistePine, pistePuff, pisteSapling, pisteSnowman } from './scenery/piste.ts'
+import { descentCarve, descentGlide, descentLaunch } from './characters/boarder-descent.ts'
+import { pistePine, pistePuff, pisteRock, pisteSapling, pisteSnowman } from './scenery/piste.ts'
 
 /** shipped = judged usable · probe = built to compare, never content · retired = superseded or failed. */
 export type GrammarStatus = 'shipped' | 'probe' | 'retired'
@@ -181,6 +182,20 @@ export const CATALOG: Readonly<Record<string, CatalogEntry>> = {
     description: 'a Yoshi’s Island cloud: flat white puff, width 2.2× height, OUTLINED — drawn with the scene’s own crayon; lives in the drift bands',
     tags: ['yoshi-island'],
   }),
+  ...family([descentGlide, descentCarve, descentLaunch], {
+    kind: 'character',
+    status: 'shipped',
+    games: ['descent'],
+    description: 'the boarder from BEHIND, run 20 — the down-slope camera’s subject; the carve holds a 31–36° bank on the root while chest and board roll under it, the declared drift case at full amplitude, measured',
+    tags: ['3d-roll', 'yoshi-island', 'back-view'],
+  }),
+  ...entry(pisteRock, {
+    kind: 'prop',
+    status: 'shipped',
+    games: ['descent'],
+    description: 'a low snow-capped rock, ~11 px: the descent’s jumpable obstacle — jumpable because of how short it is DRAWN, the height-from-art rule',
+    tags: ['yoshi-island'],
+  }),
 }
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = Object.fromEntries(
@@ -255,6 +270,11 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: pisteSapling.name, tunables: 'piste' },
   { grammar: pistePine.name, tunables: 'piste' },
   { grammar: pistePuff.name, tunables: 'puff' },
+  // Run 20: the back view. Three clips, three files, the standing reason.
+  { grammar: descentGlide.name, tunables: 'descent' },
+  { grammar: descentCarve.name, tunables: 'descent-carve' },
+  { grammar: descentLaunch.name, tunables: 'descent-launch' },
+  { grammar: pisteRock.name, tunables: 'piste' },
 ]
 
 export function grammarByName(name: string): Grammar {

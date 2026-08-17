@@ -30,6 +30,7 @@ import { forestScene } from './forest-scene.ts'
 import { moonScene } from './moon-scene.ts'
 import { aeroScene } from './aero-scene.ts'
 import { snowScene } from './snow-scene.ts'
+import { descentScene } from './descent-scene.ts'
 
 export type MicroGame = {
   /** Stable, and it never changes: he navigates by it. */
@@ -210,5 +211,21 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     date: '2026-08-17',
     keys: 'space jump · space again in the air = rodeo · one collision ends the run',
     scene: snowScene,
+  },
+  /**
+   * **Micro game 8: the descent.** His correction, 17/08 — the snowboard test was always about
+   * the CAMERA — and this is the camera: the first new view since the moon, high behind the
+   * rider, the world scrolling down the fall line. Steering plays the composed carve (a 31–36°
+   * bank with rolled children under it, the declared approximation at full amplitude, measured
+   * in the locks), and the mountain is the same Yoshi's Island winter seen from above.
+   */
+  {
+    id: 'descent',
+    title: 'The descent',
+    blurb:
+      'Hold left or right to carve — the whole body banks past thirty degrees, inside hand brushing the snow — and space hops. The camera rides high behind you: the horizon is a strip of ridge pines and outlined clouds, and new terrain climbs into view from the bottom of the screen as you drop. Rocks and snowmen pass under the hop; saplings and pines do not, and the difference is only how tall each is drawn. One collision and you wipe out. The snowfall, the checker sky and the crayon line are the same winter as the rodeo — one mountain, two cameras.',
+    date: '2026-08-17',
+    keys: '← → carve · space hop · rocks and snowmen duck under the hop, pines never',
+    scene: descentScene,
   },
 ]

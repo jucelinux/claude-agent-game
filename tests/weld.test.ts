@@ -128,7 +128,9 @@ describe('a weld says two shapes are one surface', () => {
       // Run 19, same verdict: the suit is one garment (jacket-pants-beanie welded); board against
       // boots, bindings on the topsheet, mitts against sleeves keep their seams. Snow lying on a
       // pine tier is one drift with the crown; the snowman's hat is bolted felt.
-      'snow-carve', 'snow-jump', 'snow-rodeo', 'piste-snowman', 'piste-sapling', 'piste-pine', 'piste-puff'])
+      'snow-carve', 'snow-jump', 'snow-rodeo', 'piste-snowman', 'piste-sapling', 'piste-pine', 'piste-puff',
+      // Run 20: the same rider from behind, same garment logic; the rock is one drift with its cap.
+      'descent-glide', 'descent-carve', 'descent-launch', 'piste-rock'])
     for (const { grammar: g, tunables: t } of PAIRS) {
       if (welded.has(g)) continue
       const grammar = grammarByName(g)

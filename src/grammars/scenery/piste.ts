@@ -128,3 +128,20 @@ export const pistePuff: Grammar = {
     tracks: [{ bone: 'root', channel: 'scaleX', keys: [0.01, -0.01] }],
   },
 }
+
+/**
+ * A rock, ~11 px: the JUMPABLE obstacle of the descent. In the down-slope game an airborne
+ * boarder clears any obstacle whose art stands under the clearance, and the height is read
+ * from the art — so a rock is jumpable and a pine is lethal because of how tall each is drawn,
+ * never because of a flag. Granite in the coal ramp, snow lying on top.
+ */
+export const pisteRock: Grammar = {
+  name: 'piste-rock',
+  palette: WINTER,
+  skeleton: { bones: [{ name: 'root', parent: null, x: 0, y: 0, z: 0, angle: 0 }] },
+  parts: [
+    { weld: true, name: 'lump', bone: 'root', material: 'coal', shape: { kind: 'lobed', cx: 0, cy: -4.4, rx: 6, ry: 4.4, rz: 5, lobes: 5, depth: 0.16, phase: 2.6 } },
+    { name: 'capS', bone: 'root', material: 'snow', shape: { kind: 'lobed', cx: -0.4, cy: -7.6, rx: 4.6, ry: 1.9, rz: 3.8, lobes: 5, depth: 0.15, phase: 0.7 } },
+  ],
+  gait: STILL,
+}

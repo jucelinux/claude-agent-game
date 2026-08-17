@@ -13,6 +13,18 @@ branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 | 4 | skate + kickflip (roll + pixel-art experiment) | **ships** | — (spec carried: environments are basic) | 1 cycle, 1 reading |
 | 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
 | 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | *open* | — | 1 cycle so far |
+| 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | *open* | — | 1 cycle so far |
+
+**Batch 7 shipped 17/08 as `/descent` ("The descent"), one model cycle.** The camera exists —
+`Scene.descent`, the fourth game shape: terrain rises from the bottom edge, ridge and clouds
+baked on the horizon, the rider seen from high behind with a contact shadow. **And the
+composition has a number:** the carve's worst interleave (arms ±50° under a 21° chest roll under
+a 36° bank) lands the scalar accumulation **0.337 px** from matrix ground truth on a 34 px body;
+the roll-free glide measures exactly zero. The declared "will drift" is downgraded to "drifts by
+a third of a pixel at carve amplitude" — C closes as a measured validation. 522 locks.
+
+**Prediction (one line, before he looks):** SHIPS at 70/30 — the 30 is whether the new view
+FEELS fair (obstacle pace, lane pressure), the axis no instrument here reads.
 
 **Batch 5 verdict, 17/08, unsoftened — it ships.** *"O barrel roll funcionou muito bem! A
 estética do jogo respeitou o jogo anterior do skate, porém o parallax, as nuvens ao fundo e os
@@ -67,15 +79,22 @@ and the skate too.
   and the aesthetic vocabulary gains its first him-named reference target. **misses** → the
   word says whether the miss is the trick or the aesthetic, and that word is the next round.
 
-## Next round — this IS transfer test C, reshaped by his sentence
+## Batch 7 — the REAL test C, his correction recorded
 
-The plan said the carve needs a down-slope camera. His commission forces the SIDE camera —
-Yoshi's Island is a side-view game — so C runs in the camera that exists: the boarder carries a
-**rest lean on the root** and the trick composes a full roll with that screen-plane angle, which
-is exactly the declared approximation (`Bone.roll` accumulates as a scalar and does not commute
-with a parent's angle), now exercised on every frame of the trick. **The down-slope carve camera
-is NOT built and stays unplanned** — recorded here so it is not rediscovered as a dropped item:
-his aesthetic named the camera, and the approximation gets its test without new machinery.
+Batch 6's reshaping was MY silent resolution of an ambiguity between two of his statements, and
+his question caught it: *"Eu me recordo da sugestão desse microgame ter o objetivo de validar a
+relação da câmera no jogo, certo?"* Correct. So batch 7 runs C as the record wrote it:
+
+1. **The down-slope camera** — the first new view since the moon: the world scrolls down the
+   fall line, the boarder is seen from high behind, obstacles rise from the bottom edge.
+2. **The composition at carve amplitude** — batch 6 exercised roll under a 7–10° lean, which is
+   weak evidence because the approximation's error grows with the parent angle. The carve banks
+   the root to ~36° WHILE rolled children fold, sustained through the loop — and the drift is
+   **measured against matrix ground truth**, not merely survived. The number enters the record
+   whichever way it comes out: small is a validation, large is a specification (`a matrix per
+   bone`), and both are results.
+
+The Yoshi's Island aesthetic carries over — his ask stands; only the intent was clarified.
 
 ## Deferred, by him
 
@@ -119,7 +138,9 @@ Every number carries the command that regenerates it and its date.
 | weave surface share (4×4 single-owner) | rider 0.000 · kitten 0.068 · kerb 0.432 | `[weave]` line of `node bin/bench.ts --grammar skate-roll --tunables skate` | 16/08 |
 | yaw collapse threshold | depth/width ≈ 0.45 | `npx vitest run tests/yaw.test.ts` | 16/08 |
 | TS lines, source + locks | 12 700 / 4 600 | `find src bin -name '*.ts' \| xargs wc -l` | 16/08 |
-| locks green | 491 | `npm test` | 17/08, after run 19 |
+| locks green | 522 | `npm test` | 17/08, after run 20 |
+| **the composition drift at carve amplitude** — the number test C exists for | worst **0.337 px** on a 34 px body (arms ±50° under 21° roll under 36° bank); glide exactly 0 | `npx vitest run tests/descent.test.ts` | 17/08 |
+| `/descent` budget | 13 layers, 50 colours, 34 calls/frame of 200, 41k px to decode, 33 KB wire | `node bin/micro.ts --static` | 17/08 |
 | the rodeo: board faces trading under a LEANING root | base 25→**119**→8 px · topsheet 32→0→**81**, half a turn apart, pale first | `node bin/bench.ts --grammar snow-rodeo --tunables snow-rodeo` | 17/08 |
 | `/snow` budget | 12 layers, 50 colours, 44 calls/frame of 200, 83k px to decode | `node bin/micro.ts --static` | 17/08 |
 | snowfall speed | 38 px/s (0.14 pass/cycle) — snow, not hail; bounded both ways in tests/snow.test.ts | `npx vitest run tests/snow.test.ts` | 17/08 |

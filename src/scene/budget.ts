@@ -126,11 +126,21 @@ export function budgetOf(stage: Stage, gzipBytes = 0): Budget {
   const runCalls = n === null ? 0 : 1 + onScreen + 2 + driftStamps
   const runPixels = n === null ? 0 : screen + onScreen * sprites + driftStamps * sprites
 
+  /**
+   * **The descent's loop — counted the day the path was born**, so this instrument is never
+   * blind to a third draw path the way it was to the first two. One backdrop stamp, one stone
+   * per visible slot, the shadow, the rider, and the snowfall is already in rainCalls.
+   */
+  const dd = stage.descent
+  const slopeOnScreen = dd === null ? 0 : Math.ceil((stage.h + 120) / dd.spacingD) + 2
+  const descCalls = dd === null ? 0 : 1 + slopeOnScreen + 2
+  const descPixels = dd === null ? 0 : screen + slopeOnScreen * sprites
+
   return {
     perFrame: {
       // backdrop + rain + subjects + the climb's or the runner's own loops + the final blit
-      drawCalls: 1 + rainCalls + stage.placed.length + climbCalls + runCalls + 1,
-      pixels: screen + sprites + climbPixels + runPixels,
+      drawCalls: 1 + rainCalls + stage.placed.length + climbCalls + runCalls + descCalls + 1,
+      pixels: screen + sprites + climbPixels + runPixels + descPixels,
       blitPixels: stage.w * stage.scale * stage.h * stage.scale,
       overdraw: (screen + sprites + climbPixels + runPixels) / screen,
     },

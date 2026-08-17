@@ -29,7 +29,15 @@ export function run(html: string): Harness {
       set imageSmoothingEnabled(_v: boolean) {},
       set fillStyle(_v: string) {},
       set globalAlpha(_v: number) {},
-      createImageData: (w: number, h: number) => ({ width: w, height: h, data: new Uint8ClampedArray(w * h * 4) }),
+      createImageData: (w: number, h: number) => {
+        // The browser throws "Value is not of type 'long'" here; a fake that shrugs at NaN
+        // approves the exact class of defect it exists to catch — a scene field that never
+        // reached the payload sailed through this stub and died only on the real page.
+        if (!Number.isInteger(w) || !Number.isInteger(h) || w < 1 || h < 1) {
+          throw new TypeError(`createImageData(${w}, ${h}) — a browser would have thrown`)
+        }
+        return { width: w, height: h, data: new Uint8ClampedArray(w * h * 4) }
+      },
       putImageData: () => {},
       fillRect: () => {}, beginPath: () => {}, fill: () => {}, ellipse: () => {},
       drawImage: (src: { _canvas?: true }) => {

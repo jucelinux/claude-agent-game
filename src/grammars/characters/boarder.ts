@@ -29,7 +29,7 @@ import type { Grammar, Palette } from '../../core/types.ts'
  * binding; what changes per his reference is WHERE the palette sits: high key, saturated,
  * shadows that stay coloured instead of going grey.
  */
-const PISTE: Palette = {
+export const BOARDER_PALETTE: Palette = {
   name: 'boarder-piste',
   colors: [
     [0, 0, 0],
@@ -129,7 +129,7 @@ const PARTS = [
  */
 export const snowCarve: Grammar = {
   name: 'snow-carve',
-  palette: PISTE,
+  palette: BOARDER_PALETTE,
   skeleton: SKELETON,
   parts: PARTS,
   gait: {
@@ -164,7 +164,7 @@ export const snowCarve: Grammar = {
  */
 export const snowJump: Grammar = {
   name: 'snow-jump',
-  palette: PISTE,
+  palette: BOARDER_PALETTE,
   skeleton: SKELETON,
   parts: PARTS,
   gait: {
@@ -199,7 +199,7 @@ export const snowJump: Grammar = {
  */
 export const snowRodeo: Grammar = {
   name: 'snow-rodeo',
-  palette: PISTE,
+  palette: BOARDER_PALETTE,
   skeleton: SKELETON,
   parts: PARTS,
   gait: {

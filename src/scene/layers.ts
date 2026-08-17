@@ -27,7 +27,7 @@
  */
 import type { RGB } from '../core/types.ts'
 import { execute, loadParams } from '../io/load.ts'
-import type { Climb, Placement, Runner, Scene } from './types.ts'
+import type { Climb, Descent, Placement, Runner, Scene } from './types.ts'
 import { floorDepth, hazeAt, paintOrder, standRow } from './types.ts'
 
 /** One sprite's whole cycle, cropped, in index space. */
@@ -89,6 +89,7 @@ export type Placed = {
   readonly approach?: Placement['approach']
   readonly climber?: Placement['climber']
   readonly runs?: Placement['runs']
+  readonly rides?: Placement['rides']
 }
 
 /**
@@ -105,6 +106,13 @@ export type StageRunner = Omit<Runner, 'stones' | 'reaper' | 'drift'> & {
   readonly reaper: (Omit<NonNullable<Runner['reaper']>, 'grammar' | 'tunables'> & { readonly layer: number }) | null
   /** The drifting bands, each with its puff grammars resolved to layer indices. */
   readonly drift: readonly (Omit<NonNullable<Runner['drift']>[number], 'puffs'> & { readonly puffs: readonly number[] })[]
+}
+
+/** The descent, with every grammar name already resolved to a layer index. */
+export type StageDescent = Omit<Descent, 'stones' | 'ridge' | 'clouds'> & {
+  readonly stones: readonly number[]
+  readonly ridge: (Omit<NonNullable<Descent['ridge']>, 'puffs'> & { readonly puffs: readonly number[] }) | null
+  readonly clouds: (Omit<NonNullable<Descent['clouds']>, 'grammar' | 'tunables'> & { readonly layer: number }) | null
 }
 
 export type StageClimb = Omit<Climb, 'perches'> & {
@@ -145,6 +153,8 @@ export type Stage = {
   readonly climb: StageClimb | null
   /** Present on an endless runner, null on every other kind. */
   readonly runner: StageRunner | null
+  /** Present on a down-slope game, null on every other kind. */
+  readonly descent: StageDescent | null
   /** Back to front. */
   readonly placed: readonly Placed[]
   /** Distinct colours across every layer — the same cohesion reading, on the same terms. */
@@ -331,6 +341,7 @@ export function toStage(scene: Scene): Stage {
       ...(p.approach === undefined ? {} : { approach: p.approach }),
       ...(p.climber === undefined ? {} : { climber: p.climber }),
       ...(p.runs === undefined ? {} : { runs: p.runs }),
+      ...(p.rides === undefined ? {} : { rides: p.rides }),
       order: paintOrder(p, i),
     })
   }
@@ -363,6 +374,25 @@ export function toStage(scene: Scene): Stage {
         ...band,
         puffs: band.puffs.map((p) => build(p, 0, false).layer),
       })),
+    }
+  }
+
+  let descent: StageDescent | null = null
+  if (scene.descent !== undefined) {
+    const { stones, ridge, clouds, ...rest } = scene.descent
+    descent = {
+      ...rest,
+      stones: stones.map((o) => build({ grammar: o.grammar, tunables: o.tunables }, 0, false).layer),
+      ridge:
+        ridge === undefined
+          ? null
+          : { spacing: ridge.spacing, jitterX: ridge.jitterX, row: ridge.row, seed: ridge.seed,
+              puffs: ridge.puffs.map((p) => build(p, 0, false).layer) },
+      clouds:
+        clouds === undefined
+          ? null
+          : { count: clouds.count, minY: clouds.minY, maxY: clouds.maxY, seed: clouds.seed,
+              layer: build({ grammar: clouds.grammar, tunables: clouds.tunables }, 0, false).layer },
     }
   }
 
@@ -432,6 +462,6 @@ export function toStage(scene: Scene): Stage {
   return {
     name: scene.name, w: scene.w, h: scene.h, scale: scene.scale, ground: scene.ground,
     sky: scene.sky, groundRamp: scene.groundRamp, stars: scene.stars ?? null, dust: scene.dust ?? null, rain, floor,
-    layers, climb, runner, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
+    layers, climb, runner, descent, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
   }
 }

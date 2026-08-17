@@ -47,7 +47,7 @@ const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
   JSON.stringify({
     w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
     groundRamp: stage.groundRamp, floor: stage.floor, stars: stage.stars, dust: stage.dust,
-    rain: stage.rain, climb: stage.climb, runner: stage.runner, interactive, meter: interactive,
+    rain: stage.rain, climb: stage.climb, runner: stage.runner, descent: stage.descent, interactive, meter: interactive,
     layers: stage.layers.map((l) => ({
       w: l.w, h: l.h, ox: l.ox, oy: l.oy, foot: l.footOff, n: l.frames, ms: l.msPerFrame,
       palette: l.palette, indices: Buffer.from(l.indices).toString('base64'),
@@ -130,7 +130,7 @@ function mount(el, S) {
    * same plus a timer. Nothing here is in the sprites — a clip is chosen by the state, and
    * the sprites have never heard of a state.
    */
-  var P = null, crew = [], K = null, R = null
+  var P = null, crew = [], K = null, R = null, DS = null
   for (var i = 0; i < S.placed.length; i++) {
     var pl = S.placed[i]
     /**
@@ -160,6 +160,16 @@ function mount(el, S) {
       R = {
         at: i, dist: 0, y: 0, vy: 0, jumps: 0, state: 'run', clip: 0,
         speed: S.runner.speed, menace: 0, passed: -1, best: 0, over: false,
+      }
+    }
+    /**
+     * **The rider's whole state.** A slope distance, a lane, a hop height, a steer sign and a
+     * flag. Everything on screen is derived from these six numbers every frame.
+     */
+    if (pl.rides && S.descent) {
+      DS = {
+        at: i, dist: 0, x: (S.descent.minX + S.descent.maxX) / 2, y: 0, vy: 0,
+        steer: 0, clip: 0, speed: S.descent.speed, best: 0, over: false,
       }
     }
     if (pl.player) {
@@ -683,6 +693,37 @@ function mount(el, S) {
     if (N.reaper && R.menace >= 1) { R.menace = 1; R.over = true; R.state = 'caught' }
   }
 
+  /**
+   * **The ordered weave, shared by every backdrop that has a surface.** It lived inside the
+   * runner's block until the descent needed it too — two copies of a quantiser would be two
+   * quantisers eventually, the compose/layers lesson.
+   */
+  var BAY4 = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5]
+  var BAY2 = [0,2,3,1]
+  function bayerAt(x, y, n) {
+    if (n === 2) return (BAY2[(y & 1) * 2 + (x & 1)] + 0.5) / 4 - 0.5
+    return (BAY4[(y & 3) * 4 + (x & 3)] + 0.5) / 16 - 0.5
+  }
+  /** Paint rows y0..y1 as a dithered ramp through 'stops'. At amount 0 it is flat bands. */
+  function ramp(ctx, stops, y0, y1, dz) {
+    var span = y1 - y0
+    var img = ctx.createImageData(S.w, span)
+    var d = img.data
+    for (var yy = 0; yy < span; yy++) {
+      // Position along the ramp in STOP units, so the fraction is the thing to dither.
+      var u = (stops.length - 1) * (yy / Math.max(1, span - 1))
+      for (var xx = 0; xx < S.w; xx++) {
+        var k = Math.floor(u + dz.amount * bayerAt(xx, y0 + yy, dz.lattice))
+        if (k < 0) k = 0
+        if (k > stops.length - 1) k = stops.length - 1
+        var c = stops[k]
+        var at = (yy * S.w + xx) * 4
+        d[at] = c[0]; d[at + 1] = c[1]; d[at + 2] = c[2]; d[at + 3] = 255
+      }
+    }
+    ctx.putImageData(img, 0, y0)
+  }
+
   /** The runner's backdrop: a fixed sky, stars, a moon. Nothing here moves with the camera. */
   var runnerBg = null
   if (S.runner) {
@@ -708,32 +749,7 @@ function mount(el, S) {
      * road dashes and the obstacles — carry no dither at all.
      */
     var DZ = S.runner.dither || { amount: 0, lattice: 4 }
-    var BAY4 = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5]
-    var BAY2 = [0,2,3,1]
-    function bayerAt(x, y, n) {
-      if (n === 2) return (BAY2[(y & 1) * 2 + (x & 1)] + 0.5) / 4 - 0.5
-      return (BAY4[(y & 3) * 4 + (x & 3)] + 0.5) / 16 - 0.5
-    }
-    /** Paint rows y0..y1 as a dithered ramp through 'stops'. At amount 0 it is flat bands. */
-    function ramp(ctx, stops, y0, y1) {
-      var span = y1 - y0
-      var img = ctx.createImageData(S.w, span)
-      var d = img.data
-      for (var yy = 0; yy < span; yy++) {
-        // Position along the ramp in STOP units, so the fraction is the thing to dither.
-        var u = (stops.length - 1) * (yy / Math.max(1, span - 1))
-        for (var xx = 0; xx < S.w; xx++) {
-          var k = Math.floor(u + DZ.amount * bayerAt(xx, y0 + yy, DZ.lattice))
-          if (k < 0) k = 0
-          if (k > stops.length - 1) k = stops.length - 1
-          var c = stops[k]
-          var at = (yy * S.w + xx) * 4
-          d[at] = c[0]; d[at + 1] = c[1]; d[at + 2] = c[2]; d[at + 3] = 255
-        }
-      }
-      ctx.putImageData(img, 0, y0)
-    }
-    ramp(rb, S.runner.skyRamp, 0, S.runner.groundRow)
+    ramp(rb, S.runner.skyRamp, 0, S.runner.groundRow, DZ)
     if (S.runner.stars) {
       for (var sj = 0; sj < S.runner.stars.count; sj++) {
         var sha = ((sj + S.runner.stars.seed) * 2654435761) >>> 0; sha = (sha ^ (sha >>> 13)) >>> 0
@@ -753,7 +769,7 @@ function mount(el, S) {
     // The road, dithered the same way: a receding surface is a ramp from the horizon down, and a
     // flat asphalt is the one thing that would say "this is a render at low resolution".
     if (DZ.amount > 0 && S.floor.length > 2) {
-      ramp(rb, S.floor, S.runner.groundRow, S.h)
+      ramp(rb, S.floor, S.runner.groundRow, S.h, DZ)
     } else {
       for (var fy3 = 0; fy3 < S.floor.length; fy3++) {
         rb.fillStyle = rgb(S.floor[fy3]); rb.fillRect(0, S.runner.groundRow + fy3, S.w, 1)
@@ -892,6 +908,180 @@ function mount(el, S) {
     el.textContent = R.over
       ? (S.runner.overText || 'she caught you at ') + R.best.toFixed(0) + ' m  ·  press space to run again'
       : R.best.toFixed(0) + ' m'
+  }
+
+  /**
+   * **The descent's backdrop, baked once.** Sky strip woven at the top, the piste ramp below,
+   * the ridge treeline and the clouds stamped in — all static, which is honesty as much as
+   * economy: a far ridge does not visibly move when you travel straight away from it, and a
+   * static backdrop is the no-crawl rule by construction.
+   */
+  var descentBg = null
+  if (S.descent) {
+    descentBg = cv(S.w, S.h)
+    var db = descentBg.getContext('2d')
+    var DDZ = S.descent.dither || { amount: 0, lattice: 2 }
+    ramp(db, S.descent.skyRamp, 0, S.descent.horizonRow, DDZ)
+    ramp(db, S.floor, S.descent.horizonRow, S.h, DDZ)
+    if (S.descent.clouds) {
+      var DC = S.descent.clouds, CLD = S.layers[DC.layer]
+      for (var ci2 = 0; ci2 < DC.count; ci2++) {
+        var ch = ((ci2 + DC.seed) * 2654435761) >>> 0; ch = (ch ^ (ch >>> 13)) >>> 0
+        var ch2 = (ch * 1597334677) >>> 0; ch2 = (ch2 ^ (ch2 >>> 15)) >>> 0
+        db.drawImage(sheets[DC.layer], 0, 0, CLD.w, CLD.h,
+          (ch % S.w) - Math.round(CLD.w / 2), DC.minY + (ch2 % Math.max(1, DC.maxY - DC.minY)), CLD.w, CLD.h)
+      }
+    }
+    if (S.descent.ridge) {
+      var RG = S.descent.ridge
+      var rgN = Math.ceil(S.w / RG.spacing) + 2
+      for (var ri = -1; ri < rgN; ri++) {
+        var rh = ((ri + RG.seed) * 2654435761) >>> 0; rh = (rh ^ (rh >>> 13)) >>> 0
+        var rh2 = (rh * 1597334677) >>> 0; rh2 = (rh2 ^ (rh2 >>> 15)) >>> 0
+        var rli = RG.puffs[(rh2 >>> 5) % RG.puffs.length], RL = S.layers[rli]
+        db.drawImage(sheets[rli], 0, 0, RL.w, RL.h,
+          ri * RG.spacing + (rh % RG.jitterX) + RL.ox, rowOf({ anchor: 'origin', y: RG.row }, RL), RL.w, RL.h)
+      }
+    }
+  }
+
+  /** The descent's obstacles: 2D hashed slots — a slope distance AND a lane, nothing stored. */
+  function slopeAt(k) {
+    var D = S.descent
+    var h = ((k + D.seed) * 2654435761) >>> 0; h = (h ^ (h >>> 13)) >>> 0
+    var h2 = (h * 1597334677) >>> 0; h2 = (h2 ^ (h2 >>> 15)) >>> 0
+    return {
+      d: D.leadIn + k * D.spacingD + (h % D.jitterD),
+      x: D.minX + (h2 % (D.maxX - D.minX)),
+      v: (h2 >>> 9) % D.stones.length,
+    }
+  }
+
+  /**
+   * **The descent: one lane axis, one hop, and the mountain decides the rest.**
+   *
+   * Steering is the CARVE — the composed-roll clip plays whenever a key is held, which is the
+   * whole reason this game exists. The hop clears what its art is shorter than 'clearance',
+   * read from the crop: a rock is jumpable and a pine is lethal because of how each is drawn.
+   */
+  function descend(t, dt) {
+    var D = S.descent
+    if (DS.over) {
+      if (keys.jumpTap) {
+        keys.jumpTap = false
+        DS.dist = 0; DS.x = (D.minX + D.maxX) / 2; DS.y = 0; DS.vy = 0
+        DS.steer = 0; DS.clip = 0; DS.speed = D.speed; DS.best = 0; DS.over = false
+      }
+      return
+    }
+
+    DS.speed = Math.min(D.maxSpeed, DS.speed + D.accel * dt)
+    DS.dist += DS.speed * dt
+    if (DS.dist / D.pxPerMetre > DS.best) DS.best = DS.dist / D.pxPerMetre
+
+    var dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
+    DS.steer = dx
+    if (dx !== 0) DS.x = Math.max(D.minX, Math.min(D.maxX, DS.x + dx * D.steer * dt))
+
+    if (keys.jumpTap) {
+      keys.jumpTap = false
+      if (DS.y === 0) { DS.vy = -D.jump; DS.clip = 0 }
+    }
+    if (DS.y > 0 || DS.vy !== 0) {
+      DS.vy += D.gravity * dt
+      DS.y = DS.y - DS.vy * dt
+      DS.clip += dt
+      if (DS.y <= 0) { DS.y = 0; DS.vy = 0; DS.clip = 0 }
+    }
+
+    // Collision: any slot whose slope window and lane window both overlap the rider. Airborne
+    // clears art shorter than the clearance: height read from the crop, never a flag.
+    var near = Math.round((DS.dist - D.leadIn) / D.spacingD)
+    for (var k = Math.max(0, near - 3); k <= near + 3; k++) {
+      var sl = slopeAt(k)
+      if (Math.abs(sl.d - DS.dist) >= D.stoneHalfD + D.bodyHalfD) continue
+      if (Math.abs(sl.x - DS.x) >= D.stoneHalfW + D.bodyHalfW) continue
+      var SL = S.layers[D.stones[sl.v]]
+      if (DS.y > 0 && -SL.oy < D.clearance) continue
+      DS.over = true
+    }
+  }
+
+  function drawDescent(t) {
+    var D = S.descent
+    ox.drawImage(descentBg, 0, 0)
+
+    /**
+     * **The slot window maps SCREEN edges through leadIn and the jitter — his batch-5 lesson,
+     * applied at birth instead of learned again.** Screen y = holdY + (slotD - dist); terrain
+     * ahead is BELOW the rider and rises as the camera advances down the slope.
+     */
+    var kFirst = Math.max(0, Math.floor((DS.dist - D.holdY - 60 - D.jitterD - D.leadIn) / D.spacingD))
+    var kLast = Math.floor((DS.dist + (S.h - D.holdY) + 60 - D.leadIn) / D.spacingD) + 1
+
+    // Painter's order is slope order: far (up-screen) first, the rider spliced in at his row.
+    var riderDrawn = false
+    for (var k = kFirst; k <= kLast + 1; k++) {
+      var beyond = k > kLast
+      var sl = beyond ? null : slopeAt(k)
+      if (!riderDrawn && (beyond || sl.d >= DS.dist)) {
+        riderDrawn = true
+        drawRider(t)
+      }
+      if (beyond) break
+      var li = D.stones[sl.v], L = S.layers[li]
+      var sy = D.holdY + (sl.d - DS.dist)
+      var sx = sl.x + L.ox
+      // The crop's top through rowOf — the one function allowed to turn a row into a position.
+      var top = rowOf({ anchor: 'origin', y: sy }, L)
+      if (top > S.h || top + L.h < 0) continue
+      ox.drawImage(sheets[li], 0, 0, L.w, L.h, Math.round(sx), Math.round(top), L.w, L.h)
+    }
+
+    rain(t)
+
+    if (DS.over) {
+      ox.globalAlpha = 0.5
+      ox.fillStyle = '#0a0812'; ox.fillRect(0, 0, S.w, S.h)
+      ox.globalAlpha = 1
+    }
+  }
+
+  function drawRider(t) {
+    var D = S.descent
+    var pd = S.placed[DS.at]
+    // The state names a clip: airborne is the launch, a held key is the carve (mirrored for
+    // the other edge by the pair mechanism), and the rest is the glide.
+    var cn = DS.y > 0 || DS.vy !== 0 ? pd.rides.launch : DS.steer !== 0 ? pd.rides.carve : pd.rides.glide
+    var pair = pd.clips[cn]
+    var li = DS.steer < 0 ? pair.left : pair.right
+    var L = S.layers[li]
+    var f = DS.y > 0 || DS.vy !== 0
+      ? Math.min(L.n - 1, Math.floor(DS.clip * 1000 / L.ms))
+      : Math.floor(DS.dist / (D.strideLen / L.n)) % L.n
+    /**
+     * **The contact shadow, and it is the batch-4 look's finding applied at birth**: a rider
+     * with no shadow floats on snow. It shrinks with the hop, and it is the only thing telling
+     * the player where the landing is.
+     */
+    var sk = Math.max(0.45, 1 - DS.y / 40)
+    ox.globalAlpha = 0.22 * sk
+    ox.fillStyle = '#1a2a4a'
+    ox.beginPath()
+    ox.ellipse(Math.round(DS.x), D.holdY + 15, Math.round(9 * sk), Math.max(1, Math.round(3 * sk)), 0, 0, 6.283185)
+    ox.fill()
+    ox.globalAlpha = 1
+    ox.drawImage(sheets[li], 0, f * L.h, L.w, L.h,
+      Math.round(DS.x + L.ox), Math.round(rowOf({ anchor: 'origin', y: D.holdY }, L) - DS.y), L.w, L.h)
+  }
+
+  function descentScore(now) {
+    if (!S.meter || now - scoreAt < 90) return
+    scoreAt = now
+    var el = document.getElementById('score'); if (!el) return
+    el.textContent = DS.over
+      ? (S.descent.overText || 'you wiped out at ') + DS.best.toFixed(0) + ' m  ·  press space to ride again'
+      : DS.best.toFixed(0) + ' m'
   }
 
   /**
@@ -1111,6 +1301,18 @@ function mount(el, S) {
       return
     }
 
+    // **A descent takes its own path**: a fourth camera, a fourth loop.
+    if (S.descent && DS) {
+      drawn.length = 0
+      descend(t, dt)
+      drawDescent(t)
+      vx.drawImage(off, 0, 0, view.width, view.height)
+      meter.work.push(clock() - began); if (meter.work.length > 120) meter.work.shift()
+      report(now); descentScore(now)
+      requestAnimationFrame(frame)
+      return
+    }
+
     if (S.climb && K) {
       drawn.length = 0
       climb(t, dt)
@@ -1262,7 +1464,7 @@ function mount(el, S) {
    * the state, and it cannot show pixels. The first thing it found was a locked orbit that four
    * different tuning sweeps had failed to explain.
    */
-  return { view: view, drawn: drawn, state: function () { return R || K || P } }
+  return { view: view, drawn: drawn, state: function () { return R || K || DS || P } }
 }
 `
 
@@ -1366,15 +1568,16 @@ export function shelfPage(games: readonly AppGame[]): string {
 
 /** **One game, big, and playable.** Input is bound on this route and nowhere else. */
 export function gamePage(game: AppGame): string {
-  const playable = game.stage.placed.some((p) => p.player !== undefined || p.climber !== undefined || p.runs !== undefined)
+  const playable = game.stage.placed.some((p) => p.player !== undefined || p.climber !== undefined || p.runs !== undefined || p.rides !== undefined)
   // **The score is a DOM element and not a sprite.** A HUD is not art: baking a number into an
   // indexed buffer would mean drawing a font, and a font is the one thing in a pixel game that
   // has to be legible at every scale rather than beautiful at one.
-  const scored = game.stage.climb !== null || game.stage.runner !== null
+  const scored = game.stage.climb !== null || game.stage.runner !== null || game.stage.descent !== null
   return shell(
     `${game.title} · claude-ink-2d`,
     `<a class="back" href="/">← shelf</a><h1>${esc(game.title)}</h1><span class="sub mono">${esc(game.id)}</span>`,
     `${scored ? `<div class="score mono" id="score">0.0 m</div>` : ''}
+     <div id="boot" class="mono"></div>
      <div class="stage"><div id="stage"></div></div>
      <div class="meter mono"><span class="tag">measured</span><span id="meter">warming up…</span></div>
      ${playable ? `<div class="keys">${esc(game.keys ?? '← → walk · space act')}</div>` : ''}
