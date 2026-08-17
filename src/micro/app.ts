@@ -765,6 +765,34 @@ function mount(el, S) {
     var N = S.runner
     ox.drawImage(runnerBg, 0, 0)
 
+    /**
+     * **The drift bands: the sky's own traffic, far to near.** The stones' hash at a fraction
+     * of the world's speed — slot k yields a position, an altitude and a variant, nothing is
+     * stored, and the band scrolls at 'parallax' of the distance. Each puff is offset into its
+     * own breathing cycle by its slot, the three-clouds rule, so a sky of many never pulses as
+     * one object.
+     */
+    for (var b = 0; b < (N.drift ? N.drift.length : 0); b++) {
+      var B = N.drift[b]
+      var scrolled = R.dist * B.parallax
+      var f0 = Math.floor((scrolled - 80) / B.spacing)
+      var f1 = Math.floor((scrolled + S.w + 80) / B.spacing) + 1
+      for (var dk = f0; dk <= f1; dk++) {
+        var dh = ((dk + B.seed) * 2654435761) >>> 0; dh = (dh ^ (dh >>> 13)) >>> 0
+        var dh2 = (dh * 1597334677) >>> 0; dh2 = (dh2 ^ (dh2 >>> 15)) >>> 0
+        var pli = B.puffs[(dh2 >>> 5) % B.puffs.length], PL = S.layers[pli]
+        var px = dk * B.spacing + (dh % B.jitterX) - scrolled + PL.ox
+        if (px > S.w + 60 || px < -60 - PL.w) continue
+        // Through rowOf, as every placement: a band row is still a row, and the one rule the
+        // engine has about rows is that exactly one function turns them into crop positions.
+        var py = rowOf({ anchor: 'origin', y: B.minY + (dh2 % Math.max(1, B.maxY - B.minY)) }, PL)
+        // Slots run negative behind the start line, so the modulo has to be taken twice or a
+        // negative slot asks drawImage for a frame above the sheet.
+        var pf = ((Math.floor(t * 1000 / PL.ms + dk * 0.37) % PL.n) + PL.n) % PL.n
+        ox.drawImage(sheets[pli], 0, pf * PL.h, PL.w, PL.h, Math.round(px), Math.round(py), PL.w, PL.h)
+      }
+    }
+
     // The stones, far to near is irrelevant here: they all stand on one row.
     var first = Math.floor((R.dist - 60) / N.spacing)
     var last = Math.floor((R.dist + S.w + 60) / N.spacing) + 1
@@ -773,7 +801,10 @@ function mount(el, S) {
       var li = N.stones[st.v], L = S.layers[li]
       var sx = N.holdX + (st.x - R.dist) + L.ox
       if (sx > S.w + 40 || sx < -40) continue
-      ox.drawImage(sheets[li], 0, 0, L.w, L.h, Math.round(sx),
+      // A stone with more than one frame animates on the page clock, offset by its slot so a
+      // sky of flocks never beats as one. A 1-frame stone is byte-identical to the old path.
+      var sf = L.n > 1 ? Math.floor(t * 1000 / L.ms + k * 0.37) % L.n : 0
+      ox.drawImage(sheets[li], 0, sf * L.h, L.w, L.h, Math.round(sx),
         Math.round(rowOf({ anchor: 'origin', y: N.groundRow }, L)), L.w, L.h)
     }
 

@@ -120,7 +120,11 @@ describe('a weld says two shapes are one surface', () => {
       // test is whether the real object has a seam. The rider is welded throughout; the shoes on
       // the deck and the trucks bolted to it are NOT, because those are places a real skateboard
       // comes apart.
-      'skate-roll', 'skate-ollie', 'skate-flip', 'street-kerb', 'street-cone', 'street-rail'])
+      'skate-roll', 'skate-ollie', 'skate-flip', 'street-kerb', 'street-cone', 'street-rail',
+      // Run 18. The same 16/08 verdict, applied at authoring time: fabric on fabric is one skin
+      // (wings, fin, fuselage; each bird one mark), everything bolted or strapped keeps its seam
+      // (cowl panels, struts, wheels, the pilot, the scarf, baskets against envelopes).
+      'aero-cruise', 'aero-climb', 'aero-roll', 'sky-balloon', 'sky-flock', 'sky-kite'])
     for (const { grammar: g, tunables: t } of PAIRS) {
       if (welded.has(g)) continue
       const grammar = grammarByName(g)

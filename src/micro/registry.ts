@@ -28,6 +28,7 @@ import { cryptScene } from './crypt-scene.ts'
 import { skateScene } from './skate-scene.ts'
 import { forestScene } from './forest-scene.ts'
 import { moonScene } from './moon-scene.ts'
+import { aeroScene } from './aero-scene.ts'
 
 export type MicroGame = {
   /** Stable, and it never changes: he navigates by it. */
@@ -173,5 +174,24 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     date: '2026-08-16',
     keys: 'space ollie · space again in the air = kickflip · one collision ends the run',
     scene: skateScene,
+  },
+  /**
+   * **Micro game 6: the dawn patrol.** Transfer test B from the backlog — the barrel roll on a
+   * second subject — delivered as the game it lives in, per the 15/08 rule.
+   *
+   * The kickflip proved `Bone.roll` on a plank hanging from an unrotated bone. This machine is
+   * the same channel on the ROOT of a 21-part skeleton: wings, tail, wheels and pilot all carried
+   * through the turn, and the silhouette is the proof — 26 px of wingspan that live entirely in
+   * depth at rest sweep into the vertical at the quarter turn, so the sprite grows mass that was
+   * never on screen. The climb is the control, authored wholly in the screen plane.
+   */
+  {
+    id: 'aero',
+    title: 'Barrel roll',
+    blurb:
+      'Space climbs; space again in the air is a barrel roll. The biplane turns a whole circle about its own length — a quarter in, the wings that were two pale edges stand upright taller than the machine, and the cream undersides trade places with the crimson tops the way the deck traded wood for grip. The balloon and the flock fall to the climb; the kite balloon hangs its cable too high for anything but the roll. The dawn and the valley far below are the largest woven surface on the shelf, and two cloud bands drift at their own fractions of the world’s speed, so the sky has depth the backdrop alone could never carry. One collision and you go down.',
+    date: '2026-08-17',
+    keys: 'space climb · space again in the air = barrel roll · one collision ends the run',
+    scene: aeroScene,
   },
 ]

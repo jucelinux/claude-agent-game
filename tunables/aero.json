@@ -1,0 +1,88 @@
+{
+  "canvas": {
+    "w": 64,
+    "h": 48,
+    "originX": 32,
+    "originY": 26
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 8
+  },
+  "light": {
+    "x": -0.5,
+    "y": -0.55,
+    "z": -0.3,
+    "curve": 1.1
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.05,
+    "lift": 2,
+    "depth": 6,
+    "roll": 0
+  },
+  "texture": {
+    "speckle": 0,
+    "dither": 0,
+    "lattice": 2
+  },
+  "shadow": {
+    "steps": 7,
+    "bias": 0.25,
+    "strength": 2
+  },
+  "fill": {
+    "x": 0.45,
+    "y": 0.4,
+    "z": -0.3,
+    "weight": 0.1
+  },
+  "playback": {
+    "msPerFrame": 90,
+    "scale": 4
+  },
+  "_anchors": {
+    "canvas.w": "64. The machine spans 33 px prop to sternpost and the roll never changes its LENGTH — roll is about screen x, so x extents are invariant and the cell needs no flip margin sideways. 15 px of margin either side holds the outline and the bob.",
+    "canvas.h": "48, and the worst pose is the QUARTER ROLL, not the rest pose: the 30 px top-wing span sweeps into the vertical, reaching 15 px either side of the hull. 30 rows of sweep + wheels at 9 below + outline fits with 2 rows spare; 64 would spend 16 rows on nothing.",
+    "canvas.originX": "32, dead centre. The hull is near symmetric about its own middle and the sprite never flips (the street games run one way), so centre is the cheapest true answer.",
+    "canvas.originY": "26. The hull's own axis — the centre of the barrel roll, as the skate put its origin at the hip that the somersault turns about. Wheels reach 9 below (row 35), the quarter-roll wing 13 above (row 13).",
+    "tones.perMaterial": "5, the 15/08 idiom. Six materials at five tones is 30 entries + transparent.",
+    "frames.walk": "8, forced by the four named phases of the cruise: the quarter marks must land on frames or src/core/contract.ts refuses the manifest — the ink probe's defect, held off by a lock since.",
+    "light.x": "-0.5, upper left, the shelf's lamp. The dawn in this scene is a BACKDROP fact; the subject keeps the project's key or it disagrees with every other body ever placed beside it.",
+    "light.y": "-0.55, low. A low sun rims the wing edges, and the wing edge is the surface this round has to keep readable at 2 px.",
+    "light.z": "-0.3, toward the viewer, the skate's value: both wing faces have to be legible through the roll and a grazing lamp would lose one.",
+    "light.curve": "1.1. Slightly above linear; the machine is the bright thing against a dawn sky, so the dark end compresses less than the crypt's 1.3.",
+    "gait.swing": "0.05 turn = 18° at a key of 1. The largest cruise key is 0.6 on the SCARF (11°, cloth in an airstream); the hull's is 0.14 (2.5°, a trim wobble). DERIVED from what level flight does, not carried from another clip — run 7's recorded lesson.",
+    "gait.lift": "2 px. The hull bobs ±1 px on the cruise, half the skate's pump: a machine on air moves less than a body on legs.",
+    "gait.depth": "6 px. Unused; every cruise track is screen-plane or scale.",
+    "gait.roll": "0, and the zero is the null case for the channel on this subject: if the cruise changes when roll ships, the change came from somewhere it had no business reaching — the skate-roll rule, re-armed for the transfer.",
+    "body.scale": "1. The machine is 33 px long in a 240 px world — the runner proportion, three obstacles of warning on screen.",
+    "texture.speckle": "0. Retired 15/08.",
+    "texture.dither": "0 on the body, and the number is the skate round's measured result carried, not re-derived: a small body has no single-owner surface for a lattice (rider 0.000 at 4×4). The weave in this game lives on the sky and the world below, at full amplitude.",
+    "texture.lattice": "2, the body value, unused at dither 0.",
+    "shadow.steps": "7, one more than the deepest mass (the fuselage at 3.2, the wing span treated by its 26 px depth is capped by the solver).",
+    "shadow.bias": "0.25, project-wide since run 7.",
+    "shadow.strength": "2 ramp steps, the outdoor value the street uses.",
+    "fill.x": "0.45, opposite the key.",
+    "fill.y": "0.4, from below — at altitude the fill IS the sky bouncing off the undersides.",
+    "fill.z": "-0.3, matching the key.",
+    "fill.weight": "0.1, the street's value: enough to keep the cream undersides from going mud, not enough to flatten the wing edge.",
+    "playback.msPerFrame": "90, read only by the bench: in the game the cruise advances with distance over strideLen, so this number cannot disagree with the world's speed.",
+    "playback.scale": "4, read only by the bench.",
+    "outline.enabled": "true, the 15/08 ink verdict.",
+    "outline.material": "\"ink\", the skate's blue-cast near-black: the sky behind is warm, so a cool line separates from the scene's light instead of fighting it.",
+    "outline.inner": "true, and Part.weld places it: fabric-on-fabric is one skin (wings, fin, fuselage), everything bolted or strapped keeps its seam (cowl, struts, wheels, pilot, scarf) — the kitten rule.",
+    "outline.rim": "false, settled 15/08."
+  }
+}

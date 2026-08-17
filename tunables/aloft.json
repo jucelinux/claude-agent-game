@@ -1,0 +1,88 @@
+{
+  "canvas": {
+    "w": 40,
+    "h": 52,
+    "originX": 20,
+    "originY": 44
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "frames": {
+    "walk": 1
+  },
+  "light": {
+    "x": -0.5,
+    "y": -0.55,
+    "z": -0.3,
+    "curve": 1.1
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "gait": {
+    "swing": 0.1,
+    "lift": 2,
+    "depth": 6,
+    "roll": 0
+  },
+  "texture": {
+    "speckle": 0,
+    "dither": 0,
+    "lattice": 2
+  },
+  "shadow": {
+    "steps": 7,
+    "bias": 0.25,
+    "strength": 2
+  },
+  "fill": {
+    "x": 0.45,
+    "y": 0.4,
+    "z": -0.3,
+    "weight": 0.1
+  },
+  "playback": {
+    "msPerFrame": 125,
+    "scale": 4
+  },
+  "_anchors": {
+    "canvas.w": "40. The widest obstacle is the kite balloon's envelope at 22 px plus fins; 9 px of margin a side holds the outline.",
+    "canvas.h": "52. The kite balloon reaches 37 px above the line and the mooring tails reach 7 below it — the one place any obstacle paints below the horizon, and it is a depth cue, not a footprint.",
+    "canvas.originX": "20, centre.",
+    "canvas.originY": "44 — the cruise line. Obstacles anchor by origin on the runner's ground row, so the origin IS the horizon: art above it is obstacle, art below it is rope trailing toward the far world.",
+    "tones.perMaterial": "5, the idiom.",
+    "frames.walk": "1: the balloon and the kite balloon are moored stills, as the gravestones and the kerbs were. The flock animates and carries its own file, the cat-tuck rule.",
+    "light.x": "-0.5, the scene's lamp, shared with the machine.",
+    "light.y": "-0.55, shared.",
+    "light.z": "-0.3, shared.",
+    "light.curve": "1.1, shared.",
+    "gait.swing": "0.1, unused by a still.",
+    "gait.lift": "2, unused.",
+    "gait.depth": "6, unused.",
+    "gait.roll": "0. Nothing in the furniture rolls; the channel belongs to the machine.",
+    "body.scale": "1: furniture at the world's own scale.",
+    "texture.speckle": "0, retired 15/08.",
+    "texture.dither": "0, the body rule.",
+    "texture.lattice": "2, unused.",
+    "shadow.steps": "7, shared with the machine so one sun lights the sky.",
+    "shadow.bias": "0.25, project-wide since run 7.",
+    "shadow.strength": "2 ramp steps, the outdoor value.",
+    "fill.x": "0.45, opposite the key, the scene's fill.",
+    "fill.y": "0.4, from below — sky bounce.",
+    "fill.z": "-0.3, matching the key.",
+    "fill.weight": "0.1, the street's value.",
+    "playback.msPerFrame": "125, read only by the bench for a 1-frame still.",
+    "playback.scale": "4, bench only.",
+    "outline.enabled": "true, the 15/08 ink verdict.",
+    "outline.material": "\"ink\", the same line as the machine: one hand draws the sky.",
+    "outline.inner": "true; welds mark the real seams — basket against envelope, cable against everything.",
+    "outline.rim": "false, settled 15/08."
+  }
+}

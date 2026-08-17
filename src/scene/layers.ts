@@ -99,10 +99,12 @@ export type Placed = {
  * a consumer of pre-rendered indexed bytes and has never heard of a grammar.
  */
 /** The runner, with every grammar name already resolved to a layer index. */
-export type StageRunner = Omit<Runner, 'stones' | 'reaper'> & {
+export type StageRunner = Omit<Runner, 'stones' | 'reaper' | 'drift'> & {
   readonly stones: readonly number[]
   /** Absent when the game has no chaser: a collision is then the consequence on its own. */
   readonly reaper: (Omit<NonNullable<Runner['reaper']>, 'grammar' | 'tunables'> & { readonly layer: number }) | null
+  /** The drifting bands, each with its puff grammars resolved to layer indices. */
+  readonly drift: readonly (Omit<NonNullable<Runner['drift']>[number], 'puffs'> & { readonly puffs: readonly number[] })[]
 }
 
 export type StageClimb = Omit<Climb, 'perches'> & {
@@ -344,7 +346,7 @@ export function toStage(scene: Scene): Stage {
    */
   let runner: StageRunner | null = null
   if (scene.runner !== undefined) {
-    const { stones, reaper, ...rest } = scene.runner
+    const { stones, reaper, drift, ...rest } = scene.runner
     runner = {
       ...rest,
       stones: stones.map((o) => build({ grammar: o.grammar, tunables: o.tunables }, 0, false).layer),
@@ -355,6 +357,12 @@ export function toStage(scene: Scene): Stage {
               creep: reaper.creep, hit: reaper.hit, relief: reaper.relief, fromX: reaper.fromX,
               layer: build({ grammar: reaper.grammar, tunables: reaper.tunables }, 0, false).layer,
             },
+      // The drift bands go through the same build as everything else — same crop, same cache.
+      // A `scale` here is how a far band gets small clouds without a second grammar.
+      drift: (drift ?? []).map((band) => ({
+        ...band,
+        puffs: band.puffs.map((p) => build(p, 0, false).layer),
+      })),
     }
   }
 

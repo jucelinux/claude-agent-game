@@ -37,6 +37,8 @@ import { MOON } from './scenery/moon.ts'
 import { PERCHES } from './scenery/perch.ts'
 import { CRYPT_PROPS, death } from './scenery/crypt.ts'
 import { streetCone, streetKerb, streetRail } from './scenery/street.ts'
+import { aeroClimb, aeroCruise, aeroRoll } from './vehicles/aero.ts'
+import { skyBalloon, skyFlock, skyKite } from './scenery/aloft.ts'
 
 /** shipped = judged usable · probe = built to compare, never content · retired = superseded or failed. */
 export type GrammarStatus = 'shipped' | 'probe' | 'retired'
@@ -141,6 +143,21 @@ export const CATALOG: Readonly<Record<string, CatalogEntry>> = {
     games: ['skate'],
     description: 'street furniture graded to the two tricks — the kerb and cone fall to the ollie, the rail needs the flip',
   }),
+  // `vehicle` is a new kind, added by using it (the catalog's own rule): the first subject here
+  // that is a machine a player rides rather than a body that walks.
+  ...family([aeroCruise, aeroClimb, aeroRoll], {
+    kind: 'vehicle',
+    status: 'shipped',
+    games: ['aero'],
+    description: 'the biplane — barrel roll on the ROOT of a 21-part skeleton, run 18: wing faces trade places and the span sweeps into the silhouette; the climb is the screen-plane control',
+    tags: ['3d-roll'],
+  }),
+  ...family([skyBalloon, skyFlock, skyKite], {
+    kind: 'prop',
+    status: 'shipped',
+    games: ['aero'],
+    description: 'sky furniture graded to the two presses — balloon and flock fall to the climb, the kite balloon’s cable needs the roll; every column honestly full',
+  }),
 }
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = Object.fromEntries(
@@ -197,6 +214,15 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: skateOllie.name, tunables: 'skate-ollie' },
   { grammar: skateFlip.name, tunables: 'skate-flip' },
   ...[streetKerb, streetCone, streetRail].map((g) => ({ grammar: g.name, tunables: 'street' })),
+  // Three clips, three files, the skater's reason: a frame count and an amplitude live in the
+  // tunables, and the barrel roll needs gait.roll at a whole turn.
+  { grammar: aeroCruise.name, tunables: 'aero' },
+  { grammar: aeroClimb.name, tunables: 'aero-climb' },
+  { grammar: aeroRoll.name, tunables: 'aero-roll' },
+  // The stills share a file; the flock animates and carries its own — the cat-tuck rule.
+  { grammar: skyBalloon.name, tunables: 'aloft' },
+  { grammar: skyKite.name, tunables: 'aloft' },
+  { grammar: skyFlock.name, tunables: 'aloft-flock' },
 ]
 
 export function grammarByName(name: string): Grammar {
