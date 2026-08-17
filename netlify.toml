@@ -1,0 +1,9 @@
+# The shelf, published static. `--static` renders every route from current code at build
+# time into plain files — the same pages the live server composes per request, frozen at
+# the commit being deployed. Point Netlify at this repo; nothing else to configure.
+[build]
+  command = "node bin/micro.ts --static"
+  publish = "dist/micro"
+
+[build.environment]
+  NODE_VERSION = "24"

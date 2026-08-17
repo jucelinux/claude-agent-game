@@ -7,7 +7,7 @@ import { grammarByName } from '../src/grammars/index.ts'
 import { findings } from '../src/perception/structure.ts'
 import { solve } from '../src/core/skeleton.ts'
 import { evaluate } from '../src/core/gait.ts'
-import { ASTRONAUT } from '../src/grammars/run14/astronaut.ts'
+import { ASTRONAUT } from '../src/grammars/characters/astronaut.ts'
 
 /**
  * **Turning a body, and the checks are the ones a yaw can actually fail.**

@@ -83,5 +83,16 @@ Every number carries the command that regenerates it and its date.
 | `node bin/run.ts <run.json>` | headless: state hash + metrics |
 | `node bin/record.ts <out.json> [--set …]` | capture into a replayable run file |
 
-Every tunable lives in `tunables/`, anchored, the anchor locked. A grammar is data in
-`src/grammars/`; `fixture` is the harness's subject, not content.
+Every tunable lives in `tunables/`, anchored, the anchor locked.
+
+**The lexicon is a catalog (16/08).** `src/grammars/` is organized by kind — `creatures/`,
+`characters/`, `vegetation/`, `scenery/`, `probes/` — and `src/grammars/index.ts` is the
+retrieval surface: every grammar carries `kind`, `status` (shipped/probe/retired), a
+searchable description, and the games it appears in. `kind` and `tags` are open strings —
+a new taxonomy (3D, style, per-game catalogs) is added by using it, never by editing a
+type. An agent asks the catalog before authoring a new subject. Locked in
+`tests/catalog.test.ts`; `fixture` is the harness's subject, not content.
+
+**The shelf deploys to Netlify (16/08).** `netlify.toml` builds `node bin/micro.ts
+--static` and publishes `dist/micro/` — every route frozen at the deployed commit. The
+local shelf stays live-per-request; the deploy is a snapshot for remote sessions.

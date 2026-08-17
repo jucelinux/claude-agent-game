@@ -24,7 +24,7 @@
  * been making since day zero.
  */
 import type { Gait, Grammar } from '../../core/types.ts'
-import { gorilla } from '../run5/gorilla.ts'
+import { gorilla } from './gorilla.ts'
 
 /**
  * Eight named phases over 16 frames, so every key lands on a whole frame at eighths. Eight

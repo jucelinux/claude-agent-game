@@ -27,7 +27,7 @@
  * stack — every measurement. portable — the ping-pong transformation, and swap-by-scale.
  */
 import type { Grammar, Palette, Part, Track } from '../../core/types.ts'
-import { gorilla } from '../run5/gorilla.ts'
+import { gorilla } from './gorilla.ts'
 
 /**
  * Fur, hide, silver and ink come from the gorilla unchanged; steel and the eye are what this

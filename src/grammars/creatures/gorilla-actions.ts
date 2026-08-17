@@ -26,7 +26,7 @@
  * the way an arm crosses a body.
  */
 import type { Gait, Grammar } from '../../core/types.ts'
-import { gorilla } from '../run5/gorilla.ts'
+import { gorilla } from './gorilla.ts'
 
 /**
  * **The jump.** Six phases, and the spacing is the animation: three frames of crouch, one

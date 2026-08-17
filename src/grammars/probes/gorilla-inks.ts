@@ -29,7 +29,7 @@
  * a simple one wanted gradient, **if** the reading supports it.
  */
 import type { Grammar, Palette, Part } from '../../core/types.ts'
-import { gorillaJump } from '../run7/actions.ts'
+import { gorillaJump } from '../creatures/gorilla-actions.ts'
 
 /**
  * **Stardew — the control.** Four tones, warm and light, and a real outer line.
