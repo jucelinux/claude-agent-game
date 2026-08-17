@@ -28,6 +28,11 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
   rewards — the only axis whose score comes from nothing happening.
 - `[derived 15/08 · probe D]` He reads a defect through what it resembles ("the sash looks
   like a buggy arm"); location exact, cause one level below the words.
+- `[derived 17/08 · batch 5]` Environment richness he rewards is MOTION depth — parallax,
+  drifting clouds, animated obstacles — named as "agradável" in the same breath as the
+  mechanic. A static backdrop was "básico"; the same paint moving at three rates is not.
+- `[derived 17/08 · batch 5]` The consistency axis extends to lifecycle: an obstacle must
+  leave the screen before it is destroyed. Genre convention is part of what he checks.
 
 ## 1b. Bar per axis
 
@@ -85,7 +90,7 @@ the axis it was proven on, never across it.**
 | steerable body | gorilla, astronaut, kitten | nothing known — spend freely |
 | props (rocks, shelves) | moon, climb | interaction beyond standing |
 | body turned in depth (yaw) | astronaut + 2 transfer locks | depth/width < ~0.45 collapses — measured |
-| roll (out of screen plane) | skate kickflip | one subject, one clip — biplane & carve are the transfer tests |
+| roll (out of screen plane) | skate kickflip **+ biplane barrel roll on a 21-part ROOT, his verdict 17/08** | composition with a parent's screen-plane angle (the declared approximation) — batch 6 tests it |
 | face at small scale | kitten | any face not a round-skulled animal |
 | a game that can be lost | climb, crypt, skate | win conditions beyond "how far" |
 | subtraction (`cut`) | skull re-authored | **verdict pending** (BACKLOG) |

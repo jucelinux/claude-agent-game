@@ -558,7 +558,12 @@ export type Field =
       readonly spacing: number
       readonly length: number
       readonly slant: number
-      /** Whole passes down the screen per scene cycle. An integer, or the loop jumps. */
+      /**
+       * Passes down the screen per scene cycle. It set the fall SPEED and had to be whole
+       * while frames were pre-composited — a loop point demanded it. The runtime has been
+       * continuous in seconds since 15/08, there is no loop point left, and snow needs a
+       * fraction: a flake at a drop's whole-pass speed is hail.
+       */
       readonly passes: number
       readonly seed: number
     }

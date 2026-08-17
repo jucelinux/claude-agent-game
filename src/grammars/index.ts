@@ -39,6 +39,8 @@ import { CRYPT_PROPS, death } from './scenery/crypt.ts'
 import { streetCone, streetKerb, streetRail } from './scenery/street.ts'
 import { aeroClimb, aeroCruise, aeroRoll } from './vehicles/aero.ts'
 import { skyBalloon, skyFlock, skyKite } from './scenery/aloft.ts'
+import { snowCarve, snowJump, snowRodeo } from './characters/boarder.ts'
+import { pistePine, pistePuff, pisteSapling, pisteSnowman } from './scenery/piste.ts'
 
 /** shipped = judged usable · probe = built to compare, never content · retired = superseded or failed. */
 export type GrammarStatus = 'shipped' | 'probe' | 'retired'
@@ -158,6 +160,27 @@ export const CATALOG: Readonly<Record<string, CatalogEntry>> = {
     games: ['aero'],
     description: 'sky furniture graded to the two presses — balloon and flock fall to the climb, the kite balloon’s cable needs the roll; every column honestly full',
   }),
+  ...family([snowCarve, snowJump, snowRodeo], {
+    kind: 'character',
+    status: 'shipped',
+    games: ['snow'],
+    description: 'the snowboarder, run 19 — Yoshi’s Island chibi (head 0.4 of height, his reference), and the rodeo composes a full roll with a LEANING root: the declared approximation under test',
+    tags: ['3d-roll', 'yoshi-island'],
+  }),
+  ...family([pisteSnowman, pisteSapling, pistePine], {
+    kind: 'prop',
+    status: 'shipped',
+    games: ['snow'],
+    description: 'piste furniture graded to the two presses — snowman and sapling fall to the jump, the tall snow-capped pine needs the rodeo; YI winter palette',
+    tags: ['yoshi-island'],
+  }),
+  ...entry(pistePuff, {
+    kind: 'scenery',
+    status: 'shipped',
+    games: ['snow'],
+    description: 'a Yoshi’s Island cloud: flat white puff, width 2.2× height, OUTLINED — drawn with the scene’s own crayon; lives in the drift bands',
+    tags: ['yoshi-island'],
+  }),
 }
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = Object.fromEntries(
@@ -223,6 +246,15 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: skyBalloon.name, tunables: 'aloft' },
   { grammar: skyKite.name, tunables: 'aloft' },
   { grammar: skyFlock.name, tunables: 'aloft-flock' },
+  // Run 19: three clips, three files (frame count + amplitude live in the tunables); the piste
+  // stills share one; the puff breathes on two frames and carries its own.
+  { grammar: snowCarve.name, tunables: 'snow' },
+  { grammar: snowJump.name, tunables: 'snow-jump' },
+  { grammar: snowRodeo.name, tunables: 'snow-rodeo' },
+  { grammar: pisteSnowman.name, tunables: 'piste' },
+  { grammar: pisteSapling.name, tunables: 'piste' },
+  { grammar: pistePine.name, tunables: 'piste' },
+  { grammar: pistePuff.name, tunables: 'puff' },
 ]
 
 export function grammarByName(name: string): Grammar {

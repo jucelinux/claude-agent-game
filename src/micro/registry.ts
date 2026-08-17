@@ -29,6 +29,7 @@ import { skateScene } from './skate-scene.ts'
 import { forestScene } from './forest-scene.ts'
 import { moonScene } from './moon-scene.ts'
 import { aeroScene } from './aero-scene.ts'
+import { snowScene } from './snow-scene.ts'
 
 export type MicroGame = {
   /** Stable, and it never changes: he navigates by it. */
@@ -193,5 +194,21 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     date: '2026-08-17',
     keys: 'space climb · space again in the air = barrel roll · one collision ends the run',
     scene: aeroScene,
+  },
+  /**
+   * **Micro game 7: the rodeo.** His commission, 17/08 — snowboard, and the aesthetic is a
+   * him-named reference: Yoshi's Island, SNES, "bem pixel art mesmo". The sky weaves on the
+   * 2×2 checker instead of the 4×4 Bayer, the line is crayon-warm, the snow falls in front of
+   * the world, and the trick composes a full roll with a root that leans — the declared
+   * approximation of `Bone.roll`, tested in the camera his reference forces.
+   */
+  {
+    id: 'snow',
+    title: 'Rodeo',
+    blurb:
+      'Space jumps; space again in the air is a rodeo — the whole boarder turns a circle about the line of travel, board over head, and comes down riding. The suit and the sky are Yoshi’s Island winter: teal checker-blended sky, blue-shadowed snow, outlined clouds, a treeline on the horizon, and snowfall drifting between you and the mountain. The snowman and the sapling fall to the jump; the tall snow-capped pine needs the trick. One collision and you wipe out.',
+    date: '2026-08-17',
+    keys: 'space jump · space again in the air = rodeo · one collision ends the run',
+    scene: snowScene,
   },
 ]

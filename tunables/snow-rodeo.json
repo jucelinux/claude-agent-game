@@ -1,0 +1,88 @@
+{
+  "canvas": {
+    "w": 40,
+    "h": 48,
+    "originX": 20,
+    "originY": 24
+  },
+  "frames": {
+    "walk": 13
+  },
+  "gait": {
+    "swing": 0.14,
+    "lift": 2.4,
+    "depth": 6,
+    "roll": 1
+  },
+  "playback": {
+    "msPerFrame": 40,
+    "scale": 4
+  },
+  "_anchors": {
+    "light.x": "-0.35: the sun is higher and more frontal than the street's — a bluebird morning, and Yoshi's Island light is even, not raking.",
+    "light.y": "-0.75, high. His reference is lit from almost overhead; long shadows are not in its vocabulary.",
+    "light.z": "-0.35, toward the viewer: YI shading is frontal and soft.",
+    "light.curve": "0.95, just under linear — the reference's shading is soft steps, never a hard rim. The crypt's 1.3 is the opposite end of this knob.",
+    "tones.perMaterial": "5, the 15/08 idiom — binding regardless of reference. YI itself works in about this many tones per surface.",
+    "outline.enabled": "true — his reference outlines EVERYTHING, which is half of what 'Yoshi Island' means at this scale.",
+    "outline.material": "\"ink\", but WARM: crayon brown-black, not the street's blue-black. Extracted from the reference at intake.",
+    "outline.inner": "true; welds decide, the kitten rule.",
+    "outline.rim": "false, settled 15/08.",
+    "texture.speckle": "0, retired 15/08.",
+    "texture.dither": "0, the body rule from the skate round: a small body has no surface for a lattice. The checker lives on the sky and the snowfield.",
+    "texture.lattice": "2, unused at 0 on bodies; declared 2 because if it is ever turned on, 2 is the YI checker.",
+    "shadow.steps": "7, the project value.",
+    "shadow.bias": "0.25, project-wide since run 7.",
+    "shadow.strength": "1 ramp step — HALF the street's 2, extracted from the reference: YI self-shadow is a tint, not a plunge.",
+    "fill.x": "0.35, opposite the key.",
+    "fill.y": "0.55, from below and STRONG in direction: snow is the brightest bounce card there is.",
+    "fill.z": "-0.35, matching the key.",
+    "fill.weight": "0.14, above the street's 0.1 — snow bounce, and the reference's shadows stay coloured because of it.",
+    "body.scale": "1: the subject draws at the world's own scale; the register is the scene's.",
+    "playback.scale": "4, bench only.",
+    "canvas.w": "40: roll is about screen x, the length never grows.",
+    "canvas.h": "48, and THIS clip is why: at the half turn the pom hangs 19 below the core and the board rides 16 above it.",
+    "canvas.originX": "20, shared.",
+    "canvas.originY": "24 — the core, the centre of the turn.",
+    "frames.walk": "13: (n-1) divisible by four for the five phases, 30° between frames — the kickflip's arithmetic, third subject.",
+    "gait.swing": "0.14 turn: the tuck's largest key is 1.6 on an arm; the core's angle keys run to 0.2 (10°) — AND THAT ANGLE IS THE EXPERIMENT: it moves WHILE the roll accumulates, so the non-commuting pair is exercised at a different value every frame.",
+    "gait.lift": "2.4 px; the runtime carries the arc.",
+    "gait.depth": "6, unused.",
+    "gait.roll": "1 turn — the file exists for this number, third subject: a plank, a machine's root, and now a root that LEANS. The declared approximation (roll does not commute with a parent's screen-plane angle) is this clip's whole test.",
+    "playback.msPerFrame": "40: thirteen frames make 520 ms against the second impulse's ~0.77 s of air, so the turn completes and the hold is a stomped landing."
+  },
+  "tones": {
+    "perMaterial": 5
+  },
+  "light": {
+    "x": -0.35,
+    "y": -0.75,
+    "z": -0.35,
+    "curve": 0.95
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "texture": {
+    "speckle": 0,
+    "dither": 0,
+    "lattice": 2
+  },
+  "shadow": {
+    "steps": 7,
+    "bias": 0.25,
+    "strength": 1
+  },
+  "fill": {
+    "x": 0.35,
+    "y": 0.55,
+    "z": -0.35,
+    "weight": 0.14
+  }
+}

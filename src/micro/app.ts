@@ -794,13 +794,23 @@ function mount(el, S) {
     }
 
     // The stones, far to near is irrelevant here: they all stand on one row.
-    var first = Math.floor((R.dist - 60) / N.spacing)
-    var last = Math.floor((R.dist + S.w + 60) / N.spacing) + 1
+    /**
+     * **The slot window maps SCREEN edges to slot indices, and forgetting leadIn was his
+     * batch-5 note.** Slot k sits at world x = leadIn + k*spacing + jitter, and the screen's
+     * left edge is at world x = dist - holdX. The old window divided (dist - 60) by the
+     * spacing — no leadIn, no holdX — which culled every stone at screen x = holdX + leadIn
+     * - 60 - spacing + jitter: mid-screen, in all three runners, since the crypt.
+     * "O mais comum é que ele saia da tela e seja destruído fora dela." 60 px of margin
+     * beyond each edge covers the widest crop in the catalog.
+     */
+    var first = Math.floor((R.dist - N.holdX - N.leadIn - 60) / N.spacing)
+    var last = Math.floor((R.dist - N.holdX - N.leadIn + S.w + 60) / N.spacing) + 1
     for (var k = Math.max(0, first); k <= last; k++) {
       var st = stoneAt(k)
       var li = N.stones[st.v], L = S.layers[li]
       var sx = N.holdX + (st.x - R.dist) + L.ox
-      if (sx > S.w + 40 || sx < -40) continue
+      // Culled only once the CROP is past an edge, never while any pixel of it is on screen.
+      if (sx > S.w || sx + L.w < 0) continue
       // A stone with more than one frame animates on the page clock, offset by its slot so a
       // sky of flocks never beats as one. A 1-frame stone is byte-identical to the old path.
       var sf = L.n > 1 ? Math.floor(t * 1000 / L.ms + k * 0.37) % L.n : 0
@@ -859,6 +869,14 @@ function mount(el, S) {
     var stand = { anchor: D.anchor, y: N.groundRow }
     ox.drawImage(sheets[ri], 0, rfr * RL.h, RL.w, RL.h,
       Math.round(N.holdX + RL.ox), Math.round(rowOf(stand, RL) - R.y), RL.w, RL.h)
+
+    /**
+     * **Weather falls in FRONT of the world in a runner** — his reference has the snow
+     * between the player and the camera. The field is screen-space and camera-free, so the
+     * same rain() the forest uses works unchanged; only the call site is new, and a runner
+     * scene without a field skips it exactly as the fixed path does.
+     */
+    rain(t)
 
     if (R.over) {
       ox.globalAlpha = 0.5

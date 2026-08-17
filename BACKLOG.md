@@ -3,7 +3,7 @@
 What is **open**, as of 17/08 (distilled — closed items live in `DECISIONS.md` and on
 branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
-## Gate — v3, the commission test · running 2 of 4, batch 5 open
+## Gate — v3, the commission test · running 3 of 5, batch 6 open
 
 | batch | commission | verdict | capability the miss specified | cost |
 |---|---|---|---|---|
@@ -11,21 +11,41 @@ branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 | 2 | kitten platformer, cozy | **ships** | — (notes: difficulty ratio, presentation scale) | 1 cycle, 3 readings |
 | 3 | skull runner, SOTN | **miss** | **subtraction** (`Part.cut`) | 1 cycle, 1 reading |
 | 4 | skate + kickflip (roll + pixel-art experiment) | **ships** | — (spec carried: environments are basic) | 1 cycle, 1 reading |
-| 5 | "o máximo do motor", from the Claude app, model named as variable | *open* | — | 1 cycle so far |
+| 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
+| 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | *open* | — | 1 cycle so far |
 
-**Batch 5, 17/08.** His sentence: *"um microgame que extraía o máximo do que temos nesse motor…
-Tudo que fiz até aqui foi com o Opus e quero avaliar o que o Fable é capaz de entregar."* No
-object and no animation in it, so it was resolved against this file's own named next round:
-**transfer test B, the biplane's barrel roll**, as the round that composes the most engine at
-once. Shipped as `/aero` in one model cycle, no back-and-forth.
+**Batch 5 verdict, 17/08, unsoftened — it ships.** *"O barrel roll funcionou muito bem! A
+estética do jogo respeitou o jogo anterior do skate, porém o parallax, as nuvens ao fundo e os
+obstáculos do biplano trouxeram animações e novos elementos, ficou agradável."* He merged the PR
+himself and validated the game on the deployed shelf.
 
-**Prediction (one line, recorded before he looks):** SHIPS at 60/40 — the 40 is whether a 33 px
-machine turning over *reads* as a barrel roll, the one axis with no instrument.
+**Prediction scored (one line):** called SHIPS at 60/40 — right, and the 40 (does the roll READ)
+is the thing he praised first; the dark-valley note I expected never came, and what he named
+instead — parallax, clouds, new elements — is the environment axis rewarded, not noted as absent.
 
-**Declared at delivery (the ledger's one-line rule):** roll was proven on one plank and is spent
-here on the root of a 21-part machine; the cloud bands are hashed slots — a first small piece of
-the environment work he deferred, arrived because a sky game has no scene without it; the pilot
-has no face at 4 px, the skate's own answer.
+**The spec batch 5 carries, his words:** *"o objeto de obstáculo é destruído antes de sair da
+tela. O mais comum é que ele saia da tela e seja destruído fora dela"* — in every side-scroller.
+Root found by arithmetic, not by the symptom's layer: the draw window's inverse map drops
+`leadIn` and one `spacing`, so a stone is culled at screen x ≈ holdX + leadIn − 60 − spacing
+(+jitter) — mid-screen in every runner. The collision map has the same slack and survives on a
+±2-slot margin. Fixed 17/08 with a property lock over all three runner stages.
+
+**Batch 6, 17/08, his sentence:** *"desenvolver a próxima proposta de microjogo (o do
+snowboarding)… eu quero que a estética desse seja bem pixel art mesmo. Então nesse jogo pode
+aplicar a mesma estética e referência visual do Yoshi Island, do snes."* One reference image
+supplied (winter YI screen). Structural numbers extracted at intake per the 16/08 rule — see
+the tunables' anchors.
+
+**Prediction (one line, before he looks):** SHIPS at 65/35 — the 35 is whether the palette and
+checker-dither read as *Yoshi's Island* to someone who named it, which no instrument here
+measures.
+
+**Shipped 17/08 as `/snow` ("Rodeo"), one model cycle:** the trick composes a full roll with a
+root that leans AND keeps changing its lean (the declared approximation, exercised at a
+different value every frame, 491 locks green); the sky weaves on the **2×2 checker** — the
+lattice is the aesthetic statement, locked as data; snowfall is the first field in a runner,
+drawn in front of the world; the despawn fix rode along in the same push and covers the crypt
+and the skate too.
 
 ## Held for the human
 
@@ -37,23 +57,25 @@ has no face at 4 px, the skate's own answer.
   · *Changes:* **yes** → subtraction enters the mastery ledger with a verdict. **no** →
   the cut was the wrong capability or badly spent — worth more than a third primitive.
 
-- [ ] 🟡 **Two minutes: the barrel roll — batch 5's reading.**
-  · *Open:* `node bin/micro.ts` → `/aero`.
-  · *Do:* play until you clear a balloon with one press and the tall moored balloon with two.
-  Say one word — ships or misses — plus a word of why on a miss.
-  · *What a pass looks like:* the plane turning over reads as a stunt, not a glitch; nothing
-  collides where the picture shows empty sky.
-  · *Changes:* **ships** → roll enters the ledger as transferred (two subjects, two verdicts)
-  and the snowboarder becomes a pure approximation test. **misses on the roll** → the transfer
-  claim dies. Missing on anything else specifies the next capability, as every miss has.
+- [ ] 🟡 **Two minutes: the snowboarder — batch 6's reading.**
+  · *Open:* `node bin/micro.ts` → `/snow` (or the deployed shelf).
+  · *Do:* play until you clear a snowman with one press and the tall pine with two. Say one
+  word — ships or misses — plus a word of why on a miss.
+  · *What a pass looks like:* the screen says *Yoshi's Island winter* before you touch a key,
+  and the trick reads as a snowboard trick.
+  · *Changes:* **ships** → the composed roll (roll under a leaning parent) enters the ledger
+  and the aesthetic vocabulary gains its first him-named reference target. **misses** → the
+  word says whether the miss is the trick or the aesthetic, and that word is the next round.
 
-## Next round — transfer test C, the snowboarder's carve, after batch 5 is read
+## Next round — this IS transfer test C, reshaped by his sentence
 
-**B ran on 17/08 as batch 5** (`/aero`). C survives as written: it attacks the declared
-approximation — `Bone.roll` accumulates as a scalar and does not commute with a parent's
-screen-plane angle — and needs a down-slope camera that does not exist. Run it only after B's
-reading: if B misses on the roll itself, C would test an approximation of a capability that did
-not transfer.
+The plan said the carve needs a down-slope camera. His commission forces the SIDE camera —
+Yoshi's Island is a side-view game — so C runs in the camera that exists: the boarder carries a
+**rest lean on the root** and the trick composes a full roll with that screen-plane angle, which
+is exactly the declared approximation (`Bone.roll` accumulates as a scalar and does not commute
+with a parent's angle), now exercised on every frame of the trick. **The down-slope carve camera
+is NOT built and stays unplanned** — recorded here so it is not rediscovered as a dropped item:
+his aesthetic named the camera, and the approximation gets its test without new machinery.
 
 ## Deferred, by him
 
@@ -72,11 +94,11 @@ not transfer.
 
 - [ ] Mark portable/stack on every grammar rule the turn it is born.
 - [ ] The look amendment is measured: per round, one line on what looking caught that
-      counting did not. Round 1 of 3: caught 3 scene facts, verdict unchanged. **Round 2
-      of 3 (batch 5): caught 2 scene facts — the dawn weave reads as pixel art, and the
-      valley's lower half is too dark for its own weave (the asphalt finding's second
-      occurrence, seen before shipping this time); zero sprite facts. Ship unchanged.**
-      Retires after 3 rounds of no effect on hit rate or his cost.
+      counting did not. Round 1 of 3: caught 3 scene facts, verdict unchanged. Round 2 of 3
+      (batch 5): caught 2 scene facts (dawn weave reads as pixel art; the valley too dark
+      for its own weave), zero sprite facts, ship unchanged — **and his verdict then named
+      neither: he praised the parallax and clouds and never mentioned the valley.** Two
+      rounds, no verdict moved. One round left before the retirement question.
 - [ ] Async checkpoints (adopted 16/08): announce feature slices on the shelf in one
       line as they stand. Watch whether his notes get shorter.
 
@@ -97,7 +119,10 @@ Every number carries the command that regenerates it and its date.
 | weave surface share (4×4 single-owner) | rider 0.000 · kitten 0.068 · kerb 0.432 | `[weave]` line of `node bin/bench.ts --grammar skate-roll --tunables skate` | 16/08 |
 | yaw collapse threshold | depth/width ≈ 0.45 | `npx vitest run tests/yaw.test.ts` | 16/08 |
 | TS lines, source + locks | 12 700 / 4 600 | `find src bin -name '*.ts' \| xargs wc -l` | 16/08 |
-| locks green | 452 | `npm test` | 17/08, after run 18 |
+| locks green | 491 | `npm test` | 17/08, after run 19 |
+| the rodeo: board faces trading under a LEANING root | base 25→**119**→8 px · topsheet 32→0→**81**, half a turn apart, pale first | `node bin/bench.ts --grammar snow-rodeo --tunables snow-rodeo` | 17/08 |
+| `/snow` budget | 12 layers, 50 colours, 44 calls/frame of 200, 83k px to decode | `node bin/micro.ts --static` | 17/08 |
+| snowfall speed | 38 px/s (0.14 pass/cycle) — snow, not hail; bounded both ways in tests/snow.test.ts | `npx vitest run tests/snow.test.ts` | 17/08 |
 | the barrel roll on a ROOT: wing faces trading | cream 8→**57**→0 px · crimson 12→**205**→10, half a turn apart, pale first | `node bin/bench.ts --grammar aero-roll --tunables aero-roll` | 17/08 |
 | the span sweep: sprite height, quarter turn vs rest | **>1.5×**, back under 1.25× at the finish | `npx vitest run tests/aero.test.ts` | 17/08 |
 | the far wheel through the roll (offsets rolled, 5 child bones) | 0 px at rest → 12 mid-turn → 0 | `part wheelF` row of the bench command above | 17/08 |

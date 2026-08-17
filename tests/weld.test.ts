@@ -124,7 +124,11 @@ describe('a weld says two shapes are one surface', () => {
       // Run 18. The same 16/08 verdict, applied at authoring time: fabric on fabric is one skin
       // (wings, fin, fuselage; each bird one mark), everything bolted or strapped keeps its seam
       // (cowl panels, struts, wheels, the pilot, the scarf, baskets against envelopes).
-      'aero-cruise', 'aero-climb', 'aero-roll', 'sky-balloon', 'sky-flock', 'sky-kite'])
+      'aero-cruise', 'aero-climb', 'aero-roll', 'sky-balloon', 'sky-flock', 'sky-kite',
+      // Run 19, same verdict: the suit is one garment (jacket-pants-beanie welded); board against
+      // boots, bindings on the topsheet, mitts against sleeves keep their seams. Snow lying on a
+      // pine tier is one drift with the crown; the snowman's hat is bolted felt.
+      'snow-carve', 'snow-jump', 'snow-rodeo', 'piste-snowman', 'piste-sapling', 'piste-pine', 'piste-puff'])
     for (const { grammar: g, tunables: t } of PAIRS) {
       if (welded.has(g)) continue
       const grammar = grammarByName(g)
