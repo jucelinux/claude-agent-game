@@ -1,355 +1,140 @@
 # CLAUDE.md
 
-The project instance. The method lives in `TASTE-LOOP.md`; the harness in `HARNESS.md`.
-**Only this file changes between projects.**
-
-_Scope redefined 15/08, by him, and this file was rewritten whole. What it replaced is not
-wrong — it is superseded, and `DECISIONS.md` carries both halves._
+The project instance, **distilled 16/08** after the external review (`ANALISE-EXTERNA-2026-08-16.md`).
+The narrative version of every file lives on branch `taste-loop-v1`; history lives in
+`DECISIONS.md` (append-only) and in git. This file holds only what binds.
 
 ## Session start
 
-Read, in this order: this file → `TASTE.md` → the last 20 lines of `DECISIONS.md` →
-`BACKLOG.md`. Then `TASTE-LOOP.md` and `HARNESS.md` if the session involves running a
-round or building the harness, and `TASTE-LOOP-LEARNING.md` if it involves the method.
-Do not write code before that.
+Read, in order: this file → `TASTE.md` → the last 20 lines of `DECISIONS.md` → `BACKLOG.md`.
+Read `TASTE-LOOP.md` and `HARNESS.md` only when running a round or changing the harness.
+Do not write code before that. Then run the cycle open (`TASTE-LOOP.md` §3b) — at its
+**cheap** setting while the method is frozen: rungs 1–3 plus contradiction sweep; skip the
+method-debt items.
 
-Then run the **cycle open** — `TASTE-LOOP.md` §3b.
+## The project
 
----
+- **Name:** claude-agent-game (repo). Formerly claude-ink-2d.
+- **What it is:** a game engine whose interface is a coding agent — "o GameMaker dos
+  agentes". He can say exactly what he wants in a game; he cannot draw. The product is the
+  arrangement (harness + engine + drawing grammar) that lets an agent deliver it.
+- **The product surface is ONE thing:** the shelf. `node bin/micro.ts`, port 5177, `/` is
+  the shelf, `/<id>` is a game. Live from current code on every request. Nothing is ever
+  removed from it.
+- **Failure condition:** he decides, from judgment. No metric decides for him.
+- **The defining requirement (deferred by him, still defining):** a fresh agent, given only
+  this repository, can build a small game.
 
-## The gate — version 3, **the commission test**
+## The gate — v3, the commission test
 
-_Adopted 15/08. Versions 1 and 2 are both retired **unrun**, and that pattern is the most
-important thing this section knows about itself — see "Why three gates got this wrong" below._
+- He names an object and an animation in one sentence. The model delivers a micro game,
+  no back-and-forth. He answers in one word, plus a word of why on a miss.
+- **"Ships"** = usable in a game AND he would be glad to have it there.
+- **A miss is a specification, not a strike.** Its output is the name of the missing
+  capability. Every capability in this grammar was born this way.
+- Two numbers recorded per batch, evidence never thresholds: **hit rate** and **cost to
+  hit** (model cycles + his readings per shipped piece).
+- The reading is written into `BACKLOG.md` the same turn it arrives, in his words,
+  unsoftened. `DECISIONS.md` records that a reading happened, never the tally.
+- A batch spans kinds (creature, prop, character, effect, environment).
+- **Prediction discipline (reduced 16/08):** before he looks, ONE line — verdict +
+  probability + the one reason. After, ONE line scoring it. No essays.
+- Do not build a reading whose setup cost lands on him (gates v1 and v2 died of it).
 
-**The reading.** He names an object and an animation **in one sentence**, the way anyone
-commissions an artist: *"a treasure chest that opens"*, *"a bat that flies"*, *"a torch
-with a flame"*. I deliver, with **no further direction and no back-and-forth**. He answers
-with one word.
+## Method status — FROZEN 16/08
 
-**"Ships" means usable in a game AND he would be glad to have it there** — his call,
-15/08, and he took the higher of the two bars offered.
+The Taste Loop's **core stays binding**: verdicts compile into knobs/locks/prose; the
+perception channels; miss-as-specification; binary questions in batches; attributability
+bounds a reading (a foundation is bounded by the null case instead, and may accumulate).
 
-- **Declared cost of that choice, so the retrospective cannot skip it.** One verdict now
-  carries two questions — *can drawing be delegated* and *is the result good* — so a miss
-  does not say which half missed. **Mitigation, and it costs him one word:** on a miss he
-  says why in a word or two. That recovers the distinction without a second verdict.
+**Suspended until three batches show a cost** (then it returns with that evidence):
+round-close ceremony, method proposals and `TASTE-LOOP-LEARNING.md` upkeep, `TASTE.md` §2a
+essays, gate redesigns. The method is settled; the product gets the attention.
 
-**A miss is not a strike. A miss is a specification.** — his correction, 15/08, and it
-rewrites what this section is for. When a commission comes back short, the model's job is
-**not** to iterate the sample. It is to name **which capability was missing**, so it can be
-discussed and built. That is what every miss in this project has actually produced:
+## The bench loop — amended 16/08, structured look adopted
 
-| the miss | the capability it specified |
-|---|---|
-| far limbs read as a lighting error | depth was being faked by paint order → the z-buffer |
-| a limb absent in all twelve frames | a walk's amplitude cannot express an action |
-| "ficou horrível" on the tree | every primitive was convex → the lobed primitive |
-| the crown as a sponge | 28 parts in a 30×28 px space, past a recorded ceiling |
+1. **The counting channel is non-negotiable and runs every turn.** `node bin/bench.ts`:
+   contact sheet, silhouette, findings, counts. It finds what sight cannot — absence
+   leaves no trace in a picture.
+2. **The model MAY look during the bench loop.** `node bin/see.ts [run] [--set …]` writes
+   a contact-sheet PNG to `.eye/`; Read the file. Use it for the correspondence class —
+   "does this look like the thing" — which counting cannot reach.
+3. **Every fix enters through the grammar.** There is nothing else to edit; pixel
+   retouching does not exist as an operation here.
+4. **Measured:** each round records one line — what looking caught that counting did not.
+   If three batches show nothing, the look retires.
+5. **References at intake:** before authoring a NEW subject kind, look at 2–3 reference
+   images (his, or CC0) and extract **structural numbers** — proportions, landmarks,
+   ratios — into the grammar as anchored tunables. `refs/` stays gitignored.
 
-**Two numbers are recorded every batch. They are evidence, never thresholds.**
+## Collaboration
 
-| | what it is | what it is for |
-|---|---|---|
-| **hit rate** | commissions that ship / commissions given | whether the range is widening |
-| **cost to hit** | model bench cycles per shipped piece, and his attention per piece | his stated central risk, instrumented |
+- **Delivery format:** everything he asks for is born as an object belonging to a game —
+  a cloud arrives as a sky a cloud crosses. He says when a new micro game starts.
+- **Async checkpoints (adopted 16/08, his ask):** when a feature slice stands on its route
+  — the skater, the track, the background — announce it in ONE line, keep working. His
+  silence means continue; his comment enters the running round as insight, not as a formal
+  reading. Never block on a checkpoint.
+- **Slice a commission into visible features** (skeleton in scene → environment →
+  mechanic → polish), each appearing on the route when it stands. The number to watch:
+  his notes getting shorter.
+- **The ask format, binding:** what to open · what to do · how long it takes · what a pass
+  looks like · what each answer changes. Plain language a fifteen-year-old follows.
+- **Language rule:** reports to him in ASD-STE100 Simplified Technical English (or the
+  simplified aeronautical Portuguese). Short sentences, active voice, one idea per
+  sentence, no metaphor. Numbers, costs and misses stay exact; if a result is bad, say it
+  is bad. Scope: reports. Repository files keep their (now dry) style.
+- **Cadence:** several batches per week; availability raises frequency, never batch size.
+- His imprecise report is a sensor, near perfect on *that*, rarely right on *where* —
+  hunt the root, never patch the symptom. A complaint names a layer; the cause is often in
+  another (check how a thing is SHOWN before touching how it is DRAWN).
+- When a verdict is about feel, the model owes a number that moved with it.
+- Mastery is spent, not re-litigated: a commission touching a mastered subject on a read
+  axis proceeds freely; on an unread axis it gets one line at delivery naming the risk.
+  The ledger is `TASTE.md` §2b.
 
-**Nobody is killed by a number. He decides when this project ends, and he will not have a
-simple metric for it** — his words, 15/08. Five misses in a row are a prompt to *design*,
-not a verdict to *quit*.
+## Build order — as of 16/08
 
-**The residual risk, named rather than solved.** `TASTE-LOOP.md` §12 lists "no stopping
-rule" as a known gap, and its reasoning is that the party with the incentive to continue
-should not be the one deciding when to stop — which is the model, not him. A threshold was
-the wrong answer to that; the right one is **behavioural and lands on me**: misses get
-reported in his words and unsoftened, predictions get recorded before he looks and scored
-after, and the numbers above go in the record whether or not they flatter. The safeguard is
-that his judgment arrives well-fed, not that it arrives pre-empted.
-
-**A batch spans kinds, deliberately** — creature, prop, character, effect, environment.
-Breadth is the claim now, so a gate measured on one kind measures the wrong thing.
-
-**The gate stays on drawing for now — his call, 15/08.** Drawing is the only subsystem with
-a measured result, and swapping the reading would throw away the series that exists. **An
-engine gate is born with the first playable slice and not before**: a reading with nothing
-to read is how v1 and v2 both died.
-
-**Why three gates got this wrong, and what survives.** Gate v1 (find-the-impostor) died to a
-logic hole. Gate v2 (six loops ranked, five of them from shipped games) died because it
-needed **five files he had to go and collect**, and across a week they never arrived — and I
-raised it three times without once explaining plainly what they were, which is my failure
-and not his. **And v3's first draft, an hour old, tried to make a threshold do his deciding for him.
-Three gates, three different ways of moving the judgment away from the only person who
-has it: a logic hole, then a setup cost dumped on him, then an automated kill.** v3 costs him one sentence to commission and
-one word to judge. That is the property that matters, and it outranks any elegance the
-retired ones had.
-
-**Every batch gets its reading written the same turn it arrives**, at the top of
-`BACKLOG.md`. `DECISIONS.md` records that a reading happened, never the tally.
-
-**No date, and no numeric stopping rule.** The 21/08 deadline is retired with the
-conditions it belonged to (*"abri mão das condições impostas anteriormente"*), and the
-metric that briefly replaced it lasted one turn before he corrected it. **The stopping
-decision is his, held in his head, and it is allowed to be.**
-
----
-
-## 1. The project
-
-- **Name:** claude-ink-2d _(chosen by the human, 14/08)_
-- **What it is, as of 15/08:** **a game engine whose interface is a coding agent.** His
-  words: *"o GameMaker dos agentes"*, and *"uma engine de jogos que permita que o usuário
-  consiga construir seu jogo através de agentes de código"*.
-- **One-line pitch:** he cannot draw, a great many people cannot, and he can say exactly
-  what he wants in a game. The thing that lets him have it is not a better artist — it is an
-  engine another agent can drive.
-- **The failure condition:** it is not possible to build a game through agents with this —
-  and **he calls it**, from judgment rather than from a threshold.
-
-**This reframing renames what exists; it does not discard it.** Every property the harness
-has was built so the model could draw without him watching, and each one turns out to be
-what *any* agent needs to build *anything* without a human in the loop:
-
-| property | why an agent needs it | built for |
-|---|---|---|
-| everything is text and data | an agent writes text | the sprite grammar |
-| a deterministic core | an agent iterates and compares | round zero |
-| a perception channel with no human in it | an agent sees its own output | round zero |
-| a findings channel | an agent locates its own defect | 15/08 |
-| locks | an agent verifies without asking | every round |
-| every number anchored | an agent knows why a value is that value | `HARNESS.md` §2.7 |
-
-**So the harness is the product, and the sprite grammar is subsystem one** — the one that
-proved the pattern works on a visual artifact.
-
-**Three requirements, and the third one changed on 15/08.**
-
-1. **Breadth.** A draughtsman handles many kinds of object and many kinds of animation. That
-   requirement survives intact: the drawing gate still runs, and drawing is still where the
-   only measured results are.
-2. **The validation loop is the central risk, and it is a *making* problem.** His words: the
-   no-images rule is about the most effective way to work, because *validating is part of
-   making*. **This now generalises one level up.** An agent building a game has to perceive
-   the running game without playing it, which is the same problem as perceiving a sprite
-   without looking at it. Deterministic simulation, a text channel, a findings list.
-3. **~~It has to work outside this repo~~ → it has to work for agents other than this one.**
-   The exporter is dead: exporting to somebody else's engine was building a bridge to a
-   competitor, and it answered a requirement that has been replaced. What replaced it is
-   harder and testable: **can a fresh agent, given only this repository, build a small
-   game?** If not, the product does not exist however well it works when I drive it.
-
-**The slice, chosen by him 15/08, and it comes AFTER the drawing is finished: a one-screen
-platformer.** A character, a floor, some
-platforms, something to reach. It needs gravity, box-against-box collision, a jump and a
-fixed camera — and it reuses more of what exists than the alternatives, because the gorilla
-already jumps. **Build the engine only as far as that game needs it.** A game engine is
-enormous and the failure mode is a thin version of everything and a good version of nothing;
-the method's own answer is a vertical slice first (`TASTE-LOOP.md` §6).
-
-**The architectural rule, inherited and now load-bearing twice.** The engine's core is a
-**deterministic headless simulation**, and rendering is a consumer of it — exactly as
-`sprite()` is deterministic and the viewer is a consumer (`HARNESS.md` §2.1). A recorded
-input sequence must replay to the same state, or an agent cannot verify a game at all.
-
-**Binding details that survive the rewrite.** Each is a line in `DECISIONS.md`.
-
-- **The unit of work is the grammar, never a sprite.** Locked indexed palette, per-material
-  ramps with a tone budget, a skeleton with named anchors, a frame matrix with named
-  phases. A sprite is a *sample* of the grammar. **Pixel retouching is drawing, and drawing
-  is where the ceiling is low.**
-- **Animation by transforming anchored parts**, never by redrawing frames. This is the cut
-  that separates reachable from unreachable, and nine runs have not strained it.
-- **An open knob declares its point and its anchor every round** (`HARNESS.md` §2.7).
-- **Depth is solved, not authored** — 2.5D, a z-buffer, no projection divide (run 7).
-- **The ink idiom is five tones over a wide value range, with a drawn line** (run 8, his
-  ranking). Value range and region structure are two factors and both are required.
-
-**Dead — do not restore from old notes.**
-
-- **Subject: arthropod.** Superseded by gorilla, then tree, then breadth as a requirement.
-- **Gate v1 and gate v2.** Both retired unrun. Do not reintroduce a reading whose setup
-  cost lands on him.
-- **The 21/08 date**, and the three-strike counter before it.
-- **"Do not generalize the grammar before it works once."** It worked — the same body took
-  a walk, a jump and an attack, and the same engine took a tree. **Generality is now the
-  work**, under one surviving constraint: *harvest, do not design*. A rule earns its
-  generality by being extracted from two subjects that already work, never by being
-  imagined for subjects that do not exist yet.
-
----
-
-## 2. Build order — **drawing capacity first, and the engine after it**
-
-_His rationale, 15/08, and it corrects an order I had written the wrong way round: **the
-greater the production capacity, the greater the diversity of games possible.** Drawing is
-upstream of the engine, not parallel to it. An engine with a thin asset pipeline makes thin
-games, and no amount of engine work fixes that. **No secondary track. The engine waits.**_
-
-1. ~~Round zero — deterministic core + perception channel~~ **done, 14/08.**
-2. ~~Vertical slice of a grammar~~ **done** — gorilla walk/jump/attack, tree.
-3. ~~The exporter~~ **dead, 15/08.**
-4. **Finish the drawing, and "finish" has a definition rather than a feeling:
-   commissions ship reliably across kinds.** That is exactly what gate v3 measures, and the
-   gate has never run. So the next step is **a commission batch**, not another feature —
-   because a miss is a specification and a feature chosen without one is a guess.
-   Known gaps, named so they can be recognised when a commission hits one, and **not** built
-   before it does:
-   - **pattern inside a part** — stripes, spots, scales, grain, brick. A part has one
-     material and one ramp today.
-   - **effects** — fire, smoke, sparks, an explosion. There is no mechanism at all.
-   - **facing** — one direction is rendered. Four or eight need rotation in depth.
-   - **generativity** — an L-system turns one tree into trees.
-5. **Then the engine slice: a one-screen platformer.** Deterministic headless simulation,
-   fixed timestep, entities, box collision, gravity, recorded input that replays
-   identically, the animation state machine, and the browser runtime — which is mostly the
-   viewer that already exists plus input.
-6. **The agent's perception of a *running game*.** The same pattern as the sprite channel,
-   one level up, and **the differentiator — not the platformer.**
+1. ~~Round zero~~ · 2. ~~grammar slice~~ · 3. ~~exporter~~ (dead) — done or dead.
+4. **Finish the drawing via commission batches.** "Finish" = commissions ship reliably
+   across kinds. Known gaps, built only when a miss names them: pattern inside a part ·
+   effects (fire, smoke) · full 3D pitch (roll exists) · generativity beyond trees.
+5. **Then the engine slice:** one-screen platformer — deterministic headless sim, fixed
+   timestep, box collision, replayable input, animation state machine. (Much exists
+   already: the climb, the runners.)
+6. **The differentiator: the agent's perception of a RUNNING game.** Same pattern as the
+   sprite channel, one level up.
 7. Judging apparatus — only if judging becomes the bottleneck.
 
-## 3. Stack
+Drawing capacity is upstream of the engine: production capacity bounds game diversity.
 
-| Layer | Choice | Why |
-|---|---|---|
-| Language | TypeScript, Node, no DOM | The core has to run headless, under test |
-| Output | indexed buffer → indexed PNG atlas + JSON manifest | A locked palette is verifiable in index space |
-| Tests / locks | Vitest | Rung 2 is where taste compiles |
-| Perception channel | text dump + frame strip + counts | Against wrong presence, look. Against absence, count |
-| Consumer | **Pixi**, as the thing that proves the claim — never as a dependency of the core | An engine that cannot ingest the artifact means the artifact does not exist |
+## Architecture — prerequisites, not preferences
 
-No image dependency is proposed yet; PNG write is stdlib zlib. Architecture rules in
-`HARNESS.md` §2 are prerequisites, not preferences.
+- The deterministic core imports nothing from presentation. `sprite(grammar, params,
+  seed)` is closed-form; the browser is a consumer. A recorded input replays identically.
+- The unit of work is the **grammar**, never a sprite. Animation transforms anchored
+  parts; frames are never redrawn.
+- Every tunable lives in `tunables/`, anchored, locked. Depth is solved (z-buffer, 2.5D),
+  never authored. One placement rule (`rowOf`); one renderer.
+- The ink idiom: five tones over a wide value range, with a drawn line (his run-8
+  ranking). Value range AND region structure, both or neither counts.
+- Declared per part because no measurement can infer intent: `marking`, `weld`, `cut`,
+  symmetric-pair exemptions.
 
----
+## Don'ts
 
-## 4. The human
+- No dependency without proposing it first (Pixi = consumer in an example, never core).
+- No pixel retouching. No judging stills — everything he sees is in motion.
+- Do not design generality; harvest it from two working subjects.
+- Do not enrich the counting channel into a picture — the look is `bin/see.ts`, separate,
+  and the counts stay primary for absence.
+- Do not mechanise his judgment. Any rule that would spare a conversation is suspect.
+- Commit only when he asks or a batch closes.
 
-Jucelinux. Software engineer, author of the Taste Loop, reference practitioner of the
-method.
+## The human
 
-**The pleasure boundary, inverted — and it is the variable under test.** He declared the
-visual creative part his largest gap and asked to delegate it. The Taste Loop presupposes
-the human has taste to spend at rung 5; here he is handing over precisely the piece the
-method assumes he brings. **He is not short of judgment — he plays a great deal and can say
-exactly what he wants in a game.** He is short of the hand. That is the whole asymmetry the
-project exists to exploit.
-
-He is the tiebreaker and the one who sets the bar — not an inspector. Rules in
-`TASTE-LOOP.md` §7: binary questions, in batches, never for something a test resolves.
-
-- **Cadence:** several batches per week. High availability raises the **frequency** of
-  batches, never their size — size is bounded by attributability (§3.6).
-- **He stretches the rope on purpose.** His own words, 15/08: he will keep pushing to find
-  the limits of the current setup so it can be extrapolated. **A question that sounds naive
-  is usually a harness probe** — "leaves follow a mathematical pattern, could you draw the
-  pattern?" was this project's own founding premise applied one level deeper than the model
-  had applied it, and it turned into a primitive.
-- **Delivery format, changed by him 15/08, and it binds every future ask.** *"Tudo que eu
-  lhe pedir daqui pra frente nasce como um objeto que pertence a um jogo."* A cloud is not
-  delivered as a cloud; it is delivered as **a sky a cloud crosses**. The deliverable of any
-  request is a **micro game** — a scene the thing lives in — on the shelf at
-  `node bin/micro.ts --serve`, and he says explicitly when a new one starts.
-  - **The shelf is a webapp with one route per game** — `node bin/micro.ts` serves it on
-    5177, `/` is the shelf and `/<id>` is the game. Iterating on a game is edit, refresh,
-    look: every route renders from current code on every request, with no cache and no build
-    step.
-  - **The shelf renders live from current code**, so every engine improvement reaches every
-    micro game ever made. **It is the only surface, since 16/08.** The frozen gallery that used
-    to sit beside it was deleted at his instruction — *"só faz sentido desenhar se for em uma
-    cena de jogo... o subproduto aqui deva ser uma única coisa"* — and with it the live sprite
-    bench, the gate sheet and the viewer. What survived is the **terminal** eye: the contact
-    sheet and the findings channel, which are how the model perceives its own output and are not
-    a surface anybody looks at.
-  - **Nothing is ever removed from the shelf.** He revisits it.
-  - `dist/history-2026-08-15.html` is the frozen snapshot of everything up to the change.
-  - **Three tracks feed it**, his words: improve the drawing system, improve the engine's
-    components, and improve the *creation methodology* — how the agent guides a person
-    building their game. He expects the third one late, around the end of the following week.
-
-- **Language rule, added 15/08, at his request.** Report to him in **ASD-STE100 Simplified
-  Technical English**. If you write in Portuguese, use the simplified Portuguese of the
-  aeronautical standard. The rules to obey:
-  - Write short sentences. Use 20 words maximum in an instruction. Use 25 words maximum in
-    a description.
-  - Write in the active voice.
-  - Use one word for one meaning. Do not change the word to make the text more varied.
-  - Write one idea in one sentence.
-  - Do not use metaphor. Do not use idiom.
-  - Keep the articles. Do not remove words to make the text short.
-  - Use a list when you show steps or items.
-  - Use 6 sentences maximum in a paragraph.
-  - Technical names and technical verbs of this domain are permitted. Examples: z-buffer,
-    palette, ramp, primitive, gate, phase.
-
-  **This rule agrees with the ask format below.** That paragraph already says an ask must
-  use plain language. This rule makes the requirement exact instead of approximate.
-
-  **What does not change:** the numbers, the declared costs, and the misses. Simple language
-  is not less precision. If a result is bad, say that it is bad.
-
-  **What this rule does not do:** it does not make the text shorter. Simple sentences use
-  more space than dense sentences. A limit on length is a separate rule.
-
-  **Scope:** reports to him. The repository files keep their present style. He must ask
-  before that changes.
-
-- **Delegation line:** the model applies alone — clear margin, rungs 1–3 green. Waits for a
-  batch — a tie, a direction call. Interrupts immediately — nothing, now that the gate has
-  no strike counter.
-- **The shape of every ask, and it binds.** State, in plain language a fifteen-year-old
-  would follow: **what to open · what to do · how long it takes · what a pass looks like ·
-  what each possible answer changes.** No method vocabulary. **An ask he has to decode gets
-  rubber-stamped, and a rubber stamp is worse than silence because it arrives looking like
-  data.** Gate v2 died of exactly this failure — three requests for "the refs" that never
-  once said what they were.
-
----
-
-## 5. Project-specific don'ts
-
-- Do not add a dependency without proposing it first. Pixi is a **consumer in an example**,
-  never an import of the core.
-- **Do not retouch pixels.** If the fix does not fit as a knob, a lock, or a primitive in
-  the grammar, it is not the fix.
-- **Do not judge stills.** Every sample that reaches him is in motion.
-- **Do not design generality; harvest it.** Breadth is the goal now, and the failure mode
-  moved with it: parameterising over subjects that do not exist yet is building the judge
-  before the artifact, again.
-- **Do not build a reading whose setup cost lands on him.** Two gates died of it.
-- **Do not enrich the perception channel into a picture.** A channel that cannot show
-  pixels forces every fix into the generative representation — that is §5's no-retouching
-  rule enforced by blindness instead of by discipline, and it is very likely *why* text
-  perception improved the drawing in his other repos. Enrich it toward **answering
-  questions about parts**, never toward showing a better image.
-
-  **Amended 16/08, by him, and the amendment is narrow on purpose.** He asked whether the
-  no-image rule is still the most efficient arrangement, given that the model routinely writes
-  code to see around it. The evidence from this repo says the code and the eye are **not
-  substitutes**: 14 defects were found by counting and several were *invisible in a picture* —
-  a limb that is absent leaves no trace to see, and a wrong grey is a plausible grey. Every one
-  of the 10 defects only his eye found was the other class: **the thing does not look like what
-  it is supposed to be.** The proof that the second class cannot be compiled is the `swallowed`
-  check of 16/08 — an attempt to measure it in pixels fired on 237 parts across 69 approved
-  subjects, because occlusion is normal and **intent is not in the picture**.
-
-  So the arrangement is now:
-
-  | | rule |
-  |---|---|
-  | **the bench loop, dozens per round** | **blind. Non-negotiable.** It finds what sight cannot |
-  | **once, at the round boundary** | the model may look at **one** rendered sample before it reaches him |
-
-  **The hard rule that makes the look safe: look to decide WHETHER TO SHIP, never to decide
-  WHAT TO CHANGE.** A change is still named from the findings channel and still lands in the
-  grammar, because the grammar is still the only tool there is — the no-retouching rule is
-  untouched, and the blindness that used to enforce it is now enforced by having nothing else
-  to edit. **The model reports what it saw, never what it concluded**: `TASTE.md` §2a records
-  three separate occasions of a verdict written before he looked, and sight makes that easier
-  rather than harder.
-
-  **It is measured, and it is retired if it does not pay.** Every look records what it caught
-  that the channel did not. If three rounds pass with no change to the hit rate and no change
-  to his cost per batch, the amendment goes. **Cost is not the argument in either direction:**
-  one image is one to two thousand tokens against a round that spends hundreds of thousands.
-  What his original rule was right about is a **per-iteration image judge** — rung 4, the most
-  expensive and least reliable oracle in the ladder — and nothing here proposes one.
+Jucelinux. Software engineer, author of the Taste Loop. Plays a great deal; can say
+exactly what he wants in a game; delegates the hand, not the judgment. He stretches the
+rope on purpose — a naive-sounding question is usually a harness probe. He picks the
+medium, delegates the taste inside it, and wants the reasoning out loud before it is
+applied.

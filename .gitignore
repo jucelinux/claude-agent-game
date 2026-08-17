@@ -4,3 +4,4 @@ node_modules/
 tunables/_*.json
 refs/
 dist/
+.eye/

@@ -1,680 +1,87 @@
 # BACKLOG.md
 
-What is **open**. What is settled lives in `DECISIONS.md`.
+What is **open**, as of 16/08 (distilled — closed items live in `DECISIONS.md` and on
+branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
-A **state** file. Owner of the numbers that change, re-derived when a verdict supersedes
-it. It is also where a cold session picks up the work — read against itself at every cycle
-open (`TASTE-LOOP.md` §3b).
+## Gate — v3, the commission test · running 2 of 4
 
----
-
-## Gate — **v3, the commission test.** Adopted 15/08 · no date
-
-He names an object and an animation in one sentence. I deliver with no back-and-forth. He
-answers in one word, plus one word of *why* on a miss. Full definition in `CLAUDE.md`.
-
-**Batch 4 given 16/08**, and it is the first one he framed as an experiment rather than a
-commission. His sentence, verbatim:
-
-> *"você havia se recusado a trabalhar no aprimoramento 3D no microjogo anterior e agora eu quero
-> explorar a possibilidade de desenharmos pixel art. Quero tratar esses 2 temas nessa run mais
-> experimental."*
-
-Then, after I offered three themes and recommended the skate:
-
-> *"Vamos de skate (sua recomendação), e posteriormente os outros 2 para validar se consolidamos a
-> técnica. Pixel Art: pode puxar para o extremo do desafio. A ideia desse experimentor é provar uma
-> tese, então pode recomendar aqui o que a força."*
-
-**Two things he said that shape how this closes.** The other two themes are *transfer tests*, not
-follow-ups — he wants to know whether the technique consolidated, which is `TASTE.md` §2b's own rule
-about dominance transferring only along the axis it was proven on. And "prove a thesis" means the
-round is allowed to come back with a NO.
-
-| batch | commissions | shipped | hit rate | cycles per shipped piece |
+| batch | commission | verdict | capability the miss specified | cost |
 |---|---|---|---|---|
-| 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
-| 2 | 1 | **1 — ships** | 1/1 | 1 model cycle, 3 readings |
-| 3 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
-| 4 | 1 | *open* | — | 1 model cycle so far |
-
-**Running: 1 of 3, batch 4 open.**
-
-### What ships — `node bin/micro.ts`, route `/skate`
-
-A skater on a dusk street. Space ollies; space again in the air is a **kickflip**. The kerb and the
-cone fall to the ollie, the rail needs the flip. One collision ends the run.
-
-### His verdict, 16/08, unsoftened — **it ships**
-
-> *"Joguei todos os jogos e não percebi nenhuma piora."*
->
-> *"A prancha virou de verdade, respeitando o comando, gostei muito!"*
->
-> *"Eu gostei da representação do skatista e aprecio seus detalhes aplicados ao jogo: as cores, a
-> ausência de qualquer bug relacionado ao posicionamento do skate e dos obstáculos, demonstrou
-> consistência de sua parte nessa run."*
->
-> *"Se fosse um microjogo que eu tivesse idealizado (ao invés de uma sugestão para provarmos um
-> conceito) eu trabalharia nos detalhes do ambiente e do skatista. Estão básicos, mas no geral o jogo
-> está ok!"*
-
-**That is a ship, and the control passed with it.** Every earlier game renders from current code, so
-"nenhuma piora" is the only evidence that the roll work did not damage the screen-plane path — and it
-covers four scenes rather than the one ollie I had designated.
-
-| batch | commissions | shipped | hit rate | cycles per shipped piece |
-|---|---|---|---|---|
-| 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
-| 2 | 1 | **1 — ships** | 1/1 | 1 model cycle, 3 readings |
-| 3 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading |
-| 4 | 1 | **1 — ships** | 1/1 | **1 model cycle, 1 reading** |
-
-**Running: 2 of 4.** Cost per shipped piece is the lowest the project has recorded: one cycle, one
-reading, no back-and-forth.
-
-### Scoring the prediction — **wrong, and wrong in a way that is about me rather than about the work**
-
-| I predicted | what happened |
-|---|---|
-| a MISS at 60/40 | **ships** |
-| the roll passes | **passes**, and it is the thing he named first: *"gostei muito"* |
-| **the pixel-art half misses**, because the weave is not visible on the rider and "the instrument refused it" sounds like an excuse | **he never mentioned it.** Not positively, not negatively. He praised *"as cores"* and did not name the sky, the dusk or the dither |
-| the weakest instrument is whether a 26 px board reads as a skateboard | **it read.** He named the absence of positioning bugs on it, which is a stronger statement than "it reads" |
-
-**The bias, and it is new.** I predicted his verdict from **the round's internal argument** — the thesis
-I had spent the session proving, the honest NO I had to report, the sentence I was afraid would sound
-like an excuse. He graded **a game on a page**. Every single thing he named is a player's reading: the
-board obeying the button, the colours, the absence of bugs, the consistency across a run. Not one is
-about the experiment.
-
-`TASTE-LOOP.md` §4 says judge artifacts, never source, because source access converts a judge into a
-reviewer and reviewers rate effort. **I had been predicting from the source.** The round's narrative
-was vivid to me and invisible to him, which is exactly the asymmetry that rule exists to name.
-
-### The pixel-art thesis has NO verdict, and that is a result rather than an oversight
-
-He did not read it. It shipped inside a round that shipped, and those are not the same thing.
-
-So the honest state is: **the weave is measured and unjudged.** Measured, it works on a sky and is
-indistinguishable from dirt on a body — a 36 px character has 0.000 of its pixels inside a
-single-owner 4x4 cell. Judged, nothing. A reading would need the weave to be **the variable**, which is
-a probe with two samples of one scene, not a feature inside a game.
-
-**It is not proposed.** §3.0 says a probe is for the first round on an axis, and this axis has a
-measured answer already; spending his attention to confirm a number the channel can produce is the
-cost his own gate design exists to avoid. It goes in the record as unjudged and waits for a round
-where the surface is the subject — which is exactly what the procedural-environment work below is.
-
-### Batch 3 verdict, 16/08, unsoftened
-
-> *"Essa primeira versão ficou ruim. Primeiro, a caveira: isso não é uma caveira. Nem de longe
-> lembra uma... A movimentação da corrida está bem acelerada, parece que ela está correndo em
-> supervelocidade... O obstáculo não está no mesmo nível da caveira, está na altura da cintura...
-> A movimentação de pulo e o pulo duplo ficaram ok, mas a projeção do pulo duplo deveria garantir
-> mais altura."*
-
-**Four defects, and three of them are measured rather than argued:**
-
-| his words | the number |
-|---|---|
-| the stone is at waist height | his feet land on row **127** and the ground is **112**. `drawRunner` ignores the `anchor: 'foot'` the placement declares — the climb applies it, this path does not |
-| running at super speed | **9.9 stride cycles per second** at the speed cap. A sprint is about 2.5. The frame is picked from distance over a fixed divisor, with no bound |
-| the double jump should gain more | apex 22 → 36 px. The second press buys 14 px, which is less than half a body |
-| **it is not a skull** | not a bug. See below — it is the capability the miss specifies |
-
-### The capability this miss specifies: **subtraction**
-
-**A skull is read by its holes.** Eye sockets, a nasal cavity, the gap between teeth. Every
-primitive in this grammar is a **solid**, and a body is their *union* — so the vocabulary can add
-mass and cannot remove any. The socket I drew is a `marking`, which recolours the surface it lies
-on: a dark patch painted on a white ball, not a cavity in a bone.
-
-**That is why it read as a helmet with two lights in it.** The failure is not resolution, not
-part count and not the palette; it is that **a skull is defined by subtraction and this grammar
-only adds.**
-
-It is the same shape as run 9's finding — a tree was not hard, it was *inexpressible*, because
-every primitive was convex — and it produced the lobed primitive. This one asks for a `cut`.
-
----
-
-
-### His verdict, 16/08, unsoftened
-
-> *"Eu gostei dessa produção. Temos um gatinho implementado com muita animação (as caudas, as
-> orelhas, sua projeção quando salta) e ficaram boas."*
->
-> *"No geral achei que o minigame atendeu as expectativas."*
-
-**That is a ship.** Two notes came with it, and both are specifications rather than complaints:
-
-> *"embora eu sinta que tenham muitas plataformas disponíveis, o que torna o jogo pouco
-> desafiador, pois é difícil errar um salto assim"*
->
-> *"tornar o gatinho mais pixelado. Ver os contornos de suas formas dá ao gato um aspecto mais
-> mecânico, o que você já resolveu com o gorila."*
-
-### Scoring the prediction — **wrong, and wrong on the half I named**
-
-| I predicted | what happened |
-|---|---|
-| a MISS at 55/45 | **ships** |
-| the cat is the risk — 22 parts in 34 px, a face of four parts in a 12 px skull | **the cat is what he praised**, by name: the tail, the ears, the projection on the jump |
-| the loop holds, because I measured every part of it a number can reach | **the loop is where the note landed** — too many platforms, too easy |
-
-**Last batch's lesson was applied and it was applied too literally.** The rule I took from batch 1
-was *name what you have not examined*. So I named the drawing, because I had counted it instead
-of looking at it. **But "not examined" is not the same as "at risk", and I substituted one for
-the other.** The counts on the cat were good and I discounted them for being counts; the counts
-on the loop were good and I trusted them — and the loop is where the miss-shaped note came from.
-
-**The sharper form, and it is the one worth carrying:** the loop was measured by an instrument
-that could not perceive the quantity he judged it on. It reports whether progress happens, never
-whether progress is *earned*. **A number that comes back green from an instrument blind to the
-question is worth less than a count I have simply not looked at.** Confidence should have gone to
-the axis with the weakest instrument, not to the axis with the least attention.
-
-### What the two notes specified, and both are built
-
-**"Muitas plataformas" — the difficulty knob had been tuned against a robot.** The tower was
-thickened to break a locked orbit, and the thickening was tuned by a headless run holding one
-key: a player who never aims. That instrument cannot feel "too easy". Pushed on, it drives every
-knob to the generous end and reports success all the way.
-
-The reading is a **pair** now, and it is a lock:
-
-| | before his note | now |
-|---|---|---|
-| shelves on screen | 15.8 | **9.2** |
-| landing window | 26% of the width | **22%** |
-| a run that never aims | ~20 m | **6.1 m, then falls** |
-| a run that steers at the nearest shelf | — | **67 m in a minute, still climbing** |
-
-**One number is not a difficulty reading; the ratio between two is.** `tests/climb.test.ts`
-asserts both ends and the ratio, so a tower that gets this easy again goes red.
-
-**"Mais pixelado" — and it was never a drawing problem.** Measured before anything was touched:
-the cat carries the same five tones, the same drawn line, the same inner outline as the gorilla,
-and **28% of its painted pixels are outline against the gorilla's 27%**. Identical.
-
-What differed was the scene. Every other hero on the shelf stands **132 px tall on screen with
-3×3 pixels**; the kitten stood **72 px with 2×2** — the only game rendering at ×2. At half the
-size and two thirds the pixel, the eye stops reading pixels and reads the smooth shaded round
-masses, which is exactly *"os contornos de suas formas"*. The world is 200×240 at ×3 now:
-600×720 on the page, kitten 132 px, 3 px pixel.
-
-**Portable, and it is the finding of the round:** a subject can be drawn correctly and presented
-wrongly. A complaint about how a thing is *drawn* gets checked against how it is *shown* before a
-pixel is touched.
-
----
-
-**Batch 1 given 16/08.** His sentence, verbatim:
-
-> *"Eu quero que você crie para mim um astronauta. Quero ser capaz de pular e andar em todas
-> as direções com ele. O ambiente: o solo lunar, similar a vista da lua com a terra ao fundo."*
-
-| batch | commissions | shipped | hit rate | cycles per shipped piece |
-|---|---|---|---|---|
-| 1 | 1 | **0 — miss** | 0/1 | 1 model cycle, 1 reading from him |
-
-### His verdict, 16/08, unsoftened
-
-**Shipped:**
-
-> *"O espaço profundo e a terra ficaram muito boas: aqui eu acho que você conseguiu superar
-> minhas expectativas. A sombra na terra, as estrelas, embora simples, é o tipo de
-> representação que traz uma memória nostálgica para quem joga."*
-
-> *"O Astronauta (apenas a visão esquerda e direita): a representação ficou muito boa também.
-> Eu senti falta daquela mochila quadrada... Se fosse um jogo 2d apenas com movimentos para
-> esquerda e direita, não teria defeito algum."*
-
-**Missed:**
-
-> *"Na animação de movimento, não importa a direção, os braços estão fixos, sempre."*
->
-> *"Quando ando para cima (W), deveria ver as costas do astronauta. Ao invés disso vejo o visor
-> dele e o braço esquerdo apontado para minha direção... Os movimentos diagonais precisam
-> corrigir os braços também."*
->
-> *"O pulo enquanto me desloco com o A ou D está com uma animação muito boa. Para qualquer
-> outra direção não."*
->
-> *"A relação entre origem de luz e sombra não está bem resolvida... quando observo a terra
-> tenho um indicador claro de onde está o sol. Porém quando olho para o terreno da lua e para
-> o astronauta, o foco de luz não fica claro."*
->
-> *"Esse solo lunar não está bem representado. Me parece apenas um chão preto com pedras."*
-
-### Scoring the prediction
-
-**The call was right and the reasoning was half right, and the half I got wrong is the more
-useful half.**
-
-| I predicted | what happened |
-|---|---|
-| a MISS at 60/40 | **miss** |
-| the body works | **works** — he shipped the side view outright |
-| the turned WALK fails | **it did**, but not for the reason I gave |
-
-I predicted the failure would be the gait decomposition — that a stride turned to face the
-camera would swing its legs sideways. **That part was fine.** The back view keeps 65% of the
-side view's motion.
-
-What actually broke was three things I never considered:
-
-1. **`Part.z` was never yawed at all.** The visor sits on the front of the helmet at `z: -3.6`
-   and stayed on the camera side in every facing. Rotating a part's `x` and leaving its `z` is
-   not an approximation, it is half a rotation — and I wrote the transform believing it was
-   complete enough to name its own weaknesses.
-2. **The compass signs were inverted.** North turned the face toward the camera. A sign.
-3. **The arms were animated at nine degrees**, which is not restraint, it is a still image. I
-   had a true fact — Apollo crews loped with their arms out rather than swinging them — and
-   applied it until the animation stopped.
-
-**The lesson, and it is about the prediction rather than about the code:** I predicted the
-failure of the part I had *thought hardest about*, and shipped three defects in the parts I
-had not thought about at all. **A declared risk is a place I was already looking.** Next
-prediction should name what I have not examined, not what I have.
-
-**The capability the miss specifies:** not *"a gait that survives being turned"*, which is what
-I guessed. It is **a body that survives being turned** — every field that carries a position
-has to rotate, and I had only rotated some of them.
-
-### My prediction, recorded before he looks
-
-**I predict a MISS**, and the reason is one specific half of the sentence.
-
-*"andar em todas as direções"* lands squarely on the gap named on 15/08 and never built:
-**facing — one direction is rendered.** Everything else here is reachable with what exists.
-A suited body is bulky primitives; lunar ground is a plane and a field; the Earth is a
-sphere with a terminator; a jump is gravity in the runtime, which is twenty lines.
-
-Eight directions is not. The plan is to **yaw the body** — rotate every bone offset and every
-solid about the vertical axis, which the 2.5D vocabulary can express exactly for a capsule
-and near enough for an ellipsoid. That produces a silhouette from any angle from one authored
-body, and I believe that part works.
-
-**What I expect to fail is the WALK, not the body.** A stride is authored as limb rotation in
-the *screen plane*. Yawed to face the camera, that same rotation swings the legs sideways
-instead of forward, and the fix — decomposing each swing into `angle × cos(yaw)` plus
-`z × sin(yaw)` — is an approximation I have never tested. A front-facing walk that reads as a
-side walk seen head-on is the specific way I expect this to come back.
-
-**Confidence: 60/40 toward a miss.** The one thing running in its favour is the subject: a
-pressure suit is close to rotationally symmetric, so front and side silhouettes differ less
-than they would on any other body. That is luck rather than design, and it should be counted
-as luck when the verdict arrives.
-
-**If it misses, the capability it specifies is:** *a gait that survives being turned* — which
-is a bigger and more useful thing than eight sprites of an astronaut.
-
-**Neither column kills anything** — his correction, 15/08. They are evidence for a judgment
-he holds himself and will not reduce to a metric. **A miss is a specification, not a
-strike:** its output is the name of the capability that was missing, which is what every
-miss in this project has actually produced (`CLAUDE.md`, gate block).
-
-**Retired:** gate v1 (find-the-impostor, logic hole) and gate v2 (six loops
-ranked against five shipped ones — the five files never arrived, and I asked three times
-without once explaining what they were). `refs/` is no longer needed by anything. And v3's own first draft, which tried to make a
-threshold do his deciding for him and lasted one turn. **The pattern is the finding: three
-gates, three ways of moving the judgment away from the only person who has it.**
-
-**Prior verdicts, kept because they are still evidence** — they were readings of *movement*,
-not gate readings:
-
-| date | subject | his words |
-|---|---|---|
-| 15/08 | run 3 vs run 2 | "não superou, mas aprecio a tentativa" |
-| 15/08 | run 4 vs run 2 | "não vou dizer que superou... com mais algumas iterações, ficaria no mesmo patamar" |
-| 15/08 | run 5, the gorilla walk | "dá pra sentir seu peso caindo e a fidelidade com movimento" |
-| 15/08 | run 7, depth + jump + attack | "gostei muito... não sinto uma mudança visual, mas a movimentação e os detalhes estão melhores e mais fluídos" |
-| 15/08 | run 8, the ink probe | Chrono first; Stardew and the incumbent tied last |
-| 15/08 | run 9, the tree, first pass | "ficou horrível" |
-
----
-
-## Next round — **the transfer tests, and the biplane goes first**
-
-Batch 4 shipped. He named what comes next himself and asked whether I had a better idea:
-
-> *"Podemos seguir com os outros testes de microjogos que você sugeriu ou você tem uma proposta
-> melhor?"*
-
-**The transfer tests are right, and their order is not arbitrary.** `TASTE.md` §2b: roll is proven on
-**one subject, one clip, one verdict**, and dominance transfers along the axis it was proven on and
-never across it. The skateboard is a rigid plate on a bone whose parent never rotates — the friendliest
-possible case for two accumulated scalars.
-
-| | **B — the biplane's barrel roll** | **C — the snowboarder's carve** |
-|---|---|---|
-| what it tests | roll on a subject whose **silhouette is the proof**: a wing goes from full width to a thin line and back. A plate cannot fake that | roll on a body that **leans while it travels**, which is roll composed with a screen-plane angle — the exact case my accumulation is only an approximation of |
-| camera | side or three-quarter. **The one that exists** | **needs a new camera looking down the slope.** In a side view a lean is a screen-plane rotation and the theme forces nothing. Named on 16/08 before he chose |
-| what else it exercises | a **sky**, which is all surface — so the unjudged weave gets a second scene without a probe. `CLOUDS` already exists from run 12 | a receding ground plane (mastered) and snow, which is the hardest dither case there is: a bright near-uniform field |
-| the declared risk it attacks | none of mine. It is a clean transfer | **`Bone.roll` accumulates as a scalar and does not commute with a parent's angle.** A carving body is where that drift becomes measurable |
-
-**So B first and C second, and the reason is that C is worth more.** The snowboarder attacks the
-approximation I declared when roll was built, and it needs a camera. Running it second means the
-approximation is tested on a subject where I already know roll works — one variable, which is the
-structure run 7 used with the walk as control.
-
-**What I am not proposing, and why:** a probe for the weave. It is measured and unjudged (above), and
-confirming a number with his attention is what gate v3 was designed to stop.
-
----
-
-## Deferred by him — **procedural filling of environments**
-
-Recorded in his words, 16/08, so it is not rediscovered later as an idea of mine:
-
-> *"Eu sei que não é o momento ainda, mas sinto que em algum momento vamos entrar em algumas sessões
-> para avaliarmos formas procedurais para preencher os ambientes. Eu sei que não era o foco aqui, mas
-> esse preenchimento traz riqueza aos jogos e em breve vamos tratar isso."*
-
-**Three independent readings already agree on it**, which is why it is written down rather than left to
-his memory:
-
-1. **His verdict on batch 4:** *"eu trabalharia nos detalhes do ambiente e do skatista. Estão
-   básicos."*
-2. **His forward note above**, naming the mechanism he expects — procedural, not hand-placed.
-3. **My one permitted look**, which found the asphalt too dark for its own weave and no contact shadow
-   under either rider. Both are scene facts and the findings channel cannot see either.
-
-**It is also where the unjudged weave belongs.** A dithered surface needs surface, and filling an
-environment is the work that creates it — so the pixel-art answer and the richness answer are the same
-round, whenever he calls it. **His call, not mine, and he has said not yet.**
-
-## Dead — **the exporter**
-
-_Killed 15/08 with the scope redefinition, and the section that described it as "a requirement
-now" sat in this file for a day after. §3b.4 caught it at a cycle open on 16/08._
-
-Exporting to somebody else's engine was building a bridge to a competitor, and it answered a
-requirement that has been replaced. What replaced it: **can a fresh agent, given only this
-repository, build a small game?** `src/export/contract.ts` and its locks stay — a declared
-output contract costs nothing and is the thing that would be needed if this ever came back.
-
----
-
-## Previous round — run 7, closed 15/08
-
-Depth solver, jump and attack. **His verdict:** *"gostei muito... não sinto uma mudança
-visual, mas a movimentação e os detalhes estão melhores e mais fluídos"*. The walk control
-held, so the engine stays and nothing was rolled back — and the "no visual change" half
-scored a prediction of mine at zero (`TASTE.md` §2a).
-
----
-
-## Superseded — the silhouette/value pair
-
-_(Rewritten 15/08 at a cycle open: this section still named the
-silhouette/value pair as "next", three runs after it was settled by being built into every
-sample since — `outline.rim` is on in every shipped tunables file. §3b.4, and it is the
-"backlog describes a dead product" failure in §10 caught one step early.)_
-
-- **Axis:** **weight and impact outside a walk cycle**, on the body that already landed.
-- **The change underneath it:** depth is solved rather than authored (`DECISIONS.md`,
-  15/08). 2.5D — a z-buffer, no projection divide, so nothing moves on screen and only
-  occlusion changes. **Locked in `tests/depth.test.ts`, seven assertions, both null cases.**
-- **The three samples, and the third one is the control:**
-  - **JUMP** (`runs/gorilla-jump.run.json`, gallery #0018) — six phases on a 12-frame grid,
-    three frames of crouch and one from contact to the bottom of the absorb.
-  - **ATTACK** (`runs/gorilla-attack.run.json`, gallery #0019) — five phases; the near fist
-    travels from behind the torso to clear in front of it inside one cycle, which is the
-    thing no paint order could express.
-  - **WALK** (`runs/gorilla.run.json`, gallery #0017) — **run 5's gait, unchanged**,
-    re-rendered through the solver. One variable. Without it, a bad reading cannot be
-    attributed to the engine rather than to the two new actions.
-- **What closes it:** his verdict, below. All three clear rungs 1–3.
-- **Open, named rather than fixed:** the light still lands from the upper left, so the
-  gorilla's face is the darkest region on a body that faces right. Pre-existing, unchanged
-  by this round, and it is a knob (`light.x`) rather than a defect — but it is the first
-  thing to try if the head reads badly.
-
----
-
-## Previous round — frontier probe, closed 15/08
-
-- **Axis:** sprite idiom. First round on the axis → **frontier probe** (§3.0).
-- **Bar:** `TASTE.md` §1b — Stardew as control, Chrono Trigger as target, Comix Zone as
-  declared overshoot.
-- **The question, and the cost:** which idiom the model sustains with the arthropod
-  subject, in motion. Cost: 4 disposable samples. **Unblocked since 14/08** — round zero
-  is closed, so the whole cost of this round is now the samples themselves.
-- **The four samples, and the spread brackets:**
-  - **A — Stardew idiom.** Small sprite, few tones, 4 frames, cohesion over virtuosity.
-    **Control.** If A does not clear, the round answered everything.
-  - **B — Chrono idiom.** Silhouette and value separation carrying the weight, contained
-    frame count, real anticipation. **Target.**
-  - **C — high-budget idiom.** Many tones, gradient, per-pixel noise. It is the direction
-    my bias pulls toward, and it is here **to be knocked down by looking**, not by
-    argument.
-  - **D — Comix Zone idiom, on a humanoid.** **Declared overshoot.** Changes subject and
-    idiom on purpose. The prediction is that it fails visibly; if it does not fail,
-    `TASTE.md` §2b is wrong and that is the round's finding.
-- **Probe needed?** Yes — it is the first round on this axis.
-- **Status, 15/08: the four samples exist, render, and are kept.** `node bin/serve.ts` puts
-  all four on the page as history, live run first. **The round is not closed** — it closes
-  on the human's verdict, and the ink question below rides with it.
-- **This round's knobs, and where they landed.** Tones per material opened at 3/4/8 across
-  A/B/C — the 3–6 range was declared and C deliberately overshoots it. Walk frames landed
-  at 4/8/12/8, forced to multiples of the gait's four named phases by a defect found while
-  looking. Every sample shares a **600 ms cycle** so the sheet never compares walking speed.
-  Two knobs were *born* this round and are now open: **`outline.inner`** and
-  **`light.curve`**.
-
----
-
-## Open
-
-- [x] **Round zero.** Deterministic core `sprite(grammar, params, seed) → indexed
-      buffer`, no DOM, no clock, no `Math.random`. Blocks everything. **Closed 14/08** —
-      `HARNESS.md` §4 acceptance ticked item by item; `npm test`, 22 locks green.
-- [x] **Perception channel.** `node bin/bench.ts` — contact sheet in luminance blocks,
-      frames side by side, 25% silhouette strip, and the counts underneath.
-- [x] **Null case for the channel, before believing it.** `tests/channel-null.test.ts`,
-      four cases: subject off prints an empty sheet; the dump loses no ink (printed
-      characters = painted pixels, so a dark outline can never collapse into background);
-      the 25% reduction separates two frames I know differ; an authored part that never
-      reaches the buffer is caught by the count while the sheet still reads as a body.
-- [x] **Silhouette lock at 25%** — `tests/silhouette.test.ts`. Reduce, threshold, and what
-      survives must still be **one body**: the share held by the largest connected blob,
-      because coverage alone would pass a cloud of dust.
-- [x] **Value lock** — edge contrast against the ground, in luminance, per frame. Calibrated
-      on the sample that failed by eye: the high-budget idiom had a boundary pixel **0.058**
-      from the ground, which is a pixel nobody can see. Floor is 0.10 min, 0.25 mean; both
-      answers of the silhouette round clear it. The ground the lock measures against is
-      pinned by test to the ground the eye sees.
-- [x] **Animation family lock** — `tests/animation.test.ts`. Margin **0.02 of the canvas**
-      (≈ one leg, 46 px of 2304), calibrated in both directions: a twitch of 0.0009 passes
-      byte-inequality and fails the margin. Part rotation orients the part; moving the root
-      translates every pixel exactly; the gait's four phases are named and ordered.
-- [x] **Absence lock** — pixel ownership per part, reported by `measure()` and asserted per
-      grammar. Against absence, count; looking does not catch it.
-- [x] **Latency of one bench turn.** Re-measured 15/08 on the heaviest sample in the repo:
-      120 ms wall, 32 ms of it render, for 12 frames of 64×64. That is 10 ms over the
-      ~100 ms reference in absolute terms and roughly **three times faster per pixel** than
-      the 14/08 figure, which was 4 frames of 48×48. No work owed; re-measure if a sample
-      ever needs more than ~16 frames.
-- [x] **The human's channel.** A self-contained HTML page, no dependency, no network.
-      **bench** (labels, `t`, pause, step) is mine; **gate** (no control, no label, no
-      tooltip, nothing that names a cell) is his, and both are compiled from the same
-      emitter so a cell can never be compared as a renderer: one blit path,
-      nearest-neighbour, integer scale, and **one clock for the whole page** — a cell may
-      declare a rate and a scale off it, never a timer of its own.
-- [x] **Null case for the viewer, both ways.** `/selftest` shows a human what each
-      failure looks like — **confirmed by him, all four cases, 14/08**; `tests/viewer-runtime.test.ts` runs the same inlined runtime
-      headless against a fake DOM. Five defects planted, five caught — smoothing on,
-      label leaked into the gate, empty payload, dead tick, index 0 painted opaque. All
-      five flatter the sprite. That is the direction instrument defects come in.
-- [x] **The live bench** (`bin/serve.ts`, `node:http` only). The page is opened once and
-      never rebuilt: a change re-executes in a fresh process — no module cache to lie —
-      and the frames swap **under a loop that never stops**, with every kept generation
-      behind it. Locked both ways: it fires when the output changes and stays
-      quiet when a watched file is rewritten byte-for-byte. Its failure mode is stale
-      frames I believe are fresh, which reads as "the defect is fixed".
-- [x] **The export contract** (`src/export/contract.ts`), declared and locked before the
-      exporter exists: fixed frame rect, pivot on the grid, named phases pointing at real
-      frames, anchors, palette ≤ 256 with index 0 transparent, whole-millisecond timing.
-      Compatibility with engines is an **output contract, not an architecture** — depending
-      on one renderer would make the artifact less portable, not more.
-- [x] ~~**The exporter**~~ → **dead 15/08**, with the scope redefinition. The output contract
-      and its locks stay; nothing builds against them.
-- [x] ~~**The forest still has a mechanic and no consequence.**~~ → **Closed by him, 16/08,
-      without being built:** *"O microgame do gorila está fechado. Se no futuro eu decidir
-      revisitá-lo eu te aviso."* The pattern exists in the climb if it is ever wanted. Same
-      answer closes **the attack that lands looking like one that misses** — both defects live
-      inside that one game.
-- [x] ~~**A 4 px enclosed pocket between the gorilla's legs.**~~ → **Closed by him, 16/08:**
-      *"Não percebo isso visualmente, nem precisamos revisitar isso."* A defect nobody can see
-      is not a defect; it is a number I found. Kept in `DECISIONS.md` and off this list.
-- [x] ~~**`compose.ts` and `layers.ts` are two paths and nothing compares them.**~~ →
-      **Closed 16/08 by deletion, on his call.** I had proposed a lock to keep the two honest;
-      the right answer was that one of them should not exist.
-- [x] ~~**Every clip of a subject renders twice under two cache keys.**~~ → **Fixed 16/08 at
-      his instruction:** *"Isso é ruim. Em jogos mais robustos vai custar caro esse desperdício.
-      Vamos resolver isso."* The scale is resolved above the main build instead of below it, so
-      one picture has one key. **83 layers → 79, 2245 KB → 2176 KB of indices, and every stage
-      now carries zero byte-identical layers.** Locked in `tests/performance.test.ts`, with its
-      null case.
-- [x] ~~**The "sprite in situ" axis**~~ → **done, and content asked for it rather than a plan.**
-      Three micro games, each a loop inside a real scene with a camera, parallax and
-      neighbours. _(Ticked 16/08 at a cycle open; it had sat open through all three. §3b.4.)_
-- [x] ~~**Image cells** — his five reference loops in the same blit path as mine~~ →
-      **dissolved 16/08**, not solved. It belonged to gate v2, which was retired on 15/08, and
-      gate v3 needs no reference files at all. _(§3b.4: it survived the gate that needed it by
-      a day and a half.)_
-
-- [x] ~~🔴 THE GATE HAS NEVER FIRED, and `refs/` does not exist~~ → **dissolved 15/08**, not
-      solved: gate v2 was retired with the scope redefinition, so the five files it needed
-      are no longer needed by anything. **Kept visible on purpose** — it is the record of a
-      blocker I raised three times and explained zero times, and gate v3 exists in the shape
-      it does because of it.
-
-- [ ] **Mark portable/stack on every grammar rule in the turn it is born.** Standing, never
-      ticked. Live since 14/08: `src/core/types.ts` and `src/core/skeleton.ts` carry
-      `portable`, `src/grammars/fixture.ts` carries `stack`.
-- [ ] **`TASTE-LOOP-LEARNING.md` §1, the thesis under test.** It is born at the close of
-      round 1, not at the intake. The candidate: *the Taste Loop presupposes the human's
-      taste at rung 5; discrimination is far cheaper than generation, and a discrimination
-      gate extracts judgment without demanding direction.*
-
-## Measured baselines
-
-Every number here carries **the command that regenerates it** and the date. A baseline
-without both is a rumour.
-
-| what | value | command | date |
-|---|---|---|---|
-| one bench turn, wall clock | 170 ms | `node bin/bench.ts runs/tree.run.json` | 15/08 |
-| render only, 16 frames of 64×64, 38 parts | 72 ms | `node bin/bench.ts runs/tree.run.json` (the `elapsed` line) | 15/08 |
-| full cycle: record → replay → compare | 1.0 s | `node bin/record.ts /tmp/c.run.json && node bin/run.ts /tmp/c.run.json && npm test` | 14/08 |
-| fixture baseline hash | `a542197e4c49b27d` | `npm run baseline` | 15/08 |
-| min pair distance, shipped tunables | 0.106 | `node bin/run.ts runs/fixture.run.json` | 15/08 |
-| locks green | 410 | `npm test` | 16/08, after run 17 |
-| the climb: worst gap in an infinite tower | 58 px, against a 96 px apex — ratio 0.60 | `npx vitest run tests/climb.test.ts` | 16/08 |
-| the climb, draw calls per frame | 98, against a 200 ceiling | `node bin/micro.ts --static` then read the budget row | 16/08 |
-| the climb, on the wire | 11 layers, 35 colours | `node bin/micro.ts --static` | 16/08 |
-| **difficulty, and it is a PAIR because one number is not a reading** | never aims: **6.1 m then falls** · aims at the nearest shelf: **67 m in a minute, still climbing** | `npx vitest run tests/climb.test.ts` | 16/08, after his note |
-| every hero's on-screen height | forest 132 px · moon 141 px · climb 132 px, all at a 3 px pixel | `node bin/micro.ts --static` | 16/08, after his note |
-| outline as a share of painted pixels | kitten 28%, gorilla 27% — the drawing was never the difference | `node bin/bench.ts --grammar cat-rise --tunables cat` | 16/08 |
-| **share of painted pixels in a single-owner 4×4 cell** — whether a subject HAS a surface to dither | rider **0.000** · skeleton 0.080 · kitten 0.068 · kerb 0.432 · rider at ×2 scale 0.177 | the `[weave]` line of `node bin/bench.ts --grammar skate-roll --tunables skate` | 16/08 |
-| the same, at a 2×2 lattice | rider 0.289 · skeleton 0.347 · kerb 0.703 | `node bin/bench.ts` with `--set texture.lattice=2` | 16/08 |
-| periodicity, weave against speckle against a hard cut, on one gradient | hard **-0.006** · speckle **0.068** · half weave **0.589** · full weave **0.628**. `PERIODIC` is 0.25 | `npx vitest run tests/dither.test.ts` | 16/08 |
-| the kickflip, in pixels: the deck's two faces trading places | wood 47 → **106** → 0 px · grip 21 → 0 → **146** px, peaks a quarter turn apart | `node bin/bench.ts --grammar skate-flip --tunables skate-flip` | 16/08 |
-| the far wheels through the flip, before and after the offset-roll fix | **0 px in all 12 frames** → 0→12→0 while the near pair goes 10→0→12 | the same command, `part wheelFF` row | 16/08 |
-| the marched path against the closed form, at one full turn of roll | **99.4% of pixels identical** on three shapes | `npx vitest run tests/roll.test.ts` | 16/08 |
-| `/skate` on the wire | 9 layers, 50 colours, 102 KB of indices, **10 draw calls/frame** against a 200 ceiling | `node bin/micro.ts --static` | 16/08 |
-| one bench turn, the kickflip (12 rolled frames, ray-marched board) | 46 ms | `node bin/bench.ts --grammar skate-flip --tunables skate-flip` | 16/08 |
-| lines of TypeScript, source and locks | 12 515 source, 4 523 locks | `find src bin -name '*.ts' \| xargs wc -l` | 16/08, after run 17 |
-
-## The harness, as of 14/08
-
-**Five commands, and the deletion of 16/08 took eight of them away.**
-
-His call: *"vamos manter apenas o que for vital para a continuidade deste repo. Se você precisa
-do olho, o mantenha. Isso se aplica a qualquer outro resquício de código."*
-
-| command | what it is |
-|---|---|
-| `node bin/micro.ts` | **the product.** The shelf on `/`, one game per route, live from current code on every request |
-| `npm test` | the locks. Determinism, baseline, tunables, the findings channel's null cases, the animation family, the sprite contract, three game loops run headless |
-| `node bin/bench.ts [run] [--set …]` | **my eye.** One bench turn in the terminal: contact sheet, 25% silhouette, findings, counts, elapsed |
-| `node bin/run.ts <run.json>` | headless: state hash and metrics, no presentation layer |
-| `node bin/record.ts <out.json> [--set …]` | capture what you are looking at into a replayable run file |
-
-**Deleted 16/08, and named here so nobody hunts for them:** `bin/serve.ts` (the live sprite
-bench), `bin/gate.ts` (the gate sheet), `bin/keep.ts` and `bin/publish.ts` (the frozen gallery),
-`bin/shell.ts`, `bin/scene.ts`, `src/viewer/`, `src/io/gallery.ts`, `src/scene/compose.ts`,
-`src/scene/gallery-scene.ts`, and the 33 kept generations. All of it showed drawing **outside a
-game**, which is the one thing this project has decided it does not deliver. Every one of them
-is in git history if a reason to want them back ever arrives.
-
-**`src/export/contract.ts` moved to `src/core/contract.ts` rather than dying.** The exporter is
-dead and the folder named a feature that does not exist, but its eight locks are not dead: they
-assert every grammar keeps one frame rect, a pivot on the grid, named phases landing on real
-frames, and timing in whole milliseconds. Those are facts about the art, not about exporting.
-
-Nothing is written to `.out` any more, and nothing has to be regenerated to be looked at:
-the page is served, the history is on disk, and both are always current.
-
-Every tunable lives in `tunables/default.json` and is anchored there — the anchor is
-locked, not a comment. A grammar is data in `src/grammars/`; `fixture` is the harness's
-own subject and **is not content**.
-
----
+| 1 | astronaut, 8-way walk, moon | **miss** | a body that survives being turned (every positional field rotates) | 1 cycle, 1 reading |
+| 2 | kitten platformer, cozy | **ships** | — (notes: difficulty ratio, presentation scale) | 1 cycle, 3 readings |
+| 3 | skull runner, SOTN | **miss** | **subtraction** (`Part.cut`) | 1 cycle, 1 reading |
+| 4 | skate + kickflip (roll + pixel-art experiment) | **ships** | — (spec carried: environments are basic) | 1 cycle, 1 reading |
 
 ## Held for the human
 
-In a batch, with samples attached. **Every item carries the five lines of `CLAUDE.md` §4:
-what to open, what to do, how long, what a pass looks like, what each answer changes.**
-Written for him, so no method vocabulary crosses into this section.
+- [ ] 🟡 **30 seconds: is the skull a skull now?**
+  · *Open:* `node bin/micro.ts` → `/crypt`. · *Do:* look at the runner's head, say yes or no.
+  · *Why:* batch 3 missed on "isso não é uma caveira"; `Part.cut` was built and the skull
+  re-authored (sockets are cavities, ember gone, cranium enlarged). "Nothing got worse"
+  from your last play is a different question and does not close this.
+  · *Changes:* **yes** → subtraction enters the mastery ledger with a verdict. **no** →
+  the cut was the wrong capability or badly spent — worth more than a third primitive.
 
-- [x] ~~🟡 **Your sentence reaches further than the file I just deleted. How far?**~~ →
-      **Answered 16/08: all of it.** *"Vamos manter apenas o que for vital para a continuidade
-      deste repo. Se você precisa do olho, o mantenha. Isso se aplica a qualquer outro resquício
-      de código que estiver presente e sem uso."* The bench page, the gate sheet, the viewer and
-      the 33 frozen generations are gone. The terminal eye and the findings channel stayed,
-      because without them I cannot see my own output at all.
+## Next round — the transfer tests, biplane first
 
-- [x] ~~**Run 7 — the jump, the attack, and the walk as control**~~ · ~~**the five reference
-      loops**~~ · ~~**is "ink" aspiration or direction?**~~ → **all three dissolved 16/08 at a cycle
-      open, and the pattern is why they are named here rather than deleted.**
+Roll is proven on one subject, one clip. He approved continuing with the transfer tests.
 
-      All three were asks written for machinery that no longer exists. The run 7 reading was answered
-      on 15/08 and its own entry said SUPERSEDED for a day. The five reference loops belonged to **gate
-      v2**, retired 15/08 — and asking for them three times without once saying what they were is the
-      recorded reason gate v3 has the shape it does. The ink question was answered by run 8's ranking:
-      he put five tones with a drawn line first, and `TASTE.md` §1b has carried that as derived ever
-      since.
+1. **B — biplane barrel roll.** Clean transfer; silhouette is the proof (wing goes full
+   width → line → back). Camera that exists. Also gives the unjudged weave a sky.
+2. **C — snowboarder carve.** Attacks the declared risk: `Bone.roll` accumulates as a
+   scalar and does not commute with a parent's angle. Needs a down-slope camera. Run
+   second, so the approximation is tested where roll already works (one variable).
 
-      **They sat in the section reserved for HIS attention for a day and a half after the thing that
-      needed them died.** A cold session reading this file would have asked him for files he does not
-      need, which is the exact failure `TASTE-LOOP.md` §3b.4 exists to catch and the second time it has
-      caught it here. The rule that follows: **an ask dies with the reading that motivated it, in the
-      same turn**, and the gate block in `CLAUDE.md` is where a reading's death is recorded.
+## Deferred, by him
 
-- [ ] 🟡 **One pendency, and it is 30 seconds of yours: is the skull a skull now?**
-      · *Open:* `node bin/micro.ts` → `/crypt`.
-      · *Do:* look at the runner's head for five seconds. Say yes or no.
-      · *Time:* thirty seconds.
-      · *Background:* batch 3 missed on one word — *"isso não é uma caveira. Nem de longe lembra
-      uma"*. That miss specified **subtraction**: every primitive here was a solid, so the eye sockets
-      were paint on a ball rather than holes in bone. `Part.cut` was built after your verdict and the
-      skull was re-authored around it — the sockets are cavities, the ember material is gone because a
-      skull's eyes are the darkest thing on it, and the cranium is now larger than the ribcage.
-      · *Why it is still open:* you played it this round and reported no regression. **That is not the
-      same question.** "Nothing got worse" and "this is a skull" are different readings, and only the
-      second one closes batch 3.
-      · *What each answer changes:* **yes** closes the miss and puts subtraction in the mastery ledger
-      with a verdict behind it. **no** means the cut was the wrong capability, or the right capability
-      badly spent — and either way the skull is the second subject to fail on the same axis, which is
-      worth more than a third primitive.
+- **Procedural filling of environments** — "em breve vamos tratar isso". Three readings
+  agree (his batch-4 note, his forward note, the round-boundary look). The unjudged weave
+  belongs to this round too: a dither needs a surface, and environments are the surface.
+- **Pattern inside a part** — "discutiremos sobre isso depois".
+- **The fresh-agent test** — deferred with a condition: when engine + harness are done.
+  It remains the requirement that defines the product. _(External review recommends a
+  minimal early version: a fresh agent modifies an existing game.)_
+- **Pitch** (full 3D) — roll exists; pitch is still inexpressible. He named it as a
+  candidate theme; the measurement so far says every yaw defect was implementation, not
+  the 2.5D model's limit.
 
-## Closed
+## Standing
 
-- ~~Readings check~~ → `DECISIONS.md` 14/08 · artifact
-- ~~Availability and cadence~~ → `CLAUDE.md` §4 · focus week 14–21/08
-- ~~Project name~~ → `claude-ink-2d`, chosen by the human 14/08
+- [ ] Mark portable/stack on every grammar rule the turn it is born.
+- [ ] The look amendment is measured: per round, one line on what looking caught that
+      counting did not. Round 1 of 3: caught 3 scene facts, verdict unchanged. Retires
+      after 3 rounds of no effect on hit rate or his cost.
+- [ ] Async checkpoints (adopted 16/08): announce feature slices on the shelf in one
+      line as they stand. Watch whether his notes get shorter.
+
+## Measured baselines
+
+Every number carries the command that regenerates it and its date.
+
+| what | value | command | date |
+|---|---|---|---|
+| one bench turn, wall | 170 ms | `node bin/bench.ts runs/tree.run.json` | 15/08 |
+| one bench turn, kickflip (ray-marched) | 46 ms | `node bin/bench.ts --grammar skate-flip --tunables skate-flip` | 16/08 |
+| full record→replay→compare | 1.0 s | `node bin/record.ts /tmp/c.run.json && node bin/run.ts /tmp/c.run.json && npm test` | 14/08 |
+| fixture baseline hash | `a542197e4c49b27d` | `npm run baseline` | 15/08 |
+| locks green | 414 | `npm test` | 16/08, after the eye |
+| climb difficulty pair | no-aim 6.1 m · aims 67 m/min | `npx vitest run tests/climb.test.ts` | 16/08 |
+| hero on-screen height | 132–141 px, 3 px pixel, all games | `node bin/micro.ts --static` | 16/08 |
+| `/skate` on the wire | 9 layers, 50 colours, 102 KB, 10 calls/frame of 200 | `node bin/micro.ts --static` | 16/08 |
+| weave surface share (4×4 single-owner) | rider 0.000 · kitten 0.068 · kerb 0.432 | `[weave]` line of `node bin/bench.ts --grammar skate-roll --tunables skate` | 16/08 |
+| yaw collapse threshold | depth/width ≈ 0.45 | `npx vitest run tests/yaw.test.ts` | 16/08 |
+| TS lines, source + locks | 12 700 / 4 600 | `find src bin -name '*.ts' \| xargs wc -l` | 16/08 |
+
+## The harness — six commands
+
+| command | what it is |
+|---|---|
+| `node bin/micro.ts` | **the product.** The shelf, one game per route, live on every request |
+| `npm test` | the locks (414): determinism, baseline, tunables, findings null cases, contracts, game loops headless |
+| `node bin/bench.ts [run] [--set …]` | **the counting eye**: contact sheet, silhouette, findings, counts, elapsed |
+| `node bin/see.ts [run] [--set …]` | **the structured look** (16/08): contact-sheet PNG in `.eye/`, for the correspondence class. Fixes still enter via the grammar |
+| `node bin/run.ts <run.json>` | headless: state hash + metrics |
+| `node bin/record.ts <out.json> [--set …]` | capture into a replayable run file |
+
+Every tunable lives in `tunables/`, anchored, the anchor locked. A grammar is data in
+`src/grammars/`; `fixture` is the harness's subject, not content.

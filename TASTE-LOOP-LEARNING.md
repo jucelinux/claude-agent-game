@@ -1,5 +1,11 @@
 # TASTE-LOOP-LEARNING.md
 
+> **FROZEN 16/08, by him, on the external review's recommendation.** The method is
+> declared settled: no new proposals, no round-close ceremony, no §2a essays, no gate
+> redesigns, until three batches show an observable cost to their absence — then the
+> suspended piece returns with that evidence. The method's CORE stays binding and is
+> restated in `CLAUDE.md`. This file is read-only until the freeze lifts.
+
 Inputs for evolving the method. **Not the method itself.**
 
 | File            | Layer                  | Question it answers                                       |
