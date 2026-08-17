@@ -380,6 +380,17 @@ export type Gait = {
 }
 
 export type Grammar = {
+  /**
+   * **Turns of yaw this grammar was generated at, when it was generated rather than authored.**
+   *
+   * Absent on every authored body. `yaw()` stamps it, and the point is that some facts are true
+   * of an AUTHORED body and meaningless on a turned copy: `Bone.z` says which side of the body a
+   * limb is on until a yaw, after which it says which side of the CAMERA. A lock that reads a
+   * body-frame invariant off that field has to know the difference, and a naming convention is
+   * not a thing a lock can trust (`tests/pairs.test.ts` was casing a shoulder against a thruster
+   * rack before this field existed).
+   */
+  readonly yawTurns?: number
   readonly name: string
   readonly palette: Palette
   readonly skeleton: Skeleton
@@ -465,7 +476,12 @@ export type Params = {
    * below one tone step. `src/perception/weave.ts` is the only instrument that can tell them
    * apart, and every other lock in the repo is blind to both.
    */
-  readonly texture: { readonly speckle: number; readonly dither: number; readonly lattice: number }
+  /**
+   * `facet` snaps the surface normal to a lattice of directions, so a smooth solid shades as
+   * flat plates with hard creases — the one-normal-per-face look of fixed-function hardware.
+   * 0 is off and byte-identical; 2 is a coarse hull, 5 nearly smooth. See `paintPart`.
+   */
+  readonly texture: { readonly speckle: number; readonly dither: number; readonly lattice: number; readonly facet: number }
   /**
    * **Shadow cast by the body onto itself**, marched through the depth buffer.
    *

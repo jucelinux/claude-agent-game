@@ -72,6 +72,24 @@ export function paintPart(
    * inside of a hollow. See `Part.cut`.
    */
   carve = false,
+  /**
+   * **Facets: the normal snapped to a lattice of directions, and it is the PS1 read.**
+   *
+   * Every primitive here is a smooth implicit solid, so its normal turns continuously and the
+   * shading is a gradient cut into tones. Hardware of that era shaded a *triangle at a time*:
+   * one normal per face, so a curved hull came out as a fan of flat plates with hard creases
+   * between them. That is the thing his reference's eye actually remembers, and it is not a
+   * palette or a resolution — **it is the shading being piecewise constant**.
+   *
+   * Snapping each component to `1/facet` and renormalizing does exactly that, in one place and
+   * with no new geometry: every point whose normal falls in the same cell takes the same
+   * brightness, so a sphere becomes a polyhedron and the crease lands where the cell changes.
+   * `facet` is how many steps each component gets — 2 is a coarse hull, 5 is a smooth one.
+   *
+   * **At 0 the term does not run**, so every subject on the shelf renders byte-identical and
+   * the baseline hash stands. Same contract the dither shipped under.
+   */
+  facet = 0,
 ): void {
   const levels = ramp.length
   if (levels === 0) throw new Error('a ramp with no tones cannot paint')
@@ -236,12 +254,34 @@ export function paintPart(
       // The normal has three components now, so this is a real lambert term instead of the
       // distance-to-edge sweep it used to be — and the cost lands on `light.z`, which
       // decides how much ramp a body spends on merely facing the viewer.
-      const dot = hit.nx * lx + hit.ny * ly + hit.nz * lz
+      /**
+       * **The facet, applied to the normal and to nothing else.** It runs before both lamps
+       * and before the curve, because a facet is a fact about the *surface* — one normal for a
+       * whole plate — and every downstream term then agrees about which plate it is lighting.
+       * At `facet` 0 this branch does not run and `nx, ny, nz` are the values they always were.
+       */
+      let hnx = hit.nx
+      let hny = hit.ny
+      let hnz = hit.nz
+      if (facet > 0) {
+        const qx = Math.round(hnx * facet)
+        const qy = Math.round(hny * facet)
+        const qz = Math.round(hnz * facet)
+        // A normal that snaps to the origin has no direction left; keep the true one rather
+        // than inventing a lit or unlit surface out of a rounding artifact.
+        const qm = Math.hypot(qx, qy, qz)
+        if (qm > 0) {
+          hnx = qx / qm
+          hny = qy / qm
+          hnz = qz / qm
+        }
+      }
+      const dot = hnx * lx + hny * ly + hnz * lz
       // Two lamps, blended before the curve and before the quantisation. At weight 0 this
       // reduces to the single-lamp expression exactly, which is the null case.
       let u = (dot + 1) / 2
       if (fw > 0) {
-        const dotFill = hit.nx * fx + hit.ny * fy + hit.nz * fz
+        const dotFill = hnx * fx + hny * fy + hnz * fz
         u = u * (1 - fw) + ((dotFill + 1) / 2) * fw
       }
       /**

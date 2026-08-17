@@ -97,12 +97,26 @@ const SYMMETRIC: Readonly<Record<string, string>> = {
   'astro-idle-e': 'standing still in a pressure suit, arms held out either side',
   'astro-leap-e': 'a lunar leap is a two-footed push',
   'cat-tuck': 'a cat meets a shelf with both front paws and springs off both',
+  // Run 21. A boosting machine is not walking: the thrust moves it, both legs trail together
+  // and the shoulders hold the weapons level. The same intent as the lunar leap's two-footed
+  // push. Only band 0 is listed — the other eleven are turned copies and are skipped above.
+  'mech-boost-0': 'a boost is thrust, not a stride: both legs trail and the guns stay level',
 }
 
 describe('a body has two of each limb', () => {
   for (const pair of PAIRS) {
     if (SYMMETRIC[pair.grammar] !== undefined) continue
     const grammar = grammarByName(pair.grammar)
+    /**
+     * **A turned body is not a body this check can read, and run 21 is where that surfaced.**
+     *
+     * The detector pairs two bones by `Bone.z` having opposite signs — which says "opposite
+     * sides of the body" on an AUTHORED body and says "opposite sides of the CAMERA" the moment
+     * a yaw has been applied. On a mech turned thirty degrees it duly paired a shoulder block
+     * against a thruster rack and reported that they moved as one limb, which they are not and
+     * never were. The invariant belongs to the authoring; the facings inherit it.
+     */
+    if (grammar.yawTurns !== undefined) continue
     const pairs = mirrorPairs(grammar)
     if (pairs.length === 0) continue
 

@@ -123,7 +123,7 @@ function yawPart(part: Part, c: number, s: number): Part {
  * `depth` is the same story for the other end: the `z` channel's keys are read back through
  * `gait.depth` in pixels, so a distance has to be divided by it to become a key.
  */
-export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26, depth = 7): Grammar {
+export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26, depth = 7, rollAmp = 0, exact = false): Grammar {
   const a = turns * Math.PI * 2
   const c = Math.cos(a)
   const s = Math.sin(a)
@@ -148,7 +148,16 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26,
     // further from the camera than the elbow it hangs from — *"parece que o antebraço está
     // atrás do braço"* — and stacked down the chain, so the error grew with every segment.
     const parent = b.parent === null ? 0 : (angleOf.get(b.parent) ?? 0)
-    return { ...b, x: p.x, z: p.z + Math.sin(parent * Math.PI * 2) * b.y * s, angle: b.angle * c }
+    // A rest ROLL decomposes the same way a rest angle does: `cos θ` stays a roll, `sin θ`
+    // becomes a screen-plane angle. Zero for every body authored before run 21.
+    const r0 = b.roll ?? 0
+    return {
+      ...b,
+      x: p.x,
+      z: p.z + Math.sin(parent * Math.PI * 2) * b.y * s,
+      angle: b.angle * c + r0 * s,
+      ...(r0 === 0 ? {} : { roll: r0 * c }),
+    }
   })
 
   /** Which bones hang off each bone, so a rotation can be pushed down to them. */
@@ -192,9 +201,74 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26,
     (Math.sin(k * swing * Math.PI * 2) * reach * s) / depth
 
   const tracks: Track[] = []
+  /**
+   * **The turn is the identity only when `cos θ` is 1, and the guard used to test `sin θ` alone.**
+   *
+   * At exactly half a turn the sine is zero and the cosine is −1: every rotation on the body
+   * REVERSES, and the old test waved the track through unchanged. The rest angles were already
+   * being multiplied by `c` two dozen lines above, so a half-turned body had its rest pose
+   * mirrored and its gait not — the two disagreed by twice the swing. It never shipped because
+   * the astronaut generates five facings and none of them is west; the mech generates twelve and
+   * band 6 is exactly there. Measured before the fix: the knee **10.7 units** off a 30-unit
+   * machine, against 0.4 at every other heading. That outlier is what found it.
+   */
+  const identity = Math.abs(s) < 1e-6 && c > 0
   for (const t of grammar.gait.tracks) {
-    if (t.channel !== 'angle' || Math.abs(s) < 1e-6) {
+    /**
+     * **A roll turns with the body too, and until run 21 it did not.**
+     *
+     * `roll` is rotation about the horizontal SCREEN axis, and a body authored facing east has
+     * its own forward axis lying along it. Yaw the body by θ and that forward axis swings into
+     * depth: it is now `cos θ` along screen x and `sin θ` along screen z. Rotation about screen
+     * x is `roll`; rotation about screen z is `angle`. **So a roll decomposes exactly the way an
+     * angle already did** — it keeps `cos θ` of itself and grows an `angle` companion carrying
+     * `sin θ`.
+     *
+     * Without this a machine banking into a dash banked about the camera's axis instead of its
+     * own: correct at the authored heading, and at a quarter turn it pitched toward the viewer
+     * when it should have leaned sideways. Nothing shipped before this round has a roll track on
+     * a yawed body, so the whole back catalogue is byte-identical — `tests/weld.test.ts` says so.
+     *
+     * The two channels carry different amplitudes (`gait.roll` in turns against `gait.swing` in
+     * turns), so the companion is scaled by their ratio. `rollAmp` 0 means the caller has no
+     * roll to convert, which is every caller that predates this.
+     */
+    if (t.channel === 'roll' && !identity) {
+      if (Math.abs(c) > 1e-6) tracks.push({ ...t, keys: t.keys.map((k) => k * c) })
+      if (rollAmp > 0 && swing > 0 && Math.abs(s) > 1e-6) {
+        tracks.push({ bone: t.bone, channel: 'angle', keys: t.keys.map((k) => (k * rollAmp * s) / swing) })
+      }
+      continue
+    }
+    if (t.channel !== 'angle' || identity) {
       tracks.push(t)
+      continue
+    }
+    /**
+     * **The exact path, and it exists because `roll` was not a channel when this file was
+     * written.**
+     *
+     * A gait `angle` is a rotation about the DEPTH axis. Yaw the body by θ and that axis turns
+     * to `(−sin θ, 0, cos θ)` — so the rotation is `cos θ` about depth (still an `angle`) and
+     * `−sin θ` about the horizontal screen axis, **which is exactly what `roll` is**. Run 14 had
+     * no roll channel, so it approximated the out-of-plane half as a linear depth OFFSET
+     * (`sin θ × limb reach`) plus a `scaleY` foreshortening term. That is a first-order stand-in
+     * for a rotation: fine at a walk's amplitude and wrong at a stride's.
+     *
+     * Measured on the mech's 45° thigh swing, the old path puts the knee **10.7 units** from
+     * where a rigid turn would; this one is exact to floating point. Both numbers are in
+     * `BACKLOG.md` with the command that makes them.
+     *
+     * **It is opt-in, and that is a cost decision rather than caution.** The astronaut's fifteen
+     * facings and the moon game were judged by him on the old path; switching them silently
+     * would change a shipped artifact he has already read. So run 21 uses this and nothing else
+     * does, and whether to migrate the moon is one line in his next batch.
+     */
+    if (exact) {
+      if (Math.abs(c) > 1e-6) tracks.push({ ...t, keys: t.keys.map((k) => k * c) })
+      if (rollAmp > 0 && Math.abs(s) > 1e-6) {
+        tracks.push({ bone: t.bone, channel: 'roll', keys: t.keys.map((k) => (-k * swing * s) / rollAmp) })
+      }
       continue
     }
     if (Math.abs(c) > 1e-6) tracks.push({ ...t, keys: t.keys.map((k) => k * c) })
@@ -249,7 +323,10 @@ export function yaw(grammar: Grammar, turns: number, name: string, swing = 0.26,
   }
 
   const gait: Gait = { ...grammar.gait, tracks }
-  return { name, palette: grammar.palette, skeleton: { bones }, parts, gait }
+  // The stamp: what a lock needs to know that this body was TURNED rather than authored, so it
+  // can tell a body-frame fact from a camera-frame one. Absent at yaw 0, which is the authored
+  // pose itself and is exactly as trustworthy as the grammar it came from.
+  return { name, palette: grammar.palette, skeleton: { bones }, parts, gait, ...(turns === 0 ? {} : { yawTurns: turns }) }
 }
 
 /**

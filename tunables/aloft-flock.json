@@ -35,7 +35,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 2
+    "lattice": 2,
+    "facet": 0
   },
   "shadow": {
     "steps": 7,
@@ -83,6 +84,7 @@
     "outline.enabled": "true, the 15/08 ink verdict.",
     "outline.material": "\"ink\", one hand draws the sky.",
     "outline.inner": "true; each bird is welded into one mark.",
-    "outline.rim": "false, settled 15/08."
+    "outline.rim": "false, settled 15/08.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   }
 }

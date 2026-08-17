@@ -35,7 +35,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 2
+    "lattice": 2,
+    "facet": 0
   },
   "shadow": {
     "steps": 7,
@@ -83,6 +84,7 @@
     "outline.enabled": "true, the 15/08 ink verdict.",
     "outline.material": "\"ink\", the skate's blue-cast near-black: the sky behind is warm, so a cool line separates from the scene's light instead of fighting it.",
     "outline.inner": "true, and Part.weld places it: fabric-on-fabric is one skin (wings, fin, fuselage), everything bolted or strapped keeps its seam (cowl, struts, wheels, pilot, scarf) — the kitten rule.",
-    "outline.rim": "false, settled 15/08."
+    "outline.rim": "false, settled 15/08.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   }
 }

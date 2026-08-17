@@ -29,6 +29,8 @@ export function run(html: string): Harness {
       set imageSmoothingEnabled(_v: boolean) {},
       set fillStyle(_v: string) {},
       set globalAlpha(_v: number) {},
+      set strokeStyle(_v: string) {},
+      set lineWidth(_v: number) {},
       createImageData: (w: number, h: number) => {
         // The browser throws "Value is not of type 'long'" here; a fake that shrugs at NaN
         // approves the exact class of defect it exists to catch — a scene field that never
@@ -40,6 +42,10 @@ export function run(html: string): Harness {
       },
       putImageData: () => {},
       fillRect: () => {}, beginPath: () => {}, fill: () => {}, ellipse: () => {},
+      // The path API, added when the arena's floor grid needed it. A fake that lacks a method
+      // the real context has does not "pass" — it throws, which is at least loud; a fake that
+      // SHRUGS is the flattering instrument this file's header is about.
+      moveTo: () => {}, lineTo: () => {}, stroke: () => {}, closePath: () => {},
       drawImage: (src: { _canvas?: true }) => {
         if (src?._canvas !== true) throw new TypeError('drawImage got a non-canvas — a browser would have thrown')
       },

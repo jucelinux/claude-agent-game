@@ -100,6 +100,7 @@ export function sprite(grammar: Grammar, params: Params, seed: number, t: number
     paintPart(
       painter, part.shape, xf, ramp.indices, params.light, params.fill, i, rng,
       params.texture.speckle, params.texture.dither, params.texture.lattice, part.shift ?? 0, part.marking === true, part.cut === true,
+      params.texture.facet,
     )
   }
 

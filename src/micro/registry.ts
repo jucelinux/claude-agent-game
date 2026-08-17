@@ -31,6 +31,7 @@ import { moonScene } from './moon-scene.ts'
 import { aeroScene } from './aero-scene.ts'
 import { snowScene } from './snow-scene.ts'
 import { descentScene } from './descent-scene.ts'
+import { arenaScene } from './arena-scene.ts'
 
 export type MicroGame = {
   /** Stable, and it never changes: he navigates by it. */
@@ -227,5 +228,25 @@ export const MICRO_GAMES: readonly MicroGame[] = [
     date: '2026-08-17',
     keys: '← → carve · space hop · rocks and snowmen duck under the hop, pines never',
     scene: descentScene,
+  },
+  /**
+   * **Micro game 9: the arena.** His commission of 17/08 — one game that kills every remaining
+   * 3D debt, benched by a third person whose memory is PS1. The mech was chosen because the yaw
+   * approximation lives in the GAIT: only a body that walks while it turns can test it.
+   *
+   * Four debts, one round: runtime yaw as twelve generated headings; the yaw gait approximation
+   * measured against matrix truth for the first time; yaw composed with root pitch AND root roll
+   * on the boost; and a camera with a position and a heading that both move. The PS1 read is
+   * `texture.facet`, a new quantiser that snaps the surface normal so smooth solids shade as
+   * flat plates — one normal per face, which is what the hardware actually did.
+   */
+  {
+    id: 'arena',
+    title: 'Hangar duel',
+    blurb:
+      'Two machines, one floor, and a camera on a boom. Arrows strafe and close — you are locked on, so the machine always faces its target while it walks sideways, which is exactly the turn the engine had never been asked to do at runtime. Space dashes: 50 units of ground for one press, then a second of being a target. X fires. Every plate is shaded one normal at a time, so the armour creases like the machines of that era instead of blending, and the floor grid converges on the vanishing point as the camera swings. Twelve headings, four sizes, all pre-rendered — nothing here is a stretched sprite. First to zero armour loses.',
+    date: '2026-08-17',
+    keys: '↑ ↓ close and back off · ← → strafe · space dash · X fire',
+    scene: arenaScene,
   },
 ]

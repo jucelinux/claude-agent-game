@@ -14,6 +14,48 @@ branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 | 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
 | 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | *open* | — | 1 cycle so far |
 | 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | **ships** (cycle 2) | cycle 1 specified: **perspective — scale over distance, spawn at the vanishing point, the treadmill** | 2 cycles, 2 readings |
+| 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | *open* | — | 1 cycle so far |
+
+**Batch 8, 17/08, his sentence:** *"Ainda temos pendências sobre o 3D e queria matá-las em um
+único microgame… um bench que irei validar com outro humano, um liderado meu… 'Jogos com a
+memória gráfica de ps1, com gráficos mais poligonais, com uma mecânica refinada'."* Three games
+were offered; he took the mech duel, which was the recommendation, because **the yaw
+approximation lives in the gait** and only a body that walks while it turns can test it.
+
+**Shipped as `/arena` ("Hangar duel"), one model cycle. The 3D ledger closes.**
+
+| debt | how it was paid |
+|---|---|
+| yaw had no runtime channel | 12 generated headings; the band is `bodyHeading − cameraHeading`, chosen per frame — the `/descent` band technique on rotation |
+| the yaw gait approximation was never measured | **measured, and the batch-1 prediction is refuted** (below) |
+| the three axes never composed | `mech-boost` pitches and rolls its root, and the generator yaws the result |
+| no camera that rotates | position AND heading on a plane, both moving every frame, over the shoulder with lag |
+
+**The numbers, and the second one is the round's real finding:**
+
+1. **The gait approximation is under a pixel and always was.** The record has said since batch 1
+   that this was "the half most likely to fail". Measured on a 45° stride across every heading,
+   against a true pose-then-turn: the run-14 depth-offset path puts the knee **0.877 units** off,
+   the new rotation path **0.424** — on a 30-unit machine drawn 34 px high, **0.99 px and 0.48 px**.
+   The prediction is refuted by measurement.
+2. **A half turn was being treated as the identity, and that cost 10.7 units.** `yaw()` guarded
+   its gait decomposition on `sin θ` alone; at 180° the sine is zero and the cosine is −1, so the
+   rest pose mirrored and the gait did not. **It never shipped** — the astronaut generates five
+   facings and none is west — and the mech's twelve walked straight into it. Found by an outlier
+   in the new instrument, not by looking.
+3. `roll` had never been decomposed under a yaw at all: a banking machine banked about the
+   camera's axis instead of its own. Fixed, and measured against its own absence.
+
+**The aesthetic is a capability: `texture.facet`.** A new quantiser that snaps the surface normal
+to a lattice, so a smooth solid shades as flat plates with hard creases — one normal per face,
+which is what fixed-function hardware did. 0 is byte-identical and every subject before run 21
+carries 0; the machines and the hangar carry 2.
+
+**Prediction (one line, before either of them looks):** SHIPS at 55/45 from HIM, and the 45 is
+the mechanic rather than the look — a duel is the first game here with an opponent, and "refined"
+is a bar no instrument in this repo can read. From the COLLEAGUE I predict the reverse split: he
+answers the picture first, and the risk there is that facets on a 34 px body read as noise rather
+than as polygons.
 
 **Batch 7, cycle 1: MISS, his words unsoftened.** *"os obstáculos estão surgindo de trás do
 player… deveriam aparecer em escala, ao fundo, e crescerem conforme se aproximam… tudo parece
@@ -77,6 +119,16 @@ and the skate too.
   · *Changes:* **yes** → subtraction enters the mastery ledger with a verdict. **no** →
   the cut was the wrong capability or badly spent — worth more than a third primitive.
 
+- [ ] 🔴 **Two readings on `/arena`, and they are two different instruments.**
+  · *Open:* the shelf → `/arena`. · *Do:* one duel each, ~2 minutes.
+  · **You** judge the game: does the duel feel refined — is the dash worth its cooldown, does
+  the strafe read, is losing your own fault? That is the gate's question and yours alone.
+  · **Your colleague** holds a BAR, not a taste: "does this look like the PS1 I remember?" One
+  word plus one word of why. His answer moves the aesthetic vocabulary; it does not move
+  `TASTE.md` §1, which is compiled from your verdicts only.
+  · *Changes:* a disagreement between the two is worth more than either agreement — it would be
+  the first evidence the project has about whose eye a named external reference belongs to.
+
 - [ ] 🟡 **Two minutes: the snowboarder — batch 6's reading.**
   · *Open:* `node bin/micro.ts` → `/snow` (or the deployed shelf).
   · *Do:* play until you clear a snowman with one press and the tall pine with two. Say one
@@ -129,7 +181,10 @@ Every number carries the command that regenerates it and its date.
 | weave surface share (4×4 single-owner) | rider 0.000 · kitten 0.068 · kerb 0.432 | `[weave]` line of `node bin/bench.ts --grammar skate-roll --tunables skate` | 16/08 |
 | yaw collapse threshold | depth/width ≈ 0.45 | `npx vitest run tests/yaw.test.ts` | 16/08 |
 | TS lines, source + locks | 12 700 / 4 600 | `find src bin -name '*.ts' \| xargs wc -l` | 16/08 |
-| locks green | 523 | `npm test` | 17/08, after run 20 cycle 2 |
+| locks green | 575 | `npm test` | 17/08, after run 21 |
+| **the yaw gait approximation, measured at last** | legacy 0.877 units = **0.99 px**; exact 0.424 = **0.48 px** (30-unit machine, 34 px on screen) | `npx vitest run tests/arena.test.ts` | 17/08 |
+| the half-turn defect, before the fix | **10.7 units** at band 6, against 0.4 at every other heading | same command, band sweep | 17/08 |
+| `/arena` budget | 100 layers, 35 colours, 21 calls/frame of 200, 338k px to decode, 60 fps measured | `node bin/micro.ts --static` | 17/08 |
 | **the composition drift at carve amplitude** — the number test C exists for | worst **0.337 px** on a 34 px body (arms ±50° under 21° roll under 36° bank); glide exactly 0 | `npx vitest run tests/descent.test.ts` | 17/08 |
 | `/descent` budget | 13 layers, 50 colours, 34 calls/frame of 200, 41k px to decode, 33 KB wire | `node bin/micro.ts --static` | 17/08 |
 | the rodeo: board faces trading under a LEANING root | base 25→**119**→8 px · topsheet 32→0→**81**, half a turn apart, pale first | `node bin/bench.ts --grammar snow-rodeo --tunables snow-rodeo` | 17/08 |

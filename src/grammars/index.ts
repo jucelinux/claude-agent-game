@@ -42,6 +42,8 @@ import { skyBalloon, skyFlock, skyKite } from './scenery/aloft.ts'
 import { snowCarve, snowJump, snowRodeo } from './characters/boarder.ts'
 import { descentCarve, descentGlide, descentLaunch } from './characters/boarder-descent.ts'
 import { pistePine, pistePuff, pisteRock, pisteSapling, pisteSnowman } from './scenery/piste.ts'
+import { MECH, MECH_BOOST, MECH_WALK } from './vehicles/mech.ts'
+import { hangarPillar } from './scenery/hangar.ts'
 
 /** shipped = judged usable · probe = built to compare, never content · retired = superseded or failed. */
 export type GrammarStatus = 'shipped' | 'probe' | 'retired'
@@ -196,6 +198,20 @@ export const CATALOG: Readonly<Record<string, CatalogEntry>> = {
     description: 'a low snow-capped rock, ~11 px: the descent’s jumpable obstacle — jumpable because of how short it is DRAWN, the height-from-art rule',
     tags: ['yoshi-island'],
   }),
+  ...family(MECH, {
+    kind: 'vehicle',
+    status: 'shipped',
+    games: ['arena'],
+    description: 'the mech, run 21 — 23 plates authored once and generated at 12 yaw headings: the runtime-yaw answer as orientation bands, the walk that measures the yaw gait approximation, and a boost that composes yaw with root pitch AND root roll',
+    tags: ['3d-yaw', '3d-roll', 'ps1', 'facet'],
+  }),
+  ...entry(hangarPillar, {
+    kind: 'prop',
+    status: 'shipped',
+    games: ['arena'],
+    description: 'a hangar pillar — square in plan so it needs no yaw bands of its own, and it is what a turning camera measures its turn against',
+    tags: ['ps1', 'facet'],
+  }),
 }
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = Object.fromEntries(
@@ -275,6 +291,12 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   { grammar: descentCarve.name, tunables: 'descent-carve' },
   { grammar: descentLaunch.name, tunables: 'descent-launch' },
   { grammar: pisteRock.name, tunables: 'piste' },
+  // Run 21: two clips, two files, the standing reason — a frame count and the roll amplitude
+  // live in the tunables. Every yaw band of one clip shares that clip's file: a heading is a
+  // fact about the camera, never about the tone budget.
+  ...MECH_WALK.map((g) => ({ grammar: g.name, tunables: 'mech' })),
+  ...MECH_BOOST.map((g) => ({ grammar: g.name, tunables: 'mech-boost' })),
+  { grammar: hangarPillar.name, tunables: 'hangar' },
 ]
 
 export function grammarByName(name: string): Grammar {

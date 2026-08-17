@@ -130,7 +130,11 @@ describe('a weld says two shapes are one surface', () => {
       // pine tier is one drift with the crown; the snowman's hat is bolted felt.
       'snow-carve', 'snow-jump', 'snow-rodeo', 'piste-snowman', 'piste-sapling', 'piste-pine', 'piste-puff',
       // Run 20: the same rider from behind, same garment logic; the rock is one drift with its cap.
-      'descent-glide', 'descent-carve', 'descent-launch', 'piste-rock'])
+      'descent-glide', 'descent-carve', 'descent-launch', 'piste-rock',
+      // Run 21: a machine is the easy case of the seam test — plate against plate inside one
+      // section is one surface, every section boundary keeps its line. All 24 yaw bands.
+      ...Array.from({ length: 12 }, (_, i) => `mech-walk-${i}`),
+      ...Array.from({ length: 12 }, (_, i) => `mech-boost-${i}`), 'hangar-pillar'])
     for (const { grammar: g, tunables: t } of PAIRS) {
       if (welded.has(g)) continue
       const grammar = grammarByName(g)

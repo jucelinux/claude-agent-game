@@ -49,7 +49,8 @@
     "gait.lift": "2.4 px; the runtime carries the arc.",
     "gait.depth": "6, unused.",
     "gait.roll": "1 turn — the file exists for this number, third subject: a plank, a machine's root, and now a root that LEANS. The declared approximation (roll does not commute with a parent's screen-plane angle) is this clip's whole test.",
-    "playback.msPerFrame": "40: thirteen frames make 520 ms against the second impulse's ~0.77 s of air, so the turn completes and the hold is a stomped landing."
+    "playback.msPerFrame": "40: thirteen frames make 520 ms against the second impulse's ~0.77 s of air, so the turn completes and the hold is a stomped landing.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   },
   "tones": {
     "perMaterial": 5
@@ -72,7 +73,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 2
+    "lattice": 2,
+    "facet": 0
   },
   "shadow": {
     "steps": 7,

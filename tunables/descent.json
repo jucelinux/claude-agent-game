@@ -49,7 +49,8 @@
     "gait.lift": "2 px: a straight run barely bobs.",
     "gait.depth": "6, unused.",
     "gait.roll": "0 — THE NULL CASE of the composition experiment: no roll anywhere in the glide, upright root, and the drift instrument measures zero here before it is believed at the carve.",
-    "playback.msPerFrame": "90, bench only: the glide advances with distance in the game."
+    "playback.msPerFrame": "90, bench only: the glide advances with distance in the game.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   },
   "tones": {
     "perMaterial": 5
@@ -72,7 +73,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 2
+    "lattice": 2,
+    "facet": 0
   },
   "shadow": {
     "steps": 7,

@@ -27,7 +27,7 @@
  */
 import type { RGB } from '../core/types.ts'
 import { execute, loadParams } from '../io/load.ts'
-import type { Climb, Descent, Placement, Runner, Scene } from './types.ts'
+import type { Arena, Climb, Descent, Placement, Runner, Scene } from './types.ts'
 import { floorDepth, hazeAt, paintOrder, standRow } from './types.ts'
 
 /** One sprite's whole cycle, cropped, in index space. */
@@ -120,6 +120,22 @@ export type StageDescent = Omit<Descent, 'stones' | 'ridge' | 'clouds'> & {
   readonly clouds: (Omit<NonNullable<Descent['clouds']>, 'grammar' | 'tunables'> & { readonly layer: number }) | null
 }
 
+/**
+ * The arena, with every grammar name resolved to a layer index.
+ *
+ * `walk[band][scale]` is the whole answer to "yaw has no runtime channel": each cell is a full
+ * crisp render of the machine turned to that heading and built at that size, and the runtime
+ * picks one with two integer indices and no idea what a yaw is.
+ */
+export type StageArena = Omit<Arena, 'walk' | 'boost' | 'pillars'> & {
+  readonly walk: readonly (readonly number[])[]
+  readonly boost: readonly (readonly number[])[]
+  /** One layer per scale band, as the machines have: a pillar 200 units off is a small render. */
+  readonly pillar: readonly number[]
+  readonly pillarCount: number
+  readonly pillarSeed: number
+}
+
 export type StageClimb = Omit<Climb, 'perches'> & {
   /** Layer index per platform variant, in the order the scene declared them. */
   readonly perches: readonly number[]
@@ -160,6 +176,8 @@ export type Stage = {
   readonly runner: StageRunner | null
   /** Present on a down-slope game, null on every other kind. */
   readonly descent: StageDescent | null
+  /** Present on an arena duel, null on every other kind. */
+  readonly arena: StageArena | null
   /** Back to front. */
   readonly placed: readonly Placed[]
   /** Distinct colours across every layer — the same cohesion reading, on the same terms. */
@@ -382,6 +400,29 @@ export function toStage(scene: Scene): Stage {
     }
   }
 
+  let arena: StageArena | null = null
+  if (scene.arena !== undefined) {
+    const { walk, boost, pillars, ...rest } = scene.arena
+    // One render per (clip, heading, size). The cache dedupes across the two machines, so a
+    // duel costs exactly what one machine costs — the enemy is the same body at another band.
+    const set = (prefix: string): readonly (readonly number[])[] =>
+      Array.from({ length: rest.bands }, (_, b) =>
+        rest.scales.map(
+          (s) => build({ grammar: `${prefix}-${b}`, tunables: prefix === walk ? 'mech' : 'mech-boost', ...(s === 1 ? {} : { scale: s }) }, 0, false).layer,
+        ),
+      )
+    arena = {
+      ...rest,
+      walk: set(walk),
+      boost: set(boost),
+      pillar: rest.scales.map(
+        (s) => build({ grammar: pillars.grammar, tunables: pillars.tunables, ...(s === 1 ? {} : { scale: s }) }, 0, false).layer,
+      ),
+      pillarCount: pillars.count,
+      pillarSeed: pillars.seed,
+    }
+  }
+
   let descent: StageDescent | null = null
   if (scene.descent !== undefined) {
     const { stones, ridge, clouds, ...rest } = scene.descent
@@ -475,6 +516,6 @@ export function toStage(scene: Scene): Stage {
   return {
     name: scene.name, w: scene.w, h: scene.h, scale: scene.scale, ground: scene.ground,
     sky: scene.sky, groundRamp: scene.groundRamp, stars: scene.stars ?? null, dust: scene.dust ?? null, rain, floor,
-    layers, climb, runner, descent, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
+    layers, climb, runner, descent, arena, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
   }
 }

@@ -33,6 +33,12 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
   mechanic. A static backdrop was "básico"; the same paint moving at three rates is not.
 - `[derived 17/08 · batch 5]` The consistency axis extends to lifecycle: an obstacle must
   leave the screen before it is destroyed. Genre convention is part of what he checks.
+- `[derived 17/08 · batch 7]` He reads MOTION before form: "sensação de movimento e
+  profundidade" came before any note on the drawing, and a static-looking world reads as
+  broken to him even when every sprite in it is right.
+- `[derived 17/08 · batch 8, declared]` He brings a second human as a BAR, naming an external
+  reference the colleague holds ("PS1"). §1 stays compiled from his verdicts alone; the
+  colleague's answer moves the aesthetic vocabulary, not the taste.
 
 ## 1b. Bar per axis
 
@@ -67,6 +73,10 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
   hour (PERIODIC on a gradient → a body). Ask first: what differs about this artifact?
 - I promote a surviving parameter to a constant in my head (the walk's swing spent on a
   jump — re-derive, the anchor names its scope).
+- **I carry a predicted risk as if it were a measured one.** The yaw gait approximation was
+  written down in batch 1 as "the half most likely to fail" and repeated for three days; when
+  finally measured it was under a pixel, and the real defect was a guard nobody had suspected.
+  A named risk with no number is a hypothesis, and it ages into a fact if nothing measures it.
 
 ## 2b. Capability surface & mastery ledger
 
@@ -96,7 +106,10 @@ the axis it was proven on, never across it.**
 | a game that can be lost | climb, crypt, skate | win conditions beyond "how far" |
 | subtraction (`cut`) | skull re-authored | **verdict pending** (BACKLOG) |
 | pattern inside a part | — | does not exist |
-| pitch | — | inexpressible; roll exists, pitch does not |
+| **runtime yaw** (a body turned to any heading while playing) | `/arena`, 12 generated headings on a camera that orbits | bodies needing more than ~12 bands, or a gait+heading grid larger than the cache affords |
+| **the full rotation set composing** (yaw × screen-plane angle × roll) | `/arena`'s boost, measured: gait residual **0.48 px** on a 34 px body | nothing known — the instrument is in `tests/arena.test.ts` and runs on anything |
+| **facets** (`texture.facet`, one normal per plate) | the mech and the hangar | organic bodies — untried, and a facet needs a flat plate to sit on |
+| **a camera with a heading** (projection, painter by depth, over-the-shoulder lag) | `/arena` | a camera the player aims himself; a second one in the same scene |
 
 Hypotheses (14/08, still open): **H1** a body with a grammar reaches the bar, a humanoid
 with cloth does not. **H2** "and animate it" raises the ceiling rather than lowering it.

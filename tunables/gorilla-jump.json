@@ -35,7 +35,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 4
+    "lattice": 4,
+    "facet": 0
   },
   "playback": {
     "msPerFrame": 65,
@@ -74,7 +75,8 @@
     "fill.z": "-0.2, barely on the viewer side. A fill that faces the viewer as hard as the key does flattens the form it exists to recover.",
     "fill.weight": "0.15, and it is the measured edge rather than a taste. His ink verdict of 15/08 requires BOTH a wide value range and clustered tone regions, and this knob moves them in opposite directions. Swept at 0, 0.10, 0.13, 0.15, 0.17, 0.19 and 0.22: regions improve monotonically, and the tree loses 23% of its value range between 0.15 and 0.17 (0.654 down to 0.504). 0.15 is the largest weight that costs no range on either subject, and it still buys a 7% gain in region size.",
     "silverback": "The silver saddle and the heavier crest were added 16/08 at his request: 'vamos caracterizar esse gorila? Ele deveria ser um silverback.' The saddle is its own MATERIAL, not a lighter shift of the fur, because a shift walks a part along its own ramp and grey hair is a colder hue than pale fur. The crest is the half that changes the silhouette, which is where a sprite is actually read.",
-    "palette": "Black fur with a COOL highlight, 16/08, his words: 'cara o gorila é preto'. It ran to a warm cream at [182,164,140], which is a brown bear. Black hair reflects the sky. Declared cost: Chrono's argument is a wide value range and a black animal cannot have one - this ramp spans 9 to 134 where the run 8 probe spanned 30 to 196, and the separation is bought with the drawn line and the saddle instead."
+    "palette": "Black fur with a COOL highlight, 16/08, his words: 'cara o gorila é preto'. It ran to a warm cream at [182,164,140], which is a brown bear. Black hair reflects the sky. Declared cost: Chrono's argument is a wide value range and a black animal cannot have one - this ramp spans 9 to 134 where the run 8 probe spanned 30 to 196, and the separation is bought with the drawn line and the saddle instead.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   },
   "shadow": {
     "steps": 8,

@@ -136,13 +136,33 @@ export function budgetOf(stage: Stage, gzipBytes = 0): Budget {
   const descCalls = dd === null ? 0 : 1 + slopeOnScreen + 2 + (dd.dust?.count ?? 0)
   const descPixels = dd === null ? 0 : screen + slopeOnScreen * sprites + (dd.dust?.count ?? 0) * 4
 
+  /**
+   * **The arena's loop, counted from the shapes it actually draws**: a backdrop stamp, the grid
+   * as one stroked path, a pillar per slot, two machines, the shots, and the final blit. The
+   * grid is one path however many segments it holds, which is exactly why it is drawn as one.
+   */
+  const ar = stage.arena
+  const arenaCalls = ar === null ? 0 : 1 + 1 + ar.pillarCount + 2 + 6 + 2
+  /**
+   * An arena has an empty `placed` list — every actor is projected, not placed — so `sprites`
+   * is zero here and would have reported a frame that writes only its own backdrop. The stamps
+   * are measured off the layers they actually use: the two machines at full size and a pillar.
+   */
+  const arenaStamp = ar === null ? 0
+    : (stage.layers[ar.walk[0]![0]!]?.w ?? 0) * (stage.layers[ar.walk[0]![0]!]?.h ?? 0)
+  const arenaPillar = ar === null ? 0 : (stage.layers[ar.pillar]?.w ?? 0) * (stage.layers[ar.pillar]?.h ?? 0)
+  const arenaPixels = ar === null ? 0 : screen + 2 * arenaStamp + ar.pillarCount * arenaPillar
+
   return {
     perFrame: {
       // backdrop + rain + subjects + the climb's or the runner's own loops + the final blit
-      drawCalls: 1 + rainCalls + stage.placed.length + climbCalls + runCalls + descCalls + 1,
-      pixels: screen + sprites + climbPixels + runPixels + descPixels,
+      drawCalls: 1 + rainCalls + stage.placed.length + climbCalls + runCalls + descCalls + arenaCalls + 1,
+      pixels: screen + sprites + climbPixels + runPixels + descPixels + arenaPixels,
       blitPixels: stage.w * stage.scale * stage.h * stage.scale,
-      overdraw: (screen + sprites + climbPixels + runPixels) / screen,
+      // **Every path's pixels, and the descent's and the arena's were missing.** An overdraw
+      // that ignores a whole draw path is the flattering instrument defect this file's own
+      // header warns about — third and fourth occurrence, fixed together.
+      overdraw: (screen + sprites + climbPixels + runPixels + descPixels + arenaPixels) / screen,
     },
     load: {
       decodePixels,

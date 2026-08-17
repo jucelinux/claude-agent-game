@@ -49,7 +49,8 @@
     "gait.lift": "2.4 px: the pump travels ±1.2, a knee rhythm with both feet strapped down — the skate's reasoning on snow.",
     "gait.depth": "6, unused.",
     "gait.roll": "0, and the zero is the null case for the channel on this subject: the carve must not change when the rodeo ships.",
-    "playback.msPerFrame": "90, bench only: in the game the carve advances with distance over strideLen."
+    "playback.msPerFrame": "90, bench only: in the game the carve advances with distance over strideLen.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   },
   "tones": {
     "perMaterial": 5
@@ -72,7 +73,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 2
+    "lattice": 2,
+    "facet": 0
   },
   "shadow": {
     "steps": 7,

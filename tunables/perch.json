@@ -35,7 +35,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 4
+    "lattice": 4,
+    "facet": 0
   },
   "shadow": {
     "steps": 6,
@@ -83,6 +84,7 @@
     "shadow.bias": "0.25, the project-wide value since run 7. Depth tolerance, so a curved surface does not shadow itself along its own tangent.",
     "fill.x": "0.45, opposite the key in x. A fill is what a photographer puts across from the key light and what a painter calls bounce.",
     "fill.y": "0.5, from BELOW. The key comes down through leaves and the bounce comes up off the ground, which is what an outdoor scene actually does.",
-    "fill.z": "-0.3, matching the key's own z. The fill is a weaker second lamp, not a different camera."
+    "fill.z": "-0.3, matching the key's own z. The fill is a weaker second lamp, not a different camera.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   }
 }

@@ -49,7 +49,8 @@
     "gait.lift": "2.4 px: the body loads and releases through the turn.",
     "gait.depth": "6, unused.",
     "gait.roll": "0.14 turn: the chest's fold keys reach 0.42 — 21° of roll — and the board's pitch 0.24, BOTH under the banked root. A rolled subtree under a root swinging hard in the screen plane is the declared drift case, held for the whole loop.",
-    "playback.msPerFrame": "90, bench only: the carve advances with distance while steering."
+    "playback.msPerFrame": "90, bench only: the carve advances with distance while steering.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   },
   "tones": {
     "perMaterial": 5
@@ -72,7 +73,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 2
+    "lattice": 2,
+    "facet": 0
   },
   "shadow": {
     "steps": 7,

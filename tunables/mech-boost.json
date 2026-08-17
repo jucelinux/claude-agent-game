@@ -1,0 +1,90 @@
+{
+  "tones": {
+    "perMaterial": 5
+  },
+  "light": {
+    "x": -0.42,
+    "y": -0.68,
+    "z": -0.4,
+    "curve": 1.25
+  },
+  "outline": {
+    "enabled": true,
+    "material": "ink",
+    "inner": true,
+    "rim": false
+  },
+  "body": {
+    "scale": 1
+  },
+  "texture": {
+    "speckle": 0,
+    "dither": 0,
+    "lattice": 2,
+    "facet": 2
+  },
+  "shadow": {
+    "steps": 8,
+    "bias": 0.25,
+    "strength": 3
+  },
+  "fill": {
+    "x": 0.5,
+    "y": 0.2,
+    "z": -0.2,
+    "weight": 0.08
+  },
+  "canvas": {
+    "w": 56,
+    "h": 56,
+    "originX": 28,
+    "originY": 26
+  },
+  "frames": {
+    "walk": 9
+  },
+  "gait": {
+    "swing": 0.2,
+    "lift": 3.4,
+    "depth": 8,
+    "roll": 0.14
+  },
+  "playback": {
+    "msPerFrame": 70,
+    "scale": 4
+  },
+  "_anchors": {
+    "canvas.w": "56. The machine is 34 px tall and 26 px wide at rest, but a YAW sweeps its depth into the width: the shoulders sit at 6.4 depth and the rifle reaches 11 forward, so at three quarters the widest pose spans 46. 56 holds it with the outline.",
+    "canvas.h": "56, square with the width. The band generator turns this body through twelve headings and the cell has to hold the worst of all twelve, not the authored one.",
+    "canvas.originX": "28, dead centre — the axis every yaw band turns about. Off-centre would swing the machine out of its own cell between bands.",
+    "canvas.originY": "26. The core, which is the bone the boost pitches and rolls about. Feet reach 24 below, the cannon 16 above.",
+    "tones.perMaterial": "5, the 15/08 idiom. Facets need range, not more levels — the range is in the palette.",
+    "light.x": "-0.42, upper left, the shelf's key.",
+    "light.y": "-0.68, high and hard. A hangar lamp, not a sun: PS1 mechs are lit from above with little bounce, and a high key is what makes adjacent facets differ.",
+    "light.z": "-0.4, well toward the viewer — MORE front light than any subject here. A facet only reads if the plate facing the camera differs from the plates either side of it, and a grazing lamp would put both in shadow.",
+    "light.curve": "1.25. Near the crypt's 1.3: the dark end compresses so the machine sits against a lit floor with real contrast, the era's own look.",
+    "outline.enabled": "true, the 15/08 ink verdict. It also does a second job here: fixed-function hardware had no anti-aliasing, so a hard edge IS the period read.",
+    "outline.material": "\"ink\", cool near-black — a hangar is lit blue and a warm line would float off the metal.",
+    "outline.inner": "true, and Part.weld places it: plate against plate inside one section is one surface; every section boundary keeps its seam, which is what makes a machine read as assembled.",
+    "outline.rim": "false, settled 15/08.",
+    "body.scale": "1. The mech stands 34 px in a 240 px arena — big enough that facets have plates to sit on, small enough that two of them and the floor fit the frame.",
+    "texture.speckle": "0, retired 15/08.",
+    "texture.dither": "0 on the body — the skate round's measured rule. A 34 px machine has no single-owner surface for a weave, and the arena's floor is where the lattice goes.",
+    "texture.lattice": "2, unused at dither 0.",
+    "texture.facet": "**2, and this file is the first in the project to spend the knob.** Each normal component snaps to halves, so the machine shades as a small set of flat plates with hard creases between them — one normal per face, which is what the hardware his reference remembers actually did. 3 was measured smoother and 2 reads as polygons; the number is the PS1 idiom itself, so it is a knob his verdict can move.",
+    "shadow.steps": "8, one more than the deepest mass (the core at 5.2 half-depth).",
+    "shadow.bias": "0.25, project-wide since run 7.",
+    "shadow.strength": "3 ramp steps — the DEEPEST on the shelf. Hard shadows are the other half of the era's look, and a machine of plates casts them on itself constantly.",
+    "fill.x": "0.5, opposite the key.",
+    "fill.y": "0.2, barely from below: a hangar floor bounces little.",
+    "fill.z": "-0.2, toward the viewer.",
+    "fill.weight": "0.08, the LOWEST here. A fill blends two lambert terms and blending is exactly what a facet must not do — too much and the creases soften back into a gradient.",
+    "playback.scale": "4, bench only.",
+    "gait.depth": "8 px: the limb radius the yaw decomposition multiplies a rotation by, measured off this body — the thigh runs 7.8 and the shin 8.2.",
+    "gait.roll": "**0.14 turn, and this number is the round's experiment.** The root's roll keys reach 0.42 — 21 degrees of bank — WHILE the same bone pitches 24 degrees on angle, and the band generator then yaws the whole grammar. Three axes on one bone is the composition nothing in this project has run; tests/arena.test.ts measures it against matrix truth.",
+    "frames.walk": "9: a once-played clip's frame times are k/(n-1), so five phases at the quarters need (n-1) divisible by four.",
+    "gait.swing": "0.2 turn, the walk's — the boost's largest angle key is 0.78 on a thigh (56 degrees, legs trailing) and 0.34 on the ROOT, which is 24 degrees of pitch into the dash.",
+    "gait.lift": "3.4 px: the machine sinks and is thrown.",
+    "playback.msPerFrame": "70: nine frames make a 630 ms boost, matched to the dash the arena spends. Plays once and holds."
+  }
+}

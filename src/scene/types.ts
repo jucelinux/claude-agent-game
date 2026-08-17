@@ -217,6 +217,12 @@ export type Placement = {
     readonly launch: string
   }
   /**
+   * **The pilot: the arena's actor, and the sixth kind.** It has a world position on a plane
+   * and a heading of its own, which no actor before it had — every earlier one lived on a row.
+   * `player` says whether the keyboard drives it or the machine does.
+   */
+  readonly pilots?: { readonly player: boolean }
+  /**
    * **The runner: a body that never stops and chooses only when to leave the ground.**
    *
    * A third actor kind after `player` and `climber`, and it is a third kind for the same reason
@@ -581,6 +587,100 @@ export type Descent = {
   readonly seed: number
 }
 
+/**
+ * **The arena: a ground plane, two machines, and a camera that orbits — the last camera the
+ * 3D ledger was missing.**
+ *
+ * Every camera before this one either stood still or slid along one axis. This one has a
+ * **position and a heading in the world**, and both change every frame, so a thing's place on
+ * screen is no longer a row and a column — it is a projection. That is what makes the yaw bands
+ * mean something: the band a machine draws at is `bodyHeading − cameraHeading`, and with a
+ * camera that turns, every one of the twelve gets used.
+ *
+ * The projection is a real divide, the one `/descent` introduced, now in two axes:
+ *
+ * ```
+ * fwd  = dx·sin h + dz·cos h        depth ahead of the camera
+ * side = dx·cos h − dz·sin h        offset to its right
+ * k    = focal / fwd
+ * screen = (w/2 + side·k, horizon + (camHeight − y)·k)
+ * ```
+ *
+ * **Nothing here is a renderer change.** The sprites are still pre-rendered indexed bytes from
+ * the deterministic core; what the browser gained is one more way to decide where to stamp them
+ * — which is the same split `HARNESS.md` §2.1 has demanded since round zero.
+ */
+export type Arena = {
+  /** Half-width of the floor, in world units. Both machines are clamped inside it. */
+  readonly radius: number
+  /** Screen row of the eye line. The floor is drawn below it, the sky above. */
+  readonly horizonRow: number
+  /** Camera height above the plane, and how far behind the player it trails. */
+  readonly camHeight: number
+  readonly camDist: number
+  /**
+   * **Over the shoulder: the camera stands this far to its own right.** With a lock camera the
+   * enemy sits dead centre by construction, and a camera on the player's own axis puts his back
+   * exactly in front of it — the first build had the two machines overlapping every frame. The
+   * offset is what those games all did, and it costs one term in the projection.
+   */
+  readonly camSide: number
+  /**
+   * **The camera turns toward the lock, but it LAGS**, and the lag is not a nicety: a camera
+   * welded behind the player would hold him at relative heading zero for ever, and eleven of
+   * the twelve yaw bands would never draw. Turning per second; lower is more lag.
+   */
+  readonly camEase: number
+  /** Pixels per world unit at unit depth, and the depth below which nothing draws. */
+  readonly focal: number
+  readonly near: number
+  /** How many yaw bands the machines were generated at, and the scale bands they draw through. */
+  readonly bands: number
+  readonly scales: readonly number[]
+  /** Clip name prefixes; the runtime appends the band index. */
+  readonly walk: string
+  readonly boost: string
+  /** World units per second, and per second of strafe. */
+  readonly speed: number
+  readonly strafe: number
+  /** The dash: speed, how long it lasts, and how long before another. */
+  readonly boostSpeed: number
+  readonly boostMs: number
+  readonly boostCoolMs: number
+  /** World units the stride covers in one walk cycle. The gait advances with distance. */
+  readonly strideLen: number
+  /** The duel: a shot's speed, its reach, what it costs, and the reload. */
+  readonly shotSpeed: number
+  readonly shotRange: number
+  readonly shotHalf: number
+  readonly damage: number
+  readonly reloadMs: number
+  /** Armour both machines start with. First to zero loses. */
+  readonly armour: number
+  /** The enemy's ranges: it closes past `far` and backs off inside `close`. */
+  readonly aiClose: number
+  readonly aiFar: number
+  readonly aiReloadMs: number
+  /**
+   * **The floor grid, and it is the period cue that costs almost nothing.** Lines in world
+   * space, projected — so they converge on the vanishing point and swing as the camera turns.
+   * More than any shading, a grid is what told a player of that era that the floor was a plane
+   * in space rather than a picture of one.
+   */
+  readonly grid: { readonly step: number; readonly color: RGB; readonly fade: RGB }
+  /** Pillars: the same hash-slot mechanism as every other world here. */
+  readonly pillars: { readonly grammar: string; readonly tunables: string; readonly count: number; readonly seed: number }
+  readonly skyRamp: readonly RGB[]
+  readonly floorRamp: readonly RGB[]
+  readonly dither?: { readonly amount: number; readonly lattice: number }
+  /**
+   * No `overText` here, and the absence is deliberate: a duel has TWO outcomes and one string
+   * cannot carry both. The runner's single field was right for a runner, where the only ending
+   * is losing. A field the runtime ignores is a field that lies.
+   */
+  readonly seed: number
+}
+
 export type Scene = {
   readonly name: string
   readonly w: number
@@ -652,6 +752,8 @@ export type Scene = {
   readonly runner?: Runner
   /** Present on a down-slope game and absent on every other kind. See `Descent`. */
   readonly descent?: Descent
+  /** Present on an arena duel and absent on every other kind. See `Arena`. */
+  readonly arena?: Arena
 }
 
 export type Field =

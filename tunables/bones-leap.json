@@ -35,7 +35,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 4
+    "lattice": 4,
+    "facet": 0
   },
   "shadow": {
     "steps": 7,
@@ -83,6 +84,7 @@
     "shadow.bias": "0.25, the project-wide value since run 7.",
     "fill.x": "0.45, opposite the key.",
     "fill.y": "0.4, from below.",
-    "fill.z": "-0.22, matching the key's own z."
+    "fill.z": "-0.22, matching the key's own z.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   }
 }

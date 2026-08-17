@@ -29,7 +29,8 @@
   "texture": {
     "speckle": 0,
     "dither": 0,
-    "lattice": 4
+    "lattice": 4,
+    "facet": 0
   },
   "shadow": {
     "steps": 8,
@@ -83,6 +84,7 @@
     "fill.y": "+0.7, from BELOW. This is bounce off the regolith, which on the moon is the ONLY bounce there is.",
     "fill.z": "-0.2, barely on the viewer side.",
     "fill.weight": "0.03, the lowest in the project by a factor of five. A fill stands in for sky bounce and there is no sky; what remains is regolith bounce, which is why it is not zero.",
-    "canvas.originY": "30, canvas.h - 18. A crater's origin is the middle of its bowl, which is where the hole meets the plain; a rock's is the ground under it. Both place by origin rather than by foot, because the ground contact of a depression IS its centre and its lowest painted pixel is its near rim."
+    "canvas.originY": "30, canvas.h - 18. A crater's origin is the middle of its bowl, which is where the hole meets the plain; a rock's is the ground under it. Both place by origin rather than by foot, because the ground contact of a depression IS its centre and its lowest painted pixel is its near rim.",
+    "texture.facet": "0 — the facet quantiser is OFF, so this subject renders byte-identical to every version before the knob existed. Faceting snaps the surface normal to a lattice so a smooth solid shades as flat plates; it belongs to the PS1 idiom of run 21 and to nothing authored before it."
   }
 }

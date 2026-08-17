@@ -47,7 +47,7 @@ const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
   JSON.stringify({
     w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
     groundRamp: stage.groundRamp, floor: stage.floor, stars: stage.stars, dust: stage.dust,
-    rain: stage.rain, climb: stage.climb, runner: stage.runner, descent: stage.descent, interactive, meter: interactive,
+    rain: stage.rain, climb: stage.climb, runner: stage.runner, descent: stage.descent, arena: stage.arena, interactive, meter: interactive,
     layers: stage.layers.map((l) => ({
       w: l.w, h: l.h, ox: l.ox, oy: l.oy, foot: l.footOff, n: l.frames, ms: l.msPerFrame,
       palette: l.palette, indices: Buffer.from(l.indices).toString('base64'),
@@ -205,6 +205,15 @@ function mount(el, S) {
         if (v && !keys.hit) { keys.tap = true; keys.jumpTap = true }
         keys.hit = v; e.preventDefault()
       }
+      /**
+       * **Two more flags, and they exist because the arena is the first game with four verbs.**
+       * Every game before it conflated space, x and z into one 'act' button, which is right when
+       * a game has one action. A duel has a dash AND a trigger, and a player who dashes every
+       * time he fires has no mechanic to be refined about. The old flags are untouched, so no
+       * shipped game changes.
+       */
+      if (k === ' ') { if (v && !keys.space) keys.spaceTap = true; keys.space = v; e.preventDefault() }
+      if (k === 'x' || k === 'X' || k === 'z' || k === 'Z') { keys.fire = v; e.preventDefault() }
     }
     window.addEventListener('keydown', function (e) { down(e, true) })
     window.addEventListener('keyup', function (e) { down(e, false) })
@@ -911,6 +920,315 @@ function mount(el, S) {
   }
 
   /**
+   * **The arena's backdrop, baked once: a sky and a floor, both woven.** Everything that moves
+   * in this game is projected per frame, so the backdrop is the one thing that is not — and a
+   * static backdrop is the no-crawl rule by construction, as in every game here.
+   */
+  var arenaBg = null
+  if (S.arena) {
+    arenaBg = cv(S.w, S.h)
+    var ab = arenaBg.getContext('2d')
+    var ADZ = S.arena.dither || { amount: 0, lattice: 2 }
+    ramp(ab, S.arena.skyRamp, 0, S.arena.horizonRow, ADZ)
+    ramp(ab, S.arena.floorRamp, S.arena.horizonRow, S.h, ADZ)
+  }
+
+  /**
+   * **The projection, and it is the whole of the new camera.** A world point against a camera
+   * that has a position AND a heading: rotate into camera space, divide by depth. Everything
+   * else in this mode — where a machine stands, how big it draws, which way the grid runs — is
+   * this one function called with different arguments.
+   */
+  function project(wx, wy, wz) {
+    var A = S.arena
+    var dx = wx - CAM.x, dz = wz - CAM.z
+    var c = Math.cos(CAM.h), s = Math.sin(CAM.h)
+    var fwd = dx * s + dz * c
+    if (fwd < A.near) return null
+    var side = dx * c - dz * s
+    var k = A.focal / fwd
+    return { x: S.w / 2 + side * k, y: A.horizonRow + (A.camHeight - wy) * k, k: k, fwd: fwd }
+  }
+
+  /** Shortest signed difference between two headings, in turns. */
+  function turnDelta(a, b) {
+    var d = a - b
+    while (d > 0.5) d -= 1
+    while (d < -0.5) d += 1
+    return d
+  }
+
+  /**
+   * **The band, and this is the runtime yaw the ledger was missing.** A machine's heading minus
+   * the camera's, wrapped and quantised: the index of a grammar that was generated already
+   * turned that far. The runtime never rotates anything — it chooses.
+   */
+  function bandOf(heading) {
+    var A = S.arena
+    /**
+     * **The quarter turn is not a fudge, it is the two conventions meeting.** The body is
+     * authored facing EAST and yaw measures from there; the camera looks along +z. So a machine
+     * whose heading equals the camera's is walking AWAY from it — which is yaw 0.25 in the
+     * compass the astronaut established ('n' is walking away), not yaw 0. Without the offset
+     * the player was drawn in profile while walking directly away, which is what the first
+     * screenshot showed.
+     */
+    var rel = ((heading - CAM.h + 0.25) % 1 + 1) % 1
+    return Math.round(rel * A.bands) % A.bands
+  }
+
+  /** Nearest rendered size to the projection's own factor. Same snap as the descent's. */
+  function scaleOf(k) {
+    // The projection's own factor, normalised so the PLAYER — who is always at camDist by
+    // construction of the rig — lands exactly on 1. Anything further back asks for less.
+    var A = S.arena, want = k * A.camDist / A.focal, si = 0
+    for (var i = 1; i < A.scales.length; i++) {
+      if (Math.abs(A.scales[i] - want) < Math.abs(A.scales[si] - want)) si = i
+    }
+    return si
+  }
+
+  var CAM = { x: 0, z: -60, h: 0 }
+  var AR = null
+  if (S.arena) {
+    var A0 = S.arena
+    var mk = function (px, pz, player) {
+      return {
+        x: px, z: pz, h: 0, player: player, armour: A0.armour,
+        walked: 0, boost: 0, cool: 0, reload: 0, dir: 1, flip: 0, hurt: 0,
+      }
+    }
+    AR = {
+      you: mk(0, -A0.radius * 0.45, true),
+      foe: mk(0, A0.radius * 0.45, false),
+      shots: [], over: 0, clock: 0,
+    }
+    CAM.x = AR.you.x + A0.camSide
+    CAM.z = AR.you.z - A0.camDist
+  }
+
+  /**
+   * **The duel: lock, strafe, dash, fire.** Four verbs, and the first of them is what makes the
+   * yaw bands earn their place — a machine that faces its target while MOVING sideways is a
+   * machine whose walk plays at a heading its motion does not share.
+   */
+  function arenaStep(t, dt) {
+    var A = S.arena, you = AR.you, foe = AR.foe
+    AR.clock += dt
+    if (AR.over !== 0) {
+      if (keys.spaceTap) {
+        keys.spaceTap = false
+        you.x = 0; you.z = -A.radius * 0.45; you.armour = A.armour; you.boost = 0; you.cool = 0
+        foe.x = 0; foe.z = A.radius * 0.45; foe.armour = A.armour; foe.boost = 0; foe.cool = 0
+        AR.shots.length = 0; AR.over = 0; AR.clock = 0
+      }
+      return
+    }
+
+    // **Lock: both machines always face each other.** It is the genre's contract and it is why
+    // the mechanic is one key shorter than it would otherwise be.
+    you.h = Math.atan2(foe.x - you.x, foe.z - you.z) / 6.283185
+    foe.h = Math.atan2(you.x - foe.x, you.z - foe.z) / 6.283185
+
+    var move = function (m, fwdAmt, sideAmt, dt2) {
+      var c = Math.cos(m.h * 6.283185), s = Math.sin(m.h * 6.283185)
+      // Facing is (sin h, cos h); its right hand is (cos h, -sin h).
+      var vx = s * fwdAmt + c * sideAmt
+      var vz = c * fwdAmt - s * sideAmt
+      m.x += vx * dt2
+      m.z += vz * dt2
+      var r = Math.sqrt(m.x * m.x + m.z * m.z)
+      if (r > A.radius) { m.x = m.x / r * A.radius; m.z = m.z / r * A.radius }
+      m.walked += Math.hypot(vx, vz) * dt2
+    }
+
+    // ---- The player.
+    var fwd = (keys.up ? 1 : 0) - (keys.down ? 1 : 0)
+    var side = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
+    you.cool = Math.max(0, you.cool - dt * 1000)
+    you.reload = Math.max(0, you.reload - dt * 1000)
+    you.hurt = Math.max(0, you.hurt - dt)
+    if (keys.spaceTap) {
+      keys.spaceTap = false
+      if (you.cool <= 0 && (fwd !== 0 || side !== 0)) {
+        you.boost = A.boostMs; you.cool = A.boostCoolMs; you.bf = fwd; you.bs = side
+      }
+    }
+    if (you.boost > 0) {
+      you.boost -= dt * 1000
+      move(you, (you.bf || 0) * A.boostSpeed, (you.bs || 0) * A.boostSpeed, dt)
+    } else if (fwd !== 0 || side !== 0) {
+      var norm = fwd !== 0 && side !== 0 ? 0.7071 : 1
+      move(you, fwd * A.speed * norm, side * A.strafe * norm, dt)
+    }
+    if (keys.fire && you.reload <= 0) {
+      you.reload = A.reloadMs
+      AR.shots.push({ x: you.x, z: you.z, h: you.h, gone: 0, mine: true })
+    }
+
+    // ---- The machine. Deterministic from its own clock: no ambient randomness anywhere here,
+    // which is what lets the headless harness replay a duel.
+    var d2 = Math.hypot(foe.x - you.x, foe.z - you.z)
+    foe.cool = Math.max(0, foe.cool - dt * 1000)
+    foe.reload = Math.max(0, foe.reload - dt * 1000)
+    foe.hurt = Math.max(0, foe.hurt - dt)
+    foe.flip -= dt
+    if (foe.flip <= 0) {
+      var fh = ((Math.floor(AR.clock * 2) + A.seed) * 2654435761) >>> 0
+      fh = (fh ^ (fh >>> 13)) >>> 0
+      foe.dir = (fh & 1) === 0 ? 1 : -1
+      foe.flip = 1.1 + (fh % 900) / 1000
+      if ((fh >>> 8) % 5 === 0 && foe.cool <= 0) { foe.boost = A.boostMs; foe.cool = A.boostCoolMs }
+    }
+    var closeAmt = d2 > A.aiFar ? 1 : d2 < A.aiClose ? -1 : 0
+    if (foe.boost > 0) {
+      foe.boost -= dt * 1000
+      move(foe, closeAmt * A.boostSpeed * 0.6, foe.dir * A.boostSpeed, dt)
+    } else {
+      move(foe, closeAmt * A.speed * 0.85, foe.dir * A.strafe * 0.8, dt)
+    }
+    if (foe.reload <= 0 && d2 < A.shotRange * 0.9) {
+      foe.reload = A.aiReloadMs
+      AR.shots.push({ x: foe.x, z: foe.z, h: foe.h, gone: 0, mine: false })
+    }
+
+    // ---- Shots travel and land. A shot is a point on the plane; a machine is a radius.
+    for (var i = AR.shots.length - 1; i >= 0; i--) {
+      var sh = AR.shots[i]
+      var step = A.shotSpeed * dt
+      sh.x += Math.sin(sh.h * 6.283185) * step
+      sh.z += Math.cos(sh.h * 6.283185) * step
+      sh.gone += step
+      var target = sh.mine ? foe : you
+      if (Math.hypot(sh.x - target.x, sh.z - target.z) < A.shotHalf) {
+        target.armour -= A.damage
+        target.hurt = 0.16
+        AR.shots.splice(i, 1)
+        if (target.armour <= 0) { target.armour = 0; AR.over = sh.mine ? 1 : -1 }
+        continue
+      }
+      if (sh.gone > A.shotRange) AR.shots.splice(i, 1)
+    }
+
+    // ---- The camera: it turns toward what the player faces, and it LAGS. The lag is what
+    // spends the yaw bands on the player; without it he would sit at band 0 for ever.
+    var want = you.h
+    CAM.h += turnDelta(want, CAM.h) * Math.min(1, A.camEase * dt)
+    // Behind along the camera's own heading, then out to its right: over the shoulder.
+    var ch = CAM.h * 6.283185
+    CAM.x = you.x - Math.sin(ch) * A.camDist + Math.cos(ch) * A.camSide
+    CAM.z = you.z - Math.cos(ch) * A.camDist - Math.sin(ch) * A.camSide
+  }
+
+  /** One machine, stamped at the band its heading asks for and the size its depth asks for. */
+  function mechDraw(m, t, out) {
+    var A = S.arena
+    var p = project(m.x, 0, m.z)
+    if (p === null) return
+    var si = scaleOf(p.k)
+    var set = m.boost > 0 ? A.boost : A.walk
+    var li = set[bandOf(m.h)][si]
+    var L = S.layers[li]
+    var f = m.boost > 0
+      ? Math.min(L.n - 1, Math.floor((A.boostMs - m.boost) / L.ms))
+      : Math.floor(m.walked / (A.strideLen / L.n)) % L.n
+    out.push({ fwd: p.fwd, kind: 'mech', li: li, L: L, frame: f, x: p.x, y: p.y, hurt: m.hurt, k: p.k })
+  }
+
+  function drawArena(t) {
+    var A = S.arena
+    ox.drawImage(arenaBg, 0, 0)
+
+    /**
+     * **The floor grid, and it is the cue that makes the camera legible.** Lines in world space,
+     * projected — so they converge on the vanishing point and swing as the camera turns. A
+     * player of that era read a plane in space from exactly this, long before any shading.
+     */
+    ox.strokeStyle = rgb(A.grid.color)
+    ox.lineWidth = 1
+    ox.beginPath()
+    var R = A.radius, st = A.grid.step
+    for (var g = -R; g <= R + 0.01; g += st) {
+      // Each line is walked in segments so the perspective divide bends it correctly and a
+      // segment that crosses behind the camera is dropped rather than smeared across the view.
+      var prevA = null, prevB = null
+      for (var u = -R; u <= R + 0.01; u += st) {
+        var pa = project(g, 0, u), pb = project(u, 0, g)
+        if (pa !== null && prevA !== null) { ox.moveTo(prevA.x, prevA.y); ox.lineTo(pa.x, pa.y) }
+        if (pb !== null && prevB !== null) { ox.moveTo(prevB.x, prevB.y); ox.lineTo(pb.x, pb.y) }
+        prevA = pa; prevB = pb
+      }
+    }
+    ox.stroke()
+
+    /**
+     * **Everything on the plane is depth-sorted every frame**, which is new: a fixed camera lets
+     * paint order be decided once when the stage is built, and a camera that orbits does not.
+     */
+    var out = []
+    for (var i = 0; i < A.pillarCount; i++) {
+      var ph = ((i + A.pillarSeed) * 2654435761) >>> 0; ph = (ph ^ (ph >>> 13)) >>> 0
+      var ph2 = (ph * 1597334677) >>> 0; ph2 = (ph2 ^ (ph2 >>> 15)) >>> 0
+      // Spread by INDEX with a hashed nudge: a pure hash bunches, and a ring of pillars that
+      // all stand on one side gives a turning camera nothing to measure itself against.
+      var ang = (i / A.pillarCount + (ph % 400) / 4000) * 6.283185
+      var rad = A.radius * (0.5 + (ph2 % 420) / 1000)
+      var pp = project(Math.sin(ang) * rad, 0, Math.cos(ang) * rad)
+      if (pp === null) continue
+      // A pillar takes a size band exactly as a machine does. Without it the first build drew
+      // a block two hundred units away at the size of one standing beside you.
+      var pli = A.pillar[scaleOf(pp.k)]
+      var PL = S.layers[pli]
+      out.push({ fwd: pp.fwd, kind: 'pillar', li: pli, L: PL, x: pp.x, y: pp.y, hurt: 0, k: pp.k })
+    }
+    mechDraw(AR.foe, t, out)
+    mechDraw(AR.you, t, out)
+    for (var j = 0; j < AR.shots.length; j++) {
+      var sp = project(AR.shots[j].x, 6, AR.shots[j].z)
+      if (sp !== null) out.push({ fwd: sp.fwd, kind: 'shot', x: sp.x, y: sp.y, k: sp.k })
+    }
+    out.sort(function (a, b) { return b.fwd - a.fwd })
+
+    for (var o = 0; o < out.length; o++) {
+      var e = out[o]
+      if (e.kind === 'shot') {
+        var r = Math.max(1, Math.round(e.k * 0.9))
+        ox.fillStyle = '#ffd27a'
+        ox.fillRect(Math.round(e.x) - r, Math.round(e.y) - r, r * 2, r * 2)
+        continue
+      }
+      var L = e.L
+      var fr = e.frame || 0
+      ox.drawImage(sheets[e.li], 0, fr * L.h, L.w, L.h,
+        Math.round(e.x + L.ox), Math.round(rowOf({ anchor: 'origin', y: e.y }, L)), L.w, L.h)
+      // A hit flashes the machine white for a sixth of a second: the cheapest possible feedback,
+      // and the shutter's own device.
+      if (e.hurt > 0) {
+        ox.globalAlpha = 0.5
+        ox.fillStyle = '#ffffff'
+        ox.fillRect(Math.round(e.x + L.ox), Math.round(rowOf({ anchor: 'origin', y: e.y }, L)), L.w, L.h)
+        ox.globalAlpha = 1
+      }
+    }
+
+    if (AR.over !== 0) {
+      ox.globalAlpha = 0.45
+      ox.fillStyle = AR.over === 1 ? '#0a1420' : '#200a0a'
+      ox.fillRect(0, 0, S.w, S.h)
+      ox.globalAlpha = 1
+    }
+  }
+
+  function arenaScore(now) {
+    if (!S.meter || now - scoreAt < 90) return
+    scoreAt = now
+    var el = document.getElementById('score'); if (!el) return
+    el.textContent = AR.over !== 0
+      ? (AR.over === 1 ? 'target destroyed' : 'you were destroyed') + '  ·  press space to redeploy'
+      : 'AP ' + Math.round(AR.you.armour) + '   ·   TARGET ' + Math.round(AR.foe.armour)
+  }
+
+  /**
    * **The descent's backdrop, baked once.** Sky strip woven at the top, the piste ramp below,
    * the ridge treeline and the clouds stamped in — all static, which is honesty as much as
    * economy: a far ridge does not visibly move when you travel straight away from it, and a
@@ -1343,6 +1661,19 @@ function mount(el, S) {
       return
     }
 
+    // **An arena takes its own path**: the fifth game shape, and the first with a camera that
+    // has a heading of its own.
+    if (S.arena && AR) {
+      drawn.length = 0
+      arenaStep(t, dt)
+      drawArena(t)
+      vx.drawImage(off, 0, 0, view.width, view.height)
+      meter.work.push(clock() - began); if (meter.work.length > 120) meter.work.shift()
+      report(now); arenaScore(now)
+      requestAnimationFrame(frame)
+      return
+    }
+
     // **A descent takes its own path**: a fourth camera, a fourth loop.
     if (S.descent && DS) {
       drawn.length = 0
@@ -1506,7 +1837,7 @@ function mount(el, S) {
    * the state, and it cannot show pixels. The first thing it found was a locked orbit that four
    * different tuning sweeps had failed to explain.
    */
-  return { view: view, drawn: drawn, state: function () { return R || K || DS || P } }
+  return { view: view, drawn: drawn, state: function () { return R || K || DS || AR || P }, cam: function () { return CAM } }
 }
 `
 
@@ -1610,11 +1941,11 @@ export function shelfPage(games: readonly AppGame[]): string {
 
 /** **One game, big, and playable.** Input is bound on this route and nowhere else. */
 export function gamePage(game: AppGame): string {
-  const playable = game.stage.placed.some((p) => p.player !== undefined || p.climber !== undefined || p.runs !== undefined || p.rides !== undefined)
+  const playable = game.stage.arena !== null || game.stage.placed.some((p) => p.player !== undefined || p.climber !== undefined || p.runs !== undefined || p.rides !== undefined)
   // **The score is a DOM element and not a sprite.** A HUD is not art: baking a number into an
   // indexed buffer would mean drawing a font, and a font is the one thing in a pixel game that
   // has to be legible at every scale rather than beautiful at one.
-  const scored = game.stage.climb !== null || game.stage.runner !== null || game.stage.descent !== null
+  const scored = game.stage.climb !== null || game.stage.runner !== null || game.stage.descent !== null || game.stage.arena !== null
   return shell(
     `${game.title} · claude-ink-2d`,
     `<a class="back" href="/">← shelf</a><h1>${esc(game.title)}</h1><span class="sub mono">${esc(game.id)}</span>`,

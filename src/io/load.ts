@@ -49,7 +49,7 @@ const REQUIRED: readonly string[] = [
   'outline.enabled', 'outline.material', 'outline.inner', 'outline.rim',
   'body.scale',
   'gait.swing', 'gait.lift', 'gait.depth', 'gait.roll',
-  'texture.speckle', 'texture.dither', 'texture.lattice',
+  'texture.speckle', 'texture.dither', 'texture.lattice', 'texture.facet',
   'shadow.steps', 'shadow.bias', 'shadow.strength',
   'playback.msPerFrame', 'playback.scale',
 ]
