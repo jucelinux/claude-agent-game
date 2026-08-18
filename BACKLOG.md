@@ -104,6 +104,19 @@ a third of the frame's height; the duel held at 70–130 units → **44–88**; 
 
 **Still open on this batch:** the colleague has not seen cycle 2.
 
+**Named limitations, cycle 2 — carried on purpose, not overlooked:**
+
+- **A machine closer than the rig snaps down.** The scale ladder tops out at 1, and the enemy
+  asks for up to 1.57 when it flies past the camera — about one frame in seventy, measured. A
+  band above 1 for the machines costs 1.5× the whole arena build; the pillars got one because
+  they are cheap and because *"flutuando"* named them. Spend it when a verdict does.
+- **`/arena` builds in 8.5 s**, the shelf's slowest by three times, and the shelf has no cache
+  by design. The one large saving (`shadow.steps`) was measured and refused by the look. The
+  next honest lever is the boost clip's 9 frames, and that is an animation decision, not mine.
+- **Twelve yaw bands, and a locked duel can only reach them through the dash and the boom's
+  lead.** The cone is a theorem about framing cameras (`DECISIONS.md`, 18/08). One varied drive
+  reaches 12 of 12; a passive one would not.
+
 **Batch 7, cycle 1: MISS, his words unsoftened.** *"os obstáculos estão surgindo de trás do
 player… deveriam aparecer em escala, ao fundo, e crescerem conforme se aproximam… tudo parece
 estar parado e os obstáculos parecem estar numa cascata invertida."* The carve he validated; the
@@ -208,12 +221,16 @@ and the skate too.
 ## Standing
 
 - [ ] Mark portable/stack on every grammar rule the turn it is born.
-- [ ] The look amendment is measured: per round, one line on what looking caught that
-      counting did not. Round 1 of 3: caught 3 scene facts, verdict unchanged. Round 2 of 3
-      (batch 5): caught 2 scene facts (dawn weave reads as pixel art; the valley too dark
-      for its own weave), zero sprite facts, ship unchanged — **and his verdict then named
-      neither: he praised the parallax and clouds and never mentioned the valley.** Two
-      rounds, no verdict moved. One round left before the retirement question.
+- [x] **The look amendment is measured, and round 3 answers it: the look STAYS.**
+      Round 1 of 3: caught 3 scene facts, verdict unchanged. Round 2 (batch 5): caught 2 scene
+      facts, zero sprite facts, ship unchanged — and his verdict named neither. **Round 3
+      (run 22, batch 8 cycle 2) caught two things, and the first would have cost the round:**
+      a scale band was setting `body.scale` absolutely instead of as a fraction of the authored
+      size, so the enemy rendered at less than half the size the projection asked for — with
+      every sprite internally perfect, every budget inside its ceiling and 53 locks green. No
+      count could reach it; one frame of the game did. The second was the reverse: the look
+      REFUSED a saving (`shadow.steps`, 70% of the raster) because cutting it flattens the
+      plates. Two rounds of nothing and one round that paid for all three.
 - [ ] Async checkpoints (adopted 16/08): announce feature slices on the shelf in one
       line as they stand. Watch whether his notes get shorter.
 
