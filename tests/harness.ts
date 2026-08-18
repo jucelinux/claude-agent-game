@@ -16,6 +16,7 @@ export type Harness = {
   /** The camera, and the projection that SHIPS — never a copy of it written in a test file. */
   cam: () => { x: number; z: number; h: number; b: number }
   project: (x: number, y: number, z: number) => { x: number; y: number; k: number; fwd: number } | null
+  scaleOf: (k: number, ladder: readonly number[], cur?: number) => number
   text: Record<string, string>
   tick: (now: number) => void
   key: (name: string, down: boolean) => void
@@ -78,6 +79,8 @@ export function run(html: string): Harness {
     state: () => (mounted as { state: () => ReturnType<Harness['state']> }).state(),
     cam: () => (mounted as { cam: () => ReturnType<Harness['cam']> }).cam(),
     project: (x: number, y: number, z: number) => (mounted as { project: Harness['project'] }).project(x, y, z),
+    scaleOf: (k: number, ladder: readonly number[], cur?: number) =>
+      (mounted as { scaleOf: Harness['scaleOf'] }).scaleOf(k, ladder, cur),
     text,
     tick: (now: number) => { const fn = pending; pending = null; fn?.(now) },
     key: (name: string, down: boolean) => {

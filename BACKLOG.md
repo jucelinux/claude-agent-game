@@ -3,7 +3,7 @@
 What is **open**, as of 17/08 (distilled — closed items live in `DECISIONS.md` and on
 branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
-## Gate — v3, the commission test · running **6 of 7**, batch 8 half-read
+## Gate — v3, the commission test · running **7 of 7** · the 3D ledger closes
 
 | batch | commission | verdict | capability the miss specified | cost |
 |---|---|---|---|---|
@@ -14,7 +14,7 @@ branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 | 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
 | 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | **ships** | — (spec carried: a named reference was met by ELEMENTS, not by fidelity) | 1 cycle, 1 reading |
 | 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | **ships** (cycle 2) | cycle 1 specified: **perspective — scale over distance, spawn at the vanishing point, the treadmill** | 2 cycles, 2 readings |
-| 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | cycle 1 **miss** (colleague) → cycle 2 **ships from HIM**; the colleague's bar still pending | **scale is the aesthetic** · a prop the SIM cannot see · a camera whose aim is not solved · **nothing on the plane is grounded** | 2 cycles, 2 readings |
+| 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | cycle 1 **miss** (Carlos) → cycle 2 **SHIPS, both readers** | **scale is the aesthetic** · a prop the SIM cannot see · a camera whose aim is not solved · **nothing on the plane is grounded** · *(cycle 3 carries: a size band must be HELD)* | 2 cycles, 3 readings |
 
 **Batch 8, 17/08, his sentence:** *"Ainda temos pendências sobre o 3D e queria matá-las em um
 único microgame… um bench que irei validar com outro humano, um liderado meu… 'Jogos com a
@@ -196,19 +196,35 @@ and the skate too.
       cycle — a defect list from the bar-holder converted directly into a ship from the
       taste-holder, with no round of guessing in between.
 
-- [ ] 🔴 **The colleague's second reading on `/arena` — the only thing batch 8 still waits for.**
-      · *Open:* the shelf → `/arena`. · *Do:* one duel, ~2 minutes. One word plus one word of why.
-      · *What changed since he looked:* twice the machine on screen (60 px in a 288 px frame,
-      against 34 in 240), a duel held at half the range, a camera whose aim is solved rather than
-      eased, columns that stop shots and stand on the floor, and a contact shadow under
-      everything.
-      · *Changes:* **ships** → the two readers agreed, and the aesthetic vocabulary gains "PS1"
-      as a met bar. **misses** → his word says whether "poligonal" is still about SIZE or about
-      something the facet cannot reach, and that word is the next round. A disagreement between
-      the two is still worth more than either agreement, and it is now the LIKELY outcome
-      rather than the hoped-for one — Jucelinux has already shipped it.
+- [x] **Carlos's second reading, 18/08: SHIPS — and the bar is met in his own vocabulary.**
+      *"Gostei do dithering que tem pois a sensação de tremidinha que existia no PS1 está
+      presente. Gostei da dinâmica de 2d em um mapa 3d: me lembrou ragnarok. A ref do Armored
+      Core é a cereja do bolo: lembrou gundam, front mission. No geral eu gostei."*
+      **Both readers shipped. The gate runs 7 of 7 and the 3D ledger closes with a verdict.**
+      Three things in his words are worth keeping, and none of them is what was fixed:
+      · **He named the DITHER**, which nobody asked about and no round has ever claimed for the
+      PS1 — *"a sensação de tremidinha"*. The weave was authored for the SNES round and read here
+      as period hardware. A technique can be right for a bar it was not built for.
+      · **He named the technique and stopped minding it**: *"a dinâmica de 2d em um mapa 3d"* is
+      the same sentence as cycle 1's *"tentativas de 3d em jogos 2d"* — and this time it is a
+      compliment with a reference attached (Ragnarok). **The method did not change between the
+      two readings. The scale did.** That is the strongest evidence the record has for batch 4's
+      "the cause is scale, not the drawn line".
+      · He met the reference and then named two MORE (Gundam, Front Mission), which is what a
+      satisfied bar sounds like.
 
 ## Open against a stated prerequisite — found 18/08 by a sanity check, not by a verdict
+
+- [x] **Fixed 18/08 — the size band is now HELD.** His report in the same message as Carlos's
+      verdict: *"a depender da distância o tamanho do obstáculo ou do robô fica variando muito.
+      Tem uma distância específica que o tamanho fica variando constantemente, causando uma
+      sensação de bug."* Nearest-band-per-frame has no memory, so a thing parked on a boundary
+      flipped every frame — a 21 percent size change, sixty times a second.
+      **`/descent` uses the same ladder ratio (0.78 against 0.79) and never showed it**, and that
+      is the finding worth more than the fix: on a treadmill every object crosses every boundary
+      ONCE, in one direction; in an arena a thing can LIVE on a boundary. The band technique did
+      not change — the MOTION did, and a rule proven safe in one game shape was not safe in the
+      next. `bandHold` at 0.25, locked with the flicker itself as the null case.
 
 - [ ] 🔴 **The timestep is VARIABLE, and `CLAUDE.md` §Architecture says "a recorded input
       replays identically".** `src/micro/app.ts` runs `var dt = Math.min(0.05, t - prev)` — the

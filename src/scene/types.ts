@@ -673,6 +673,19 @@ export type Arena = {
    */
   readonly scales: readonly number[]
   readonly pillarScales: readonly number[]
+  /**
+   * **How much better a new size band must be before a thing leaves the one it is drawing at.**
+   *
+   * Nearest-band-per-frame has no memory, so a thing sitting on a boundary flips every frame and
+   * the flip is a whole band of size. His report: *"tem uma distância específica que o tamanho
+   * fica variando constantemente, causando uma sensação de bug"*.
+   *
+   * `/descent` uses the same ladder ratio and never showed it, and that is the general lesson:
+   * on a treadmill every object crosses every boundary ONCE, in one direction. In an arena the
+   * enemy closes and backs off and the player strafes, so a thing can LIVE on a boundary. The
+   * band technique did not change; the motion did.
+   */
+  readonly bandHold: number
   /** Clip name prefixes; the runtime appends the band index. */
   readonly walk: string
   readonly boost: string

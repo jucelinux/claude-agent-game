@@ -179,6 +179,14 @@ export const arenaScene: Scene = {
      * whole prop as detached, and detached is what "flutuando" describes.
      */
     pillarScales: [3.2, 2.4, 1.8, 1.35, 1, 0.75, 0.56, 0.42, 0.31],
+    /**
+     * **0.25: a thing keeps its size band until the next one is a quarter better.** Both ladders
+     * step by about 0.79, so a boundary sits at roughly the geometric mean of two bands; a
+     * quarter of margin either side of it is a dead zone about a tenth of a band wide in `want`,
+     * which is far more than any single frame of movement can cross. Below about 0.12 the flicker
+     * returns; above about 0.45 a thing carries a visibly wrong size well past the boundary.
+     */
+    bandHold: 0.25,
     walk: 'mech-walk',
     boost: 'mech-boost',
     /**

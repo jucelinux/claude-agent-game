@@ -49,10 +49,15 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
 - `[derived 18/08 · batch 6]` An animation he can USE outranks an animation he can watch. The
   rodeo came back as *"um recurso adicional para superar os obstáculos"* — the commission asked
   for a trick and the verdict answered about a mechanic.
-- `[derived 18/08 · batch 8, the colleague]` A named reference is read as SIZE before it is read
-  as technique: "Armored Core" arrived as *mechas grandes, tela maior, mais velocidade* — three
-  numbers and no drawing note. Batch 4 measured the same law on the dither. When a reference
-  misses, ask what it is a size of before asking what it is a style of.
+- `[derived 18/08 · batch 8, Carlos]` A named reference is read as SIZE before it is read as
+  technique: "Armored Core" arrived as *mechas grandes, tela maior, mais velocidade* — three
+  numbers and no drawing note. **Proven by his second reading**: the same technique he called
+  *"tentativas de 3d em jogos 2d"* he then called *"a dinâmica de 2d em um mapa 3d… me lembrou
+  ragnarok"*. Nothing changed but the scale. When a reference misses, ask what it is a size of
+  before asking what it is a style of.
+- `[derived 18/08 · batch 8, Carlos]` A capability reaches bars it was not built for: the 2×2
+  weave was authored for the SNES round and he credited it as PS1 hardware, unprompted —
+  *"a sensação de tremidinha"*. Do not scope a technique to the round that produced it.
 
 ## 1b. Bar per axis
 
@@ -131,7 +136,8 @@ the axis it was proven on, never across it.**
 | **runtime yaw** (a body turned to any heading while playing) | `/arena`, 12 generated headings on a camera that orbits | bodies needing more than ~12 bands, or a gait+heading grid larger than the cache affords |
 | **the full rotation set composing** (yaw × screen-plane angle × roll) | `/arena`'s boost, measured: gait residual **0.48 px** on a 34 px body | nothing known — the instrument is in `tests/arena.test.ts` and runs on anything |
 | **facets** (`texture.facet`, one normal per plate) | the mech and the hangar | organic bodies — untried, and a facet needs a flat plate to sit on |
-| **a camera with a heading** (projection, painter by depth, over-the-shoulder lag) | `/arena` | a camera the player aims himself; a second one in the same scene |
+| **a camera with a heading** (projection, painter by depth, over-the-shoulder lag) | `/arena`, both readers 18/08 | a camera the player aims himself; a second one in the same scene |
+| **discrete scale bands over distance** | `/descent` and `/arena`, both shipped | **the MOTION, not the subject**: a treadmill crosses each boundary once and an arena can park on one. Any new game shape needs `bandHold` checked, not the ladder |
 | **a framed camera** (the aim solved per frame, clamped so two subjects cannot leave the picture) | `/arena` cycle 2, measured: worst 60.2 px off centre of a 79.5 px bound over nine drives | three or more subjects — the bisector is a two-body rule and nothing here has tested a third |
 | **props that are IN the world** (one list for sim and painter, collision, contact shadow, a scale ladder of their own) | `/arena`'s nine columns | props that move, or that a subject can stand on |
 

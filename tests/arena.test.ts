@@ -558,6 +558,111 @@ describe('a scale band is a fraction of the authored size', () => {
 })
 
 /**
+ * **A thing keeps its size band until the next one is clearly better — his report, 18/08.**
+ *
+ * > *"A depender da distância o tamanho do obstáculo ou do robô fica variando muito. Tem uma
+ * > distância específica que o tamanho fica variando constantemente, causando uma sensação de
+ * > bug."*
+ *
+ * Nearest-band-per-frame has no memory. A machine sitting on a boundary flips every frame and
+ * the flip is a whole band — 21 percent of its size — so it reads as a bug, which is the word
+ * he used. **`/descent` uses the same ladder ratio and never showed it**, and that is the
+ * transferable part: on a treadmill every object crosses every boundary once, in one direction;
+ * in an arena a thing can LIVE on a boundary. The band technique did not change, the motion did,
+ * and a rule that was safe in one game shape was not safe in the next.
+ *
+ * Driven through the SHIPPED `scaleOf`, because the last camera lock in this file tested a copy.
+ */
+describe('a size band is held, not re-chosen every frame', () => {
+  const h = run(page)
+  const L = A.scales
+  /** The `want` a given projection factor asks for — the runtime's own normalisation. */
+  const kFor = (want: number): number => (want * A.focal) / A.camDist
+  /** The boundary between two bands: where the nearest-band rule changes its mind. */
+  const edge = (i: number): number => (L[i]! + L[i + 1]!) / 2
+
+  it('the null case: with no band held, the boundary flickers — which is the report', () => {
+    // Exactly what shipped before: `cur` undefined, so every frame is a fresh choice.
+    let flips = 0
+    let prev = h.scaleOf(kFor(edge(1)), L)
+    for (let i = 0; i < 200; i++) {
+      // A hundredth of a band of movement, back and forth. Nothing a player could see.
+      const want = edge(1) + (i % 2 === 0 ? 1 : -1) * 0.0005
+      const band = h.scaleOf(kFor(want), L)
+      if (band !== prev) flips++
+      prev = band
+    }
+    expect(flips, 'the memoryless rule was stable on a boundary — then this lock proves nothing')
+      .toBeGreaterThan(150)
+  })
+
+  it('holding the band, the same movement changes nothing', () => {
+    let band = h.scaleOf(kFor(edge(1)), L)
+    const first = band
+    let flips = 0
+    for (let i = 0; i < 200; i++) {
+      const want = edge(1) + (i % 2 === 0 ? 1 : -1) * 0.0005
+      const next = h.scaleOf(kFor(want), L, band)
+      if (next !== band) flips++
+      band = next
+    }
+    expect(flips, `the size changed ${flips} times while the thing sat still`).toBe(0)
+    expect(band).toBe(first)
+  })
+
+  it('and a thing that really travels still changes size, once per boundary, in order', () => {
+    // The dead zone must not become a lock: walking the whole ladder has to walk the whole
+    // ladder. Monotone in, monotone out, and every band visited exactly once.
+    let band = h.scaleOf(kFor(L[0]!), L, undefined)
+    const seen = [band]
+    for (let step = 0; step <= 400; step++) {
+      const want = L[0]! + ((L[L.length - 1]! - L[0]!) * step) / 400
+      const next = h.scaleOf(kFor(want), L, band)
+      if (next !== band) {
+        expect(next, 'the band jumped instead of stepping').toBe(band + 1)
+        seen.push(next)
+        band = next
+      }
+    }
+    expect(seen, 'a full sweep of the ladder did not visit every band in order')
+      .toEqual(L.map((_, i) => i))
+  })
+
+  it('the hold is a margin, not a hard boundary: real travel crosses within a band of the edge', () => {
+    // How far past the edge a thing carries the old size. Anchored, because too much hold is
+    // the opposite defect — a machine visibly the wrong size well past where it should change.
+    let band = 1
+    let crossed = 0
+    for (let step = 0; step <= 2000; step++) {
+      const want = edge(1) + 0.001 - (0.06 * step) / 2000
+      const next = h.scaleOf(kFor(want), L, band)
+      if (next !== band) { crossed = edge(1) - want; break }
+      band = next
+    }
+    expect(crossed, 'the band never changed at all across a whole boundary').toBeGreaterThan(0)
+    expect(crossed, `the old size is carried ${crossed.toFixed(3)} past the edge — a band is ${(L[1]! - L[2]!).toFixed(3)} wide`)
+      .toBeLessThan((L[1]! - L[2]!) / 2)
+  })
+
+  it('in play, nothing changes size more than a few times over a long duel', () => {
+    // The consequence in the shipped loop. Before the hold, one boundary-parked machine could
+    // flip every frame; this counts what actually happens over half a minute of fighting.
+    const g = run(page)
+    let t = 0
+    let flips = 0
+    let prev: number | undefined
+    for (let i = 0; i < 1800; i++) {
+      if (i % 47 === 0) { g.key('ArrowRight', (i / 47) % 2 === 0); g.key('ArrowLeft', (i / 47) % 2 !== 0) }
+      g.tick((t++) * 16.67)
+      const s = g.state() as unknown as { foe: { band?: number } }
+      if (prev !== undefined && s.foe.band !== prev) flips++
+      prev = s.foe.band
+    }
+    expect(flips, `the enemy changed size ${flips} times in 30 seconds`).toBeLessThan(60)
+  })
+})
+
+/**
  * **The canvas holds the body, with margin, and this lock is what makes a tight canvas safe.**
  *
  * The first build guessed 56 px at the authored scale and carried the guess through `body.scale`
