@@ -142,7 +142,10 @@ export function budgetOf(stage: Stage, gzipBytes = 0): Budget {
    * grid is one path however many segments it holds, which is exactly why it is drawn as one.
    */
   const ar = stage.arena
-  const arenaCalls = ar === null ? 0 : 1 + 1 + ar.pillarCount + 2 + 6 + 2
+  // Two calls per standing thing now, not one: the contact shadow is an ellipse path of its
+  // own before the stamp. Left uncounted it would be the same flattering-direction defect the
+  // header warns about, at the exact place the last one was found.
+  const arenaCalls = ar === null ? 0 : 1 + 1 + 2 * (ar.pillarCount + 2) + 6 + 2
   /**
    * An arena has an empty `placed` list — every actor is projected, not placed — so `sprites`
    * is zero here and would have reported a frame that writes only its own backdrop. The stamps
@@ -150,7 +153,12 @@ export function budgetOf(stage: Stage, gzipBytes = 0): Budget {
    */
   const arenaStamp = ar === null ? 0
     : (stage.layers[ar.walk[0]![0]!]?.w ?? 0) * (stage.layers[ar.walk[0]![0]!]?.h ?? 0)
-  const arenaPillar = ar === null ? 0 : (stage.layers[ar.pillar]?.w ?? 0) * (stage.layers[ar.pillar]?.h ?? 0)
+  // `ar.pillar` became a list of scale bands and this read it as a single index, so every
+  // pillar counted as zero pixels. The band charged for is the one nearest the reference size,
+  // not the largest: charging for the 3.2 band would price a frame where every pillar is
+  // pressed against the lens, which is a frame that cannot happen.
+  const pillarBand = ar === null ? 0 : ar.pillar[ar.pillarScales.indexOf(1) < 0 ? 0 : ar.pillarScales.indexOf(1)]!
+  const arenaPillar = ar === null ? 0 : (stage.layers[pillarBand]?.w ?? 0) * (stage.layers[pillarBand]?.h ?? 0)
   const arenaPixels = ar === null ? 0 : screen + 2 * arenaStamp + ar.pillarCount * arenaPillar
 
   return {

@@ -15,7 +15,7 @@
     "rim": false
   },
   "body": {
-    "scale": 1
+    "scale": 2.6
   },
   "texture": {
     "speckle": 0,
@@ -36,9 +36,9 @@
   },
   "canvas": {
     "w": 44,
-    "h": 44,
+    "h": 72,
     "originX": 22,
-    "originY": 40
+    "originY": 66
   },
   "frames": {
     "walk": 1
@@ -54,10 +54,10 @@
     "scale": 4
   },
   "_anchors": {
-    "canvas.w": "44: the pillar is 16 wide at its base and square in plan, so no heading makes it wider. Margin holds the line.",
-    "canvas.h": "44: 30 px of block above the floor plus the cap and the outline.",
+    "canvas.w": "44, measured: the cap overhangs 19 px either side of the axis at body.scale 2.6, and the pillar is square in plan so no heading makes it wider.",
+    "canvas.h": "72: 61 px of block and cap above the floor contact, one below it for the base's own shadow line. Six of margin.",
     "canvas.originX": "22, centre.",
-    "canvas.originY": "40 — the floor contact. Arena props anchor by origin on the projected ground point.",
+    "canvas.originY": "66 \u2014 the floor contact. Arena props anchor by origin on the projected ground point.",
     "tones.perMaterial": "5, the 15/08 idiom. Facets need range, not more levels — the range is in the palette.",
     "light.x": "-0.42, upper left, the shelf's key.",
     "light.y": "-0.68, high and hard. A hangar lamp, not a sun: PS1 mechs are lit from above with little bounce, and a high key is what makes adjacent facets differ.",
@@ -67,7 +67,7 @@
     "outline.material": "\"ink\", cool near-black — a hangar is lit blue and a warm line would float off the metal.",
     "outline.inner": "true, and Part.weld places it: plate against plate inside one section is one surface; every section boundary keeps its seam, which is what makes a machine read as assembled.",
     "outline.rim": "false, settled 15/08.",
-    "body.scale": "1. The mech stands 34 px in a 240 px arena — big enough that facets have plates to sit on, small enough that two of them and the floor fit the frame.",
+    "body.scale": "**2.6, larger than the machine's 1.76 on purpose.** His colleague read the first build's pillar as *\"um barril\"* \u2014 and at 16 px beside a 34 px machine that is what it was. At 2.6 it stands 39 world units against the machine's 30 and 21 across: taller than what hides behind it, which is the only proportion that makes cover read as cover before it is tested.",
     "texture.speckle": "0, retired 15/08.",
     "texture.dither": "0 on the body — the skate round's measured rule. A 34 px machine has no single-owner surface for a weave, and the arena's floor is where the lattice goes.",
     "texture.lattice": "2, unused at dither 0.",

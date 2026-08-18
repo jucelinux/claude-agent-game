@@ -216,7 +216,7 @@ function box(frames: readonly { readonly buf: { w: number; h: number; data: Uint
  * turning round with it.
  */
 function layerOf(
-  spec: { grammar: string; tunables: string; scale?: number; msPerFrame?: number; seed?: number },
+  spec: { grammar: string; tunables: string; scale?: number; msPerFrame?: number; seed?: number; fit?: boolean },
   id: string,
   sky: RGB,
   recede: number,
@@ -232,7 +232,27 @@ function layerOf(
    * Compared rather than assumed, so the second render happens only when something differs.
    */
   const overrides: Record<string, number> = {}
-  if (spec.scale !== undefined && spec.scale !== run.params.body.scale) overrides['body.scale'] = spec.scale
+  if (spec.scale !== undefined && spec.scale !== run.params.body.scale) {
+    overrides['body.scale'] = spec.scale
+    /**
+     * **`fit` carries the canvas with the body, and a scale band above 1 cannot work without
+     * it.** The canvas is a tunable in its own right, so a caller that doubles `body.scale`
+     * doubles the body inside a cell that did not move — and the body is cut off at the cell
+     * wall. Every scale band before the arena was below 1, where the failure is invisible
+     * (a small body in a large cell wastes raster and clips nothing), which is why this has
+     * never been needed. Asked for rather than automatic: the ratio is not always integral, so
+     * a rounded origin shifts the sampling grid by a fraction of a pixel, and every subject
+     * that does not need this must not pay a changed picture for it.
+     */
+    if (spec.fit === true) {
+      const r = spec.scale / run.params.body.scale
+      const c = run.params.canvas
+      overrides['canvas.w'] = Math.max(4, Math.round(c.w * r))
+      overrides['canvas.h'] = Math.max(4, Math.round(c.h * r))
+      overrides['canvas.originX'] = Math.max(1, Math.round(c.originX * r))
+      overrides['canvas.originY'] = Math.max(1, Math.round(c.originY * r))
+    }
+  }
   if (spec.msPerFrame !== undefined && spec.msPerFrame !== run.params.playback.msPerFrame) {
     overrides['playback.msPerFrame'] = spec.msPerFrame
   }
@@ -289,7 +309,7 @@ export function toStage(scene: Scene): Stage {
    */
   const cache = new Map<string, { layer: number; foot: number; origin: { x: number; y: number } }>()
   const build = (
-    spec: { grammar: string; tunables: string; scale?: number; msPerFrame?: number; seed?: number },
+    spec: { grammar: string; tunables: string; scale?: number; msPerFrame?: number; seed?: number; fit?: boolean },
     recede: number,
     flip: boolean,
   ): { layer: number; foot: number; origin: { x: number; y: number } } => {
@@ -297,6 +317,7 @@ export function toStage(scene: Scene): Stage {
     // placement that happened to ask for it — two photographers on one set of sprites is the
     // case, and a layer named after one of them is a layer that lies about the other.
     const key = `${spec.grammar}@${spec.tunables}${spec.scale === undefined ? '' : `×${spec.scale}`}` +
+      `${spec.fit === true ? '!fit' : ''}` +
       `${spec.msPerFrame === undefined ? '' : `/${spec.msPerFrame}ms`}${spec.seed === undefined || spec.seed === 1 ? '' : `#${spec.seed}`}` +
       `${recede === 0 ? '' : `~${recede.toFixed(3)}`}${flip ? ':left' : ''}`
     const hit = cache.get(key)
@@ -403,20 +424,40 @@ export function toStage(scene: Scene): Stage {
   let arena: StageArena | null = null
   if (scene.arena !== undefined) {
     const { walk, boost, pillars, ...rest } = scene.arena
+    /**
+     * **A scale band is a FRACTION of the authored size, and `spec.scale` is an absolute
+     * `body.scale`.** They were the same number for as long as every arena tunable sat at 1,
+     * and they stopped being the same the moment the machines were authored at 1.76 — after
+     * which every band but the first rendered the body at a fraction of ONE, so the enemy drew
+     * at less than half the size the projection had asked for. The look found it; no count
+     * could have, because each sprite was internally perfect.
+     */
+    const mechBase = loadParams('mech').body.scale
+    const boostBase = loadParams('mech-boost').body.scale
+    const pillarBase = loadParams(pillars.tunables).body.scale
     // One render per (clip, heading, size). The cache dedupes across the two machines, so a
     // duel costs exactly what one machine costs — the enemy is the same body at another band.
     const set = (prefix: string): readonly (readonly number[])[] =>
       Array.from({ length: rest.bands }, (_, b) =>
         rest.scales.map(
-          (s) => build({ grammar: `${prefix}-${b}`, tunables: prefix === walk ? 'mech' : 'mech-boost', ...(s === 1 ? {} : { scale: s }) }, 0, false).layer,
+          (s) => {
+            const base = prefix === walk ? mechBase : boostBase
+            return build({
+              grammar: `${prefix}-${b}`, tunables: prefix === walk ? 'mech' : 'mech-boost',
+              ...(s === 1 ? {} : { scale: base * s, fit: true }),
+            }, 0, false).layer
+          },
         ),
       )
     arena = {
       ...rest,
       walk: set(walk),
       boost: set(boost),
-      pillar: rest.scales.map(
-        (s) => build({ grammar: pillars.grammar, tunables: pillars.tunables, ...(s === 1 ? {} : { scale: s }) }, 0, false).layer,
+      pillar: rest.pillarScales.map(
+        (s) => build({
+          grammar: pillars.grammar, tunables: pillars.tunables,
+          ...(s === 1 ? {} : { scale: pillarBase * s, fit: true }),
+        }, 0, false).layer,
       ),
       pillarCount: pillars.count,
       pillarSeed: pillars.seed,

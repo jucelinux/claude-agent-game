@@ -111,7 +111,16 @@ describe('every micro game stays inside the frame budget', () => {
  */
 describe('nothing is drawn twice', () => {
   for (const game of MICRO_GAMES) {
-    it(`${game.id}: no two layers are byte-identical`, () => {
+    /**
+     * **20 s, and the number is the arena's own build cost written down.** Twelve yaw bands of
+     * two clips at six sizes, on a body that is 60 px tall and self-shadows in eight steps, is
+     * 8.5 s of raster on this machine — the slowest page on the shelf by three times. The
+     * shadow steps were the obvious saving and the LOOK refused them: at 4 the plates flatten
+     * and the era's hard cast shadow goes with them, which is the one thing his colleague named
+     * that the counting channel cannot see. The cost is real and it is recorded rather than
+     * hidden; a default timeout that fails on it would be reporting the wrong fact.
+     */
+    it(`${game.id}: no two layers are byte-identical`, { timeout: 20_000 }, () => {
       const stage = toStage(game.scene)
       const seen = new Map<string, string>()
       for (const layer of stage.layers) {

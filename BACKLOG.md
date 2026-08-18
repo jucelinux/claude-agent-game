@@ -3,7 +3,7 @@
 What is **open**, as of 17/08 (distilled — closed items live in `DECISIONS.md` and on
 branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
-## Gate — v3, the commission test · running 4 of 6, batch 6 open
+## Gate — v3, the commission test · running 4 of 7, batches 6 and 8 open
 
 | batch | commission | verdict | capability the miss specified | cost |
 |---|---|---|---|---|
@@ -14,7 +14,7 @@ branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 | 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
 | 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | *open* | — | 1 cycle so far |
 | 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | **ships** (cycle 2) | cycle 1 specified: **perspective — scale over distance, spawn at the vanishing point, the treadmill** | 2 cycles, 2 readings |
-| 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | *open* | — | 1 cycle so far |
+| 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | **miss** (cycle 1, the colleague) | **scale is the aesthetic** · a prop the SIM cannot see · a camera whose aim is not solved · **nothing on the plane is grounded** | 2 cycles so far, 1 reading |
 
 **Batch 8, 17/08, his sentence:** *"Ainda temos pendências sobre o 3D e queria matá-las em um
 único microgame… um bench que irei validar com outro humano, um liderado meu… 'Jogos com a
@@ -56,6 +56,53 @@ the mechanic rather than the look — a duel is the first game here with an oppo
 is a bar no instrument in this repo can read. From the COLLEAGUE I predict the reverse split: he
 answers the picture first, and the risk there is that facets on a 34 px body read as noise rather
 than as polygons.
+
+**Scored: half right, for the wrong reason.** The colleague did answer the picture first and it
+was a miss. But the facets were not read as noise — they were not read at all, because a 34 px
+body has no plate big enough to hold a crease. The prediction named the right axis and the wrong
+mechanism, which is the §2a bias about confidence sitting on the axis I examined most.
+
+### Batch 8, cycle 1 — MISS, the colleague's words unsoftened
+
+> *"Eu não gostei dos gráficos. Pareceu aquelas tentativas de 3d em jogos 2d (Sonic 3d, Crack
+> Down). Eu esperava algo mais poligonal mesmo no estilo Armored Core (mechas grandes na tela,
+> uma tela maior, mais velocidade, dinâmica)."*
+>
+> *"Existe um barril no mapa e esse barril não serve para nada: não há bloqueio do projétil nele,
+> quando eu me aproximo, percebo que ele está flutuando ao invés de posicionado no chão."*
+>
+> *"O strafe está funcionando, porém a depender da relação de distância e ângulo que estou do
+> inimigo, simplesmente a cena vai para um ângulo em que não consigo visualizar nem meu player,
+> nem o inimigo."*
+
+He named the technique exactly: banded-yaw sprites on a projected floor **are** the Sonic 3D
+method. The four things he asked for decompose into one number and three defects.
+
+**The number is SCALE, and the record already owned it from the other side** (batch 4: *"the
+cause is scale, not the drawn line"*). Frame 240×150 → **288×180**; machine 34 px → **60 px**,
+a third of the frame's height; the duel held at 70–130 units → **44–88**; every speed raised.
+
+| defect | the layer it was really in | what shipped this cycle |
+|---|---|---|
+| *"a cena vai para um ângulo…"* | **units.** `project()` read a heading stored in TURNS as if it were radians, so the rig and the view agreed only at zero and parted on the first strafe | the conversion, plus a rig split in two — the boom lags (it is what spends the yaw bands), the aim is SOLVED every frame as the bisector of the two machines, clamped so the player cannot leave the frame |
+| *"não há bloqueio do projétil"* | **the simulation never had the prop.** Pillars were hashed inside the DRAW loop | one list, held by the sim: shots die on it, machines are pushed out of it, and the columns are spread at twice the keep-out so one pass is exact |
+| *"ele está flutuando"* | **three causes, not one.** No contact shadow anywhere; the pillars shared the machines' scale ladder so they STOPPED GROWING at arm's length; and every sprite was stamped by its origin — which for a mech is its core, so the machines had been hovering a leg's length above the floor since the first build | projected ground ellipses under everything that stands; a pillar ladder of its own reaching 3.2; `anchor: 'foot'` |
+| *"esse barril não serve para nada"* | also **placement**: seven columns on a rim while the duel was fought in the middle | nine, spread from a fifth of the way out to four fifths |
+
+**What the LOOK caught that no count could** (`CLAUDE.md` §5.4, two entries this round):
+
+1. **A scale band is a fraction of the authored size, and for one build it was not.**
+   `build({ scale })` sets `body.scale` *absolutely*. That was the same number for as long as
+   every arena tunable sat at 1; the moment the machines were authored at 1.76 the enemy
+   rendered at 0.79 of ONE — less than half what the projection asked for. Every sprite was
+   internally perfect, every budget inside its ceiling, 53 locks green. One frame of the game
+   showed it. Locked now, with the null case.
+2. **`shadow.steps` cannot be cut.** It is 70 percent of the raster (45 ms → 13 ms at 0), so it
+   was the obvious saving for an 8.5 s page build. At 4 the plates flatten and the era's hard
+   cast shadow goes with them — the one thing the colleague named that the counting channel
+   cannot see. Cost kept, and written down rather than hidden.
+
+**Still open on this batch:** the colleague has not seen cycle 2.
 
 **Batch 7, cycle 1: MISS, his words unsoftened.** *"os obstáculos estão surgindo de trás do
 player… deveriam aparecer em escala, ao fundo, e crescerem conforme se aproximam… tudo parece
@@ -119,15 +166,21 @@ and the skate too.
   · *Changes:* **yes** → subtraction enters the mastery ledger with a verdict. **no** →
   the cut was the wrong capability or badly spent — worth more than a third primitive.
 
-- [ ] 🔴 **Two readings on `/arena`, and they are two different instruments.**
+- [ ] 🔴 **Two readings on `/arena` cycle 2 — and they are two different instruments.**
   · *Open:* the shelf → `/arena`. · *Do:* one duel each, ~2 minutes.
   · **You** judge the game: does the duel feel refined — is the dash worth its cooldown, does
   the strafe read, is losing your own fault? That is the gate's question and yours alone.
-  · **Your colleague** holds a BAR, not a taste: "does this look like the PS1 I remember?" One
-  word plus one word of why. His answer moves the aesthetic vocabulary; it does not move
-  `TASTE.md` §1, which is compiled from your verdicts only.
+  · **Your colleague** holds a BAR, not a taste. He has already answered once, and the answer
+  was a miss with three defects named; all three are fixed and the machine is now 60 px in a
+  288 px frame instead of 34 in 240. The question for him is the same one: "does this look
+  like the PS1 you remember?" One word plus one word of why.
+  · *What changed since he looked:* twice the machine on screen, a duel held at half the range,
+  a camera whose aim is solved rather than eased, columns that stop shots and stand on the
+  floor, and a contact shadow under everything.
   · *Changes:* a disagreement between the two is worth more than either agreement — it would be
   the first evidence the project has about whose eye a named external reference belongs to.
+  A second miss from him names whether "polygonal" is still about SIZE or about something the
+  facet cannot reach, and that word is the next round.
 
 - [ ] 🟡 **Two minutes: the snowboarder — batch 6's reading.**
   · *Open:* `node bin/micro.ts` → `/snow` (or the deployed shelf).
@@ -182,9 +235,16 @@ Every number carries the command that regenerates it and its date.
 | yaw collapse threshold | depth/width ≈ 0.45 | `npx vitest run tests/yaw.test.ts` | 16/08 |
 | TS lines, source + locks | 12 700 / 4 600 | `find src bin -name '*.ts' \| xargs wc -l` | 16/08 |
 | locks green | 575 | `npm test` | 17/08, after run 21 |
+| locks green | **612** | `npm test` | 18/08, after run 22 |
 | **the yaw gait approximation, measured at last** | legacy 0.877 units = **0.99 px**; exact 0.424 = **0.48 px** (30-unit machine, 34 px on screen) | `npx vitest run tests/arena.test.ts` | 17/08 |
 | the half-turn defect, before the fix | **10.7 units** at band 6, against 0.4 at every other heading | same command, band sweep | 17/08 |
-| `/arena` budget | 100 layers, 35 colours, 21 calls/frame of 200, 338k px to decode, 60 fps measured | `node bin/micro.ts --static` | 17/08 |
+| `/arena` budget, cycle 1 | 100 layers, 35 colours, 21 calls/frame of 200, 338k px to decode, 60 fps measured | `node bin/micro.ts --static` | 17/08 |
+| **`/arena` budget, cycle 2** (288×180, 60 px machine, 9 columns) | 153 layers, 34 calls/frame of 200, **1.6M px to decode**, 6.4 MB resident, 2.56× overdraw | `node bin/micro.ts --static` | 18/08 |
+| **`/arena` page build, and it is the shelf's slowest by three times** | **8.5–9.2 s** — 12 headings × 2 clips × 6 sizes on a 60 px self-shadowing body | `node -e` over `toStage(arenaScene)` | 18/08 |
+| the self-shadow's share of the raster | 45 ms → **13 ms** at `shadow.steps` 0; the look refuses the saving (plates flatten at 4) | `node bin/bench.ts --grammar mech-walk-0 --tunables mech --set shadow.steps=N` | 18/08 |
+| the framing clamp, measured over 9 strafe cadences | worst **60.2 px** off centre of a 79.5 px bound, 144 px half-frame; on the broken build, **417 px** and the player lost behind the camera | `npx vitest run tests/arena.test.ts` | 18/08 |
+| the scale a machine actually asks for in play | **0.31 – 1.57**, mass at 1.0 (the player, pinned) and 0.5–0.7 (the enemy); a pillar reaches **5.5** | driven through `tests/harness.ts`, 6000 frames | 18/08 |
+| yaw headings reached in one varied drive | **12 of 12** — 6 by the player, 8 by the enemy, and the overlap is why both are needed | `npx vitest run tests/arena.test.ts` | 18/08 |
 | **the composition drift at carve amplitude** — the number test C exists for | worst **0.337 px** on a 34 px body (arms ±50° under 21° roll under 36° bank); glide exactly 0 | `npx vitest run tests/descent.test.ts` | 17/08 |
 | `/descent` budget | 13 layers, 50 colours, 34 calls/frame of 200, 41k px to decode, 33 KB wire | `node bin/micro.ts --static` | 17/08 |
 | the rodeo: board faces trading under a LEANING root | base 25→**119**→8 px · topsheet 32→0→**81**, half a turn apart, pale first | `node bin/bench.ts --grammar snow-rodeo --tunables snow-rodeo` | 17/08 |
