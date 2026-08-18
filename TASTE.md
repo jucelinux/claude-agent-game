@@ -39,10 +39,25 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
 - `[derived 17/08 · batch 8, declared]` He brings a second human as a BAR, naming an external
   reference the colleague holds ("PS1"). §1 stays compiled from his verdicts alone; the
   colleague's answer moves the aesthetic vocabulary, not the taste.
-- `[derived 18/08 · batch 8, the colleague]` A named reference is read as SIZE before it is read
-  as technique: "Armored Core" arrived as *mechas grandes, tela maior, mais velocidade* — three
-  numbers and no drawing note. Batch 4 measured the same law on the dither. When a reference
-  misses, ask what it is a size of before asking what it is a style of.
+- `[derived 18/08 · batch 3, second reading]` He names FLUIDITY as its own axis, unprompted:
+  *"antes estava com uma animação desengonçada, agora vejo um personagem correndo"*. Twice now
+  the cause was an animation RATE picked rather than derived from the body — *"supervelocidade"*
+  was the same defect. A rate must come from the body's own size.
+- `[derived 18/08 · batch 6]` A reference is granted on ELEMENTS, not on fidelity: *"não
+  replicou em alta fidelidade. Mas o tema de neve, os inimigos temáticos, o pinheiro e a neve
+  caindo foram elementos que trouxeram a estética"*. He named the shortfall and shipped it.
+- `[derived 18/08 · batch 6]` An animation he can USE outranks an animation he can watch. The
+  rodeo came back as *"um recurso adicional para superar os obstáculos"* — the commission asked
+  for a trick and the verdict answered about a mechanic.
+- `[derived 18/08 · batch 8, Carlos]` A named reference is read as SIZE before it is read as
+  technique: "Armored Core" arrived as *mechas grandes, tela maior, mais velocidade* — three
+  numbers and no drawing note. **Proven by his second reading**: the same technique he called
+  *"tentativas de 3d em jogos 2d"* he then called *"a dinâmica de 2d em um mapa 3d… me lembrou
+  ragnarok"*. Nothing changed but the scale. When a reference misses, ask what it is a size of
+  before asking what it is a style of.
+- `[derived 18/08 · batch 8, Carlos]` A capability reaches bars it was not built for: the 2×2
+  weave was authored for the SNES round and he credited it as PS1 hardware, unprompted —
+  *"a sensação de tremidinha"*. Do not scope a technique to the round that produced it.
 
 ## 1b. Bar per axis
 
@@ -77,6 +92,9 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
   hour (PERIODIC on a gradient → a body). Ask first: what differs about this artifact?
 - I promote a surviving parameter to a constant in my head (the walk's swing spent on a
   jump — re-derive, the anchor names its scope).
+- **I split two readers along the axis I designed for them.** Batch 8 gave the mechanic to
+  Jucelinux and the PS1 bar to the colleague; Jucelinux answered the bar himself, unprompted,
+  before the colleague looked. A bar named for one reader is not invisible to the other.
 - **I diagnose in the layer that sounds architectural.** The arena camera was recorded as
   "an eased scalar instead of a consequence of what must be shown" — a defensible sentence about
   design — and the bug was a heading stored in turns and read as radians. The wrong diagnosis is
@@ -109,15 +127,17 @@ the axis it was proven on, never across it.**
 | props (rocks, shelves) | moon, climb | interaction beyond standing |
 | body turned in depth (yaw) | astronaut + 2 transfer locks | depth/width < ~0.45 collapses — measured |
 | roll (out of screen plane) | kickflip + biplane root + rodeo-under-lean + carve at 36° | nothing known on shelf amplitudes — the composition is MEASURED at 0.337 px worst (tests/descent.test.ts); beyond carve amplitude, run the instrument before spending |
+| **roll under a LEANING parent** (the non-commuting pair, a changing lean through a full turn) | `/snow`'s rodeo, his verdict 18/08 — *"a manobra foi bem implementada"* | a leaning parent that also YAWS — three axes on one root is the arena's case, and it is measured but unjudged |
 | the down-slope camera & perspective (scale bands over distance, vanishing point) | `/descent`, his verdict 17/08 — "sensação de movimento e profundidade… crescimento suave" | one game shape; a second view (e.g. toward the camera) is untested |
 | face at small scale | kitten | any face not a round-skulled animal |
 | a game that can be lost | climb, crypt, skate | win conditions beyond "how far" |
-| subtraction (`cut`) | skull re-authored | **verdict pending** (BACKLOG) |
+| subtraction (`cut`) | skull re-authored, **his verdict 18/08 — *"sim, agora é uma caveira"*** | holes that must read as depth rather than as absence; a cut across a joint |
 | pattern inside a part | — | does not exist |
 | **runtime yaw** (a body turned to any heading while playing) | `/arena`, 12 generated headings on a camera that orbits | bodies needing more than ~12 bands, or a gait+heading grid larger than the cache affords |
 | **the full rotation set composing** (yaw × screen-plane angle × roll) | `/arena`'s boost, measured: gait residual **0.48 px** on a 34 px body | nothing known — the instrument is in `tests/arena.test.ts` and runs on anything |
 | **facets** (`texture.facet`, one normal per plate) | the mech and the hangar | organic bodies — untried, and a facet needs a flat plate to sit on |
-| **a camera with a heading** (projection, painter by depth, over-the-shoulder lag) | `/arena` | a camera the player aims himself; a second one in the same scene |
+| **a camera with a heading** (projection, painter by depth, over-the-shoulder lag) | `/arena`, both readers 18/08 | a camera the player aims himself; a second one in the same scene |
+| **discrete scale bands over distance** | `/descent` and `/arena`, both shipped | **the MOTION, not the subject**: a treadmill crosses each boundary once and an arena can park on one. Any new game shape needs `bandHold` checked, not the ladder |
 | **a framed camera** (the aim solved per frame, clamped so two subjects cannot leave the picture) | `/arena` cycle 2, measured: worst 60.2 px off centre of a 79.5 px bound over nine drives | three or more subjects — the bisector is a two-body rule and nothing here has tested a third |
 | **props that are IN the world** (one list for sim and painter, collision, contact shadow, a scale ladder of their own) | `/arena`'s nine columns | props that move, or that a subject can stand on |
 

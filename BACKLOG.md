@@ -3,18 +3,18 @@
 What is **open**, as of 17/08 (distilled — closed items live in `DECISIONS.md` and on
 branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
-## Gate — v3, the commission test · running 4 of 7, batches 6 and 8 open
+## Gate — v3, the commission test · running **7 of 7** · the 3D ledger closes
 
 | batch | commission | verdict | capability the miss specified | cost |
 |---|---|---|---|---|
 | 1 | astronaut, 8-way walk, moon | **miss** | a body that survives being turned (every positional field rotates) | 1 cycle, 1 reading |
 | 2 | kitten platformer, cozy | **ships** | — (notes: difficulty ratio, presentation scale) | 1 cycle, 3 readings |
-| 3 | skull runner, SOTN | **miss** | **subtraction** (`Part.cut`) | 1 cycle, 1 reading |
+| 3 | skull runner, SOTN | **miss → answered 18/08: *"sim, agora é uma caveira"*** | **subtraction** (`Part.cut`) — spent, and the verdict is in | 1 cycle, 2 readings |
 | 4 | skate + kickflip (roll + pixel-art experiment) | **ships** | — (spec carried: environments are basic) | 1 cycle, 1 reading |
 | 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
-| 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | *open* | — | 1 cycle so far |
+| 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | **ships** | — (spec carried: a named reference was met by ELEMENTS, not by fidelity) | 1 cycle, 1 reading |
 | 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | **ships** (cycle 2) | cycle 1 specified: **perspective — scale over distance, spawn at the vanishing point, the treadmill** | 2 cycles, 2 readings |
-| 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | **miss** (cycle 1, the colleague) | **scale is the aesthetic** · a prop the SIM cannot see · a camera whose aim is not solved · **nothing on the plane is grounded** | 2 cycles so far, 1 reading |
+| 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | cycle 1 **miss** (Carlos) → cycle 2 **SHIPS, both readers** | **scale is the aesthetic** · a prop the SIM cannot see · a camera whose aim is not solved · **nothing on the plane is grounded** · *(cycle 3 carries: a size band must be HELD)* | 2 cycles, 3 readings |
 
 **Batch 8, 17/08, his sentence:** *"Ainda temos pendências sobre o 3D e queria matá-las em um
 único microgame… um bench que irei validar com outro humano, um liderado meu… 'Jogos com a
@@ -104,6 +104,19 @@ a third of the frame's height; the duel held at 70–130 units → **44–88**; 
 
 **Still open on this batch:** the colleague has not seen cycle 2.
 
+**Named limitations, cycle 2 — carried on purpose, not overlooked:**
+
+- **A machine closer than the rig snaps down.** The scale ladder tops out at 1, and the enemy
+  asks for up to 1.57 when it flies past the camera — about one frame in seventy, measured. A
+  band above 1 for the machines costs 1.5× the whole arena build; the pillars got one because
+  they are cheap and because *"flutuando"* named them. Spend it when a verdict does.
+- **`/arena` builds in 8.5 s**, the shelf's slowest by three times, and the shelf has no cache
+  by design. The one large saving (`shadow.steps`) was measured and refused by the look. The
+  next honest lever is the boost clip's 9 frames, and that is an animation decision, not mine.
+- **Twelve yaw bands, and a locked duel can only reach them through the dash and the boom's
+  lead.** The cone is a theorem about framing cameras (`DECISIONS.md`, 18/08). One varied drive
+  reaches 12 of 12; a passive one would not.
+
 **Batch 7, cycle 1: MISS, his words unsoftened.** *"os obstáculos estão surgindo de trás do
 player… deveriam aparecer em escala, ao fundo, e crescerem conforme se aproximam… tudo parece
 estar parado e os obstáculos parecem estar numa cascata invertida."* The carve he validated; the
@@ -158,39 +171,76 @@ and the skate too.
 
 ## Held for the human
 
-- [ ] 🟡 **30 seconds: is the skull a skull now?**
-  · *Open:* `node bin/micro.ts` → `/crypt`. · *Do:* look at the runner's head, say yes or no.
-  · *Why:* batch 3 missed on "isso não é uma caveira"; `Part.cut` was built and the skull
-  re-authored (sockets are cavities, ember gone, cranium enlarged). "Nothing got worse"
-  from your last play is a different question and does not close this.
-  · *Changes:* **yes** → subtraction enters the mastery ledger with a verdict. **no** →
-  the cut was the wrong capability or badly spent — worth more than a third primitive.
+- [x] **The skull, 18/08: *"sim, agora é uma caveira!"*** — batch 3's miss is answered and
+      **subtraction gets its verdict**. He volunteered a second thing nobody asked about:
+      *"nesse ajuste eu gostei da fluidez da animação. Antes estava com uma animação
+      desengonçada, agora vejo um personagem correndo."*
+      **That credit does not belong to the cut.** The same round replaced the runner's frame
+      rule: it was `dist / 2.2`, a divisor I picked, which at the speed cap ran 9.9 stride
+      cycles a second — his own earlier words, *"parece que ela está correndo em
+      supervelocidade"*. It is now `dist / (strideLen / frames)` with `strideLen` **derived from
+      the body**: a sprinter covers about 1.2 of its own height per stride and this one is 34 px,
+      so 41. Two unrelated fixes shipped in one round and he read them as one improvement —
+      which is the §1 rule that he grades a GAME, never a round, seen from the flattering side
+      for once.
 
-- [ ] 🔴 **Two readings on `/arena` cycle 2 — and they are two different instruments.**
-  · *Open:* the shelf → `/arena`. · *Do:* one duel each, ~2 minutes.
-  · **You** judge the game: does the duel feel refined — is the dash worth its cooldown, does
-  the strafe read, is losing your own fault? That is the gate's question and yours alone.
-  · **Your colleague** holds a BAR, not a taste. He has already answered once, and the answer
-  was a miss with three defects named; all three are fixed and the machine is now 60 px in a
-  288 px frame instead of 34 in 240. The question for him is the same one: "does this look
-  like the PS1 you remember?" One word plus one word of why.
-  · *What changed since he looked:* twice the machine on screen, a duel held at half the range,
-  a camera whose aim is solved rather than eased, columns that stop shots and stand on the
-  floor, and a contact shadow under everything.
-  · *Changes:* a disagreement between the two is worth more than either agreement — it would be
-  the first evidence the project has about whose eye a named external reference belongs to.
-  A second miss from him names whether "polygonal" is still about SIZE or about something the
-  facet cannot reach, and that word is the next round.
+- [x] **`/arena` cycle 2 — HIS half, 18/08: SHIPS.** *"Eu adorei o jogo. Após as correções eu
+      me senti num jogo de robôs do PS1. As correções foram certeiras e a mecânica do jogo
+      melhorou também."*
+      **Prediction scored, and I split the two humans along the wrong seam.** I predicted him
+      ships at 60/40 with the 40 on the duel feeling thin — right verdict, and the named risk did
+      not appear; he said the mechanic improved. But I had assigned the PS1 axis entirely to the
+      colleague, and he answered it himself, unprompted and positively. **A bar named for one
+      reader is not invisible to the other.**
+      Also: *"as correções foram certeiras"* is the miss-as-specification loop closing in one
+      cycle — a defect list from the bar-holder converted directly into a ship from the
+      taste-holder, with no round of guessing in between.
 
-- [ ] 🟡 **Two minutes: the snowboarder — batch 6's reading.**
-  · *Open:* `node bin/micro.ts` → `/snow` (or the deployed shelf).
-  · *Do:* play until you clear a snowman with one press and the tall pine with two. Say one
-  word — ships or misses — plus a word of why on a miss.
-  · *What a pass looks like:* the screen says *Yoshi's Island winter* before you touch a key,
-  and the trick reads as a snowboard trick.
-  · *Changes:* **ships** → the composed roll (roll under a leaning parent) enters the ledger
-  and the aesthetic vocabulary gains its first him-named reference target. **misses** → the
-  word says whether the miss is the trick or the aesthetic, and that word is the next round.
+- [x] **Carlos's second reading, 18/08: SHIPS — and the bar is met in his own vocabulary.**
+      *"Gostei do dithering que tem pois a sensação de tremidinha que existia no PS1 está
+      presente. Gostei da dinâmica de 2d em um mapa 3d: me lembrou ragnarok. A ref do Armored
+      Core é a cereja do bolo: lembrou gundam, front mission. No geral eu gostei."*
+      **Both readers shipped. The gate runs 7 of 7 and the 3D ledger closes with a verdict.**
+      Three things in his words are worth keeping, and none of them is what was fixed:
+      · **He named the DITHER**, which nobody asked about and no round has ever claimed for the
+      PS1 — *"a sensação de tremidinha"*. The weave was authored for the SNES round and read here
+      as period hardware. A technique can be right for a bar it was not built for.
+      · **He named the technique and stopped minding it**: *"a dinâmica de 2d em um mapa 3d"* is
+      the same sentence as cycle 1's *"tentativas de 3d em jogos 2d"* — and this time it is a
+      compliment with a reference attached (Ragnarok). **The method did not change between the
+      two readings. The scale did.** That is the strongest evidence the record has for batch 4's
+      "the cause is scale, not the drawn line".
+      · He met the reference and then named two MORE (Gundam, Front Mission), which is what a
+      satisfied bar sounds like.
+
+## Open against a stated prerequisite — found 18/08 by a sanity check, not by a verdict
+
+- [x] **Fixed 18/08 — the size band is now HELD.** His report in the same message as Carlos's
+      verdict: *"a depender da distância o tamanho do obstáculo ou do robô fica variando muito.
+      Tem uma distância específica que o tamanho fica variando constantemente, causando uma
+      sensação de bug."* Nearest-band-per-frame has no memory, so a thing parked on a boundary
+      flipped every frame — a 21 percent size change, sixty times a second.
+      **`/descent` uses the same ladder ratio (0.78 against 0.79) and never showed it**, and that
+      is the finding worth more than the fix: on a treadmill every object crosses every boundary
+      ONCE, in one direction; in an arena a thing can LIVE on a boundary. The band technique did
+      not change — the MOTION did, and a rule proven safe in one game shape was not safe in the
+      next. `bandHold` at 0.25, locked with the flicker itself as the null case.
+
+- [ ] 🔴 **The timestep is VARIABLE, and `CLAUDE.md` §Architecture says "a recorded input
+      replays identically".** `src/micro/app.ts` runs `var dt = Math.min(0.05, t - prev)` — the
+      real elapsed time, clamped. Every game on the shelf integrates against it.
+      **The locks do not see this** because `tests/harness.ts` feeds a fixed 16.67 ms tick, so
+      the harness is testing a determinism the browser does not have. Two machines at 60 and 144
+      Hz replaying the same key sequence diverge.
+      · *Why it has not bitten:* nothing on the shelf is scored against a recorded input, and
+      the worlds themselves are integer-hashed and frame-independent.
+      · *Why it blocks item 5:* "deterministic headless sim, fixed timestep, replayable input"
+      is the engine slice's own definition, and this is the first of the three.
+      · *Cost:* a fixed-step accumulator in one place, plus a lock that drives one game at two
+      different frame rates and asserts the same end state. Not a rewrite.
+
+- [ ] 🟡 **`bin/record.ts` records a GRAMMAR run, not a GAME session.** There is no recorder for
+      an input sequence. The harness can replay keys in a test; nothing can capture a play.
 
 ## Deferred, by him
 
@@ -208,12 +258,16 @@ and the skate too.
 ## Standing
 
 - [ ] Mark portable/stack on every grammar rule the turn it is born.
-- [ ] The look amendment is measured: per round, one line on what looking caught that
-      counting did not. Round 1 of 3: caught 3 scene facts, verdict unchanged. Round 2 of 3
-      (batch 5): caught 2 scene facts (dawn weave reads as pixel art; the valley too dark
-      for its own weave), zero sprite facts, ship unchanged — **and his verdict then named
-      neither: he praised the parallax and clouds and never mentioned the valley.** Two
-      rounds, no verdict moved. One round left before the retirement question.
+- [x] **The look amendment is measured, and round 3 answers it: the look STAYS.**
+      Round 1 of 3: caught 3 scene facts, verdict unchanged. Round 2 (batch 5): caught 2 scene
+      facts, zero sprite facts, ship unchanged — and his verdict named neither. **Round 3
+      (run 22, batch 8 cycle 2) caught two things, and the first would have cost the round:**
+      a scale band was setting `body.scale` absolutely instead of as a fraction of the authored
+      size, so the enemy rendered at less than half the size the projection asked for — with
+      every sprite internally perfect, every budget inside its ceiling and 53 locks green. No
+      count could reach it; one frame of the game did. The second was the reverse: the look
+      REFUSED a saving (`shadow.steps`, 70% of the raster) because cutting it flattens the
+      plates. Two rounds of nothing and one round that paid for all three.
 - [ ] Async checkpoints (adopted 16/08): announce feature slices on the shelf in one
       line as they stand. Watch whether his notes get shorter.
 

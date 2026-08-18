@@ -993,13 +993,31 @@ function mount(el, S) {
    * uses.** Same snap as the descent's, but the ladder is now per kind — a machine and a
    * pillar do not live at the same range of depths and a single ladder served neither.
    */
-  function scaleOf(k, ladder) {
+  function scaleOf(k, ladder, cur) {
     // The projection's own factor, normalised so the PLAYER — who is always at camDist by
     // construction of the rig — lands exactly on 1. Anything further back asks for less.
     var A = S.arena, want = k * A.camDist / A.focal, si = 0
     for (var i = 1; i < ladder.length; i++) {
       if (Math.abs(ladder[i] - want) < Math.abs(ladder[si] - want)) si = i
     }
+    /**
+     * **Hysteresis, and its absence is his report: *'tem uma distância específica que o tamanho
+     * fica variando constantemente, causando uma sensação de bug'*.**
+     *
+     * Nearest-band-per-frame has no memory. Sitting exactly on a boundary, a hundredth of a unit
+     * of movement flips the choice, and the flip is a 21 percent size change every frame.
+     *
+     * The descent uses the same ladder ratio and never showed this, which is the part worth
+     * writing down: on a treadmill every object crosses every boundary ONCE, moving one way.
+     * In an arena the enemy closes and backs off and the player strafes, so a thing can live on
+     * a boundary. **The band technique did not change; the motion did**, and a rule that was
+     * safe in one game shape was not safe in the next.
+     *
+     * So the band is kept until the new one is clearly better, not merely better. bandHold is
+     * that margin, and it is why every drawn thing now carries the band it drew at last frame.
+     */
+    if (cur === undefined || cur === si) return si
+    if (Math.abs(ladder[si] - want) > Math.abs(ladder[cur] - want) * (1 - A.bandHold)) return cur
     return si
   }
 
@@ -1296,7 +1314,8 @@ function mount(el, S) {
     var A = S.arena
     var p = project(m.x, 0, m.z)
     if (p === null) return
-    var si = scaleOf(p.k, A.scales)
+    var si = scaleOf(p.k, A.scales, m.band)
+    m.band = si
     var set = m.boost > 0 ? A.boost : A.walk
     var li = set[bandOf(m.bh)][si]
     var L = S.layers[li]
@@ -1352,7 +1371,9 @@ function mount(el, S) {
        * a pillar STOPPED GROWING at arm's length — and a prop that does not grow as you close on
        * it is a prop that is not in the world, whatever row it is stamped on.
        */
-      var pli = A.pillar[scaleOf(pp.k, A.pillarScales)]
+      var psi = scaleOf(pp.k, A.pillarScales, pw.band)
+      pw.band = psi
+      var pli = A.pillar[psi]
       var PL = S.layers[pli]
       out.push({ fwd: pp.fwd, kind: 'pillar', li: pli, L: PL, x: pp.x, y: pp.y, hurt: 0, k: pp.k, disc: A.pillarHalf })
     }
@@ -2056,6 +2077,7 @@ function mount(el, S) {
     view: view, drawn: drawn, state: function () { return R || K || DS || AR || P },
     cam: function () { return CAM },
     project: function (x, y, z) { return S.arena ? project(x, y, z) : null },
+    scaleOf: function (k, ladder, cur) { return S.arena ? scaleOf(k, ladder, cur) : 0 },
   }
 }
 `
