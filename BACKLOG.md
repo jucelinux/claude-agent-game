@@ -208,6 +208,24 @@ and the skate too.
       the two is still worth more than either agreement, and it is now the LIKELY outcome
       rather than the hoped-for one — Jucelinux has already shipped it.
 
+## Open against a stated prerequisite — found 18/08 by a sanity check, not by a verdict
+
+- [ ] 🔴 **The timestep is VARIABLE, and `CLAUDE.md` §Architecture says "a recorded input
+      replays identically".** `src/micro/app.ts` runs `var dt = Math.min(0.05, t - prev)` — the
+      real elapsed time, clamped. Every game on the shelf integrates against it.
+      **The locks do not see this** because `tests/harness.ts` feeds a fixed 16.67 ms tick, so
+      the harness is testing a determinism the browser does not have. Two machines at 60 and 144
+      Hz replaying the same key sequence diverge.
+      · *Why it has not bitten:* nothing on the shelf is scored against a recorded input, and
+      the worlds themselves are integer-hashed and frame-independent.
+      · *Why it blocks item 5:* "deterministic headless sim, fixed timestep, replayable input"
+      is the engine slice's own definition, and this is the first of the three.
+      · *Cost:* a fixed-step accumulator in one place, plus a lock that drives one game at two
+      different frame rates and asserts the same end state. Not a rewrite.
+
+- [ ] 🟡 **`bin/record.ts` records a GRAMMAR run, not a GAME session.** There is no recorder for
+      an input sequence. The harness can replay keys in a test; nothing can capture a play.
+
 ## Deferred, by him
 
 - **Procedural filling of environments** — "em breve vamos tratar isso". Three readings
