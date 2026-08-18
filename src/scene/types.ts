@@ -629,14 +629,50 @@ export type Arena = {
    * **The camera turns toward the lock, but it LAGS**, and the lag is not a nicety: a camera
    * welded behind the player would hold him at relative heading zero for ever, and eleven of
    * the twelve yaw bands would never draw. Turning per second; lower is more lag.
+   *
+   * The lag belongs to the BOOM — where the camera stands — and to nothing else. The first
+   * build let one eased angle both place the camera and aim it, and the aim became a
+   * consequence of the lag rather than of what had to be shown.
    */
   readonly camEase: number
+  /**
+   * **How far off the view axis the player may sit, in turns — and it is a guarantee, not a
+   * taste.** The camera aims at the bisector of the two machines so both frame symmetrically;
+   * this clamps that aim so the player is never further from the centre than the frame can
+   * hold. Derived from the frame's own half-width: `atan((w/2 · margin) / focal) / 2pi`.
+   */
+  readonly frameHold: number
+  /**
+   * **How far the boom leads a strafe, in turns.** Hold right and the camera swings out that
+   * way. It is the genre's own move and it is also one of the two things that spend the yaw
+   * bands — see `faceEase`.
+   */
+  readonly boomLead: number
+  /**
+   * **How fast a body turns toward where it is TRAVELLING, in turns a second.**
+   *
+   * A locked duel has a geometry worth stating: the camera must frame both machines, so it
+   * looks roughly along the axis they face, so the player is always seen from behind and the
+   * enemy head-on. That bounds the reachable yaw bands to a cone — a theorem about framing
+   * cameras rather than a tuning. A machine under boost is the honest exception: thrusters push
+   * along travel, so a dashing machine points where it dashes while its weapon stays on target,
+   * and a sideways dash shows the body in full profile.
+   */
+  readonly faceEase: number
   /** Pixels per world unit at unit depth, and the depth below which nothing draws. */
   readonly focal: number
   readonly near: number
   /** How many yaw bands the machines were generated at, and the scale bands they draw through. */
   readonly bands: number
+  /**
+   * **The machines' ladder, and the pillars' — separate, because they do not share a range.**
+   * Measured over three long drives: a machine lives between 0.31 and 1 of the reference size
+   * (the player is pinned at 1 by the rig), while a pillar the camera walks past reaches 3.2.
+   * One ladder for both meant the pillar stopped growing at arm's length, and a prop that does
+   * not grow as you close on it is not in the world, whatever row it is stamped on.
+   */
   readonly scales: readonly number[]
+  readonly pillarScales: readonly number[]
   /** Clip name prefixes; the runtime appends the band index. */
   readonly walk: string
   readonly boost: string
@@ -670,6 +706,21 @@ export type Arena = {
   readonly grid: { readonly step: number; readonly color: RGB; readonly fade: RGB }
   /** Pillars: the same hash-slot mechanism as every other world here. */
   readonly pillars: { readonly grammar: string; readonly tunables: string; readonly count: number; readonly seed: number }
+  /**
+   * **What a pillar and a machine occupy on the plane, in world units.** These exist because a
+   * pillar that only the painter knew about is scenery wearing an obstacle's clothes: a shot
+   * went through it and a machine walked into it. The simulation holds the same list the paint
+   * loop draws, and these two radii are what it tests against.
+   */
+  readonly pillarHalf: number
+  readonly bodyHalf: number
+  /**
+   * **The contact shadow: a ground disc under everything that stands on the plane.** Arithmetic
+   * already put every sprite on the floor; nothing told the eye. Batch 4 named this class once
+   * — *"neither rider is grounded"* — and it shipped again in the first arena, so the number
+   * lives in the scene now rather than in a draw call.
+   */
+  readonly contact: { readonly alpha: number; readonly color: RGB }
   readonly skyRamp: readonly RGB[]
   readonly floorRamp: readonly RGB[]
   readonly dither?: { readonly amount: number; readonly lattice: number }

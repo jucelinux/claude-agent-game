@@ -39,6 +39,10 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
 - `[derived 17/08 · batch 8, declared]` He brings a second human as a BAR, naming an external
   reference the colleague holds ("PS1"). §1 stays compiled from his verdicts alone; the
   colleague's answer moves the aesthetic vocabulary, not the taste.
+- `[derived 18/08 · batch 8, the colleague]` A named reference is read as SIZE before it is read
+  as technique: "Armored Core" arrived as *mechas grandes, tela maior, mais velocidade* — three
+  numbers and no drawing note. Batch 4 measured the same law on the dither. When a reference
+  misses, ask what it is a size of before asking what it is a style of.
 
 ## 1b. Bar per axis
 
@@ -73,6 +77,10 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
   hour (PERIODIC on a gradient → a body). Ask first: what differs about this artifact?
 - I promote a surviving parameter to a constant in my head (the walk's swing spent on a
   jump — re-derive, the anchor names its scope).
+- **I diagnose in the layer that sounds architectural.** The arena camera was recorded as
+  "an eased scalar instead of a consequence of what must be shown" — a defensible sentence about
+  design — and the bug was a heading stored in turns and read as radians. The wrong diagnosis is
+  always the one that reads well; the right one is usually arithmetic.
 - **I carry a predicted risk as if it were a measured one.** The yaw gait approximation was
   written down in batch 1 as "the half most likely to fail" and repeated for three days; when
   finally measured it was under a pixel, and the real defect was a guard nobody had suspected.
@@ -110,6 +118,8 @@ the axis it was proven on, never across it.**
 | **the full rotation set composing** (yaw × screen-plane angle × roll) | `/arena`'s boost, measured: gait residual **0.48 px** on a 34 px body | nothing known — the instrument is in `tests/arena.test.ts` and runs on anything |
 | **facets** (`texture.facet`, one normal per plate) | the mech and the hangar | organic bodies — untried, and a facet needs a flat plate to sit on |
 | **a camera with a heading** (projection, painter by depth, over-the-shoulder lag) | `/arena` | a camera the player aims himself; a second one in the same scene |
+| **a framed camera** (the aim solved per frame, clamped so two subjects cannot leave the picture) | `/arena` cycle 2, measured: worst 60.2 px off centre of a 79.5 px bound over nine drives | three or more subjects — the bisector is a two-body rule and nothing here has tested a third |
+| **props that are IN the world** (one list for sim and painter, collision, contact shadow, a scale ladder of their own) | `/arena`'s nine columns | props that move, or that a subject can stand on |
 
 Hypotheses (14/08, still open): **H1** a body with a grammar reaches the bar, a humanoid
 with cloth does not. **H2** "and animate it" raises the ceiling rather than lowering it.

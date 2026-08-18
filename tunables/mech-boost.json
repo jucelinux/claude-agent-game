@@ -15,7 +15,7 @@
     "rim": false
   },
   "body": {
-    "scale": 1
+    "scale": 1.76
   },
   "texture": {
     "speckle": 0,
@@ -35,10 +35,10 @@
     "weight": 0.08
   },
   "canvas": {
-    "w": 56,
-    "h": 56,
-    "originX": 28,
-    "originY": 26
+    "w": 66,
+    "h": 90,
+    "originX": 33,
+    "originY": 41
   },
   "frames": {
     "walk": 9
@@ -54,10 +54,10 @@
     "scale": 4
   },
   "_anchors": {
-    "canvas.w": "56. The machine is 34 px tall and 26 px wide at rest, but a YAW sweeps its depth into the width: the shoulders sit at 6.4 depth and the rifle reaches 11 forward, so at three quarters the widest pose spans 46. 56 holds it with the outline.",
-    "canvas.h": "56, square with the width. The band generator turns this body through twelve headings and the cell has to hold the worst of all twelve, not the authored one.",
-    "canvas.originX": "28, dead centre — the axis every yaw band turns about. Off-centre would swing the machine out of its own cell between bands.",
-    "canvas.originY": "26. The core, which is the bone the boost pitches and rolls about. Feet reach 24 below, the cannon 16 above.",
+    "canvas.w": "66, and it is MEASURED rather than estimated. Every one of the twelve yaw bands of both clips was rendered and its ink bounded: the widest reaches 29 px either side of the axis. 33 leaves four. The first build guessed 56 at the authored scale and carried the guess through 1.76 to 100, which rastered nearly twice the pixels it drew \u2014 nine seconds a page load, on a shelf whose whole surface is edit-refresh-look.",
+    "canvas.h": "90: the ink runs 36 px above the core and 48 below across all twelve bands and both clips, measured the same way. 41 above and 49 below leaves five and one \u2014 the tight side is the feet, which are the one place a plant cannot move.",
+    "canvas.originX": "33, dead centre \u2014 the axis every yaw band turns about. Off-centre would swing the machine out of its own cell between bands.",
+    "canvas.originY": "41. The core, which is the bone the boost pitches and rolls about; the measured 36 px of cannon and crest sit above it.",
     "tones.perMaterial": "5, the 15/08 idiom. Facets need range, not more levels — the range is in the palette.",
     "light.x": "-0.42, upper left, the shelf's key.",
     "light.y": "-0.68, high and hard. A hangar lamp, not a sun: PS1 mechs are lit from above with little bounce, and a high key is what makes adjacent facets differ.",
@@ -67,7 +67,7 @@
     "outline.material": "\"ink\", cool near-black — a hangar is lit blue and a warm line would float off the metal.",
     "outline.inner": "true, and Part.weld places it: plate against plate inside one section is one surface; every section boundary keeps its seam, which is what makes a machine read as assembled.",
     "outline.rim": "false, settled 15/08.",
-    "body.scale": "1. The mech stands 34 px in a 240 px arena — big enough that facets have plates to sit on, small enough that two of them and the floor fit the frame.",
+    "body.scale": "**1.76, and the number is his colleague's verdict compiled.** *\"Mechas grandes na tela\"*: the machine now draws 60 px in a 180 px frame \u2014 a third of its height, against 34 px in 150 and a fifth of it before. It is also what makes the facet legible at all: a plate on a 34 px body was three pixels across and had no room to crease. Derived, not chosen \u2014 30 world units x focal 156 / camDist 78 = 60 px, and 60 / 34 model units = 1.76.",
     "texture.speckle": "0, retired 15/08.",
     "texture.dither": "0 on the body — the skate round's measured rule. A 34 px machine has no single-owner surface for a weave, and the arena's floor is where the lattice goes.",
     "texture.lattice": "2, unused at dither 0.",

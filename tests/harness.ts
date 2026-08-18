@@ -13,6 +13,9 @@
  */
 export type Harness = {
   state: () => { dist: number; y: number; jumps: number; state: string; menace: number; over: boolean; best: number }
+  /** The camera, and the projection that SHIPS — never a copy of it written in a test file. */
+  cam: () => { x: number; z: number; h: number; b: number }
+  project: (x: number, y: number, z: number) => { x: number; y: number; k: number; fwd: number } | null
   text: Record<string, string>
   tick: (now: number) => void
   key: (name: string, down: boolean) => void
@@ -73,6 +76,8 @@ export function run(html: string): Harness {
   new Function(...Object.keys(capture), `${script}\n__capture(__last)`)(...Object.values(capture))
   return {
     state: () => (mounted as { state: () => ReturnType<Harness['state']> }).state(),
+    cam: () => (mounted as { cam: () => ReturnType<Harness['cam']> }).cam(),
+    project: (x: number, y: number, z: number) => (mounted as { project: Harness['project'] }).project(x, y, z),
     text,
     tick: (now: number) => { const fn = pending; pending = null; fn?.(now) },
     key: (name: string, down: boolean) => {
