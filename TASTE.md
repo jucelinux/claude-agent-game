@@ -39,6 +39,10 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
 - `[derived 17/08 · batch 8, declared]` He brings a second human as a BAR, naming an external
   reference the colleague holds ("PS1"). §1 stays compiled from his verdicts alone; the
   colleague's answer moves the aesthetic vocabulary, not the taste.
+- `[derived 18/08 · batch 3, second reading]` He names FLUIDITY as its own axis, unprompted:
+  *"antes estava com uma animação desengonçada, agora vejo um personagem correndo"*. Twice now
+  the cause was an animation RATE picked rather than derived from the body — *"supervelocidade"*
+  was the same defect. A rate must come from the body's own size.
 - `[derived 18/08 · batch 6]` A reference is granted on ELEMENTS, not on fidelity: *"não
   replicou em alta fidelidade. Mas o tema de neve, os inimigos temáticos, o pinheiro e a neve
   caindo foram elementos que trouxeram a estética"*. He named the shortfall and shipped it.
@@ -83,6 +87,9 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
   hour (PERIODIC on a gradient → a body). Ask first: what differs about this artifact?
 - I promote a surviving parameter to a constant in my head (the walk's swing spent on a
   jump — re-derive, the anchor names its scope).
+- **I split two readers along the axis I designed for them.** Batch 8 gave the mechanic to
+  Jucelinux and the PS1 bar to the colleague; Jucelinux answered the bar himself, unprompted,
+  before the colleague looked. A bar named for one reader is not invisible to the other.
 - **I diagnose in the layer that sounds architectural.** The arena camera was recorded as
   "an eased scalar instead of a consequence of what must be shown" — a defensible sentence about
   design — and the bug was a heading stored in turns and read as radians. The wrong diagnosis is
@@ -119,7 +126,7 @@ the axis it was proven on, never across it.**
 | the down-slope camera & perspective (scale bands over distance, vanishing point) | `/descent`, his verdict 17/08 — "sensação de movimento e profundidade… crescimento suave" | one game shape; a second view (e.g. toward the camera) is untested |
 | face at small scale | kitten | any face not a round-skulled animal |
 | a game that can be lost | climb, crypt, skate | win conditions beyond "how far" |
-| subtraction (`cut`) | skull re-authored | **verdict pending** (BACKLOG) |
+| subtraction (`cut`) | skull re-authored, **his verdict 18/08 — *"sim, agora é uma caveira"*** | holes that must read as depth rather than as absence; a cut across a joint |
 | pattern inside a part | — | does not exist |
 | **runtime yaw** (a body turned to any heading while playing) | `/arena`, 12 generated headings on a camera that orbits | bodies needing more than ~12 bands, or a gait+heading grid larger than the cache affords |
 | **the full rotation set composing** (yaw × screen-plane angle × roll) | `/arena`'s boost, measured: gait residual **0.48 px** on a 34 px body | nothing known — the instrument is in `tests/arena.test.ts` and runs on anything |

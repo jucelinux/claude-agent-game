@@ -3,18 +3,18 @@
 What is **open**, as of 17/08 (distilled — closed items live in `DECISIONS.md` and on
 branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
-## Gate — v3, the commission test · running **5 of 7**, batch 8 open
+## Gate — v3, the commission test · running **6 of 7**, batch 8 half-read
 
 | batch | commission | verdict | capability the miss specified | cost |
 |---|---|---|---|---|
 | 1 | astronaut, 8-way walk, moon | **miss** | a body that survives being turned (every positional field rotates) | 1 cycle, 1 reading |
 | 2 | kitten platformer, cozy | **ships** | — (notes: difficulty ratio, presentation scale) | 1 cycle, 3 readings |
-| 3 | skull runner, SOTN | **miss** | **subtraction** (`Part.cut`) | 1 cycle, 1 reading |
+| 3 | skull runner, SOTN | **miss → answered 18/08: *"sim, agora é uma caveira"*** | **subtraction** (`Part.cut`) — spent, and the verdict is in | 1 cycle, 2 readings |
 | 4 | skate + kickflip (roll + pixel-art experiment) | **ships** | — (spec carried: environments are basic) | 1 cycle, 1 reading |
 | 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
 | 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | **ships** | — (spec carried: a named reference was met by ELEMENTS, not by fidelity) | 1 cycle, 1 reading |
 | 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | **ships** (cycle 2) | cycle 1 specified: **perspective — scale over distance, spawn at the vanishing point, the treadmill** | 2 cycles, 2 readings |
-| 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | **miss** (cycle 1, the colleague) | **scale is the aesthetic** · a prop the SIM cannot see · a camera whose aim is not solved · **nothing on the plane is grounded** | 2 cycles so far, 1 reading |
+| 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | cycle 1 **miss** (colleague) → cycle 2 **ships from HIM**; the colleague's bar still pending | **scale is the aesthetic** · a prop the SIM cannot see · a camera whose aim is not solved · **nothing on the plane is grounded** | 2 cycles, 2 readings |
 
 **Batch 8, 17/08, his sentence:** *"Ainda temos pendências sobre o 3D e queria matá-las em um
 único microgame… um bench que irei validar com outro humano, um liderado meu… 'Jogos com a
@@ -171,42 +171,42 @@ and the skate too.
 
 ## Held for the human
 
-- [ ] 🟡 **30 seconds: is the skull a skull now?**
-  · *Open:* `node bin/micro.ts` → `/crypt`. · *Do:* look at the runner's head, say yes or no.
-  · *Why:* batch 3 missed on "isso não é uma caveira"; `Part.cut` was built and the skull
-  re-authored (sockets are cavities, ember gone, cranium enlarged). "Nothing got worse"
-  from your last play is a different question and does not close this.
-  · *Changes:* **yes** → subtraction enters the mastery ledger with a verdict. **no** →
-  the cut was the wrong capability or badly spent — worth more than a third primitive.
+- [x] **The skull, 18/08: *"sim, agora é uma caveira!"*** — batch 3's miss is answered and
+      **subtraction gets its verdict**. He volunteered a second thing nobody asked about:
+      *"nesse ajuste eu gostei da fluidez da animação. Antes estava com uma animação
+      desengonçada, agora vejo um personagem correndo."*
+      **That credit does not belong to the cut.** The same round replaced the runner's frame
+      rule: it was `dist / 2.2`, a divisor I picked, which at the speed cap ran 9.9 stride
+      cycles a second — his own earlier words, *"parece que ela está correndo em
+      supervelocidade"*. It is now `dist / (strideLen / frames)` with `strideLen` **derived from
+      the body**: a sprinter covers about 1.2 of its own height per stride and this one is 34 px,
+      so 41. Two unrelated fixes shipped in one round and he read them as one improvement —
+      which is the §1 rule that he grades a GAME, never a round, seen from the flattering side
+      for once.
 
-- [ ] 🔴 **Two readings on `/arena` cycle 2 — and they are two different instruments.**
-  · *Open:* the shelf → `/arena`. · *Do:* one duel each, ~2 minutes.
-  · **You** judge the game: does the duel feel refined — is the dash worth its cooldown, does
-  the strafe read, is losing your own fault? That is the gate's question and yours alone.
-  · **Your colleague** holds a BAR, not a taste. He has already answered once, and the answer
-  was a miss with three defects named; all three are fixed and the machine is now 60 px in a
-  288 px frame instead of 34 in 240. The question for him is the same one: "does this look
-  like the PS1 you remember?" One word plus one word of why.
-  · *What changed since he looked:* twice the machine on screen, a duel held at half the range,
-  a camera whose aim is solved rather than eased, columns that stop shots and stand on the
-  floor, and a contact shadow under everything.
-  · *Changes:* a disagreement between the two is worth more than either agreement — it would be
-  the first evidence the project has about whose eye a named external reference belongs to.
-  A second miss from him names whether "polygonal" is still about SIZE or about something the
-  facet cannot reach, and that word is the next round.
+- [x] **`/arena` cycle 2 — HIS half, 18/08: SHIPS.** *"Eu adorei o jogo. Após as correções eu
+      me senti num jogo de robôs do PS1. As correções foram certeiras e a mecânica do jogo
+      melhorou também."*
+      **Prediction scored, and I split the two humans along the wrong seam.** I predicted him
+      ships at 60/40 with the 40 on the duel feeling thin — right verdict, and the named risk did
+      not appear; he said the mechanic improved. But I had assigned the PS1 axis entirely to the
+      colleague, and he answered it himself, unprompted and positively. **A bar named for one
+      reader is not invisible to the other.**
+      Also: *"as correções foram certeiras"* is the miss-as-specification loop closing in one
+      cycle — a defect list from the bar-holder converted directly into a ship from the
+      taste-holder, with no round of guessing in between.
 
-- [x] **The snowboarder — batch 6's reading, 18/08: SHIPS.** His words:
-      *"A manobra foi bem implementada. Consegui usá-la no jogo como um recurso adicional para
-      superar os obstáculos. O estilo da tela trás uma memória sobre Yoshi Island, não replicou
-      em alta fidelidade. Mas o tema de neve, os inimigos temáticos, o pinheiro e a neve caindo
-      foram elementos que trouxeram a estética do Yoshi Island."*
-      Two findings, and the second is the one that generalises:
-      **(1)** the trick is not decoration — he used it AS A VERB, to clear obstacles. An
-      animation that is also a mechanic is what "animation is half the ask" has meant all along.
-      **(2)** he granted the reference on **thematic elements** — snow, themed enemies, the
-      pine, the falling snow — and explicitly withheld fidelity, and it still shipped. Compare
-      the colleague on "Armored Core", who withheld the reference over SIZE. Two named
-      references, two different currencies, and neither was the drawn line.
+- [ ] 🔴 **The colleague's second reading on `/arena` — the only thing batch 8 still waits for.**
+      · *Open:* the shelf → `/arena`. · *Do:* one duel, ~2 minutes. One word plus one word of why.
+      · *What changed since he looked:* twice the machine on screen (60 px in a 288 px frame,
+      against 34 in 240), a duel held at half the range, a camera whose aim is solved rather than
+      eased, columns that stop shots and stand on the floor, and a contact shadow under
+      everything.
+      · *Changes:* **ships** → the two readers agreed, and the aesthetic vocabulary gains "PS1"
+      as a met bar. **misses** → his word says whether "poligonal" is still about SIZE or about
+      something the facet cannot reach, and that word is the next round. A disagreement between
+      the two is still worth more than either agreement, and it is now the LIKELY outcome
+      rather than the hoped-for one — Jucelinux has already shipped it.
 
 ## Deferred, by him
 
