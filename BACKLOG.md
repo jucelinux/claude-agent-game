@@ -3,7 +3,7 @@
 What is **open**, as of 17/08 (distilled — closed items live in `DECISIONS.md` and on
 branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
-## Gate — v3, the commission test · running 4 of 7, batches 6 and 8 open
+## Gate — v3, the commission test · running **5 of 7**, batch 8 open
 
 | batch | commission | verdict | capability the miss specified | cost |
 |---|---|---|---|---|
@@ -12,7 +12,7 @@ branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 | 3 | skull runner, SOTN | **miss** | **subtraction** (`Part.cut`) | 1 cycle, 1 reading |
 | 4 | skate + kickflip (roll + pixel-art experiment) | **ships** | — (spec carried: environments are basic) | 1 cycle, 1 reading |
 | 5 | "o máximo do motor" → biplane barrel roll, `/aero` | **ships** | — (spec carried: obstacles must leave the screen before dying) | 1 cycle, 1 reading |
-| 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | *open* | — | 1 cycle so far |
+| 6 | snowboard, Yoshi's Island SNES aesthetic — "bem pixel art mesmo" | **ships** | — (spec carried: a named reference was met by ELEMENTS, not by fidelity) | 1 cycle, 1 reading |
 | 7 | **the real test C**: down-slope camera + carve-amplitude composition, `/descent` | **ships** (cycle 2) | cycle 1 specified: **perspective — scale over distance, spawn at the vanishing point, the treadmill** | 2 cycles, 2 readings |
 | 8 | **one game that kills every remaining 3D debt**, PS1 aesthetic, benched by a third person — `/arena` | **miss** (cycle 1, the colleague) | **scale is the aesthetic** · a prop the SIM cannot see · a camera whose aim is not solved · **nothing on the plane is grounded** | 2 cycles so far, 1 reading |
 
@@ -195,15 +195,18 @@ and the skate too.
   A second miss from him names whether "polygonal" is still about SIZE or about something the
   facet cannot reach, and that word is the next round.
 
-- [ ] 🟡 **Two minutes: the snowboarder — batch 6's reading.**
-  · *Open:* `node bin/micro.ts` → `/snow` (or the deployed shelf).
-  · *Do:* play until you clear a snowman with one press and the tall pine with two. Say one
-  word — ships or misses — plus a word of why on a miss.
-  · *What a pass looks like:* the screen says *Yoshi's Island winter* before you touch a key,
-  and the trick reads as a snowboard trick.
-  · *Changes:* **ships** → the composed roll (roll under a leaning parent) enters the ledger
-  and the aesthetic vocabulary gains its first him-named reference target. **misses** → the
-  word says whether the miss is the trick or the aesthetic, and that word is the next round.
+- [x] **The snowboarder — batch 6's reading, 18/08: SHIPS.** His words:
+      *"A manobra foi bem implementada. Consegui usá-la no jogo como um recurso adicional para
+      superar os obstáculos. O estilo da tela trás uma memória sobre Yoshi Island, não replicou
+      em alta fidelidade. Mas o tema de neve, os inimigos temáticos, o pinheiro e a neve caindo
+      foram elementos que trouxeram a estética do Yoshi Island."*
+      Two findings, and the second is the one that generalises:
+      **(1)** the trick is not decoration — he used it AS A VERB, to clear obstacles. An
+      animation that is also a mechanic is what "animation is half the ask" has meant all along.
+      **(2)** he granted the reference on **thematic elements** — snow, themed enemies, the
+      pine, the falling snow — and explicitly withheld fidelity, and it still shipped. Compare
+      the colleague on "Armored Core", who withheld the reference over SIZE. Two named
+      references, two different currencies, and neither was the drawn line.
 
 ## Deferred, by him
 

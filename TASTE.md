@@ -39,6 +39,12 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
 - `[derived 17/08 · batch 8, declared]` He brings a second human as a BAR, naming an external
   reference the colleague holds ("PS1"). §1 stays compiled from his verdicts alone; the
   colleague's answer moves the aesthetic vocabulary, not the taste.
+- `[derived 18/08 · batch 6]` A reference is granted on ELEMENTS, not on fidelity: *"não
+  replicou em alta fidelidade. Mas o tema de neve, os inimigos temáticos, o pinheiro e a neve
+  caindo foram elementos que trouxeram a estética"*. He named the shortfall and shipped it.
+- `[derived 18/08 · batch 6]` An animation he can USE outranks an animation he can watch. The
+  rodeo came back as *"um recurso adicional para superar os obstáculos"* — the commission asked
+  for a trick and the verdict answered about a mechanic.
 - `[derived 18/08 · batch 8, the colleague]` A named reference is read as SIZE before it is read
   as technique: "Armored Core" arrived as *mechas grandes, tela maior, mais velocidade* — three
   numbers and no drawing note. Batch 4 measured the same law on the dither. When a reference
@@ -109,6 +115,7 @@ the axis it was proven on, never across it.**
 | props (rocks, shelves) | moon, climb | interaction beyond standing |
 | body turned in depth (yaw) | astronaut + 2 transfer locks | depth/width < ~0.45 collapses — measured |
 | roll (out of screen plane) | kickflip + biplane root + rodeo-under-lean + carve at 36° | nothing known on shelf amplitudes — the composition is MEASURED at 0.337 px worst (tests/descent.test.ts); beyond carve amplitude, run the instrument before spending |
+| **roll under a LEANING parent** (the non-commuting pair, a changing lean through a full turn) | `/snow`'s rodeo, his verdict 18/08 — *"a manobra foi bem implementada"* | a leaning parent that also YAWS — three axes on one root is the arena's case, and it is measured but unjudged |
 | the down-slope camera & perspective (scale bands over distance, vanishing point) | `/descent`, his verdict 17/08 — "sensação de movimento e profundidade… crescimento suave" | one game shape; a second view (e.g. toward the camera) is untested |
 | face at small scale | kitten | any face not a round-skulled animal |
 | a game that can be lost | climb, crypt, skate | win conditions beyond "how far" |
