@@ -78,12 +78,21 @@ export function mount(el: HTMLElement, S: Payload) {
    */
   const keys: Keys = {}
   const timeline: { at: number; key: string; down: boolean }[] = []
+  /**
+   * **Everything that was pressed, kept.** The loop consumes `timeline`; this keeps the same
+   * events so a play can be written out and handed back. A recording IS this list, which is the
+   * dividend of treating live input as a timeline in the first place — the recorder needed no
+   * new concept, only a second reference.
+   */
+  const log: { at: number; key: string; down: boolean }[] = []
   if (S.interactive) {
     const record = function (e: KeyEvent, v: boolean): void {
       const k = e.key
       if (!WATCHED.test(k)) return
       // The event's own clock, which is the same one `requestAnimationFrame` is given.
-      timeline.push({ at: typeof e.timeStamp === 'number' ? e.timeStamp : 0, key: k, down: v })
+      const ev = { at: typeof e.timeStamp === 'number' ? e.timeStamp : 0, key: k, down: v }
+      timeline.push(ev)
+      log.push(ev)
       e.preventDefault()
     }
     window.addEventListener('keydown', function (e: KeyEvent) { record(e, true) })
@@ -283,6 +292,21 @@ export function mount(el: HTMLElement, S: Payload) {
    */
   return {
     view: view, drawn: drawn,
+    /**
+     * **A play, as the file `bin/play.ts` reads.** Times are relative to the first frame, so a
+     * recording is independent of when the tab was opened. `feed` is the other direction: hand
+     * back a play and it runs exactly as it did, because the loop applies an event to the
+     * simulation step it belongs to and not to the frame that noticed it.
+     */
+    log: function () {
+      const base = t0 === null ? 0 : t0
+      return log.map(function (e) { return [Math.round(e.at - base), e.key, e.down] })
+    },
+    feed: function (events: readonly (readonly [number, string, boolean])[]) {
+      const base = t0 === null ? 0 : t0
+      for (const e of events) timeline.push({ at: base + e[0], key: e[1], down: e[2] })
+      timeline.sort(function (a, b) { return a.at - b.at })
+    },
     state: function () { return shape.state() },
     cam: function () { return arena.cam() },
     project: function (x: number, y: number, z: number) { return S.arena ? arena.project(x, y, z) : null },

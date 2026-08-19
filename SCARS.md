@@ -37,13 +37,14 @@ that demanded it of both would have added a meaningless number to a shipped game
 | 4 | **A size band is HELD, not re-chosen every frame** | batch 8 cycle 2 — *"causando uma sensação de bug"* | any game whose subjects can sit at a fixed distance | ⚠️ locked in `tests/arena.test.ts` only. `/descent` genuinely does not need it — on a treadmill every boundary is crossed once — which is why the gate must ask rather than demand |
 | 5 | **An instrument must not test its own copy of the thing** | four times, `HARNESS.md` §5 | every lock over runtime behaviour | ⚠️ the arena hands out its real `project`; nothing stops the next test file re-implementing something |
 | 6 | **Nothing is ever drawn at a coordinate that is not a number** | 18/08, by the compiler, the hour the runtime left its string | every game | ✅ `tests/golden.test.ts`, sweeps `MICRO_GAMES` |
-| 11 | **The simulation advances in fixed steps, and input is a timeline rather than a poll** | 18/08, by reading the build order — a stated prerequisite the code never met | every game | ✅ `tests/timestep.test.ts`, sweeps `MICRO_GAMES` at 60, 90 and 144 Hz |
 | 7 | **One placement rule** (`rowOf`), never a second row arithmetic | run 12 | every draw path | ✅ locked |
 | 8 | **Nothing is rendered, shipped or decoded twice** | his own reading — *"isso é ruim… vamos resolver isso"* | every game | ✅ `tests/performance.test.ts`, sweeps `MICRO_GAMES` |
 | 9 | **Every tunable is anchored, in a sentence** | run 7 | every tunables file | ✅ `src/io/load.ts` refuses to load otherwise |
 | 10 | **No ambient randomness, and no clock below the consumers** | `HARNESS.md` §2.5 | all of `src/` | ✅ `tests/determinism.test.ts` |
+| 11 | **The simulation advances in fixed steps, and input is a timeline rather than a poll** | 18/08, by reading the build order — a stated prerequisite the code never met | every game | ✅ `tests/timestep.test.ts`, sweeps `MICRO_GAMES` at 60, 90 and 144 Hz |
+| 12 | **A recorded play replays exactly** | the same reading of the build order | every game | ✅ `tests/replay.test.ts`, sweeps `MICRO_GAMES`; `bin/play.ts` is the command |
 
-**Five of eleven sweep every game. Three have nothing.** That count is the honest state of the
+**Six of twelve sweep every game. Three have nothing.** That count is the honest state of the
 method as of 18/08, and it is the number to move.
 
 ## What is not in here

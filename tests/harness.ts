@@ -21,6 +21,9 @@ export type Harness = {
   tick: (now: number) => void
   /** `at` is the event's own timestamp; it defaults to the last ticked moment. */
   key: (name: string, down: boolean, at?: number) => void
+  /** The play so far, and a play handed back — see `bin/play.ts`. */
+  log: () => (readonly [number, string, boolean])[]
+  feed: (events: readonly (readonly [number, string, boolean])[]) => void
 }
 
 /**
@@ -91,6 +94,8 @@ export function run(html: string, ctxFactory?: (id: number) => Record<string, un
   return {
     state: () => (mounted as { state: () => ReturnType<Harness['state']> }).state(),
     cam: () => (mounted as { cam: () => ReturnType<Harness['cam']> }).cam(),
+    log: () => (mounted as { log: Harness['log'] }).log(),
+    feed: (events) => (mounted as { feed: Harness['feed'] }).feed(events),
     project: (x: number, y: number, z: number) => (mounted as { project: Harness['project'] }).project(x, y, z),
     scaleOf: (k: number, ladder: readonly number[], cur?: number) =>
       (mounted as { scaleOf: Harness['scaleOf'] }).scaleOf(k, ladder, cur),
