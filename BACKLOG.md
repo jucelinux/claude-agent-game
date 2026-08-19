@@ -245,40 +245,41 @@ Other things the move bought, each measurable:
 | `var side` in the arena was the same variable as `var side` anywhere else | one scope per module, locked by `tests/runtime-shape.test.ts` |
 | the payload's shape was a hope | the STAGE's real types — a difference that was invisible and produced eight errors pointing straight at it |
 
-- [ ] 🟡 **The runtime's typing is staged debt, with a number.** `tsconfig.runtime.json` relaxes
-      `strictNullChecks`, `noImplicitAny` and `noUncheckedIndexedAccess`; everything else is
-      strict, including the property-existence check that found the reaper. **671 errors to
-      close**, and they are almost all one shape: a state constant TypeScript will not narrow
-      inside a hoisted `function` declaration. One shape module per round closes it.
+- [x] **The runtime's typing debt closed the same day, 671 → 0.** It compiles under exactly the
+      strictness everything else does, and `tests/runtime-shape.test.ts` asserts that
+      `tsconfig.runtime.json` overrides nothing but `lib`. Three moves did almost all of it: a
+      layer accessor that states the invariant once instead of eighteen times (245 → 4 by
+      itself), a non-null ALIAS per shape rather than a narrowed const — TypeScript keeps
+      narrowing inside an arrow function and drops it inside a hoisted declaration, which is how
+      this runtime is written — and the actor's own declaration captured where it was CHECKED.
 
-## Open against a stated prerequisite — found 18/08 by a sanity check, not by a verdict
+## The engine slice — audited 18/08, and two of five are done
 
-- [x] **Fixed 18/08 — the size band is now HELD.** His report in the same message as Carlos's
-      verdict: *"a depender da distância o tamanho do obstáculo ou do robô fica variando muito.
-      Tem uma distância específica que o tamanho fica variando constantemente, causando uma
-      sensação de bug."* Nearest-band-per-frame has no memory, so a thing parked on a boundary
-      flipped every frame — a 21 percent size change, sixty times a second.
-      **`/descent` uses the same ladder ratio (0.78 against 0.79) and never showed it**, and that
-      is the finding worth more than the fix: on a treadmill every object crosses every boundary
-      ONCE, in one direction; in an arena a thing can LIVE on a boundary. The band technique did
-      not change — the MOTION did, and a rule proven safe in one game shape was not safe in the
-      next. `bandHold` at 0.25, locked with the flicker itself as the null case.
+`CLAUDE.md` item 5 defines it as five things. The audit and the work happened in one day:
 
-- [ ] 🔴 **The timestep is VARIABLE, and `CLAUDE.md` §Architecture says "a recorded input
-      replays identically".** `src/micro/app.ts` runs `var dt = Math.min(0.05, t - prev)` — the
-      real elapsed time, clamped. Every game on the shelf integrates against it.
-      **The locks do not see this** because `tests/harness.ts` feeds a fixed 16.67 ms tick, so
-      the harness is testing a determinism the browser does not have. Two machines at 60 and 144
-      Hz replaying the same key sequence diverge.
-      · *Why it has not bitten:* nothing on the shelf is scored against a recorded input, and
-      the worlds themselves are integer-hashed and frame-independent.
-      · *Why it blocks item 5:* "deterministic headless sim, fixed timestep, replayable input"
-      is the engine slice's own definition, and this is the first of the three.
-      · *Cost:* a fixed-step accumulator in one place, plus a lock that drives one game at two
-      different frame rates and asserts the same end state. Not a rewrite.
+| the definition asks for | state |
+|---|---|
+| deterministic headless sim | ✅ since round zero — `tests/harness.ts` drives the real games |
+| **fixed timestep** | ✅ 18/08. Whole 1/120 s steps, counted with integer millisecond arithmetic |
+| **replayable input** | ✅ 18/08. `bin/play.ts`; a play is a game, a duration and every key with the millisecond it was pressed |
+| box collision | ❌ still per game — a radius in the arena, a row in the runners, a shelf in the climb |
+| animation state machine | ❌ still per game — hand-rolled `state` strings in five shapes |
 
-- [ ] 🟡 **`bin/record.ts` records a GRAMMAR run, not a GAME session.** There is no recorder for
-      an input sequence. The harness can replay keys in a test; nothing can capture a play.
+**The two that closed are one finding.** The loop integrated against real elapsed frame time,
+against a prerequisite stated since round zero, and **no lock could see it** because the harness
+feeds a fixed tick — the instrument was testing a determinism the product did not have.
+
+Fixing the step was not enough. The three rates still differed by exactly one step of steer on
+the climb, every time, because a press at 200 ms is SEEN at 200.0 on a 60 Hz screen and at 201.39
+on a 144 Hz one. **A loop that applies an event on the frame that noticed it has made the refresh
+rate part of the game.** Input is a timeline now — and once it was, the recorder needed no
+concept of its own: the live path and the replayed path are the same path, so a replay cannot
+drift. Measured: every game identical at 60, 90 and 144 Hz, with input at ragged times no rate
+lands on.
+
+**What is left of the slice** — box collision and the state machine — is the harvest kind of
+work, not the design kind: five games already do both, and the general shape is to be taken from
+them rather than invented. It waits for a commission that needs it.
 
 ## Deferred, by him
 

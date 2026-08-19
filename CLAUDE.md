@@ -116,9 +116,9 @@ CONSTRAINT — so the constraint belongs where the code is, not where the conver
    across kinds. Known gaps, built only when a miss names them: pattern inside a part ·
    effects (fire, smoke) · full 3D pitch (roll exists) · generativity beyond trees.
 5. **Then the engine slice:** one-screen platformer — deterministic headless sim, fixed
-   timestep, box collision, replayable input, animation state machine. Audited 18/08: the
-   headless sim exists and the other four do not. **The timestep is first** — it is a stated
-   prerequisite already violated, and it is an accumulator in one place.
+   timestep, box collision, replayable input, animation state machine. **Three of five done as
+   of 18/08**; box collision and the state machine remain, and both are harvest work — five
+   games already do them, so the general shape is to be taken rather than invented.
 6. **The differentiator: the agent's perception of a RUNNING game.** Same pattern as the
    sprite channel, one level up.
 7. Judging apparatus — only if judging becomes the bottleneck.
@@ -129,8 +129,10 @@ Drawing capacity is upstream of the engine: production capacity bounds game dive
 
 - The deterministic core imports nothing from presentation. `sprite(grammar, params,
   seed)` is closed-form; the browser is a consumer.
-- **A recorded input replays identically — and as of 18/08 that is a stated prerequisite the
-  code does NOT meet.** The frame loop integrates against real elapsed time (`BACKLOG.md`, open).
+- **A recorded input replays identically, and as of 18/08 that is enforced rather than claimed.**
+  The simulation advances in whole 1/120 s steps and input is a TIMELINE — each event carries its
+  own timestamp and is applied to the step it belongs to, not to the frame that noticed it.
+  Locked at three refresh rates (`tests/timestep.test.ts`); a play is recorded by `bin/play.ts`.
 - **The browser runtime is `src/runtime/`: one typed module per game shape.** It was 2014 lines
   inside a template literal, where the compiler could not read it, backticks were forbidden and
   nine games shared one scope. `src/micro/bundle.ts` turns the modules into the one classic
