@@ -171,6 +171,25 @@ and the skate too.
 
 ## Held for the human
 
+- [ ] 🔴 **Two minutes: three games you already approved now look different.**
+      · *Open:* the shelf → `/skate`, `/crypt`, `/snow`. · *Do:* glance at each, say one word.
+      · *What changed and why:* a contact shadow under the rider. The finding is YOURS, batch 4,
+      made on `/skate` — *"nenhum dos dois pilotos está apoiado no chão"* — and it never came
+      back to the three games that share that loop. It shrinks with the jump, so it is also the
+      only thing on screen that says where a landing will be.
+      · *What a pass looks like:* the board and the boots sit ON the ground, and you do not
+      notice the shadow itself.
+      · *Changes:* **ok** → `SCARS.md` #1 is closed with a verdict rather than by assertion.
+      **not ok** → the word says whether it is the value, the size or the colour, and the gate
+      that now demands one gets its exemption written for those games instead.
+
+- [ ] 🟡 **Also new and unread: Death is drawn in `/crypt`.**
+      · She had never appeared — the runtime read `fromX` off the runner and it lives on the
+      reaper, so every frame called `drawImage` with `x = NaN` and a canvas ignores that
+      silently. Four of your readings of that game never saw her.
+      · *Do:* play until the menace rises and say whether the chase reads now.
+
+
 - [x] **The skull, 18/08: *"sim, agora é uma caveira!"*** — batch 3's miss is answered and
       **subtraction gets its verdict**. He volunteered a second thing nobody asked about:
       *"nesse ajuste eu gostei da fluidez da animação. Antes estava com uma animação
