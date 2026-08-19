@@ -63,47 +63,62 @@ export function mount(el: HTMLElement, S: Payload) {
   }
 
 
-  var keys: Keys = {}
+  /**
+   * **Input is a TIMELINE, not a poll, and that is what makes a replay exact.**
+   *
+   * Every event carries the moment it happened, and the loop applies it to the SIMULATION STEP
+   * it belongs to rather than to whichever frame happened to notice it. Without that, the same
+   * play produces a different game at a different refresh rate — not because the simulation
+   * drifts, but because a 144 Hz screen samples the keyboard at moments a 60 Hz screen never
+   * visits. Measured: one step of steer, every time, on the climb.
+   *
+   * It also makes a recording trivial and honest. A recorded play is exactly this list — a
+   * timestamp, a key, and up or down — and replaying it cannot diverge, because the loop already
+   * treats live input as a list of the same shape.
+   */
+  const keys: Keys = {}
+  const timeline: { at: number; key: string; down: boolean }[] = []
   if (S.interactive) {
-    var down = function (e: KeyEvent, v: boolean) {
-      var k = e.key
-      if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = v; e.preventDefault() }
-      if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = v; e.preventDefault() }
-      if (k === 'ArrowUp' || k === 'w' || k === 'W') { keys.up = v; e.preventDefault() }
-      if (k === 'ArrowDown' || k === 's' || k === 'S') { keys.down = v; e.preventDefault() }
-      // **A press is latched, not sampled.** A tap that begins and ends between two animation
-      // frames is invisible to a loop that only reads the key's current state — and at 60 fps
-      // that is a 16 ms window a person hits regularly. The edge is consumed by the loop, so
-      // the input survives the gap between frames rather than falling into it.
-      if (k === ' ' || k === 'x' || k === 'X' || k === 'z' || k === 'Z') {
-        if (v && !keys.hit) { keys.tap = true; keys.jumpTap = true }
-        keys.hit = v; e.preventDefault()
-      }
-      /**
-       * **Two more flags, and they exist because the arena is the first game with four verbs.**
-       * Every game before it conflated space, x and z into one 'act' button, which is right when
-       * a game has one action. A duel has a dash AND a trigger, and a player who dashes every
-       * time he fires has no mechanic to be refined about. The old flags are untouched, so no
-       * shipped game changes.
-       */
-      if (k === ' ') { if (v && !keys.space) keys.spaceTap = true; keys.space = v; e.preventDefault() }
-      if (k === 'x' || k === 'X' || k === 'z' || k === 'Z') { keys.fire = v; e.preventDefault() }
+    const record = function (e: KeyEvent, v: boolean): void {
+      const k = e.key
+      if (!WATCHED.test(k)) return
+      // The event's own clock, which is the same one `requestAnimationFrame` is given.
+      timeline.push({ at: typeof e.timeStamp === 'number' ? e.timeStamp : 0, key: k, down: v })
+      e.preventDefault()
     }
-    window.addEventListener('keydown', function (e) { down(e, true) })
-    window.addEventListener('keyup', function (e) { down(e, false) })
+    window.addEventListener('keydown', function (e: KeyEvent) { record(e, true) })
+    window.addEventListener('keyup', function (e: KeyEvent) { record(e, false) })
   }
 
-
   /**
-   * **The meter: what the machine actually did**, against the budget's prediction of what it
-   * would be asked to do. The pairing is the point — a budget that says cheap next to a meter
-   * that says 30 fps is a budget measuring the wrong thing ('HARNESS.md' section 5).
-   *
-   * Two separate numbers, because they answer different questions. **fps** comes from the
-   * gaps between animation frames and includes everything the browser does; **work** is the
-   * time spent inside this loop and is the only part this code owns. A page at 60 fps with
-   * 14 ms of work has no headroom left even though nothing is dropping yet.
+   * **One event, folded into the latched state.** A press is LATCHED and not sampled: a tap that
+   * begins and ends between two steps is invisible to a loop that only reads the key's current
+   * level, and at 120 steps a second that is an 8 ms window a person hits regularly. The edge is
+   * consumed by the shape, so the input survives the gap rather than falling into it.
    */
+  function apply(k: string, v: boolean): void {
+    if (k === 'ArrowLeft' || k === 'a' || k === 'A') keys.left = v
+    if (k === 'ArrowRight' || k === 'd' || k === 'D') keys.right = v
+    if (k === 'ArrowUp' || k === 'w' || k === 'W') keys.up = v
+    if (k === 'ArrowDown' || k === 's' || k === 'S') keys.down = v
+    if (k === ' ' || k === 'x' || k === 'X' || k === 'z' || k === 'Z') {
+      if (v && !keys.hit) { keys.tap = true; keys.jumpTap = true }
+      keys.hit = v
+    }
+    /**
+     * **Two more flags, and they exist because the arena is the first game with four verbs.**
+     * Every game before it conflated space, x and z into one 'act' button, which is right when a
+     * game has one action. A duel has a dash AND a trigger, and a player who dashes every time
+     * he fires has no mechanic to be refined about. The old flags are untouched, so no shipped
+     * game changes.
+     */
+    if (k === ' ') { if (v && !keys.space) keys.spaceTap = true; keys.space = v }
+    if (k === 'x' || k === 'X' || k === 'z' || k === 'Z') keys.fire = v
+  }
+
+  /** Everything the shelf reads. Anything else is left to the page. */
+  const WATCHED = /^(ArrowLeft|ArrowRight|ArrowUp|ArrowDown|[adwsxzADWSXZ]| )$/
+
   var clock = (typeof performance !== 'undefined' && performance.now)
     ? function () { return performance.now() } : function () { return 0 }
   const meter: { gaps: number[]; work: number[]; at: number; worst: number; decode: number } =
@@ -165,26 +180,91 @@ export function mount(el: HTMLElement, S: Payload) {
   let shape: Shape = stage
   for (const s of shapes) { if (s.active) { shape = s; break } }
 
-  let t0: number | null = null, prev = 0
+  /**
+   * **The fixed timestep, and it is a stated prerequisite this loop did not meet.**
+   *
+   * `CLAUDE.md` §Architecture says *a recorded input replays identically*. The loop integrated
+   * against `now - prev` — the real elapsed frame time — so the same key sequence produced a
+   * different game on a 144 Hz screen than on a 60 Hz one. **The locks could not see it**,
+   * because `tests/harness.ts` feeds a fixed 16.67 ms tick: the instrument was testing a
+   * determinism the product did not have, which is the fifth occurrence of that shape and the
+   * first found by reading the build order rather than by a defect.
+   *
+   * The simulation now advances in whole steps of `STEP` and nothing else. A slow frame runs
+   * several; a fast one runs none and redraws the same state, which is correct — the picture is
+   * a function of the state and the state only moves in steps.
+   *
+   * `MAX_CATCHUP` is the spiral-of-death bound: a tab that was in the background for a minute
+   * must not try to simulate a minute when it wakes. It drops the backlog and says so by simply
+   * carrying on, which is what every fixed-step loop does and the only honest thing available —
+   * the alternative is a hang.
+   */
+  const HZ = 120
+  const STEP = 1 / HZ
+  const MAX_CATCHUP = 8
+  let t0: number | null = null
+  /** How many whole steps the simulation has run. An integer, deliberately. */
+  let done = 0
+  let prevReal = 0
   function frame(now: number) {
     var began = clock()
     if (t0 === null) t0 = now
-    var t = (now - t0) / 1000
-    var dt = Math.min(0.05, t - prev)
+    /**
+     * **Whole milliseconds, and the rounding is what makes the claim exact.**
+     *
+     * The number of steps owed at a given moment is `floor(ms · 120 / 1000)` — integer
+     * arithmetic on an integer, so two machines at two refresh rates that reach the same
+     * millisecond have run the same number of steps. Carrying the browser's fractional
+     * timestamp instead leaves a residue that lands either side of a step boundary, and the
+     * two runs then differ by one step for ever after.
+     */
+    const ms = Math.round(now - t0)
+    const real = ms / 1000
     // 120 frames is two seconds at 60 fps: long enough that one slow frame does not dominate
     // the average, short enough that a stall shows up while it is still happening.
-    if (prev > 0) { meter.gaps.push((t - prev) * 1000); if (meter.gaps.length > 120) meter.gaps.shift() }
-    prev = t
+    if (prevReal > 0) { meter.gaps.push((real - prevReal) * 1000); if (meter.gaps.length > 120) meter.gaps.shift() }
+    prevReal = real
+
+    /**
+     * **The simulation advances in whole steps and nothing else, which is the prerequisite
+     * `CLAUDE.md` states and this loop did not meet.** It integrated against the real elapsed
+     * frame time, so the same keys produced a different game on a 144 Hz screen than on a 60 Hz
+     * one — and no lock could see it, because the harness feeds a fixed tick.
+     *
+     * `MAX_CATCHUP` bounds the spiral of death: a tab that was in the background for a minute
+     * must not try to simulate a minute when it wakes. It drops the backlog, which is what every
+     * fixed-step loop does and the only honest option — the alternative is a hang.
+     */
+    const owed = Math.floor((ms * HZ) / 1000)
+    let steps = 0
+    while (done < owed && steps < MAX_CATCHUP) {
+      done++; steps++
+      // Everything that happened up to the END of this step, applied before it runs. The step
+      // therefore sees the same input on every machine, whatever its screen does.
+      const upTo = t0 + (done * 1000) / HZ
+      while (timeline.length > 0 && timeline[0]!.at <= upTo) {
+        const ev = timeline.shift()!
+        apply(ev.key, ev.down)
+      }
+      shape.step(done * STEP, STEP)
+    }
+    if (done < owed) {
+      // Dropped a backlog: the events it would have consumed still have to land, or a key
+      // pressed during a stall would stay down for ever.
+      done = owed
+      const upTo = t0 + (done * 1000) / HZ
+      while (timeline.length > 0 && timeline[0]!.at <= upTo) { const ev = timeline.shift()!; apply(ev.key, ev.down) }
+    }
 
     drawn.length = 0
-    shape.step(t, dt)
-    shape.draw(t)
+    shape.draw(done * STEP)
     vx.drawImage(off, 0, 0, view.width, view.height)
     meter.work.push(clock() - began); if (meter.work.length > 120) meter.work.shift()
     report(now)
     shape.score(now)
     requestAnimationFrame(frame)
   }
+
   el.appendChild(view)
   requestAnimationFrame(frame)
 

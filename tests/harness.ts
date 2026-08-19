@@ -19,7 +19,8 @@ export type Harness = {
   scaleOf: (k: number, ladder: readonly number[], cur?: number) => number
   text: Record<string, string>
   tick: (now: number) => void
-  key: (name: string, down: boolean) => void
+  /** `at` is the event's own timestamp; it defaults to the last ticked moment. */
+  key: (name: string, down: boolean, at?: number) => void
 }
 
 /**
@@ -33,6 +34,7 @@ export function run(html: string, ctxFactory?: (id: number) => Record<string, un
   const script = html.slice(html.indexOf('<script>') + 8, html.lastIndexOf('</script>'))
   const text: Record<string, string> = {}
   let pending: ((now: number) => void) | null = null
+  let lastNow = 0
   let next = 0
   const makeCanvas = (): Record<string, unknown> => {
     const id = next++
@@ -93,9 +95,15 @@ export function run(html: string, ctxFactory?: (id: number) => Record<string, un
     scaleOf: (k: number, ladder: readonly number[], cur?: number) =>
       (mounted as { scaleOf: Harness['scaleOf'] }).scaleOf(k, ladder, cur),
     text,
-    tick: (now: number) => { const fn = pending; pending = null; fn?.(now) },
-    key: (name: string, down: boolean) => {
-      for (const fn of listeners[down ? 'keydown' : 'keyup'] ?? []) fn({ key: name, preventDefault: () => {} })
+    tick: (now: number) => { lastNow = now; const fn = pending; pending = null; fn?.(now) },
+    key: (name: string, down: boolean, at?: number) => {
+      // A real key event carries `timeStamp`, and the runtime applies it to the simulation step
+      // it belongs to rather than to whichever frame noticed it. A fake that omitted it would be
+      // testing a different engine.
+      const stamp = at ?? lastNow
+      for (const fn of listeners[down ? 'keydown' : 'keyup'] ?? []) {
+        fn({ key: name, preventDefault: () => {}, timeStamp: stamp })
+      }
     },
   }
 }

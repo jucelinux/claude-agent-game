@@ -240,4 +240,9 @@ export type Drawable =
     }
 
 /** As much of a keyboard event as this runtime reads. */
-export type KeyEvent = { readonly key: string; readonly preventDefault: () => void }
+export type KeyEvent = {
+  readonly key: string
+  readonly preventDefault: () => void
+  /** The browser's own clock, the same one `requestAnimationFrame` is handed. */
+  readonly timeStamp?: number
+}
