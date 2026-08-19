@@ -1,0 +1,38 @@
+{
+  "forest": {
+    "hash": "fba16a8940cc8105",
+    "calls": 20747
+  },
+  "moon": {
+    "hash": "32c9e9233689db9c",
+    "calls": 11647
+  },
+  "cozy": {
+    "hash": "e45ff6164998761f",
+    "calls": 19635
+  },
+  "crypt": {
+    "hash": "f704aa0ddeaca8a1",
+    "calls": 2027
+  },
+  "skate": {
+    "hash": "a80ab305f6729aa8",
+    "calls": 1491
+  },
+  "aero": {
+    "hash": "8f1eb9c4e66b79f9",
+    "calls": 2765
+  },
+  "snow": {
+    "hash": "2d3fc1794aba37c2",
+    "calls": 9640
+  },
+  "descent": {
+    "hash": "cbeca93a4144cef8",
+    "calls": 36746
+  },
+  "arena": {
+    "hash": "9ec054e1ecb829ba",
+    "calls": 135667
+  }
+}

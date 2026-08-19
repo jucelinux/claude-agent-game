@@ -22,13 +22,24 @@ export type Harness = {
   key: (name: string, down: boolean) => void
 }
 
-export function run(html: string): Harness {
+/**
+ * **One fake browser, two eyes.** By default the context is the strict stub below, which
+ * ignores what is drawn and only refuses what a browser would refuse. Pass `ctxFactory` and the
+ * same fake browser records instead — that is how `tests/trace.ts` proves a refactor changed
+ * nothing. Two fakes with one name is the copy-paste failure this file's header is about, so
+ * there is one fake and the eye is a parameter.
+ */
+export function run(html: string, ctxFactory?: (id: number) => Record<string, unknown>): Harness {
   const script = html.slice(html.indexOf('<script>') + 8, html.lastIndexOf('</script>'))
   const text: Record<string, string> = {}
   let pending: ((now: number) => void) | null = null
   let next = 0
   const makeCanvas = (): Record<string, unknown> => {
     const id = next++
+    if (ctxFactory !== undefined) {
+      const rec = ctxFactory(id)
+      return { _id: id, _canvas: true as const, width: 0, height: 0, getContext: () => rec }
+    }
     const ctx = {
       set imageSmoothingEnabled(_v: boolean) {},
       set fillStyle(_v: string) {},
