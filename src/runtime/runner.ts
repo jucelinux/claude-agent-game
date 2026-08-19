@@ -321,6 +321,27 @@ export function makeRunner(c: Shared): Shape {
      * greps the source to keep it that way.
      */
     var stand = { anchor: D.anchor, y: N.groundRow }
+    /**
+     * **The contact shadow, and it arrives here last of the three shapes that needed it.**
+     *
+     * The finding is batch 4's, and it was found ON THIS GAME SHAPE — *"nenhum dos dois pilotos
+     * está apoiado no chão"* was said about the skate. It was applied at birth in `/descent` and
+     * after a second reading in `/arena`, and never came back to the three games that share this
+     * loop. That is the failure `SCARS.md` exists to make visible: a lesson written in three
+     * markdown files and enforced by nothing.
+     *
+     * It shrinks with height, which is the only thing on screen that says where a jump will land.
+     */
+    if (N.contact !== undefined) {
+      var sk = Math.max(0.4, 1 - R.y / N.contact.fade)
+      ox.globalAlpha = N.contact.alpha * sk
+      ox.fillStyle = rgb(N.contact.color)
+      ox.beginPath()
+      ox.ellipse(Math.round(N.holdX), N.groundRow, Math.max(1, Math.round(N.contact.rx * sk)),
+        Math.max(1, Math.round(N.contact.rx * sk * 0.36)), 0, 0, 6.283185)
+      ox.fill()
+      ox.globalAlpha = 1
+    }
     ox.drawImage(sheets[ri]!, 0, rfr * RL.h, RL.w, RL.h,
       Math.round(N.holdX + RL.ox), Math.round(rowOf(stand, RL) - R.y), RL.w, RL.h)
 

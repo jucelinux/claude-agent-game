@@ -392,6 +392,16 @@ export type Climb = {
 export type Runner = {
   /** The row the world stands on. */
   readonly groundRow: number
+  /**
+   * **The contact shadow, and its absence is `SCARS.md` #1.** A subject standing on a floor with
+   * nothing under it does not read as standing on it — the finding is batch 4's and it was made
+   * on this very shape. `rx` is the disc's half-width at ground level and `fade` the height at
+   * which it stops shrinking. **Optional, and the option is the point:** a game that does not
+   * want one says so in its scene, in a sentence, and the lock reads the sentence.
+   */
+  readonly contact?: { readonly rx: number; readonly alpha: number; readonly color: RGB; readonly fade: number }
+  /** Why this runner has no contact shadow, if it has none. Read by `tests/scars.test.ts`. */
+  readonly noContact?: string
   /** Where the runner is held on screen. He never moves horizontally; the world does. */
   readonly holdX: number
   /** Scene pixels per second at the start, and how much a second adds to it. */

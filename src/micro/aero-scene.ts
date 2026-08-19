@@ -87,6 +87,13 @@ export const aeroScene: Scene = {
   ],
   runner: {
     groundRow: 112,
+    /**
+     * **No contact shadow, and the reason is the subject.** A biplane in flight touches nothing;
+     * the ground it would cast onto is a thousand feet below and off the bottom of the frame.
+     * Declared rather than omitted, because `tests/scars.test.ts` refuses silence — the gate asks
+     * the question and this is the answer.
+     */
+    noContact: 'a biplane in flight touches no ground: there is no surface in frame to cast onto',
     // A quarter into the screen, the runner's hold. The machine is 33 px long, so it needs the
     // clearance the board needed, and for the same reason.
     holdX: 58,

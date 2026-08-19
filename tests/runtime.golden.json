@@ -12,20 +12,20 @@
     "calls": 19637
   },
   "crypt": {
-    "hash": "f01c1ed20f7b6a2d",
-    "calls": 2026
+    "hash": "6341e15339ed6c62",
+    "calls": 3826
   },
   "skate": {
-    "hash": "2b8e2306df308972",
-    "calls": 1483
+    "hash": "e827acbf8214252b",
+    "calls": 3283
   },
   "aero": {
     "hash": "4aa2f8aaaa0b39c8",
     "calls": 2759
   },
   "snow": {
-    "hash": "1078ecebddd3ff6c",
-    "calls": 9630
+    "hash": "7a4cb11d2d514b95",
+    "calls": 11430
   },
   "descent": {
     "hash": "e1a6a8339bf60ec2",

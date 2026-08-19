@@ -106,6 +106,13 @@ export const skateScene: Scene = {
   ],
   runner: {
     groundRow: 116,
+    /**
+     * **The contact shadow, and this is the game the finding was MADE on** — batch 4:
+     * *"nenhum dos dois pilotos está apoiado no chão"*. It took until 18/08 to come back here,
+     * which is the whole reason `SCARS.md` exists. Dusk-blue against warm asphalt, 13 px for a
+     * board that is wider than a body.
+     */
+    contact: { rx: 13, alpha: 0.26, color: [24, 20, 38], fade: 44 },
     // Held a quarter into the screen, as the crypt: room to read three obstacles ahead, and the
     // board is 26 px long so it needs more clearance behind it than a runner does.
     holdX: 58,

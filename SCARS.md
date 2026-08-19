@@ -31,9 +31,9 @@ that demanded it of both would have added a meaningless number to a shipped game
 
 | # | the scar | found | applies to | gate |
 |---|---|---|---|---|
-| 1 | **Nothing on a plane is grounded without a contact shadow** | batch 4, `/skate` — *"nenhum dos dois pilotos está apoiado no chão"* | every game with a subject standing on a floor | ❌ **none** — present in `/descent`, `/arena`, `/moon`; **missing in `/skate`, `/crypt`, `/snow`**, and `/skate` is where it was found |
-| 2 | **An obstacle leaves the screen before it is destroyed** | batch 5 — genre convention is part of what he checks | every side-scroller | ⚠️ `tests/despawn.test.ts`, but it names three stages by hand and two games have been born since |
-| 3 | **An animation rate is derived from the body, never picked** | twice — *"supervelocidade"*, then *"desengonçada"* | every animated actor that travels | ❌ none. Every game happens to carry `strideLen`; nothing checks that the next one will |
+| 1 | **Nothing on a plane is grounded without a contact shadow** | batch 4, `/skate` — *"nenhum dos dois pilotos está apoiado no chão"* | every game with a subject standing on a floor | ✅ `tests/scars.test.ts`, sweeps `MICRO_GAMES`. Fixed 18/08 in `/skate`, `/crypt` and `/snow`; `/aero` declares its exemption in a sentence — a biplane in flight touches nothing |
+| 2 | **An obstacle leaves the screen before it is destroyed** | batch 5 — genre convention is part of what he checks | every side-scroller | ✅ `tests/scars.test.ts` sweeps `MICRO_GAMES`; `tests/despawn.test.ts` keeps the original null case, which is the pre-fix formula it must still fire on |
+| 3 | **An animation rate is derived from the body, never picked** | twice — *"supervelocidade"*, then *"desengonçada"* | every animated actor that travels | ✅ `tests/scars.test.ts`: every travelling actor declares a stride length, and no draw path divides a distance by a literal |
 | 4 | **A size band is HELD, not re-chosen every frame** | batch 8 cycle 2 — *"causando uma sensação de bug"* | any game whose subjects can sit at a fixed distance | ⚠️ locked in `tests/arena.test.ts` only. `/descent` genuinely does not need it — on a treadmill every boundary is crossed once — which is why the gate must ask rather than demand |
 | 5 | **An instrument must not test its own copy of the thing** | four times, `HARNESS.md` §5 | every lock over runtime behaviour | ⚠️ the arena hands out its real `project`; nothing stops the next test file re-implementing something |
 | 6 | **Nothing is ever drawn at a coordinate that is not a number** | 18/08, by the compiler, the hour the runtime left its string | every game | ✅ `tests/golden.test.ts`, sweeps `MICRO_GAMES` |
@@ -44,8 +44,13 @@ that demanded it of both would have added a meaningless number to a shipped game
 | 11 | **The simulation advances in fixed steps, and input is a timeline rather than a poll** | 18/08, by reading the build order — a stated prerequisite the code never met | every game | ✅ `tests/timestep.test.ts`, sweeps `MICRO_GAMES` at 60, 90 and 144 Hz |
 | 12 | **A recorded play replays exactly** | the same reading of the build order | every game | ✅ `tests/replay.test.ts`, sweeps `MICRO_GAMES`; `bin/play.ts` is the command |
 
-**Six of twelve sweep every game. Three have nothing.** That count is the honest state of the
-method as of 18/08, and it is the number to move.
+**Nine of twelve sweep every game. None has nothing.** #4 and #5 remain partial by judgment
+rather than by neglect — see their rows — and #7 is locked by a grep rather than a sweep.
+
+The three that had nothing were closed on 18/08 in one round, at his instruction. What that
+round cost is worth recording next to the count: **the contact shadow took an afternoon to
+enforce and four minutes to implement.** The gap between those two numbers is the whole argument
+of this file.
 
 ## What is not in here
 

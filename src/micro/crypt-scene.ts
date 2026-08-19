@@ -91,6 +91,13 @@ export const cryptScene: Scene = {
   ],
   runner: {
     groundRow: 112,
+    /**
+     * **The contact shadow, added 18/08 when the scar finally got a gate.** Cool and nearly
+     * black, because a graveyard at night is lit by one moon and a warm shadow would read as
+     * torchlight. 11 px is two thirds of his stride; it shrinks with the jump and is the only
+     * thing on screen that says where he will land.
+     */
+    contact: { rx: 11, alpha: 0.3, color: [10, 8, 16], fade: 46 },
     // He is held a quarter into the screen: enough room behind him for Death to be visible and
     // enough ahead to read three stones.
     holdX: 62,

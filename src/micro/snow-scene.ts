@@ -89,6 +89,12 @@ export const snowScene: Scene = {
   ],
   runner: {
     groundRow: 118,
+    /**
+     * **Snow shadows are blue and never grey** — the reference's own rule, already stated in this
+     * file's palette note and now spent where it shows. Softer than the crypt's, because an
+     * overcast piste has no hard key.
+     */
+    contact: { rx: 12, alpha: 0.2, color: [96, 124, 176], fade: 48 },
     holdX: 58,
     /** Between the street and the dawn: powder is slower than asphalt, faster than nothing. */
     speed: 130,
