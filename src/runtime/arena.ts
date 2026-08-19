@@ -7,9 +7,15 @@
  * not have caught and a string certainly did not: it is the strongest argument in the repository
  * for the golden trace that guards it.
  */
-import { bayerAt, ramp, rgb, rowOf, turnDelta } from './paint.ts'
+/**
+ * The `!` on a read like `xs[i]` inside `for (var i = 0; i < xs.length; i++)` is the loop's own
+ * bound restated: TypeScript cannot carry the comparison into the index, and a guard there would
+ * be dead code that reads as doubt about something the line above already decided.
+ */
+import { ctx2d } from './canvas.ts'
+import { bayerAt, layerAt, ramp, rgb, rowOf, turnDelta } from './paint.ts'
 import { inactive } from './types.ts'
-import type { ArenaEye, Shape, Shared } from './types.ts'
+import type { ArenaEye, Cam, Canvas, Drawable, Duel, Machine, Shape, Shared, StageArena } from './types.ts'
 
 export function makeArena(c: Shared): Shape & ArenaEye {
   const { S, ox, bg, sheets, keys, drawn, cv, rain } = c
@@ -21,8 +27,16 @@ export function makeArena(c: Shared): Shape & ArenaEye {
    * read as the game it is rather than as a chain of guards — and the early return is what
    * makes `active` a fact instead of a field somebody has to remember to set.
    */
-  const A0 = S.arena
-  if (A0 === null) return inactive() as Shape & ArenaEye
+  const block = S.arena
+  if (block === null) return inactive() as Shape & ArenaEye
+  /**
+   * **Declared non-null rather than merely narrowed, and the difference is a TypeScript rule
+   * worth writing down.** A `const` narrowed by an early return stays narrowed inside arrow
+   * functions and does NOT inside a hoisted `function` declaration — the compiler cannot prove
+   * one was not called first. This runtime is written in hoisted declarations, so the guard
+   * yields an alias whose DECLARED type carries the fact. It closed 507 errors without a cast.
+   */
+  const A0: StageArena = block
   var scoreAt = 0
 
   /**
@@ -30,14 +44,12 @@ export function makeArena(c: Shared): Shape & ArenaEye {
    * in this game is projected per frame, so the backdrop is the one thing that is not — and a
    * static backdrop is the no-crawl rule by construction, as in every game here.
    */
-  var arenaBg = null
-  if (A0) {
-    arenaBg = cv(S.w, S.h)
-    var ab = arenaBg.getContext('2d')
-    var ADZ = A0.dither || { amount: 0, lattice: 2 }
-    ramp(ab, S.w, A0.skyRamp, 0, A0.horizonRow, ADZ)
-    ramp(ab, S.w, A0.floorRamp, A0.horizonRow, S.h, ADZ)
-  }
+  const arenaBg = cv(S.w, S.h)
+  var ab = ctx2d(arenaBg)
+  var ADZ = A0.dither || { amount: 0, lattice: 2 }
+  ramp(ab, S.w, A0.skyRamp, 0, A0.horizonRow, ADZ)
+  ramp(ab, S.w, A0.floorRamp, A0.horizonRow, S.h, ADZ)
+  
 
 
   /**
@@ -46,7 +58,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
    * else in this mode — where a machine stands, how big it draws, which way the grid runs — is
    * this one function called with different arguments.
    */
-  function project(wx, wy, wz) {
+  function project(wx: number, wy: number, wz: number) {
     var A = A0
     var dx = wx - CAM.x, dz = wz - CAM.z
     /**
@@ -74,7 +86,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
    * the camera's, wrapped and quantised: the index of a grammar that was generated already
    * turned that far. The runtime never rotates anything — it chooses.
    */
-  function bandOf(heading) {
+  function bandOf(heading: number) {
     var A = A0
     /**
      * **The quarter turn is not a fudge, it is the two conventions meeting.** The body is
@@ -93,12 +105,12 @@ export function makeArena(c: Shared): Shape & ArenaEye {
    * uses.** Same snap as the descent's, but the ladder is now per kind — a machine and a
    * pillar do not live at the same range of depths and a single ladder served neither.
    */
-  function scaleOf(k, ladder, cur) {
+  function scaleOf(k: number, ladder: readonly number[], cur?: number): number {
     // The projection's own factor, normalised so the PLAYER — who is always at camDist by
     // construction of the rig — lands exactly on 1. Anything further back asks for less.
     var A = A0, want = k * A.camDist / A.focal, si = 0
     for (var i = 1; i < ladder.length; i++) {
-      if (Math.abs(ladder[i] - want) < Math.abs(ladder[si] - want)) si = i
+      if (Math.abs(ladder[i]! - want) < Math.abs(ladder[si]! - want)) si = i
     }
     /**
      * **Hysteresis, and its absence is his report: *'tem uma distância específica que o tamanho
@@ -117,14 +129,13 @@ export function makeArena(c: Shared): Shape & ArenaEye {
      * that margin, and it is why every drawn thing now carries the band it drew at last frame.
      */
     if (cur === undefined || cur === si) return si
-    if (Math.abs(ladder[si] - want) > Math.abs(ladder[cur] - want) * (1 - A.bandHold)) return cur
+    if (Math.abs(ladder[si]! - want) > Math.abs(ladder[cur]! - want) * (1 - A.bandHold)) return cur
     return si
   }
 
-  var CAM = { x: 0, z: -60, h: 0, b: 0 }
-  var AR = null
-  if (A0) {
-    var mk = function (px, pz, player) {
+  const CAM: Cam = { x: 0, z: -60, h: 0, b: 0 }
+  const AR: Duel = ((): Duel => {
+    var mk = function (px: number, pz: number, player: boolean) {
       return {
         // Both spawn already facing each other: a body heading that has to ease into place on
         // the first frame is a machine that spins on the title screen.
@@ -174,33 +185,34 @@ export function makeArena(c: Shared): Shape & ArenaEye {
         var cx = Math.sin(pang) * prad, cz = Math.cos(pang) * prad
         var clash = false
         for (var pq = 0; pq < pil.length; pq++) {
-          if (Math.hypot(cx - pil[pq].x, cz - pil[pq].z) < keepP) { clash = true; break }
+          if (Math.hypot(cx - pil[pq]!.x, cz - pil[pq]!.z) < keepP) { clash = true; break }
         }
         if (!clash) { pil.push({ x: cx, z: cz }); break }
         prad += keepP * 0.5
         if (prad > A0.radius * 0.9) prad = A0.radius * 0.2
       }
     }
-    AR = {
+    const duel: Duel = {
       you: mk(0, -A0.radius * 0.45, true),
       foe: mk(0, A0.radius * 0.45, false),
       pillars: pil,
       shots: [], over: 0, clock: 0,
     }
-    CAM.x = AR.you.x + A0.camSide
-    CAM.z = AR.you.z - A0.camDist
-    CAM.b = 0
-    // The first frame is aimed by the same solver every later frame uses. A rig that starts
-    // on a different rule than it runs on is a rig with two behaviours to debug.
-    CAM.h = aimAt(AR.you, AR.foe)
-  }
+    return duel
+  })()
+  CAM.x = AR.you.x + A0.camSide
+  CAM.z = AR.you.z - A0.camDist
+  CAM.b = 0
+  // The first frame is aimed by the same solver every later frame uses. A rig that starts on a
+  // different rule than it runs on is a rig with two behaviours to debug.
+  CAM.h = aimAt(AR.you, AR.foe)
 
   /**
    * **The duel: lock, strafe, dash, fire.** Four verbs, and the first of them is what makes the
    * yaw bands earn their place — a machine that faces its target while MOVING sideways is a
    * machine whose walk plays at a heading its motion does not share.
    */
-  function arenaStep(t, dt) {
+  function arenaStep(t: number, dt: number) {
     var A = A0, you = AR.you, foe = AR.foe
     AR.clock += dt
     if (AR.over !== 0) {
@@ -227,7 +239,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
     you.h = Math.atan2(foe.x - you.x, foe.z - you.z) / 6.283185
     foe.h = Math.atan2(you.x - foe.x, you.z - foe.z) / 6.283185
 
-    var move = function (m, fwdAmt, sideAmt, dt2) {
+    var move = function (m: Machine, fwdAmt: number, sideAmt: number, dt2: number) {
       var c = Math.cos(m.h * 6.283185), s = Math.sin(m.h * 6.283185)
       // Facing is (sin h, cos h); its right hand is (cos h, -sin h).
       var vx = s * fwdAmt + c * sideAmt
@@ -257,8 +269,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
       // One pass is exact, and it is the PLACEMENT that makes it so: the columns are spread at
       // twice this keep-out, so no point on the floor is inside two of these discs at once.
       var keep = A.pillarHalf + A.bodyHalf
-      for (var pj = 0; pj < AR.pillars.length; pj++) {
-        var pw = AR.pillars[pj]
+      for (const pw of AR.pillars) {
         var ddx = m.x - pw.x, ddz = m.z - pw.z
         var dd = Math.hypot(ddx, ddz)
         if (dd < keep && dd > 0.001) { m.x = pw.x + ddx / dd * keep; m.z = pw.z + ddz / dd * keep }
@@ -332,7 +343,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
      * by the boom's lead, which is also when the game is at its most dynamic — the two wants
      * turn out to be one.
      */
-    var faceTo = function (m, dt2) {
+    var faceTo = function (m: Machine, dt2: number) {
       var want = m.boost > 0 && m.vh !== undefined ? m.vh : m.h
       m.bh += turnDelta(want, m.bh) * Math.min(1, A.faceEase * dt2)
     }
@@ -341,7 +352,9 @@ export function makeArena(c: Shared): Shape & ArenaEye {
 
     // ---- Shots travel and land. A shot is a point on the plane; a machine is a radius.
     for (var i = AR.shots.length - 1; i >= 0; i--) {
-      var sh = AR.shots[i]
+      // The loop walks its own list backwards so a splice cannot skip an entry; the index is
+      // therefore always inside it.
+      var sh = AR.shots[i]!
       var step = A.shotSpeed * dt
       sh.x += Math.sin(sh.h * 6.283185) * step
       sh.z += Math.cos(sh.h * 6.283185) * step
@@ -352,8 +365,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
        * the same instant — which is what makes the cover worth walking to.
        */
       var blocked = false
-      for (var pk = 0; pk < AR.pillars.length; pk++) {
-        var pb = AR.pillars[pk]
+      for (const pb of AR.pillars) {
         if (Math.hypot(sh.x - pb.x, sh.z - pb.z) < A.pillarHalf) { blocked = true; break }
       }
       if (blocked) { AR.shots.splice(i, 1); continue }
@@ -399,7 +411,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
    * is an angle the player is allowed to sit off the axis, and it is derived from the frame's
    * own half-width, so a wider screen holds a wider duel without any other number moving.
    */
-  function aimAt(you, foe) {
+  function aimAt(you: Machine, foe: Machine) {
     var A = A0
     var ay = Math.atan2(you.x - CAM.x, you.z - CAM.z) / 6.283185
     var af = Math.atan2(foe.x - CAM.x, foe.z - CAM.z) / 6.283185
@@ -409,22 +421,24 @@ export function makeArena(c: Shared): Shape & ArenaEye {
   }
 
   /** One machine, stamped at the band its heading asks for and the size its depth asks for. */
-  function mechDraw(m, t, out) {
+  function mechDraw(m: Machine, t: number, out: Drawable[]) {
     var A = A0
     var p = project(m.x, 0, m.z)
     if (p === null) return
     var si = scaleOf(p.k, A.scales, m.band)
     m.band = si
     var set = m.boost > 0 ? A.boost : A.walk
-    var li = set[bandOf(m.bh)][si]
-    var L = S.layers[li]
+    // Both indices come from the generator's own counts: `bandOf` wraps modulo `bands` and
+    // `scaleOf` returns a position in the ladder it was handed.
+    var li = set[bandOf(m.bh)]![si]!
+    var L = layerAt(S, li)
     var f = m.boost > 0
       ? Math.min(L.n - 1, Math.floor((A.boostMs - m.boost) / L.ms))
       : Math.floor(m.walked / (A.strideLen / L.n)) % L.n
-    out.push({ fwd: p.fwd, kind: 'mech', li: li, L: L, frame: f, x: p.x, y: p.y, hurt: m.hurt, k: p.k, disc: A.bodyHalf })
+    out.push({ fwd: p.fwd, kind: 'mech' as const, li: li, L: L, frame: f, x: p.x, y: p.y, hurt: m.hurt, k: p.k, disc: A.bodyHalf })
   }
 
-  function drawArena(t) {
+  function drawArena(t: number) {
     var A = A0
     ox.drawImage(arenaBg, 0, 0)
 
@@ -454,11 +468,11 @@ export function makeArena(c: Shared): Shape & ArenaEye {
      * **Everything on the plane is depth-sorted every frame**, which is new: a fixed camera lets
      * paint order be decided once when the stage is built, and a camera that orbits does not.
      */
-    var out = []
+    const out: Drawable[] = []
     for (var i = 0; i < AR.pillars.length; i++) {
       // The same list the simulation blocks against. Two lists would be two truths, and the
       // one the player believes is the drawn one.
-      var pw = AR.pillars[i]
+      var pw = AR.pillars[i]!
       var pp = project(pw.x, 0, pw.z)
       if (pp === null) continue
       // A pillar takes a size band exactly as a machine does. Without it the first build drew
@@ -472,20 +486,19 @@ export function makeArena(c: Shared): Shape & ArenaEye {
        */
       var psi = scaleOf(pp.k, A.pillarScales, pw.band)
       pw.band = psi
-      var pli = A.pillar[psi]
-      var PL = S.layers[pli]
-      out.push({ fwd: pp.fwd, kind: 'pillar', li: pli, L: PL, x: pp.x, y: pp.y, hurt: 0, k: pp.k, disc: A.pillarHalf })
+      var pli = A.pillar[psi]!
+      var PL = layerAt(S, pli)
+      out.push({ fwd: pp.fwd, kind: 'pillar' as const, li: pli, L: PL, x: pp.x, y: pp.y, hurt: 0, k: pp.k, disc: A.pillarHalf, frame: 0 })
     }
     mechDraw(AR.foe, t, out)
     mechDraw(AR.you, t, out)
     for (var j = 0; j < AR.shots.length; j++) {
-      var sp = project(AR.shots[j].x, 6, AR.shots[j].z)
-      if (sp !== null) out.push({ fwd: sp.fwd, kind: 'shot', x: sp.x, y: sp.y, k: sp.k })
+      var sp = project(AR.shots[j]!.x, 6, AR.shots[j]!.z)
+      if (sp !== null) out.push({ fwd: sp.fwd, kind: 'shot' as const, x: sp.x, y: sp.y, k: sp.k })
     }
     out.sort(function (a, b) { return b.fwd - a.fwd })
 
-    for (var o = 0; o < out.length; o++) {
-      var e = out[o]
+    for (const e of out) {
       if (e.kind === 'shot') {
         var r = Math.max(1, Math.round(e.k * 0.9))
         ox.fillStyle = '#ffd27a'
@@ -528,7 +541,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
        * One placement rule (rowOf), used with the anchor the situation actually calls for.
        */
       var row = rowOf({ anchor: 'foot', y: e.y }, L)
-      ox.drawImage(sheets[e.li], 0, fr * L.h, L.w, L.h,
+      ox.drawImage(sheets[e.li]!, 0, fr * L.h, L.w, L.h,
         Math.round(e.x + L.ox), Math.round(row), L.w, L.h)
       // A hit flashes the machine white for a sixth of a second: the cheapest possible feedback,
       // and the shutter's own device.
@@ -548,7 +561,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
     }
   }
 
-  function arenaScore(now) {
+  function arenaScore(now: number) {
     if (!S.meter || now - scoreAt < 90) return
     scoreAt = now
     var el = document.getElementById('score'); if (!el) return

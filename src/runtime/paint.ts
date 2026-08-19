@@ -7,7 +7,21 @@
  * all. `rowOf` alone is called from fourteen places in five different games — it is the one
  * placement rule, and it now looks like one.
  */
-import type { Ctx2D, Layer, RGB } from './types.ts'
+import type { Ctx2D, Layer, Payload, RGB } from './types.ts'
+
+/**
+ * **A layer by index, with the invariant stated once instead of asserted eighteen times.**
+ *
+ * Every index the runtime holds was written by `toStage` as the position it pushed the layer to,
+ * so the read cannot miss — but nothing in `readonly Layer[]` says that, and eighteen call sites
+ * were each carrying the claim silently. It throws rather than returning undefined, so a payload
+ * that ever did disagree says so on the boot channel instead of drawing nothing.
+ */
+export function layerAt(S: Payload, i: number): Layer {
+  const L = S.layers[i]
+  if (L === undefined) throw new Error('the payload has no layer ' + i + ' — the stage and the page disagree')
+  return L
+}
 
 /** A colour triple as the string a 2D context wants. */
 export function rgb(c: RGB): string { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')' }
@@ -52,8 +66,8 @@ export function compass(dx: number, dy: number, last: string): string {
 export const BAY4 = [0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5]
 export const BAY2 = [0,2,3,1]
 export function bayerAt(x: number, y: number, n: number): number {
-  if (n === 2) return (BAY2[(y & 1) * 2 + (x & 1)] + 0.5) / 4 - 0.5
-  return (BAY4[(y & 3) * 4 + (x & 3)] + 0.5) / 16 - 0.5
+  if (n === 2) return (BAY2[(y & 1) * 2 + (x & 1)]! + 0.5) / 4 - 0.5
+  return (BAY4[(y & 3) * 4 + (x & 3)]! + 0.5) / 16 - 0.5
 }
 /** Paint rows y0..y1 as a dithered ramp through 'stops'. At amount 0 it is flat bands. */
 export function ramp(ctx: Ctx2D, w: number, stops: readonly RGB[], y0: number, y1: number, dz: { amount: number; lattice: number }): void {
@@ -70,7 +84,8 @@ export function ramp(ctx: Ctx2D, w: number, stops: readonly RGB[], y0: number, y
       var k = Math.floor(u + dz.amount * bayerAt(xx, y0 + yy, dz.lattice))
       if (k < 0) k = 0
       if (k > stops.length - 1) k = stops.length - 1
-      var c = stops[k]
+      // `k` was clamped to the ramp's own bounds four lines up.
+      var c = stops[k]!
       var at = (yy * w + xx) * 4
       d[at] = c[0]; d[at + 1] = c[1]; d[at + 2] = c[2]; d[at + 3] = 255
     }

@@ -15,6 +15,7 @@ import type { Placed as StagePlaced, Stage, StageArena, StageClimb, StageDescent
 import type { RGB } from '../core/types.ts'
 
 export type { RGB }
+export type { StageArena, StageClimb, StageDescent, StageRunner }
 
 /** One sprite sheet as the page receives it: a vertical strip of frames, indices base64'd. */
 export type Layer = {
@@ -170,6 +171,8 @@ export type Player = {
 export type Crew = {
   at: number; p: Placed; a: NonNullable<Placed['approach']>
   x: number; face: number; state: string; clock: number; next: number; shot: number
+  /** When the shutter last fired, in seconds. Absent until he has taken a photograph. */
+  flash?: number
 }
 
 /** One machine in the arena: a place on the plane, two headings, and its armour. */
@@ -215,3 +218,26 @@ export type ArenaEye = {
   readonly project: (x: number, y: number, z: number) => { x: number; y: number; k: number; fwd: number } | null
   readonly scaleOf: (k: number, ladder: readonly number[], cur?: number) => number
 }
+
+/**
+ * **One thing the arena is about to stamp, before the painter has sorted them.**
+ *
+ * A machine, a column and a shot are three different things with one job — to be drawn at a
+ * depth — so the sort works over the union rather than over three lists that would have to be
+ * merged and could disagree about order.
+ */
+export type Drawable =
+  | {
+      readonly kind: 'shot'
+      fwd: number; x: number; y: number; k: number
+    }
+  | {
+      readonly kind: 'mech' | 'pillar'
+      fwd: number; x: number; y: number; k: number
+      li: number; L: Layer; frame: number; hurt: number
+      /** Radius of the contact shadow on the floor, in world units. */
+      disc: number
+    }
+
+/** As much of a keyboard event as this runtime reads. */
+export type KeyEvent = { readonly key: string; readonly preventDefault: () => void }

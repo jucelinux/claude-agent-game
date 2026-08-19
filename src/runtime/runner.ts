@@ -6,9 +6,15 @@
  * only in their scene. That is the shape's whole claim, and it is why the despawn defect was
  * one fix in one place rather than three.
  */
-import { bayerAt, ramp, rgb, rowOf } from './paint.ts'
+/**
+ * The `!` on a read like `xs[i]` inside `for (var i = 0; i < xs.length; i++)` is the loop's own
+ * bound restated: TypeScript cannot carry the comparison into the index, and a guard there would
+ * be dead code that reads as doubt about something the line above already decided.
+ */
+import { ctx2d } from './canvas.ts'
+import { bayerAt, layerAt, ramp, rgb, rowOf } from './paint.ts'
 import { inactive } from './types.ts'
-import type { Runs, Shape, Shared } from './types.ts'
+import type { Canvas, Placed, Runs, Shape, Shared, StageRunner } from './types.ts'
 
 export function makeRunner(c: Shared): Shape {
   const { S, ox, bg, sheets, keys, drawn, cv, rain } = c
@@ -17,15 +23,24 @@ export function makeRunner(c: Shared): Shape {
    * **The runner's whole state.** A world distance, a height, a vertical speed, how many jumps
    * are spent, and one number for the thing chasing him.
    */
-  const N0 = S.runner
-  const R = ((): Runs | null => {
-    if (N0 === null) return null
+  const block = S.runner
+  if (block === null) return inactive()
+  /**
+   * **Declared non-null rather than merely narrowed, and the difference is a TypeScript rule
+   * worth writing down.** A `const` narrowed by an early return stays narrowed inside arrow
+   * functions and does NOT inside a hoisted `function` declaration — the compiler cannot prove
+   * one was not called first. This runtime is written in hoisted declarations, so the guard
+   * yields an alias whose DECLARED type carries the fact. It closed 507 errors without a cast.
+   */
+  const N0: StageRunner = block
+  const found = ((): { st: Runs; D: Placed; act: NonNullable<Placed['runs']>; clips: NonNullable<Placed['clips']> } | null => {
     for (var ri = 0; ri < S.placed.length; ri++) {
-      if (S.placed[ri]?.runs === undefined) continue
-      return {
+      const rp = S.placed[ri]!
+      if (rp === undefined || rp.runs === undefined || rp.clips === undefined) continue
+      return { D: rp, act: rp.runs, clips: rp.clips, st: {
         at: ri, dist: 0, y: 0, vy: 0, jumps: 0, state: 'run', clip: 0,
         speed: N0.speed, menace: 0, passed: -1, best: 0, over: false,
-      }
+      } }
     }
     return null
   })()
@@ -35,7 +50,10 @@ export function makeRunner(c: Shared): Shape {
    * closure below, which is a narrowing TypeScript grants a `const` and refuses a `let`. It is
    * what turned several hundred "possibly null" errors into checked code without one cast.
    */
-  if (R === null) return inactive()
+  if (found === null) return inactive()
+  const R: Runs = found.st
+  /** The actor's own declaration, captured where it was CHECKED — see `climb.ts` for why. */
+  const RD = found.D, RA = found.act, RC = found.clips
   var scoreAt = 0
 
   /**
@@ -43,7 +61,7 @@ export function makeRunner(c: Shared): Shape {
    * variant from one integer hash — the same family the stars, the rain and the climb's shelves
    * all use. An endless graveyard costs no memory and is identical on every machine.
    */
-  function stoneAt(k) {
+  function stoneAt(k: number) {
     var N = N0
     var h = ((k + N.seed) * 2654435761) >>> 0; h = (h ^ (h >>> 13)) >>> 0
     var h2 = (h * 1597334677) >>> 0; h2 = (h2 ^ (h2 >>> 15)) >>> 0
@@ -60,7 +78,7 @@ export function makeRunner(c: Shared): Shape {
    * genre he named. What is new here is the second press: it buys another impulse **and** a
    * somersault that has to complete rather than oscillate.
    */
-  function runner(t, dt) {
+  function runner(t: number, dt: number) {
     var N = N0
     if (R.over) {
       if (keys.jumpTap) {
@@ -122,7 +140,7 @@ export function makeRunner(c: Shared): Shape {
       var rel = st.x - R.dist
       var reach = N.bodyHalfW + N.stoneHalfW
       if (Math.abs(rel) < reach) {
-        var SL = S.layers[N.stones[st.v]]
+        var SL = layerAt(S, N.stones[st.v]!)
         if (R.y < -SL.oy - 2) {
           R.passed = k
           // **No chaser means a collision is the consequence itself.** The crypt spends a hit as
@@ -142,59 +160,57 @@ export function makeRunner(c: Shared): Shape {
 
 
   /** The runner's backdrop: a fixed sky, stars, a moon. Nothing here moves with the camera. */
-  var runnerBg = null
-  if (N0) {
-    runnerBg = cv(S.w, S.h)
-    var rb = runnerBg.getContext('2d')
-    /**
-     * **The sky and the road are where the ordered dither actually pays, and that is measured.**
-     *
-     * The sprite pipeline carries the same weave and it was switched OFF on the rider: a 36 px body
-     * of 27 primitives has 0.000 of its pixels inside a single-owner 4x4 cell, so a lattice there is
-     * indistinguishable from the speckle his verdict retired. A sky is 240x100 px of ONE surface.
-     * Same knob, same reasoning, four hundred times the room.
-     *
-     * So instead of N flat bands, the sky is a continuous ramp quantised through the Bayer lattice:
-     * each row's exact position between two stops becomes a per-pixel choice between those two
-     * stops, weighted by the lattice cell. Two colours weave and the eye reads the value between
-     * them. That is the classic pixel-art dusk, and it is the whole visible result of this half of
-     * the round.
-     *
-     * **No crawl, and it is by construction rather than by luck.** The one dither defect I predicted
-     * was a pattern that slides through a moving surface. The backdrop is painted ONCE into a static
-     * canvas and never scrolls, so the lattice is welded to the world. The scrolling elements — the
-     * road dashes and the obstacles — carry no dither at all.
-     */
-    var DZ = N0.dither || { amount: 0, lattice: 4 }
-    ramp(rb, S.w, N0.skyRamp, 0, N0.groundRow, DZ)
-    if (N0.stars) {
-      for (var sj = 0; sj < N0.stars.count; sj++) {
-        var sha = ((sj + N0.stars.seed) * 2654435761) >>> 0; sha = (sha ^ (sha >>> 13)) >>> 0
-        var shb = (sha * 1597334677) >>> 0; shb = (shb ^ (shb >>> 15)) >>> 0
-        rb.fillStyle = rgb(N0.stars.colors[shb % N0.stars.colors.length])
-        rb.fillRect(sha % S.w, shb % N0.stars.below, 1, 1)
-      }
-    }
-    // The moon: a halo ring under a disc, and it is the only round thing in the picture.
-    if (N0.moon) {
-      var M0 = N0.moon
-      rb.fillStyle = rgb(M0.halo)
-      rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r + 3, M0.r + 3, 0, 0, 6.283185); rb.fill()
-      rb.fillStyle = rgb(M0.color)
-      rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r, M0.r, 0, 0, 6.283185); rb.fill()
-    }
-    // The road, dithered the same way: a receding surface is a ramp from the horizon down, and a
-    // flat asphalt is the one thing that would say "this is a render at low resolution".
-    if (DZ.amount > 0 && S.floor.length > 2) {
-      ramp(rb, S.w, S.floor, N0.groundRow, S.h, DZ)
-    } else {
-      for (var fy3 = 0; fy3 < S.floor.length; fy3++) {
-        rb.fillStyle = rgb(S.floor[fy3]); rb.fillRect(0, N0.groundRow + fy3, S.w, 1)
-      }
+  const runnerBg = cv(S.w, S.h)
+  var rb = ctx2d(runnerBg)
+  /**
+   * **The sky and the road are where the ordered dither actually pays, and that is measured.**
+   *
+   * The sprite pipeline carries the same weave and it was switched OFF on the rider: a 36 px body
+   * of 27 primitives has 0.000 of its pixels inside a single-owner 4x4 cell, so a lattice there is
+   * indistinguishable from the speckle his verdict retired. A sky is 240x100 px of ONE surface.
+   * Same knob, same reasoning, four hundred times the room.
+   *
+   * So instead of N flat bands, the sky is a continuous ramp quantised through the Bayer lattice:
+   * each row's exact position between two stops becomes a per-pixel choice between those two
+   * stops, weighted by the lattice cell. Two colours weave and the eye reads the value between
+   * them. That is the classic pixel-art dusk, and it is the whole visible result of this half of
+   * the round.
+   *
+   * **No crawl, and it is by construction rather than by luck.** The one dither defect I predicted
+   * was a pattern that slides through a moving surface. The backdrop is painted ONCE into a static
+   * canvas and never scrolls, so the lattice is welded to the world. The scrolling elements — the
+   * road dashes and the obstacles — carry no dither at all.
+   */
+  var DZ = N0.dither || { amount: 0, lattice: 4 }
+  ramp(rb, S.w, N0.skyRamp, 0, N0.groundRow, DZ)
+  if (N0.stars) {
+    for (var sj = 0; sj < N0.stars.count; sj++) {
+      var sha = ((sj + N0.stars.seed) * 2654435761) >>> 0; sha = (sha ^ (sha >>> 13)) >>> 0
+      var shb = (sha * 1597334677) >>> 0; shb = (shb ^ (shb >>> 15)) >>> 0
+      rb.fillStyle = rgb(N0.stars.colors[shb % N0.stars.colors.length]!)
+      rb.fillRect(sha % S.w, shb % N0.stars.below, 1, 1)
     }
   }
+  // The moon: a halo ring under a disc, and it is the only round thing in the picture.
+  if (N0.moon) {
+    var M0 = N0.moon
+    rb.fillStyle = rgb(M0.halo)
+    rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r + 3, M0.r + 3, 0, 0, 6.283185); rb.fill()
+    rb.fillStyle = rgb(M0.color)
+    rb.beginPath(); rb.ellipse(M0.x, M0.y, M0.r, M0.r, 0, 0, 6.283185); rb.fill()
+  }
+  // The road, dithered the same way: a receding surface is a ramp from the horizon down, and a
+  // flat asphalt is the one thing that would say "this is a render at low resolution".
+  if (DZ.amount > 0 && S.floor.length > 2) {
+    ramp(rb, S.w, S.floor, N0.groundRow, S.h, DZ)
+  } else {
+    for (var fy3 = 0; fy3 < S.floor.length; fy3++) {
+      rb.fillStyle = rgb(S.floor[fy3]!); rb.fillRect(0, N0.groundRow + fy3, S.w, 1)
+    }
+  }
+  
 
-  function drawRunner(t) {
+  function drawRunner(t: number) {
     var N = N0
     ox.drawImage(runnerBg, 0, 0)
 
@@ -206,14 +222,14 @@ export function makeRunner(c: Shared): Shape {
      * one object.
      */
     for (var b = 0; b < (N.drift ? N.drift.length : 0); b++) {
-      var B = N.drift[b]
+      var B = N.drift[b]!
       var scrolled = R.dist * B.parallax
       var f0 = Math.floor((scrolled - 80) / B.spacing)
       var f1 = Math.floor((scrolled + S.w + 80) / B.spacing) + 1
       for (var dk = f0; dk <= f1; dk++) {
         var dh = ((dk + B.seed) * 2654435761) >>> 0; dh = (dh ^ (dh >>> 13)) >>> 0
         var dh2 = (dh * 1597334677) >>> 0; dh2 = (dh2 ^ (dh2 >>> 15)) >>> 0
-        var pli = B.puffs[(dh2 >>> 5) % B.puffs.length], PL = S.layers[pli]
+        var pli = B.puffs[(dh2 >>> 5) % B.puffs.length]!, PL = layerAt(S, pli)
         var px = dk * B.spacing + (dh % B.jitterX) - scrolled + PL.ox
         if (px > S.w + 60 || px < -60 - PL.w) continue
         // Through rowOf, as every placement: a band row is still a row, and the one rule the
@@ -222,7 +238,7 @@ export function makeRunner(c: Shared): Shape {
         // Slots run negative behind the start line, so the modulo has to be taken twice or a
         // negative slot asks drawImage for a frame above the sheet.
         var pf = ((Math.floor(t * 1000 / PL.ms + dk * 0.37) % PL.n) + PL.n) % PL.n
-        ox.drawImage(sheets[pli], 0, pf * PL.h, PL.w, PL.h, Math.round(px), Math.round(py), PL.w, PL.h)
+        ox.drawImage(sheets[pli]!, 0, pf * PL.h, PL.w, PL.h, Math.round(px), Math.round(py), PL.w, PL.h)
       }
     }
 
@@ -240,14 +256,14 @@ export function makeRunner(c: Shared): Shape {
     var last = Math.floor((R.dist - N.holdX - N.leadIn + S.w + 60) / N.spacing) + 1
     for (var k = Math.max(0, first); k <= last; k++) {
       var st = stoneAt(k)
-      var li = N.stones[st.v], L = S.layers[li]
+      var li = N.stones[st.v]!, L = layerAt(S, li)
       var sx = N.holdX + (st.x - R.dist) + L.ox
       // Culled only once the CROP is past an edge, never while any pixel of it is on screen.
       if (sx > S.w || sx + L.w < 0) continue
       // A stone with more than one frame animates on the page clock, offset by its slot so a
       // sky of flocks never beats as one. A 1-frame stone is byte-identical to the old path.
       var sf = L.n > 1 ? Math.floor(t * 1000 / L.ms + k * 0.37) % L.n : 0
-      ox.drawImage(sheets[li], 0, sf * L.h, L.w, L.h, Math.round(sx),
+      ox.drawImage(sheets[li]!, 0, sf * L.h, L.w, L.h, Math.round(sx),
         Math.round(rowOf({ anchor: 'origin', y: N.groundRow }, L)), L.w, L.h)
     }
 
@@ -256,7 +272,7 @@ export function makeRunner(c: Shared): Shape {
      * own column is where she arrives at 1. Nothing about her is a decision made per frame.
      */
     if (N.reaper) {
-      var D2 = S.layers[N.reaper.layer]
+      var D2 = layerAt(S, N.reaper.layer)
       // **`fromX` lives on the reaper, not on the runner, and this read the wrong object.**
       // `N.fromX` is undefined, so `rx` was NaN and every frame called drawImage with a
       // non-finite x — which a canvas silently ignores. Death has never been drawn in this
@@ -264,16 +280,16 @@ export function makeRunner(c: Shared): Shape {
       // literal; invisible to 628 locks, to the budget, and to four of his own readings.
       var rx = N.reaper.fromX + (N.holdX - 14 - N.reaper.fromX) * R.menace
       var rf = Math.floor(t * 1000 / D2.ms) % D2.n
-      ox.drawImage(sheets[N.reaper.layer], 0, rf * D2.h, D2.w, D2.h,
+      ox.drawImage(sheets[N.reaper.layer]!, 0, rf * D2.h, D2.w, D2.h,
         Math.round(rx + D2.ox), Math.round(rowOf({ anchor: 'origin', y: N.groundRow }, D2)), D2.w, D2.h)
     }
 
     // The runner. The state names a clip; the clip names a layer.
-    var D = S.placed[R.at]
-    var cn = R.state === 'flip' ? D.runs.flip : R.state === 'leap' ? D.runs.leap : D.runs.run
-    var pair = D.clips[cn]
+    var D = S.placed[R.at]!
+    var cn = R.state === 'flip' ? RA.flip : R.state === 'leap' ? RA.leap : RA.run
+    var pair = RC[cn]!
     var ri = pair.right
-    var RL = S.layers[ri]
+    var RL = layerAt(S, ri)
     /**
      * **The two airborne clips play ONCE and hold their last frame**, which is what 'Gait.wrap'
      * false is for: the pose at the end of a somersault is a whole turn from where it started,
@@ -305,7 +321,7 @@ export function makeRunner(c: Shared): Shape {
      * greps the source to keep it that way.
      */
     var stand = { anchor: D.anchor, y: N.groundRow }
-    ox.drawImage(sheets[ri], 0, rfr * RL.h, RL.w, RL.h,
+    ox.drawImage(sheets[ri]!, 0, rfr * RL.h, RL.w, RL.h,
       Math.round(N.holdX + RL.ox), Math.round(rowOf(stand, RL) - R.y), RL.w, RL.h)
 
     /**
@@ -323,7 +339,7 @@ export function makeRunner(c: Shared): Shape {
     }
   }
 
-  function runnerScore(now) {
+  function runnerScore(now: number) {
     if (!S.meter || now - scoreAt < 90) return
     scoreAt = now
     var el = document.getElementById('score'); if (!el) return

@@ -5,34 +5,58 @@
  * per-frame decision — except for the one subject who roams, whose row is state and who
  * therefore has to be spliced back into the order every frame.
  */
-import { compass, rgb, rowOf } from './paint.ts'
-import type { Shape, Shared } from './types.ts'
+/**
+ * The `!` on a read like `xs[i]` inside `for (var i = 0; i < xs.length; i++)` is the loop's own
+ * bound restated: TypeScript cannot carry the comparison into the index, and a guard there would
+ * be dead code that reads as doubt about something the line above already decided.
+ */
+import { compass, layerAt, rgb, rowOf } from './paint.ts'
+import type { Crew, Placed, Player, Shape, Shared } from './types.ts'
 
 export function makeStage(c: Shared): Shape {
   const { S, ox, bg, sheets, keys, drawn, cv, rain } = c
 
-  var P = null, crew = []
-  for (var pi = 0; pi < S.placed.length; pi++) {
-    var pl = S.placed[pi]
-    if (pl.player) {
-      P = {
+  /**
+   * **The cast, built by two passes rather than one, and the reason is the type.**
+   *
+   * The player is at most one and may be none; the photographers are a list. Building them in
+   * one loop meant `P` had to start as `null` and be assigned inside it — which is exactly the
+   * pattern TypeScript cannot narrow inside a hoisted function, and it is what made this file's
+   * state invisible for as long as the runtime was a string.
+   */
+  const cast = ((): { st: Player; D: Placed; act: NonNullable<Placed['player']>; clips: NonNullable<Placed['clips']> } | null => {
+    for (var pi = 0; pi < S.placed.length; pi++) {
+      const pl = S.placed[pi]!
+      if (pl === undefined || pl.player === undefined || pl.clips === undefined) continue
+      return { D: pl, act: pl.player, clips: pl.clips, st: {
         at: pi, x: pl.x, row: pl.y, face: 1, dir: 'e',
         state: 'idle', walk: 0, atk: 0, hit: false,
         // Height above the contact row, and the speed it is changing at. Zero is standing.
         lift: 0, vy: 0,
-      }
+      } }
     }
-    if (pl.approach) {
-      var a = pl.approach
-      crew.push({
-        at: pi, p: pl, a: a, x: a.from === 'left' ? -80 : S.w + 80,
-        face: a.from === 'left' ? 1 : -1, state: 'away', clock: 0, next: a.delay, shot: 0,
-      })
-    }
+    return null
+  })()
+  /**
+   * **The player is optional here and only here.** A fixed stage can be a diorama with nobody in
+   * it — the forest is one — so unlike the four other shapes this cannot early-return on a null
+   * cast. Each function that needs him re-binds it locally, which is the narrowing a hoisted
+   * declaration does support.
+   */
+  const P: Player | null = cast === null ? null : cast.st
+  const crew: Crew[] = []
+  for (var ci = 0; ci < S.placed.length; ci++) {
+    const pl = S.placed[ci]!
+    if (pl === undefined || pl.approach === undefined) continue
+    const a = pl.approach
+    crew.push({
+      at: ci, p: pl, a: a, x: a.from === 'left' ? -80 : S.w + 80,
+      face: a.from === 'left' ? 1 : -1, state: 'away', clock: 0, next: a.delay, shot: 0,
+    })
   }
 
   /** How long a clip runs, in seconds. The sprite owns its own rate; the state does not. */
-  function span(ix) { var L = S.layers[ix]; return L.n * L.ms / 1000 }
+  function span(ix: number) { var L = layerAt(S, ix); return L.n * L.ms / 1000 }
 
   /**
    * **The blow.** Anything prone within reach, on the side he is facing, gets up and runs.
@@ -40,23 +64,28 @@ export function makeStage(c: Shared): Shape {
    * impact, and a hit that registers on frame 0 registers before the arm has moved.
    */
   function strike() {
-    for (var c = 0; c < crew.length; c++) {
-      var n = crew[c]
+    const me = cast
+    if (me === null) return
+    for (const n of crew) {
       if (n.state !== 'prone') continue
-      var dx = n.x - P.x
-      if (Math.abs(dx) > S.placed[P.at].player.reach) continue
-      if (dx * P.face < 0) continue
+      var dx = n.x - me.st.x
+      // **Reach is optional on a player and this is the only place it is read.** A subject with
+      // no attack has no reach, and `strike` is only ever called from inside the attack branch —
+      // stated here rather than assumed, because the type is the one that knows.
+      if (me.act.reach === undefined || Math.abs(dx) > me.act.reach) continue
+      if (dx * me.st.face < 0) continue
       n.state = 'out'; n.clock = 0
       n.face = n.a.from === 'left' ? -1 : 1
     }
   }
 
-  function think(t, dt) {
-    if (!P) return
-    var pd = S.placed[P.at].player
-    if (P.state === 'attack') {
+  function think(t: number, dt: number) {
+    const me = cast
+    if (me === null) return
+    const P = me.st, pd = me.act
+    if (P.state === 'attack' && pd.attack !== undefined && pd.hitAt !== undefined) {
       P.atk += dt
-      var dur = span(S.placed[P.at].clips[pd.attack].right)
+      var dur = span(me.clips[pd.attack]!.right)
       if (!P.hit && P.atk >= dur * pd.hitAt) { P.hit = true; strike() }
       if (P.atk >= dur) { P.state = 'idle'; P.hit = false }
     } else if (pd.attack && (keys.hit || keys.tap)) {
@@ -106,8 +135,8 @@ export function makeStage(c: Shared): Shape {
       }
     }
 
-    for (var c = 0; c < crew.length; c++) {
-      var n = crew[c], a = n.a
+    for (const n of crew) {
+      const a = n.a
       if (n.state === 'away') {
         if (t >= n.next) {
           n.state = 'in'; n.clock = 0
@@ -143,7 +172,7 @@ export function makeStage(c: Shared): Shape {
    * the shutter. It was the tail of the frame loop; being a function is what lets `mount`
    * treat five shapes the same way instead of falling through to this one.
    */
-  function drawStage(t) {
+  function drawStage(t: number) {
     ox.drawImage(bg, 0, 0)
     rain(t)
 
@@ -160,33 +189,43 @@ export function makeStage(c: Shared): Shape {
     // A copy from the start: the payload's order is READ-ONLY, and the roaming player is
     // spliced into it. Mutating the payload would make the second frame disagree with the first.
     var seq = S.order.slice()
-    if (P && S.placed[P.at].player && S.placed[P.at].player.roam) {
-      seq.splice(seq.indexOf(P.at), 1)
+    if (cast !== null && cast.act.roam) {
+      const him = cast.st
+      seq.splice(seq.indexOf(him.at), 1)
       var slot = 0
-      while (slot < seq.length && S.placed[seq[slot]].y <= P.row) slot++
-      seq.splice(slot, 0, P.at)
+      while (slot < seq.length && (S.placed[seq[slot]!]?.y ?? Infinity) <= him.row) slot++
+      seq.splice(slot, 0, him.at)
     }
-    for (var oi = 0; oi < seq.length; oi++) {
-      var i = seq[oi]
-      var D = S.placed[i], li = D.layer, L, f, dx, dy
+    for (const i of seq) {
+      // `seq` is the payload's own order, so every entry indexes a slot that exists.
+      var D = S.placed[i]!, li = D.layer, L, f, dx, dy
 
       if (D.player && P) {
         // The state names a clip; the clip names a layer. Nothing about which animation runs
         // has ever reached the sprites, which is why an idle cost a gait and not a rewrite.
-        var pd = D.player
-        var base = P.state === 'attack' ? pd.attack
+        const pd = D.player
+        // **`attack` is optional on a player and `base` was allowed to be undefined.** The moon's
+        // player has no attack; the state machine can never put him in one, but nothing in the
+        // type said so, and the clip name was then the string "undefined-e".
+        if (pd === undefined || P === null) continue
+        const base = P.state === 'attack' && pd.attack !== undefined ? pd.attack
           : P.state === 'jump' ? (pd.jump ? pd.jump.clip : pd.idle)
           : P.state === 'walk' ? pd.walk : pd.idle
         // **A facing is part of the clip's name.** 'lope' plus '-ne' is a grammar, generated
         // by yawing the authored body, and the runtime never learns what a yaw is.
-        var name = D.clips[base + '-' + P.dir] ? base + '-' + P.dir : base
-        var pair = D.clips[name]
+        // Any placed subject may carry no clips at all; this branch is only entered for one
+        // that does, and saying so is cheaper than an assertion that hides the question.
+        const clips = D.clips
+        if (clips === undefined) continue
+        var name = clips[base + '-' + P.dir]! ? base + '-' + P.dir : base
+        var pair = clips[name]!
+        if (pair === undefined) continue
         // The western half is the eastern half mirrored. 'n' and 's' face the camera and are
         // symmetric, so mirroring them would be a flip nobody could see and a layer nobody
         // needs — they use the un-mirrored render whichever way he last walked.
         var mirror = P.face < 0 && P.dir !== 'n' && P.dir !== 's'
         li = mirror ? pair.left : pair.right
-        L = S.layers[li]
+        L = layerAt(S, li)
         var own = P.state === 'attack' ? P.atk * 1000
           : P.state === 'jump' ? t * 1000
           : P.state === 'walk' ? P.walk : t * 1000
@@ -220,21 +259,23 @@ export function makeStage(c: Shared): Shape {
           ox.globalAlpha = 1
         }
       } else if (D.approach) {
-        var me = null
-        for (var c = 0; c < crew.length; c++) if (crew[c].at === i) me = crew[c]
-        var cn = me.state === 'in' ? D.approach.walk : me.state === 'prone' ? D.approach.prone : D.approach.flee
-        var pr = D.clips[cn]
-        li = me.face < 0 ? pr.left : pr.right
-        L = S.layers[li]
-        f = Math.floor(me.clock / L.ms) % L.n
-        dx = Math.round(me.x) + L.ox
+        let who: Crew | null = null
+        for (var c = 0; c < crew.length; c++) { const n = crew[c]!; if (n !== undefined && n.at === i) who = n }
+        const app = D.approach, cl = D.clips
+        if (who === null || app === undefined || cl === undefined) continue
+        var cn = who.state === 'in' ? app.walk : who.state === 'prone' ? app.prone : app.flee
+        var pr = cl[cn]!
+        li = who.face < 0 ? pr.left : pr.right
+        L = layerAt(S, li)
+        f = Math.floor(who.clock / L.ms) % L.n
+        dx = Math.round(who.x) + L.ox
         // Anchored against THIS clip's own feet, so the body that lies down meets the same
         // floor as the body that walked in.
         dy = rowOf(D, L)
-        if (me.state === 'away') continue
-        if (me.flash !== undefined && t - me.flash < 0.07) flash = 1
+        if (who.state === 'away') continue
+        if (who.flash !== undefined && t - who.flash < 0.07) flash = 1
       } else {
-        L = S.layers[li]
+        L = layerAt(S, li)
         f = Math.floor(t * 1000 / L.ms + D.phase * L.n) % L.n
         dx = D.x + L.ox; dy = rowOf(D, L)
         if (D.motion) {
@@ -251,7 +292,7 @@ export function makeStage(c: Shared): Shape {
         }
       }
       drawn.push(i)
-      ox.drawImage(sheets[li], 0, f * L.h, L.w, L.h, Math.round(dx), Math.round(dy), L.w, L.h)
+      ox.drawImage(sheets[li]!, 0, f * L.h, L.w, L.h, Math.round(dx), Math.round(dy), L.w, L.h)
     }
 
     // **The shutter.** One rectangle, and it is the cheapest possible way to say a photograph

@@ -6,9 +6,15 @@
  * this replaced, `bandAt` sat eleven lines from the runner's `stoneAt` and both were in scope
  * everywhere.
  */
-import { rgb, rowOf } from './paint.ts'
+/**
+ * The `!` on a read like `xs[i]` inside `for (var i = 0; i < xs.length; i++)` is the loop's own
+ * bound restated: TypeScript cannot carry the comparison into the index, and a guard there would
+ * be dead code that reads as doubt about something the line above already decided.
+ */
+import { ctx2d } from './canvas.ts'
+import { layerAt, rgb, rowOf } from './paint.ts'
 import { inactive } from './types.ts'
-import type { Climber, RGB, Shape, Shared } from './types.ts'
+import type { Canvas, Climber, Placed, RGB, Shape, Shared, StageClimb } from './types.ts'
 
 export function makeClimb(c: Shared): Shape {
   const { S, ox, bg, sheets, keys, drawn, cv, rain } = c
@@ -18,13 +24,22 @@ export function makeClimb(c: Shared): Shape {
    * a best altitude and a flag. Everything a player sees is derived from these five numbers
    * every frame, and nothing is stored about the tower at all.
    */
-  const C0 = S.climb
-  const K = ((): Climber | null => {
-    if (C0 === null) return null
+  const block = S.climb
+  if (block === null) return inactive()
+  /**
+   * **Declared non-null rather than merely narrowed, and the difference is a TypeScript rule
+   * worth writing down.** A `const` narrowed by an early return stays narrowed inside arrow
+   * functions and does NOT inside a hoisted `function` declaration — the compiler cannot prove
+   * one was not called first. This runtime is written in hoisted declarations, so the guard
+   * yields an alias whose DECLARED type carries the fact. It closed 507 errors without a cast.
+   */
+  const C0: StageClimb = block
+  const found = ((): { st: Climber; D: Placed; act: NonNullable<Placed['climber']>; clips: NonNullable<Placed['clips']> } | null => {
     for (var ki = 0; ki < S.placed.length; ki++) {
-      var kp = S.placed[ki]
+      var kp = S.placed[ki]!
       if (kp === undefined || kp.climber === undefined) continue
-      return {
+      if (kp.clips === undefined) continue
+      return { D: kp, act: kp.climber, clips: kp.clips, st: {
         at: ki, x: kp.x, y: C0.startRow, vy: 0, face: 1,
         state: 'fall', tuck: 0,
         // The camera starts low enough to show the garden the run begins in, and only ever
@@ -32,7 +47,7 @@ export function makeClimb(c: Shared): Shape {
         // which is the one thing this genre never allows.
         cam: C0.startRow - S.h * 0.82,
         top: C0.startRow, best: 0, over: false,
-      }
+      } }
     }
     return null
   })()
@@ -42,7 +57,17 @@ export function makeClimb(c: Shared): Shape {
    * closure below, which is a narrowing TypeScript grants a `const` and refuses a `let`. It is
    * what turned several hundred "possibly null" errors into checked code without one cast.
    */
-  if (K === null) return inactive()
+  if (found === null) return inactive()
+  const K: Climber = found.st
+  /**
+   * **The actor's own declaration, captured where it was CHECKED.**
+   *
+   * The state carries a slot index and the loop then re-read `S.placed[at].climber` — which the
+   * compiler must treat as optional, because nothing in the type says the slot that was searched
+   * for is the slot being read. Returning the placement and its clip names alongside the state
+   * removes the question instead of asserting past it.
+   */
+  const KD = found.D, KA = found.act, KC = found.clips
   var scoreAt = 0
 
   /**
@@ -58,7 +83,7 @@ export function makeClimb(c: Shared): Shape {
    * is at most 'bandH' and never more. That is what makes reachability a fact rather than a
    * hope: one number bounds every gap in an infinite tower.
    */
-  function bandAt(k, s) {
+  function bandAt(k: number, s: number) {
     var C = C0
     // The BAND is hashed once and every shelf in it shares that base, or the spacing below
     // cannot be constructed: two independent hashes are two independent positions.
@@ -95,7 +120,7 @@ export function makeClimb(c: Shared): Shape {
   }
 
   /** Which band index sits nearest a world row. The search window is built around it. */
-  function bandNear(y) {
+  function bandNear(y: number) {
     var C = C0
     return Math.floor((C.startRow - C.firstBand - y) / C.bandH)
   }
@@ -106,7 +131,7 @@ export function makeClimb(c: Shared): Shape {
    * The collision test and the drawing both have to agree about that or a cat lands on a shelf
    * it appears to be nowhere near.
    */
-  function wrapDx(a, b) {
+  function wrapDx(a: number, b: number) {
     var d = a - b
     if (d > S.w / 2) d -= S.w
     if (d < -S.w / 2) d += S.w
@@ -126,14 +151,14 @@ export function makeClimb(c: Shared): Shape {
    * - **The camera never comes down.** Fall below the bottom of the screen and the run is over.
    *   That is the consequence this game exists to have.
    */
-  function climb(t, dt) {
+  function climb(t: number, dt: number) {
     var C = C0
     if (K.over) {
       // One key restarts. It is the same latched press the jump used, so a tap between two
       // animation frames still counts.
       if (keys.jumpTap) {
         keys.jumpTap = false
-        K.x = S.placed[K.at].x; K.y = C.startRow; K.vy = 0; K.state = 'fall'; K.tuck = 0
+        K.x = KD.x; K.y = C.startRow; K.vy = 0; K.state = 'fall'; K.tuck = 0
         K.cam = C.startRow - S.h * 0.82; K.top = C.startRow; K.best = 0; K.over = false
       }
       return
@@ -219,7 +244,8 @@ export function makeClimb(c: Shared): Shape {
     if (u > 1) u = 1
     var last = C.skyRamp.length - 1
     var f = u * last, i = Math.floor(f), g = f - i
-    var a = C.skyRamp[i], b = C.skyRamp[Math.min(last, i + 1)]
+    // `u` was clamped to [0,1] and `i` is floor(u·last), so both reads are inside the ramp.
+    var a = C.skyRamp[i]!, b = C.skyRamp[Math.min(last, i + 1)]!
     return [
       Math.round(a[0] + (b[0] - a[0]) * g),
       Math.round(a[1] + (b[1] - a[1]) * g),
@@ -239,23 +265,21 @@ export function makeClimb(c: Shared): Shape {
    * Identical arithmetic to the per-star version: the same hash, the same positions, computed
    * once instead of sixty times a second.
    */
-  var starTile = null, floorStrip = null
-  if (C0) {
-    var TH = S.h * 2
-    starTile = cv(S.w, TH)
-    var stx = starTile.getContext('2d')
-    for (var si2 = 0; si2 < C0.stars.count; si2++) {
-      var sh = ((si2 + C0.stars.seed) * 2654435761) >>> 0; sh = (sh ^ (sh >>> 13)) >>> 0
-      var sh2 = (sh * 1597334677) >>> 0; sh2 = (sh2 ^ (sh2 >>> 15)) >>> 0
-      stx.fillStyle = rgb(C0.stars.colors[sh2 % C0.stars.colors.length])
-      stx.fillRect(sh % S.w, sh2 % TH, 1, 1)
-    }
-    floorStrip = cv(S.w, S.floor.length)
-    var ftx = floorStrip.getContext('2d')
-    for (var fy2 = 0; fy2 < S.floor.length; fy2++) {
-      ftx.fillStyle = rgb(S.floor[fy2]); ftx.fillRect(0, fy2, S.w, 1)
-    }
+  const TH = S.h * 2
+  const starTile = cv(S.w, TH)
+  var stx = ctx2d(starTile)
+  for (var si2 = 0; si2 < C0.stars.count; si2++) {
+    var sh = ((si2 + C0.stars.seed) * 2654435761) >>> 0; sh = (sh ^ (sh >>> 13)) >>> 0
+    var sh2 = (sh * 1597334677) >>> 0; sh2 = (sh2 ^ (sh2 >>> 15)) >>> 0
+    stx.fillStyle = rgb(C0.stars.colors[sh2 % C0.stars.colors.length]!)
+    stx.fillRect(sh % S.w, sh2 % TH, 1, 1)
   }
+  const floorStrip = cv(S.w, S.floor.length)
+  var ftx = ctx2d(floorStrip)
+  for (var fy2 = 0; fy2 < S.floor.length; fy2++) {
+    ftx.fillStyle = rgb(S.floor[fy2]!); ftx.fillRect(0, fy2, S.w, 1)
+  }
+  
 
   var SKY_BANDS = 14
   function drawSky() {
@@ -288,10 +312,10 @@ export function makeClimb(c: Shared): Shape {
    * costs three fillStyle changes instead of one per speck. That is the same trade the rain
    * made when 240 fillRects became 48 stamps: a field is cheap only if it is drawn in groups.
    */
-  function motes(t) {
+  function motes(t: number) {
     var M = C0.motes, tile = S.h * 2
     for (var tone = 0; tone < M.colors.length; tone++) {
-      ox.fillStyle = rgb(M.colors[tone])
+      ox.fillStyle = rgb(M.colors[tone]!)
       for (var i = 0; i < M.count; i++) {
         var h = ((i + M.seed) * 2654435761) >>> 0; h = (h ^ (h >>> 13)) >>> 0
         var h2 = (h * 1597334677) >>> 0; h2 = (h2 ^ (h2 >>> 15)) >>> 0
@@ -314,7 +338,7 @@ export function makeClimb(c: Shared): Shape {
    * instead of being cut in half. The world wraps and the drawing has to say so, or the
    * collision rule and the picture disagree at exactly the moment a player is looking.
    */
-  function stampWrapped(sheet, sx, sy, sw, sh, dx, dy) {
+  function stampWrapped(sheet: Canvas, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number) {
     ox.drawImage(sheet, sx, sy, sw, sh, Math.round(dx), Math.round(dy), sw, sh)
     if (dx + sw > S.w) ox.drawImage(sheet, sx, sy, sw, sh, Math.round(dx - S.w), Math.round(dy), sw, sh)
     else if (dx < 0) ox.drawImage(sheet, sx, sy, sw, sh, Math.round(dx + S.w), Math.round(dy), sw, sh)
@@ -331,7 +355,7 @@ export function makeClimb(c: Shared): Shape {
    * index 0 transparent, one clock — and that is enforced by both calling the same 'drawImage'
    * into the same offscreen buffer at the scene's own resolution.
    */
-  function drawClimb(t) {
+  function drawClimb(t: number) {
     var C = C0
     drawSky()
 
@@ -349,27 +373,27 @@ export function makeClimb(c: Shared): Shape {
     for (var k = Math.max(0, kBot); k <= kTop && k >= 0; k++) {
       for (var s = 0; s < C.perBand; s++) {
         var b = bandAt(k, s)
-        var li = C.perches[b.v], L = S.layers[li]
+        var li = C.perches[b.v]!, L = layerAt(S, li)
         // Each shelf is offset into the sway cycle by its own band and slot, so a screen of
         // fifteen of them never leans as one object. Same rule as the three clouds.
         var f = Math.floor(t * 1000 / L.ms + (k * 0.37 + s * 1.9)) % L.n
-        stampWrapped(sheets[li], 0, f * L.h, L.w, L.h, b.x + L.ox, rowOf({ anchor: 'origin', y: b.y }, L) - K.cam)
+        stampWrapped(sheets[li]!, 0, f * L.h, L.w, L.h, b.x + L.ox, rowOf({ anchor: 'origin', y: b.y }, L) - K.cam)
       }
     }
 
     // The kitten. Its state names a clip and the clip names a layer, exactly as everywhere
     // else here: nothing about which pose is drawn has ever reached the sprites.
-    var D = S.placed[K.at]
-    var cn = K.state === 'tuck' ? D.climber.tuck : K.state === 'rise' ? D.climber.rise : D.climber.fall
-    var pair = D.clips[cn]
+    var D = KD
+    var cn = K.state === 'tuck' ? KA.tuck : K.state === 'rise' ? KA.rise : KA.fall
+    var pair = KC[cn]!
     var ci = K.face < 0 ? pair.left : pair.right
-    var CL = S.layers[ci]
+    var CL = layerAt(S, ci)
     var cf = K.state === 'tuck'
       ? Math.min(CL.n - 1, Math.floor(K.tuck * 1000 / CL.ms))
       : Math.floor(t * 1000 / CL.ms) % CL.n
     drawn.push(K.at)
     stampWrapped(
-      sheets[ci], 0, cf * CL.h, CL.w, CL.h,
+      sheets[ci]!, 0, cf * CL.h, CL.w, CL.h,
       K.x + CL.ox, rowOf({ anchor: D.anchor, y: K.y }, CL) - K.cam,
     )
 
@@ -383,7 +407,7 @@ export function makeClimb(c: Shared): Shape {
   }
 
   /** The score, in the page rather than on the canvas: a HUD is not sprite art. */
-  function score(now) {
+  function score(now: number) {
     if (!S.meter || now - scoreAt < 90) return
     scoreAt = now
     var el = document.getElementById('score'); if (!el) return

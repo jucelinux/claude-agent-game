@@ -8,7 +8,12 @@
  * the report and the request; a fifth game meant a fifth copy, and a fix to the sequence meant
  * four edits. Now every shape is a `Shape`, and the loop does not know how many there are.
  */
-import { decode, cv } from './canvas.ts'
+/**
+ * The `!` on a read like `xs[i]` inside `for (var i = 0; i < xs.length; i++)` is the loop's own
+ * bound restated: TypeScript cannot carry the comparison into the index, and a guard there would
+ * be dead code that reads as doubt about something the line above already decided.
+ */
+import { ctx2d, cv, decode } from './canvas.ts'
 import { rgb } from './paint.ts'
 import { makeRain } from './rain.ts'
 import { makeClimb } from './climb.ts'
@@ -16,12 +21,12 @@ import { makeRunner } from './runner.ts'
 import { makeDescent } from './descent.ts'
 import { makeArena } from './arena.ts'
 import { makeStage } from './stage.ts'
-import type { Keys, Payload, Shape } from './types.ts'
+import type { Canvas, Keys, KeyEvent, Payload, Shape } from './types.ts'
 
-export function mount(el, S: Payload) {
+export function mount(el: HTMLElement, S: Payload) {
   var view = cv(S.w * S.scale, S.h * S.scale)
-  var vx = view.getContext('2d'); vx.imageSmoothingEnabled = false
-  var off = cv(S.w, S.h), ox = off.getContext('2d')
+  var vx = ctx2d(view); vx.imageSmoothingEnabled = false
+  var off = cv(S.w, S.h), ox = ctx2d(off)
   var decodeAt = (typeof performance !== 'undefined' && performance.now) ? performance.now() : 0
   var sheets = S.layers.map(decode)
   var decodeMs = ((typeof performance !== 'undefined' && performance.now) ? performance.now() : 0) - decodeAt
@@ -29,7 +34,7 @@ export function mount(el, S: Payload) {
   // The backdrop never changes, so it is drawn once and copied. The floor's colour per row
   // arrives already computed: the recede is one rule and it is applied in one place, or the
   // page and the compositor put the horizon in two different rows.
-  var bg = cv(S.w, S.h), bx = bg.getContext('2d')
+  var bg = cv(S.w, S.h), bx = ctx2d(bg)
   bx.fillStyle = rgb(S.sky); bx.fillRect(0, 0, S.w, S.h)
   // **Stars go into the backdrop, not into a field.** A field is evaluated per pixel per
   // frame because it moves; a fixed sky does not. Same integer hash the rain uses, so the
@@ -38,12 +43,12 @@ export function mount(el, S: Payload) {
     for (var si = 0; si < S.stars.count; si++) {
       var sh1 = ((si + S.stars.seed) * 2654435761) >>> 0; sh1 = (sh1 ^ (sh1 >>> 13)) >>> 0
       var sh2 = (sh1 * 1597334677) >>> 0; sh2 = (sh2 ^ (sh2 >>> 15)) >>> 0
-      bx.fillStyle = rgb(S.stars.colors[sh2 % S.stars.colors.length])
+      bx.fillStyle = rgb(S.stars.colors[sh2 % S.stars.colors.length]!)
       bx.fillRect(sh1 % S.w, sh2 % S.stars.below, 1, 1)
     }
   }
   for (var y = 0; y < S.floor.length; y++) {
-    bx.fillStyle = rgb(S.floor[y]); bx.fillRect(0, S.ground + y, S.w, 1)
+    bx.fillStyle = rgb(S.floor[y]!); bx.fillRect(0, S.ground + y, S.w, 1)
   }
   // **Dust.** Same hash as the stars, thrown over the floor instead of the sky. Regolith is
   // powder, and a flat fill reads as a tile however well its value is graded.
@@ -52,7 +57,7 @@ export function mount(el, S: Payload) {
     for (var di = 0; di < S.dust.count; di++) {
       var dh = ((di + S.dust.seed) * 2654435761) >>> 0; dh = (dh ^ (dh >>> 13)) >>> 0
       var dh2 = (dh * 1597334677) >>> 0; dh2 = (dh2 ^ (dh2 >>> 15)) >>> 0
-      bx.fillStyle = rgb(S.dust.colors[dh2 % S.dust.colors.length])
+      bx.fillStyle = rgb(S.dust.colors[dh2 % S.dust.colors.length]!)
       bx.fillRect(dh % S.w, S.ground + (dh2 % band), 1, 1)
     }
   }
@@ -60,7 +65,7 @@ export function mount(el, S: Payload) {
 
   var keys: Keys = {}
   if (S.interactive) {
-    var down = function (e, v) {
+    var down = function (e: KeyEvent, v: boolean) {
       var k = e.key
       if (k === 'ArrowLeft' || k === 'a' || k === 'A') { keys.left = v; e.preventDefault() }
       if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = v; e.preventDefault() }
@@ -101,17 +106,18 @@ export function mount(el, S: Payload) {
    */
   var clock = (typeof performance !== 'undefined' && performance.now)
     ? function () { return performance.now() } : function () { return 0 }
-  var meter = { gaps: [], work: [], at: 0, worst: 0, decode: 0 }
+  const meter: { gaps: number[]; work: number[]; at: number; worst: number; decode: number } =
+    { gaps: [], work: [], at: 0, worst: 0, decode: 0 }
   meter.decode = decodeMs
 
-  function report(now) {
+  function report(now: number) {
     if (!S.meter || now - meter.at < 500) return
     meter.at = now
     var el = document.getElementById('meter'); if (!el) return
     var g = meter.gaps, w = meter.work
     if (g.length === 0) return
     var sg = 0, sw = 0, mx = 0
-    for (var i = 0; i < g.length; i++) { sg += g[i]; sw += w[i]; if (w[i] > mx) mx = w[i] }
+    for (var i = 0; i < g.length; i++) { sg += g[i]!; sw += w[i]!; if (w[i]! > mx) mx = w[i]! }
     el.textContent =
       Math.round(1000 / (sg / g.length)) + ' fps' +
       '  ·  work ' + (sw / w.length).toFixed(2) + ' ms, worst ' + mx.toFixed(2) + ' ms' +
@@ -126,7 +132,7 @@ export function mount(el, S: Payload) {
    * screen is not drawn at all, so position in the call list is not position in the scene —
    * and any harness reading the loop from outside needs to be told which is which.
    */
-  var drawn = []
+  const drawn: number[] = []
 
 
   /**
@@ -145,9 +151,9 @@ export function mount(el, S: Payload) {
    * DISPATCH order is a different question: which shape owns the loop. The runner is asked
    * first and the fixed stage last, because the stage is the fallback rather than a claim.
    */
-  var rainOf = null
+  let rainOf: ((t: number) => void) | null = null
   var shared = { S: S, ox: ox, bg: bg, sheets: sheets, keys: keys, drawn: drawn, cv: cv,
-                 rain: function (t) { return rainOf(t) } }
+                 rain: function (t: number) { if (rainOf !== null) rainOf(t) } }
   var climb = makeClimb(shared)
   var runner = makeRunner(shared)
   var arena = makeArena(shared)
@@ -156,11 +162,11 @@ export function mount(el, S: Payload) {
   rainOf = makeRain(S, ox, cv)
 
   var shapes = [runner, arena, descent, climb, stage]
-  var shape = null
-  for (var sx = 0; sx < shapes.length; sx++) { if (shapes[sx].active) { shape = shapes[sx]; break } }
+  let shape: Shape = stage
+  for (const s of shapes) { if (s.active) { shape = s; break } }
 
-  var t0 = null, prev = 0
-  function frame(now) {
+  let t0: number | null = null, prev = 0
+  function frame(now: number) {
     var began = clock()
     if (t0 === null) t0 = now
     var t = (now - t0) / 1000
