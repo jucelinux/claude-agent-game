@@ -6,7 +6,8 @@ The narrative version of every file lives on branch `taste-loop-v1`; history liv
 
 ## Session start
 
-Read, in order: this file → `TASTE.md` → the last 20 lines of `DECISIONS.md` → `BACKLOG.md`.
+Read, in order: this file → `TASTE.md` → **`SCARS.md`** → the last 20 lines of `DECISIONS.md`
+→ `BACKLOG.md`.
 Read `TASTE-LOOP.md` and `HARNESS.md` only when running a round or changing the harness.
 Do not write code before that. Then run the cycle open (`TASTE-LOOP.md` §3b) — at its
 **cheap** setting while the method is frozen: rungs 1–3 plus contradiction sweep; skip the
@@ -41,15 +42,30 @@ method-debt items.
   probability + the one reason. After, ONE line scoring it. No essays.
 - Do not build a reading whose setup cost lands on him (gates v1 and v2 died of it).
 
-## Method status — FROZEN 16/08
+## Method status — the freeze paid out, 18/08
 
 The Taste Loop's **core stays binding**: verdicts compile into knobs/locks/prose; the
 perception channels; miss-as-specification; binary questions in batches; attributability
 bounds a reading (a foundation is bounded by the null case instead, and may accumulate).
 
-**Suspended until three batches show a cost** (then it returns with that evidence):
-round-close ceremony, method proposals and `TASTE-LOOP-LEARNING.md` upkeep, `TASTE.md` §2a
-essays, gate redesigns. The method is settled; the product gets the attention.
+The 16/08 freeze suspended four things "until three batches show a cost". Batches 5, 7 and 8
+ran. **The cost arrived and it was measured:** a lesson recorded in three markdown files still
+shipped missing from three games, including the one it was found in. That releases exactly ONE
+of the four — the round-close ceremony — with the evidence, and only in the form the evidence
+justifies:
+
+> **Every defect fixed in a round is classified LOCAL or CROSS-CUTTING. A cross-cutting one
+> becomes a lock that sweeps `MICRO_GAMES` in the same turn, with its exceptions declared in
+> writing. It is entered in `SCARS.md` either way.**
+
+The other three stay frozen: method proposals, `TASTE.md` §2a essays, gate redesigns. They have
+no evidence.
+
+**Why a markdown line is not enough, in his words:** *"ele é bom em acumular memórias, mas não
+transforma essas memórias em gates."* Markdown is read once at session start; a lock runs on
+every commit. The model uses a memory when it is the SUBJECT and forgets it when it would be a
+CONSTRAINT — so the constraint belongs where the code is, not where the conversation is.
+`SCARS.md` is the ledger of which scars have made that trip.
 
 ## The bench loop — amended 16/08, structured look adopted
 
@@ -100,8 +116,9 @@ essays, gate redesigns. The method is settled; the product gets the attention.
    across kinds. Known gaps, built only when a miss names them: pattern inside a part ·
    effects (fire, smoke) · full 3D pitch (roll exists) · generativity beyond trees.
 5. **Then the engine slice:** one-screen platformer — deterministic headless sim, fixed
-   timestep, box collision, replayable input, animation state machine. (Much exists
-   already: the climb, the runners.)
+   timestep, box collision, replayable input, animation state machine. Audited 18/08: the
+   headless sim exists and the other four do not. **The timestep is first** — it is a stated
+   prerequisite already violated, and it is an accumulator in one place.
 6. **The differentiator: the agent's perception of a RUNNING game.** Same pattern as the
    sprite channel, one level up.
 7. Judging apparatus — only if judging becomes the bottleneck.
@@ -111,7 +128,17 @@ Drawing capacity is upstream of the engine: production capacity bounds game dive
 ## Architecture — prerequisites, not preferences
 
 - The deterministic core imports nothing from presentation. `sprite(grammar, params,
-  seed)` is closed-form; the browser is a consumer. A recorded input replays identically.
+  seed)` is closed-form; the browser is a consumer.
+- **A recorded input replays identically — and as of 18/08 that is a stated prerequisite the
+  code does NOT meet.** The frame loop integrates against real elapsed time (`BACKLOG.md`, open).
+- **The browser runtime is `src/runtime/`: one typed module per game shape.** It was 2014 lines
+  inside a template literal, where the compiler could not read it, backticks were forbidden and
+  nine games shared one scope. `src/micro/bundle.ts` turns the modules into the one classic
+  script the page serves — Node strips the types, the registry is twelve lines, no dependency
+  and no build step. **A string cannot contradict the agent writing it**, and the first hour
+  after the move the compiler found a sprite that had never been drawn in a shipped game.
+- `tests/golden.test.ts` holds the draw trace of every game, folded to one number. A refactor
+  that changes it changed the product; regenerating it to go green is the one forbidden move.
 - The unit of work is the **grammar**, never a sprite. Animation transforms anchored
   parts; frames are never redrawn.
 - Every tunable lives in `tunables/`, anchored, locked. Depth is solved (z-buffer, 2.5D),

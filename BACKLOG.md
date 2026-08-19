@@ -213,6 +213,44 @@ and the skate too.
       · He met the reference and then named two MORE (Gundam, Front Mission), which is what a
       satisfied bar sounds like.
 
+## The refactor — done 18/08, and what it found
+
+**`src/micro/app.ts` was 2220 lines and 2014 of them were a string.** The whole browser runtime:
+one scope for nine games, invisible to the compiler, backticks forbidden inside its own comments.
+It broke the parse three times in one session; a scene field that never reached the payload once
+shipped through 522 green locks and died only in a browser.
+
+It is now `src/runtime/` — one typed module per game shape — and `app.ts` is 215 lines. No
+dependency and no build step: Node strips the types, the module registry is twelve lines. The
+safety net was built FIRST (`tests/golden.test.ts`, the exact sequence of canvas calls each game
+makes, folded), and eight of nine games came out byte-identical.
+
+**What the compiler found in the first hour, and it is the whole argument for the refactor:**
+
+> `/crypt` called `drawImage` with `x = NaN` sixty times a second for its entire life. **Death —
+> the thing chasing the player, the point of the game — has never been drawn.** The runtime read
+> `fromX` off the runner and it lives on the reaper. A canvas silently ignores a non-finite
+> coordinate: no error, no warning, nothing missing from any count. It survived 628 locks, the
+> frame budget, and four of his own readings of that game.
+
+Fixed, and made into gate #6 in `SCARS.md`: no game may draw at a coordinate that is not a
+number. That is the only intended change in behaviour and the only golden hash that moved.
+
+Other things the move bought, each measurable:
+
+| before | after |
+|---|---|
+| the clock exemption covered 2200 lines, every game's simulation inside it | 130 lines, the frame loop and nothing else |
+| four near-identical early returns in the frame loop, one per shape | one dispatcher over a `Shape` type; a sixth game adds no copy |
+| `var side` in the arena was the same variable as `var side` anywhere else | one scope per module, locked by `tests/runtime-shape.test.ts` |
+| the payload's shape was a hope | the STAGE's real types — a difference that was invisible and produced eight errors pointing straight at it |
+
+- [ ] 🟡 **The runtime's typing is staged debt, with a number.** `tsconfig.runtime.json` relaxes
+      `strictNullChecks`, `noImplicitAny` and `noUncheckedIndexedAccess`; everything else is
+      strict, including the property-existence check that found the reaper. **671 errors to
+      close**, and they are almost all one shape: a state constant TypeScript will not narrow
+      inside a hoisted `function` declaration. One shape module per round closes it.
+
 ## Open against a stated prerequisite — found 18/08 by a sanity check, not by a verdict
 
 - [x] **Fixed 18/08 — the size band is now HELD.** His report in the same message as Carlos's

@@ -92,6 +92,11 @@ branch `taste-loop-v1`; the artifact behind every line is findable by date in
   hour (PERIODIC on a gradient → a body). Ask first: what differs about this artifact?
 - I promote a surviving parameter to a constant in my head (the walk's swing spent on a
   jump — re-derive, the anchor names its scope).
+- **My own tooling flatters me the same way an instrument does.** Refactoring by script, I used a
+  `.replace()` whose pattern did not match; it returned the string unchanged and reported nothing,
+  so a guard clause was silently never inserted and the arena claimed every scene. The rule I
+  apply to locks — an instrument that cannot fail is not an instrument — applies to the throwaway
+  script too. Assert the match.
 - **I split two readers along the axis I designed for them.** Batch 8 gave the mechanic to
   Jucelinux and the PS1 bar to the colleague; Jucelinux answered the bar himself, unprompted,
   before the colleague looked. A bar named for one reader is not invisible to the other.
