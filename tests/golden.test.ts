@@ -44,6 +44,33 @@ describe('every game draws exactly what it drew before', () => {
     })
   }
 
+  /**
+   * **Nothing is ever drawn at a coordinate that is not a number, and this is a scar made into
+   * a gate.**
+   *
+   * `/crypt` called `drawImage` with `x = NaN` sixty times a second for its entire life. Death
+   * — the thing chasing the player, the whole point of the game — was never drawn, because the
+   * runtime read `fromX` off the runner and it lives on the reaper. A canvas silently ignores a
+   * non-finite coordinate, so there was no error, no warning and nothing missing from any count:
+   * the sprite simply was not there. It survived 628 locks, the frame budget, and four of his
+   * own readings of that game.
+   *
+   * The compiler found it in the first hour after the runtime left its template literal. This
+   * lock is what makes sure the next one is found without a refactor to find it — and it costs
+   * nothing, because the trace was already recording every argument.
+   */
+  it('no game ever draws at a coordinate that is not a number', () => {
+    for (const game of MICRO_GAMES) {
+      const stage = toStage(game.scene)
+      const page = gamePage({
+        id: game.id, title: game.title, blurb: game.blurb, date: game.date, meta: [], stage,
+        ...(game.keys === undefined ? {} : { keys: game.keys }),
+      })
+      const bad = traceOf(page, run).nonFinite
+      expect(bad.length, `${game.id} drew ${bad.length} times at a non-finite coordinate, e.g. ${bad[0]}`).toBe(0)
+    }
+  }, 60_000)
+
   it('the trace is a property of the code and of nothing else', () => {
     // The null case for the instrument itself: two runs of one game must fold identically, or
     // every assertion above is reading noise rather than a difference.

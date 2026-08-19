@@ -20,7 +20,13 @@
 /** One recorded canvas call, flattened to a string so the fold is order-sensitive. */
 type Call = string
 
-export type Trace = { readonly hash: string; readonly calls: number; readonly sample: readonly Call[] }
+export type Trace = {
+  readonly hash: string
+  readonly calls: number
+  readonly sample: readonly Call[]
+  /** Calls that carried a non-finite number. See the lock in `golden.test.ts`. */
+  readonly nonFinite: readonly Call[]
+}
 
 /** A 64-bit-ish fold over the call strings. Cheap, order-sensitive, deterministic. */
 function fold(calls: readonly Call[]): string {
@@ -121,5 +127,10 @@ export function traceOf(
     for (const [at, key, down] of script) if (at === f) h.key(key, down)
     h.tick(f * 16.67)
   }
-  return { hash: fold(calls), calls: calls.length, sample: calls.slice(0, 6) }
+  return {
+    hash: fold(calls),
+    calls: calls.length,
+    sample: calls.slice(0, 6),
+    nonFinite: calls.filter((call) => call.includes('(!') || call.includes(',!')),
+  }
 }

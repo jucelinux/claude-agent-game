@@ -59,7 +59,18 @@ describe('determinism — the blocker (HARNESS §2.5)', () => {
   // One consumer now, and it used to be two. The bench page that showed sprites in cells was
   // deleted on 16/08 at his instruction: drawing only makes sense inside a game scene, so the
   // only thing allowed to read a clock is the thing that runs one.
-  const CONSUMERS = ['src/micro/app.ts']
+  /**
+   * **The clock exemption, and the refactor made it seven times smaller.**
+   *
+   * It used to name `src/micro/app.ts`, which was 2200 lines — the page builder AND the whole
+   * browser runtime, because the runtime lived inside a template literal there and the frame
+   * loop needs to know how long a frame took. An exemption that wide is an exemption that has
+   * stopped saying anything: every game's simulation was inside it too.
+   *
+   * The clock now lives in the frame loop and nowhere else. `src/runtime/mount.ts` is 130 lines,
+   * none of them a game, and every shape module below it is back under the ban.
+   */
+  const CONSUMERS = ['src/runtime/mount.ts']
 
   it('no ambient randomness anywhere, and no clock below the consumers', () => {
     const always = [/Math\.random/, /Date\.now/, /new Date\b/]
