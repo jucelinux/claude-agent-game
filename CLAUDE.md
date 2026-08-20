@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-The project instance, **distilled 16/08** after the external review (`ANALISE-EXTERNA-2026-08-16.md`).
+The project instance, **distilled 20/08** after the first fresh-agent commission.
 The narrative version of every file lives on branch `taste-loop-v1`; history lives in
 `DECISIONS.md` (append-only) and in git. This file holds only what binds.
 
@@ -15,16 +15,17 @@ method-debt items.
 
 ## The project
 
-- **Name:** claude-agent-game (repo). Formerly claude-ink-2d.
+- **Name:** agent-game-maker. Formerly claude-ink-2d and claude-agent-game.
 - **What it is:** a game engine whose interface is a coding agent — "o GameMaker dos
   agentes". He can say exactly what he wants in a game; he cannot draw. The product is the
   arrangement (harness + engine + drawing grammar) that lets an agent deliver it.
 - **The product surface is ONE thing:** the shelf. `node bin/micro.ts`, port 5177, `/` is
-  the shelf, `/<id>` is a game. Live from current code on every request. Nothing is ever
-  removed from it.
+  the shelf, `/<id>` is a game. The watched server invalidates its per-game stage cache when
+  source or tunables change. Nothing is ever removed from the shelf.
 - **Failure condition:** he decides, from judgment. No metric decides for him.
-- **The defining requirement (deferred by him, still defining):** a fresh agent, given only
-  this repository, can build a small game.
+- **The defining requirement:** a fresh agent, given only this repository, can build a small
+  game. The first Codex trial shipped `/orrery` after two human-found correctness defects; the
+  comparative protocol and the unsoftened result live in `AGENT-EVAL.md`.
 
 ## The gate — v3, the commission test
 
@@ -116,12 +117,15 @@ CONSTRAINT — so the constraint belongs where the code is, not where the conver
    across kinds. Known gaps, built only when a miss names them: pattern inside a part ·
    effects (fire, smoke) · full 3D pitch (roll exists) · generativity beyond trees.
 5. **Then the engine slice:** one-screen platformer — deterministic headless sim, fixed
-   timestep, box collision, replayable input, animation state machine. **Three of five done as
-   of 18/08**; box collision and the state machine remain, and both are harvest work — five
-   games already do them, so the general shape is to be taken rather than invented.
+   timestep, box collision, replayable input, animation state machine. **Five of five done as
+   of 20/08**; `/orrery` supplied shared box/circle collision and the first explicit typed
+   transition graph. Older shapes remain unmigrated until their behaviour asks for it.
 6. **The differentiator: the agent's perception of a RUNNING game.** Same pattern as the
    sprite channel, one level up.
-7. Judging apparatus — only if judging becomes the bottleneck.
+7. **Then a production slice:** one small complete game, accepted 20/08. It proves progression,
+   save, settings, input devices, audio, release and human completion rather than another engine
+   capability. Held until his intermediate task is finished.
+8. Judging apparatus — only if judging becomes the bottleneck.
 
 Drawing capacity is upstream of the engine: production capacity bounds game diversity.
 
@@ -137,8 +141,12 @@ Drawing capacity is upstream of the engine: production capacity bounds game dive
   inside a template literal, where the compiler could not read it, backticks were forbidden and
   nine games shared one scope. `src/micro/bundle.ts` turns the modules into the one classic
   script the page serves — Node strips the types, the registry is twelve lines, no dependency
-  and no build step. **A string cannot contradict the agent writing it**, and the first hour
+  and no build step. Generated modules carry `sourceURL`, so browser errors name their owning
+  runtime file. **A string cannot contradict the agent writing it**, and the first hour
   after the move the compiler found a sprite that had never been drawn in a shipped game.
+- Physical keys become semantic `primary` and `secondary` actions at the runtime boundary.
+  Shapes do not know key names. Every shape exposes one typed `Observation`; inspection and
+  seeded exploration consume that same contract rather than copying simulation state.
 - `tests/golden.test.ts` holds the draw trace of every game, folded to one number. A refactor
   that changes it changed the product; regenerating it to go green is the one forbidden move.
 - The unit of work is the **grammar**, never a sprite. Animation transforms anchored
@@ -152,7 +160,10 @@ Drawing capacity is upstream of the engine: production capacity bounds game dive
 
 ## Don'ts
 
-- No dependency without proposing it first (Pixi = consumer in an example, never core).
+- **Dependencies are evidence decisions, not forbidden.** Before adding one, state the measured
+  product need, why the existing stack misses it, its runtime/build reach, its deterministic
+  null case and its removal boundary. Approval is required. Presentation libraries such as Pixi
+  may consume the core; they never enter it. No dependency is added merely to look production-ready.
 - No pixel retouching. No judging stills — everything he sees is in motion.
 - Do not design generality; harvest it from two working subjects.
 - Do not enrich the counting channel into a picture — the look is `bin/see.ts`, separate,

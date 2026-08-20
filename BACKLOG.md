@@ -1,6 +1,6 @@
 # BACKLOG.md
 
-What is **open**, as of 17/08 (distilled — closed items live in `DECISIONS.md` and on
+What is **open**, as of 20/08 (distilled — closed items live in `DECISIONS.md` and on
 branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
 ## Gate — v3, the commission test · running **7 of 7** · the 3D ledger closes
@@ -110,9 +110,11 @@ a third of the frame's height; the duel held at 70–130 units → **44–88**; 
   asks for up to 1.57 when it flies past the camera — about one frame in seventy, measured. A
   band above 1 for the machines costs 1.5× the whole arena build; the pillars got one because
   they are cheap and because *"flutuando"* named them. Spend it when a verdict does.
-- **`/arena` builds in 8.5 s**, the shelf's slowest by three times, and the shelf has no cache
-  by design. The one large saving (`shadow.steps`) was measured and refused by the look. The
-  next honest lever is the boost clip's 9 frames, and that is an animation decision, not mine.
+- **`/arena` has an 8.5 s cold build**, the shelf's slowest by three times. The one large raster
+  saving (`shadow.steps`) was measured and refused by the look. As of 20/08 the local server
+  caches each built stage until source or tunables change, and the shelf mounts cards lazily;
+  the cold static build still pays the full cost. The next art lever is the boost clip's 9 frames,
+  and that is an animation decision, not an infrastructure default.
 - **Twelve yaw bands, and a locked duel can only reach them through the dash and the boom's
   lead.** The cone is a theorem about framing cameras (`DECISIONS.md`, 18/08). One varied drive
   reaches 12 of 12; a passive one would not.
@@ -260,7 +262,7 @@ Other things the move bought, each measurable:
 | before | after |
 |---|---|
 | the clock exemption covered 2200 lines, every game's simulation inside it | 130 lines, the frame loop and nothing else |
-| four near-identical early returns in the frame loop, one per shape | one dispatcher over a `Shape` type; a sixth game adds no copy |
+| four near-identical early returns in the frame loop, one per shape | one dispatcher over a `Shape` type; another game shape adds no copy |
 | `var side` in the arena was the same variable as `var side` anywhere else | one scope per module, locked by `tests/runtime-shape.test.ts` |
 | the payload's shape was a hope | the STAGE's real types — a difference that was invisible and produced eight errors pointing straight at it |
 
@@ -272,7 +274,7 @@ Other things the move bought, each measurable:
       narrowing inside an arrow function and drops it inside a hoisted declaration, which is how
       this runtime is written — and the actor's own declaration captured where it was CHECKED.
 
-## The engine slice — audited 18/08, and two of five are done
+## The engine slice — completed 20/08 by `/orrery`
 
 `CLAUDE.md` item 5 defines it as five things. The audit and the work happened in one day:
 
@@ -281,8 +283,8 @@ Other things the move bought, each measurable:
 | deterministic headless sim | ✅ since round zero — `tests/harness.ts` drives the real games |
 | **fixed timestep** | ✅ 18/08. Whole 1/120 s steps, counted with integer millisecond arithmetic |
 | **replayable input** | ✅ 18/08. `bin/play.ts`; a play is a game, a duration and every key with the millisecond it was pressed |
-| box collision | ❌ still per game — a radius in the arena, a row in the runners, a shelf in the climb |
-| animation state machine | ❌ still per game — hand-rolled `state` strings in five shapes |
+| box collision | ✅ 20/08. Pure AABB/circle functions and exact quarter-turn transforms in `src/runtime/collision.ts` |
+| animation state machine | ✅ 20/08. Typed keeper states plus an explicit allowed-transition graph; invalid edges throw |
 
 **The two that closed are one finding.** The loop integrated against real elapsed frame time,
 against a prerequisite stated since round zero, and **no lock could see it** because the harness
@@ -296,9 +298,30 @@ concept of its own: the live path and the replayed path are the same path, so a 
 drift. Measured: every game identical at 60, 90 and 144 Hz, with input at ragged times no rate
 lands on.
 
-**What is left of the slice** — box collision and the state machine — is the harvest kind of
-work, not the design kind: five games already do both, and the general shape is to be taken from
-them rather than invented. It waits for a commission that needs it.
+**The commission that needed the remaining two is `/orrery`.** It adds a fixed-screen
+platformer shape with explicit solid boxes, axis-separated collision, coyote time and jump
+buffering. The room may draw between angles, but the simulation commits only an exact quarter
+turn, so collision stays axis-aligned and a replay stays exact. Animation is an explicit graph
+over `idle · run · rise · fall · brace · dead · won`; an undeclared edge is a runtime error, not
+a new pose invented by a comparison. Older shapes are not migrated: the extraction is spent by
+the new commission, not imposed where it buys no behaviour.
+
+**The next slice now has a typed first pass.** Every runtime shape exposes one discriminated
+`Observation`; `bin/inspect-play.ts` prints stable semantic checkpoints for all games and adds a
+coarse collision map for a platformer. `bin/explore-play.ts` drives seeded alternate input through
+every game and rejects throws, non-finite state and declared world-boundary violations. Its null
+case catches an escaped keeper and NaN. It does not claim to judge composition, fun or reachability.
+The saved `runs/orrery.play.json` completes the circuit and returns to the hatch at every
+presentation rate. No dependency was added; procedural WebAudio is feature-detected and
+presentation-only.
+
+## Fresh-agent trial — first result recorded 20/08
+
+Codex entered without repository history, proposed `/orrery`, built it, corrected two defects
+found by human play, and reached **SHIPS**: *"Validei o jogo aqui, gostei deste micro jogo."*
+The exact cost and the comparative protocol live in `AGENT-EVAL.md`. This proves the small-game
+claim once; it does not prove the complete-game claim. The next accepted slice is one small
+production game, held until his intermediate task finishes.
 
 ## Deferred, by him
 
@@ -306,9 +329,6 @@ them rather than invented. It waits for a commission that needs it.
   agree (his batch-4 note, his forward note, the round-boundary look). The unjudged weave
   belongs to this round too: a dither needs a surface, and environments are the surface.
 - **Pattern inside a part** — "discutiremos sobre isso depois".
-- **The fresh-agent test** — deferred with a condition: when engine + harness are done.
-  It remains the requirement that defines the product. _(External review recommends a
-  minimal early version: a fresh agent modifies an existing game.)_
 - **Pitch** (full 3D) — roll exists; pitch is still inexpressible. He named it as a
   candidate theme; the measurement so far says every yaw defect was implementation, not
   the 2.5D model's limit.
@@ -348,6 +368,7 @@ Every number carries the command that regenerates it and its date.
 | TS lines, source + locks | 12 700 / 4 600 | `find src bin -name '*.ts' \| xargs wc -l` | 16/08 |
 | locks green | 575 | `npm test` | 17/08, after run 21 |
 | locks green | **612** | `npm test` | 18/08, after run 22 |
+| locks green | **753** | `npm run check` | 20/08, after the first fresh-agent trial and harness hardening |
 | **the yaw gait approximation, measured at last** | legacy 0.877 units = **0.99 px**; exact 0.424 = **0.48 px** (30-unit machine, 34 px on screen) | `npx vitest run tests/arena.test.ts` | 17/08 |
 | the half-turn defect, before the fix | **10.7 units** at band 6, against 0.4 at every other heading | same command, band sweep | 17/08 |
 | `/arena` budget, cycle 1 | 100 layers, 35 colours, 21 calls/frame of 200, 338k px to decode, 60 fps measured | `node bin/micro.ts --static` | 17/08 |
@@ -369,16 +390,18 @@ Every number carries the command that regenerates it and its date.
 | `/aero` budget | 14 layers, 55 colours, 19 calls/frame of 200, 85k px to decode | `node bin/micro.ts --static` | 17/08 |
 | air difficulty pair | worst gap 150 px = 0.72 s at the 208 px/s cap, vs climb hang 0.70 s | `npx vitest run tests/aero.test.ts` | 17/08 |
 
-## The harness — six commands
+## The harness — eight commands
 
 | command | what it is |
 |---|---|
-| `node bin/micro.ts` | **the product.** The shelf, one game per route, live on every request |
-| `npm test` | the locks (414): determinism, baseline, tunables, findings null cases, contracts, game loops headless |
+| `node bin/micro.ts` | **the product.** The shelf, one game per route, watched and cached against the current source/tunables snapshot |
+| `npm test` | the locks: determinism, baseline, tunables, findings null cases, contracts, game loops headless |
 | `node bin/bench.ts [run] [--set …]` | **the counting eye**: contact sheet, silhouette, findings, counts, elapsed |
 | `node bin/see.ts [run] [--set …]` | **the structured look** (16/08): contact-sheet PNG in `.eye/`, for the correspondence class. Fixes still enter via the grammar |
 | `node bin/run.ts <run.json>` | headless: state hash + metrics |
 | `node bin/record.ts <out.json> [--set …]` | capture into a replayable run file |
+| `node bin/inspect-play.ts <game> [play.json]` | the typed semantic eye; a platformer also prints its collision map |
+| `node bin/explore-play.ts <game\|all> [--seeds N --seconds N]` | seeded alternate input; throws and product-invariant failures become reproducible plays |
 
 Every tunable lives in `tunables/`, anchored, the anchor locked.
 

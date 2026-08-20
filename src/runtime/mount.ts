@@ -20,6 +20,7 @@ import { makeClimb } from './climb.ts'
 import { makeRunner } from './runner.ts'
 import { makeDescent } from './descent.ts'
 import { makeArena } from './arena.ts'
+import { makePlatformer } from './platformer.ts'
 import { makeStage } from './stage.ts'
 import type { Canvas, Keys, KeyEvent, Payload, Shape } from './types.ts'
 
@@ -110,23 +111,21 @@ export function mount(el: HTMLElement, S: Payload) {
     if (k === 'ArrowRight' || k === 'd' || k === 'D') keys.right = v
     if (k === 'ArrowUp' || k === 'w' || k === 'W') keys.up = v
     if (k === 'ArrowDown' || k === 's' || k === 'S') keys.down = v
-    if (k === ' ' || k === 'x' || k === 'X' || k === 'z' || k === 'Z') {
-      if (v && !keys.hit) { keys.tap = true; keys.jumpTap = true }
-      keys.hit = v
+    var actionKey = k.length === 1 ? k.toLowerCase() : k
+    if (S.actions.primary.includes(actionKey)) {
+      if (v && !keys.primary) keys.primaryTap = true
+      keys.primary = v
     }
-    /**
-     * **Two more flags, and they exist because the arena is the first game with four verbs.**
-     * Every game before it conflated space, x and z into one 'act' button, which is right when a
-     * game has one action. A duel has a dash AND a trigger, and a player who dashes every time
-     * he fires has no mechanic to be refined about. The old flags are untouched, so no shipped
-     * game changes.
-     */
-    if (k === ' ') { if (v && !keys.space) keys.spaceTap = true; keys.space = v }
-    if (k === 'x' || k === 'X' || k === 'z' || k === 'Z') keys.fire = v
+    if (S.actions.secondary.includes(actionKey)) {
+      if (v && !keys.secondary) keys.secondaryTap = true
+      keys.secondary = v
+    }
+    if (k === 'r' || k === 'R') { if (v) keys.restartTap = true }
+    if (k === 'm' || k === 'M') { if (v) keys.muteTap = true }
   }
 
   /** Everything the shelf reads. Anything else is left to the page. */
-  const WATCHED = /^(ArrowLeft|ArrowRight|ArrowUp|ArrowDown|[adwsxzADWSXZ]| )$/
+  const WATCHED = /^(ArrowLeft|ArrowRight|ArrowUp|ArrowDown|[adwsxzrmADWSXZRM]| )$/
 
   var clock = (typeof performance !== 'undefined' && performance.now)
     ? function () { return performance.now() } : function () { return 0 }
@@ -160,7 +159,7 @@ export function mount(el: HTMLElement, S: Payload) {
 
 
   /**
-   * **The five shapes, built once, asked once.** Each owns its own state inside its own module
+   * **The six shapes, built once, asked once.** Each owns its own state inside its own module
    * scope; the first that says it is active gets the loop, and the fixed stage is last because
    * it is the fallback rather than a claim.
    */
@@ -183,9 +182,11 @@ export function mount(el: HTMLElement, S: Payload) {
   var arena = makeArena(shared)
   var descent = makeDescent(shared)
   var stage = makeStage(shared)
+  // Added after every shipped shape so their construction-time canvas identities remain exact.
+  var platformer = makePlatformer(shared)
   rainOf = makeRain(S, ox, cv)
 
-  var shapes = [runner, arena, descent, climb, stage]
+  var shapes = [runner, arena, descent, platformer, climb, stage]
   let shape: Shape = stage
   for (const s of shapes) { if (s.active) { shape = s; break } }
 
@@ -215,9 +216,29 @@ export function mount(el: HTMLElement, S: Payload) {
   /** How many whole steps the simulation has run. An integer, deliberately. */
   let done = 0
   let prevReal = 0
+  let running = true
+  let queued = false
+  let rebaseClock = false
+
+  function queue(): void {
+    if (running && !queued) {
+      queued = true
+      requestAnimationFrame(frame)
+    }
+  }
+
   function frame(now: number) {
+    queued = false
+    if (!running) return
     var began = clock()
     if (t0 === null) t0 = now
+    if (rebaseClock) {
+      // A shelf card may have been outside the viewport for minutes. Preserve the number of
+      // simulated steps and move the origin instead of treating that absence as catch-up work.
+      t0 = now - (done * 1000) / HZ
+      prevReal = 0
+      rebaseClock = false
+    }
     /**
      * **Whole milliseconds, and the rounding is what makes the claim exact.**
      *
@@ -271,11 +292,11 @@ export function mount(el: HTMLElement, S: Payload) {
     meter.work.push(clock() - began); if (meter.work.length > 120) meter.work.shift()
     report(now)
     shape.score(now)
-    requestAnimationFrame(frame)
+    queue()
   }
 
   el.appendChild(view)
-  requestAnimationFrame(frame)
+  queue()
 
   /**
    * **What the loop is thinking, readable from outside it.**
@@ -308,6 +329,14 @@ export function mount(el: HTMLElement, S: Payload) {
       timeline.sort(function (a, b) { return a.at - b.at })
     },
     state: function () { return shape.state() },
+    observe: function () { return shape.observe() },
+    pause: function () { running = false },
+    resume: function () {
+      if (running) return
+      running = true
+      rebaseClock = true
+      queue()
+    },
     cam: function () { return arena.cam() },
     project: function (x: number, y: number, z: number) { return S.arena ? arena.project(x, y, z) : null },
     scaleOf: function (k: number, ladder: readonly number[], cur?: number) { return S.arena ? arena.scaleOf(k, ladder, cur) : 0 },

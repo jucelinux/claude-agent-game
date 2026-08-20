@@ -23,6 +23,7 @@
  */
 
 import type { Scene } from '../scene/types.ts'
+import type { ActionBindings } from '../scene/types.ts'
 import { cozyScene } from './cozy-scene.ts'
 import { cryptScene } from './crypt-scene.ts'
 import { skateScene } from './skate-scene.ts'
@@ -32,6 +33,7 @@ import { aeroScene } from './aero-scene.ts'
 import { snowScene } from './snow-scene.ts'
 import { descentScene } from './descent-scene.ts'
 import { arenaScene } from './arena-scene.ts'
+import { orreryScene } from './orrery-scene.ts'
 
 export type MicroGame = {
   /** Stable, and it never changes: he navigates by it. */
@@ -43,6 +45,7 @@ export type MicroGame = {
   readonly scene: Scene
   /** What the keys do. Written per game, because a control scheme belongs to a game. */
   readonly keys?: string
+  readonly actions?: ActionBindings
 }
 
 
@@ -247,6 +250,23 @@ export const MICRO_GAMES: readonly MicroGame[] = [
       'Two machines, one floor, and a camera on a boom. Arrows strafe and close — you are locked on, so the machine always faces its target while it walks sideways, which is exactly the turn the engine had never been asked to do at runtime. Space dashes: 50 units of ground for one press, then a second of being a target. X fires. Every plate is shaded one normal at a time, so the armour creases like the machines of that era instead of blending, and the floor grid converges on the vanishing point as the camera swings. Twelve headings, four sizes, all pre-rendered — nothing here is a stretched sprite. First to zero armour loses.',
     date: '2026-08-17',
     keys: '↑ ↓ close and back off · ← → strafe · space dash · X fire',
+    actions: { primary: [' '], secondary: ['x', 'z'] },
     scene: arenaScene,
+  },
+  /**
+   * **Micro game 10: the orrery.** A one-screen platformer whose room is the verb. Pressing X
+   * commits one exact quarter turn after a short visual wind-up: walls become floors without
+   * introducing rotated collision or non-deterministic physics. Three spatial goals complete a
+   * circuit and make returning to the starting hatch the final traversal rather than a menu.
+   */
+  {
+    id: 'orrery',
+    title: 'The Orrery',
+    blurb:
+      'Wake three mechanical suns and return to the service hatch. X turns the entire chamber one exact quarter: the picture eases through the motion, then the collision commits, walls become floors, and gravity remains honest. The three suns complete visible circuits into the vermilion core; the chamber shifts toward gold only when all are awake. One screen, one dangerous centre, and no generated asset or external dependency—the keeper, mechanisms and every state are built from the same indexed grammar as the rest of the shelf.',
+    date: '2026-08-20',
+    keys: '← → move · space jump · X rotate chamber · R restart · M mute · wake 3 suns, then return to the hatch',
+    actions: { primary: [' '], secondary: ['x', 'z'] },
+    scene: orreryScene,
   },
 ]

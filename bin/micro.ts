@@ -1,22 +1,22 @@
 /**
  * **The micro-game webapp.** His surface from 15/08 onward.
  *
- *   node bin/micro.ts            -> http://localhost:5174
+ *   node bin/micro.ts            -> http://localhost:5177
  *   node bin/micro.ts --static   -> dist/micro/ as plain files
  *
  *   /            the shelf: every micro game ever made, oldest first
  *   /<id>        one game, big, on its own route
  *
- * **Every route renders from current code on every request.** There is no cache and no
- * build step, so iterating on a game is: edit, refresh, look. That is the opposite of the
- * gallery, which freezes an entry so a refactor shows up as a difference — the gallery is
- * the record and this is the product.
+ * The dev command watches imported source, while this server caches one built stage per game
+ * until any source or tunable file changes. Iterating is still edit, refresh, look; refreshing
+ * one route no longer pays to render every other route as well.
  *
  * `node:http` and `node:fs` only. Nothing added to the stack.
  */
 import { createServer } from 'node:http'
 import { gzipSync } from 'node:zlib'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { toStage } from '../src/scene/layers.ts'
 import { MICRO_GAMES } from '../src/micro/registry.ts'
 import { gamePage, shelfPage } from '../src/micro/app.ts'
@@ -42,6 +42,7 @@ function buildGame(id: string): AppGame | undefined {
       game.date,
     ],
     stage,
+    ...(game.actions === undefined ? {} : { actions: game.actions }),
     ...(game.keys === undefined ? {} : { keys: game.keys }),
   }
 }
@@ -57,7 +58,37 @@ function withWireCost(game: AppGame): AppGame {
 }
 
 const buildAll = (): AppGame[] =>
-  MICRO_GAMES.map((g) => buildGame(g.id)).filter((g): g is AppGame => g !== undefined).map(withWireCost)
+  MICRO_GAMES.map((g) => cachedGame(g.id)).filter((g): g is AppGame => g !== undefined)
+
+/**
+ * A tiny invalidation key is enough here: Node's watch mode reloads imported TypeScript, and
+ * this walk also catches JSON tunables loaded through `readFileSync`. Size joins mtime so two
+ * quick edits on a coarse filesystem do not accidentally look identical.
+ */
+function treeStamp(root: string): string {
+  const entries = readdirSync(root, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))
+  return entries.flatMap((entry) => {
+    const path = join(root, entry.name)
+    if (entry.isDirectory()) return [treeStamp(path)]
+    if (!entry.name.endsWith('.ts') && !entry.name.endsWith('.json')) return []
+    const stat = statSync(path)
+    return [`${path}:${stat.mtimeMs}:${stat.size}`]
+  }).join('|')
+}
+
+let stamp = ''
+const cache = new Map<string, AppGame>()
+function cachedGame(id: string): AppGame | undefined {
+  const current = `${treeStamp('src')}|${treeStamp('tunables')}`
+  if (current !== stamp) { stamp = current; cache.clear() }
+  const hit = cache.get(id)
+  if (hit !== undefined) return hit
+  const built = buildGame(id)
+  if (built === undefined) return undefined
+  const measured = withWireCost(built)
+  cache.set(id, measured)
+  return measured
+}
 
 if (process.argv.includes('--static')) {
   const games = buildAll()
@@ -89,11 +120,11 @@ if (process.argv.includes('--static')) {
     }
     try {
       if (path === '' || path === '/') return send(shelfPage(buildAll()))
-      const game = buildGame(path.slice(1))
+      const game = cachedGame(path.slice(1))
       // A miss goes back to the shelf rather than to a dead end: he navigates by refreshing,
       // and a stale URL after an id changes should land somewhere useful.
       if (game === undefined) return send(shelfPage(buildAll()), 404)
-      return send(gamePage(withWireCost(game)))
+      return send(gamePage(game))
     } catch (err) {
       return send(`<pre style="color:#e88;background:#131316;padding:32px;font:13px monospace">${String((err as Error).stack ?? err)}</pre>`, 500)
     }

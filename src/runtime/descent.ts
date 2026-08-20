@@ -113,8 +113,8 @@ export function makeDescent(c: Shared): Shape {
   function descend(t: number, dt: number) {
     var D = D0
     if (DS.over) {
-      if (keys.jumpTap) {
-        keys.jumpTap = false
+      if (keys.primaryTap) {
+        keys.primaryTap = false
         DS.dist = 0; DS.x = (D.minX + D.maxX) / 2; DS.y = 0; DS.vy = 0
         DS.steer = 0; DS.clip = 0; DS.speed = D.speed; DS.best = 0; DS.over = false
       }
@@ -129,8 +129,8 @@ export function makeDescent(c: Shared): Shape {
     DS.steer = dx
     if (dx !== 0) DS.x = Math.max(D.minX, Math.min(D.maxX, DS.x + dx * D.steer * dt))
 
-    if (keys.jumpTap) {
-      keys.jumpTap = false
+    if (keys.primaryTap) {
+      keys.primaryTap = false
       if (DS.y === 0) { DS.vy = -D.jump; DS.clip = 0 }
     }
     if (DS.y > 0 || DS.vy !== 0) {
@@ -281,5 +281,6 @@ export function makeDescent(c: Shared): Shape {
     active: true,
     step: descend, draw: drawDescent, score: descentScore,
     state: function () { return DS },
+    observe: function () { return { kind: 'descent', state: DS } },
   }
 }

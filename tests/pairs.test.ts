@@ -97,6 +97,7 @@ const SYMMETRIC: Readonly<Record<string, string>> = {
   'astro-idle-e': 'standing still in a pressure suit, arms held out either side',
   'astro-leap-e': 'a lunar leap is a two-footed push',
   'cat-tuck': 'a cat meets a shelf with both front paws and springs off both',
+  'keeper-idle': 'standing at the service hatch, both boots carry the same quiet weight',
   // Run 21. A boosting machine is not walking: the thrust moves it, both legs trail together
   // and the shoulders hold the weapons level. The same intent as the lunar leap's two-footed
   // push. Only band 0 is listed — the other eleven are turned copies and are skipped above.

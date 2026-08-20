@@ -86,7 +86,7 @@ describe('SCARS #3 — an animation rate is derived from the body, never picked'
   const RATE = /strideLen/
   for (const game of MICRO_GAMES) {
     const stage = toStage(game.scene)
-    const shapes = [stage.runner, stage.descent, stage.arena].filter((x) => x !== null)
+    const shapes = [stage.runner, stage.descent, stage.arena, stage.platformer].filter((x) => x !== null)
     if (shapes.length === 0) continue
     it(`${game.id}: every travelling actor has a stride length`, () => {
       for (const shape of shapes) {
@@ -100,7 +100,7 @@ describe('SCARS #3 — an animation rate is derived from the body, never picked'
   it('and no draw path divides distance by a number of its own', () => {
     // The defect twice over was `dist / 2.2` — a literal in the draw path. The rule is greppable:
     // a frame index comes from a declared stride length or from a clip's own milliseconds.
-    for (const file of ['runner', 'descent', 'arena', 'climb', 'stage']) {
+    for (const file of ['runner', 'descent', 'arena', 'platformer', 'climb', 'stage']) {
       const src = readFileSync(`${ROOT}src/runtime/${file}.ts`, 'utf8')
         .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
       const picked = src.match(/(?:dist|walked)\s*\/\s*[\d.]+/g)

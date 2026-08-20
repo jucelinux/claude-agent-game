@@ -11,11 +11,14 @@
  * The one difference is `Layer`: on this side the pixels arrive base64'd and the field is named
  * for what it means here (`foot`, `n`, `ms`) rather than for what it meant to the renderer.
  */
-import type { Placed as StagePlaced, Stage, StageArena, StageClimb, StageDescent, StageRunner } from '../scene/layers.ts'
+import type { Placed as StagePlaced, Stage, StageArena, StageClimb, StageDescent, StagePlatformer, StageRunner } from '../scene/layers.ts'
+import type { ActionBindings } from '../scene/types.ts'
 import type { RGB } from '../core/types.ts'
+import type { Cam, Climber, Duel, Keeps, Observation, Player, Rides, Runs, RuntimeState } from '../observation/types.ts'
 
 export type { RGB }
-export type { StageArena, StageClimb, StageDescent, StageRunner }
+export type { StageArena, StageClimb, StageDescent, StagePlatformer, StageRunner }
+export type { Cam, Climber, Duel, KeeperState, Keeps, Machine, Observation, Player, Rides, Runs, Shot } from '../observation/types.ts'
 
 /** One sprite sheet as the page receives it: a vertical strip of frames, indices base64'd. */
 export type Layer = {
@@ -64,6 +67,8 @@ export type Payload = {
   readonly runner: StageRunner | null
   readonly descent: StageDescent | null
   readonly arena: StageArena | null
+  readonly platformer: StagePlatformer | null
+  readonly actions: ActionBindings
   readonly interactive: boolean
   readonly meter: boolean
   readonly layers: readonly Layer[]
@@ -72,21 +77,21 @@ export type Payload = {
 }
 
 /**
- * **The latched key state.** `tap` and `jumpTap` are edges the loop consumes; the rest are
- * levels. `space`/`fire` are separate from the old conflated `hit` because the arena is the
- * first game with four verbs, and every game before it is untouched by that split.
+ * **The latched key state.** `primaryTap` and `secondaryTap` are edges the loop consumes; the
+ * corresponding names without `Tap` are levels. Physical keys are translated once in `mount`,
+ * so a shape asks for a verb and never needs to know whether that verb was Space, X or Z.
  */
 export type Keys = {
   left?: boolean
   right?: boolean
   up?: boolean
   down?: boolean
-  hit?: boolean
-  tap?: boolean
-  jumpTap?: boolean
-  space?: boolean
-  spaceTap?: boolean
-  fire?: boolean
+  primary?: boolean
+  primaryTap?: boolean
+  secondary?: boolean
+  secondaryTap?: boolean
+  restartTap?: boolean
+  muteTap?: boolean
 }
 
 /** A 2D context, as much of one as this runtime ever touches. */
@@ -114,7 +119,7 @@ export type Shared = {
 }
 
 /**
- * **A game shape, and there are five.** `step` advances the simulation, `draw` paints one
+ * **A game shape, and there are six.** `step` advances the simulation, `draw` paints one
  * frame, `score` writes the meter. `active` is false when this shape's actor is not in the
  * scene, and it is how `mount` chooses a path without asking about payload fields.
  */
@@ -123,7 +128,8 @@ export type Shape = {
   readonly step: (t: number, dt: number) => void
   readonly draw: (t: number) => void
   readonly score: (now: number) => void
-  readonly state: () => unknown
+  readonly state: () => RuntimeState
+  readonly observe: () => Observation
 }
 
 /**
@@ -138,35 +144,6 @@ export type Shape = {
  * would put a copy in the hot path for a purity nothing here needs.
  */
 
-/** The climber: a world row, a speed, a camera that only rises, and a best altitude. */
-export type Climber = {
-  at: number; x: number; y: number; vy: number; face: number
-  state: 'fall' | 'rise' | 'tuck'; tuck: number
-  cam: number; top: number; best: number; over: boolean
-}
-
-/** The runner: a world distance, a height, spent jumps, and one number for what chases him. */
-export type Runs = {
-  at: number; dist: number; y: number; vy: number; jumps: number
-  // The four the code actually sets. The first version of this type guessed three and named
-  // two of them wrong, and the compiler said so at the comparison rather than at the guess.
-  state: 'run' | 'flip' | 'leap' | 'caught'; clip: number
-  speed: number; menace: number; passed: number; best: number; over: boolean
-}
-
-/** The rider: a slope distance, a lane, a hop, a steer sign. */
-export type Rides = {
-  at: number; dist: number; x: number; y: number; vy: number
-  steer: number; clip: number; speed: number; best: number; over: boolean
-}
-
-/** The player of a fixed stage: a position, a facing, a named state, and a height above it. */
-export type Player = {
-  at: number; x: number; row: number; face: number; dir: string
-  state: string; walk: number; atk: number; hit: boolean
-  lift: number; vy: number
-}
-
 /** One photographer: where he is, what he is doing, and when he does the next thing. */
 export type Crew = {
   at: number; p: Placed; a: NonNullable<Placed['approach']>
@@ -175,28 +152,6 @@ export type Crew = {
   flash?: number
 }
 
-/** One machine in the arena: a place on the plane, two headings, and its armour. */
-export type Machine = {
-  x: number; z: number; h: number; bh: number; vh?: number
-  player: boolean; armour: number
-  walked: number; boost: number; cool: number; reload: number
-  dir: number; flip: number; hurt: number
-  bf?: number; bs?: number; band?: number
-}
-
-/** A shot: a point on the plane with a heading, a distance travelled, and an owner. */
-export type Shot = { x: number; z: number; h: number; gone: number; mine: boolean }
-
-/** The duel: two machines, the columns they cannot walk through, and what is in the air. */
-export type Duel = {
-  you: Machine; foe: Machine
-  pillars: { x: number; z: number; band?: number }[]
-  shots: Shot[]; over: number; clock: number
-}
-
-/** The arena camera: a position on the plane, a view heading and the boom that lags behind it. */
-export type Cam = { x: number; z: number; h: number; b: number }
-
 /** What a shape that is not in this scene returns. The dispatcher never steps it. */
 export const inactive = (): Shape => ({
   active: false,
@@ -204,6 +159,7 @@ export const inactive = (): Shape => ({
   draw: () => {},
   score: () => {},
   state: () => null,
+  observe: () => ({ kind: 'inactive', state: null }),
 })
 
 /**

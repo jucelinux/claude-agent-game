@@ -16,8 +16,10 @@
  * runtime module obeys it. A general bundler would be a general problem; this one only has to
  * read code the repository writes.
  *
- * `bin/micro.ts` still renders every route from current code on every request. This adds a
- * file read and a type strip per module, which is single-digit milliseconds.
+ * Each generated module receives a `sourceURL`, so a browser exception names the TypeScript
+ * module that owns it instead of one enormous inline HTML line. It is not a source map — the
+ * reported line is the stripped module's line — but it turns "the runtime threw" into a file
+ * an agent can open immediately.
  */
 import { readFileSync, readdirSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
@@ -80,7 +82,12 @@ export function readModule(name: string): ModuleSource {
 export function bundleRuntime(entry = 'mount'): string {
   const parts = runtimeModules().map(readModule)
   const defs = parts
-    .map((p) => `__m['${p.name}'] = function(){ var __x = {}\n${p.body}\nreturn __x }`)
+    .map((p) => {
+      const source = `(function(){ var __x = {}\n${p.body}\nreturn __x })\n//# sourceURL=/src/runtime/${p.name}.ts`
+      // Direct eval is deliberate: unlike `Function`, the module keeps the page/harness lexical
+      // environment (document, requestAnimationFrame, atob). The source is repository-owned.
+      return `__m['${p.name}'] = eval(${JSON.stringify(source)})`
+    })
     .join('\n')
   return `var __m = {}, __c = {}
 function __req(k){ if (__c[k]) return __c[k]; var f = __m[k]; if (!f) throw new Error('no runtime module ' + k); return (__c[k] = f()) }

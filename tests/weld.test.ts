@@ -134,7 +134,13 @@ describe('a weld says two shapes are one surface', () => {
       // Run 21: a machine is the easy case of the seam test — plate against plate inside one
       // section is one surface, every section boundary keeps its line. All 24 yaw bands.
       ...Array.from({ length: 12 }, (_, i) => `mech-walk-${i}`),
-      ...Array.from({ length: 12 }, (_, i) => `mech-boost-${i}`), 'hangar-pillar'])
+      ...Array.from({ length: 12 }, (_, i) => `mech-boost-${i}`), 'hangar-pillar',
+      // Run 22: each keeper coat panel and limb is a continuous mass made from several
+      // primitives; markings remain decals and the two panels remain separate silhouettes. A
+      // mechanical sun's cog and face are cast masses around a separate axle. Same
+      // solid-versus-assembly verdict, stated for the new family.
+      'keeper-idle', 'keeper-run', 'keeper-rise', 'keeper-fall', 'keeper-brace',
+      'orrery-sun-dormant', 'orrery-sun-lit'])
     for (const { grammar: g, tunables: t } of PAIRS) {
       if (welded.has(g)) continue
       const grammar = grammarByName(g)

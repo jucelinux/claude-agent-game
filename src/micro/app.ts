@@ -19,11 +19,14 @@
  * page.** Everything is drawn into an offscreen buffer at the scene's own resolution and
  * blitted once, so no sprite is ever sampled through a fractional scale.
  *
- * **Every route renders from current code on every request.** No cache, no build step: a
- * refresh is the whole iteration loop.
+ * The server owns freshness; this module only turns a current `AppGame` into a page. The dev
+ * command watches source files, and the server invalidates its stage cache when source or
+ * tunables change, so refresh remains the whole iteration loop without rebuilding unrelated
+ * games for every request.
  */
 import type { RGB } from '../core/types.ts'
 import type { Stage } from '../scene/layers.ts'
+import type { ActionBindings } from '../scene/types.ts'
 import { budgetFacts, budgetOf } from '../scene/budget.ts'
 import { bundleRuntime } from './bundle.ts'
 
@@ -36,6 +39,8 @@ export type AppGame = {
   readonly stage: Stage
   /** What the keys do, in this game's own words. A control scheme is per game, not per engine. */
   readonly keys?: string
+  /** Physical keys for semantic verbs. Movement remains arrows/WASD for every current game. */
+  readonly actions?: ActionBindings
   /** Filled in by whoever served the page, since only it knows what compression achieved. */
   readonly gzipBytes?: number
 }
@@ -44,11 +49,18 @@ const esc = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
 /** The stage as JSON, with each layer's indices base64'd. */
-const payloadOf = (stage: Stage, scale: number, interactive: boolean): string =>
+const actionsOf = (game: AppGame): ActionBindings => game.actions ?? (
+  game.stage.arena !== null || game.stage.platformer !== null
+    ? { primary: [' '], secondary: ['x', 'z'] }
+    : { primary: [' ', 'x', 'z'], secondary: [] }
+)
+
+const payloadOf = (stage: Stage, scale: number, interactive: boolean, actions: ActionBindings): string =>
   JSON.stringify({
     w: stage.w, h: stage.h, scale, ground: stage.ground, sky: stage.sky,
     groundRamp: stage.groundRamp, floor: stage.floor, stars: stage.stars, dust: stage.dust,
-    rain: stage.rain, climb: stage.climb, runner: stage.runner, descent: stage.descent, arena: stage.arena, interactive, meter: interactive,
+    rain: stage.rain, climb: stage.climb, runner: stage.runner, descent: stage.descent,
+    arena: stage.arena, platformer: stage.platformer, actions, interactive, meter: interactive,
     layers: stage.layers.map((l) => ({
       w: l.w, h: l.h, ox: l.ox, oy: l.oy, foot: l.footOff, n: l.frames, ms: l.msPerFrame,
       palette: l.palette, indices: Buffer.from(l.indices).toString('base64'),
@@ -166,11 +178,31 @@ export function shelfPage(games: readonly AppGame[]): string {
     )
     .join('')
 
-  const mounts = games.map((g, i) => `mount(document.getElementById('t${i}'), ${payloadOf(g.stage, 1, false)});`).join('\n')
+  const payloads = games.map((g) => payloadOf(g.stage, 1, false, actionsOf(g))).join(',')
+  const mounts = `
+    var __cards = [${payloads}];
+    var __mounted = [];
+    function __start(i) {
+      if (__mounted[i]) { __mounted[i].resume(); return }
+      __mounted[i] = mount(document.getElementById('t' + i), __cards[i]);
+    }
+    function __stop(i) { if (__mounted[i]) __mounted[i].pause() }
+    if ('IntersectionObserver' in window) {
+      var __watch = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          var n = Number(entries[i].target.id.slice(1));
+          if (entries[i].isIntersecting) __start(n); else __stop(n);
+        }
+      }, { rootMargin: '160px 0px' });
+      var __thumbs = document.querySelectorAll('.thumb');
+      for (var i = 0; i < __thumbs.length; i++) __watch.observe(__thumbs[i]);
+    } else {
+      for (var i = 0; i < __cards.length; i++) __start(i);
+    }`
 
   return shell(
-    'claude-ink-2d · micro games',
-    `<h1>claude-ink-2d</h1><span class="sub">micro games — every object here belongs to a scene, never to a cell</span>`,
+    'Agent Game Maker · micro games',
+    `<h1>Agent Game Maker</h1><span class="sub">micro games — every object here belongs to a scene, never to a cell</span>`,
     games.length === 0 ? `<div class="empty">nothing on the shelf yet</div>` : `<div class="shelf">${cards}</div>`,
     mounts,
   )
@@ -178,13 +210,13 @@ export function shelfPage(games: readonly AppGame[]): string {
 
 /** **One game, big, and playable.** Input is bound on this route and nowhere else. */
 export function gamePage(game: AppGame): string {
-  const playable = game.stage.arena !== null || game.stage.placed.some((p) => p.player !== undefined || p.climber !== undefined || p.runs !== undefined || p.rides !== undefined)
+  const playable = game.stage.arena !== null || game.stage.platformer !== null || game.stage.placed.some((p) => p.player !== undefined || p.climber !== undefined || p.runs !== undefined || p.rides !== undefined)
   // **The score is a DOM element and not a sprite.** A HUD is not art: baking a number into an
   // indexed buffer would mean drawing a font, and a font is the one thing in a pixel game that
   // has to be legible at every scale rather than beautiful at one.
-  const scored = game.stage.climb !== null || game.stage.runner !== null || game.stage.descent !== null || game.stage.arena !== null
+  const scored = game.stage.climb !== null || game.stage.runner !== null || game.stage.descent !== null || game.stage.arena !== null || game.stage.platformer !== null
   return shell(
-    `${game.title} · claude-ink-2d`,
+    `${game.title} · Agent Game Maker`,
     `<a class="back" href="/">← shelf</a><h1>${esc(game.title)}</h1><span class="sub mono">${esc(game.id)}</span>`,
     `${scored ? `<div class="score mono" id="score">0.0 m</div>` : ''}
      <div id="boot" class="mono"></div>
@@ -207,7 +239,7 @@ export function gamePage(game: AppGame): string {
      };
      var __last = null;
      try {
-       __last = mount(document.getElementById('stage'), ${payloadOf(game.stage, game.stage.scale, true)});
+       __last = mount(document.getElementById('stage'), ${payloadOf(game.stage, game.stage.scale, true, actionsOf(game))});
        __say('', 'running — ${game.stage.layers.length} layers, ${game.stage.w}×${game.stage.h} at ×${game.stage.scale}');
      } catch (e) {
        __say('bad', 'mount failed and the game is not running:\\n' + (e && (e.stack || e.message) || e));

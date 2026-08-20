@@ -11,8 +11,12 @@
  * something the fake itself made, because a runtime passing a non-canvas is a defect a permissive
  * stub would swallow — and an instrument that flatters is the failure shape `HARNESS.md` §5 names.
  */
+import type { Observation } from '../src/observation/types.ts'
+
 export type Harness = {
   state: () => { dist: number; y: number; jumps: number; state: string; menace: number; over: boolean; best: number }
+  /** A typed, discriminated view for instruments; `state` remains the legacy test surface. */
+  observe: () => Observation
   /** The camera, and the projection that SHIPS — never a copy of it written in a test file. */
   cam: () => { x: number; z: number; h: number; b: number }
   project: (x: number, y: number, z: number) => { x: number; y: number; k: number; fwd: number } | null
@@ -24,6 +28,8 @@ export type Harness = {
   /** The play so far, and a play handed back — see `bin/play.ts`. */
   log: () => (readonly [number, string, boolean])[]
   feed: (events: readonly (readonly [number, string, boolean])[]) => void
+  pause: () => void
+  resume: () => void
 }
 
 /**
@@ -93,9 +99,12 @@ export function run(html: string, ctxFactory?: (id: number) => Record<string, un
   new Function(...Object.keys(capture), `${script}\n__capture(__last)`)(...Object.values(capture))
   return {
     state: () => (mounted as { state: () => ReturnType<Harness['state']> }).state(),
+    observe: () => (mounted as { observe: () => Observation }).observe(),
     cam: () => (mounted as { cam: () => ReturnType<Harness['cam']> }).cam(),
     log: () => (mounted as { log: Harness['log'] }).log(),
     feed: (events) => (mounted as { feed: Harness['feed'] }).feed(events),
+    pause: () => (mounted as { pause: Harness['pause'] }).pause(),
+    resume: () => (mounted as { resume: Harness['resume'] }).resume(),
     project: (x: number, y: number, z: number) => (mounted as { project: Harness['project'] }).project(x, y, z),
     scaleOf: (k: number, ladder: readonly number[], cur?: number) =>
       (mounted as { scaleOf: Harness['scaleOf'] }).scaleOf(k, ladder, cur),
@@ -112,4 +121,3 @@ export function run(html: string, ctxFactory?: (id: number) => Record<string, un
     },
   }
 }
-

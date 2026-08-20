@@ -20,7 +20,7 @@ describe('the runtime keeps the shape its delivery depends on', () => {
   const modules = runtimeModules()
 
   it('there is a module per game shape, and they are the ones the shelf has', () => {
-    for (const name of ['mount', 'climb', 'runner', 'descent', 'arena', 'stage', 'paint', 'types']) {
+    for (const name of ['mount', 'climb', 'runner', 'descent', 'arena', 'platformer', 'stage', 'paint', 'types']) {
       expect(modules, `src/runtime/${name}.ts is missing`).toContain(name)
     }
   })
@@ -38,9 +38,9 @@ describe('the runtime keeps the shape its delivery depends on', () => {
   }
 
   it('no module imports another game, which is the whole point of splitting them', () => {
-    // The five shapes are siblings. If one of them ever needs another's internals, the thing to
+    // The six shapes are siblings. If one of them ever needs another's internals, the thing to
     // move is the shared part into `paint.ts` — not to open a door between two games.
-    const shapes = ['climb', 'runner', 'descent', 'arena', 'stage']
+    const shapes = ['climb', 'runner', 'descent', 'arena', 'platformer', 'stage']
     for (const a of shapes) {
       const needs = readModule(a).needs
       for (const b of shapes) {
@@ -72,6 +72,7 @@ describe('the runtime keeps the shape its delivery depends on', () => {
     // and only ever showed up as a TypeScript syntax error in a completely different file.
     expect(() => new Function(once)).not.toThrow()
     expect(once).toContain("var mount = __entry.mount")
+    expect(once).toContain('sourceURL=/src/runtime/platformer.ts')
   })
 
   /**

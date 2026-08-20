@@ -88,12 +88,12 @@ export function makeStage(c: Shared): Shape {
       var dur = span(me.clips[pd.attack]!.right)
       if (!P.hit && P.atk >= dur * pd.hitAt) { P.hit = true; strike() }
       if (P.atk >= dur) { P.state = 'idle'; P.hit = false }
-    } else if (pd.attack && (keys.hit || keys.tap)) {
+    } else if (pd.attack && (keys.primary || keys.primaryTap)) {
       // **Guarded on the clip existing, and it crashed without the guard.** The moon's player
       // has a jump and no attack, so the same key that swings the gorilla's fist was setting
       // a state whose clip is undefined — and the draw then looked up 'undefined-e'. One key
       // means different things to different actors, and the actor decides, not the key.
-      keys.tap = false
+      keys.primaryTap = false
       P.state = 'attack'; P.atk = 0; P.hit = false
     } else {
       var dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
@@ -122,8 +122,8 @@ export function makeStage(c: Shared): Shape {
       // **The jump.** A press while standing buys an upward speed; gravity takes it back.
       // On the moon that ratio is the subject: a sixth of a g gives a hang of over a second,
       // and it is the one number in this scene that a player feels rather than sees.
-      if (pd.jump && keys.jumpTap && P.lift === 0) { P.vy = -pd.jump.impulse }
-      keys.jumpTap = false
+      if (pd.jump && keys.primaryTap && P.lift === 0) { P.vy = -pd.jump.impulse }
+      keys.primaryTap = false
     }
 
     if (pd.jump) {
@@ -311,5 +311,6 @@ export function makeStage(c: Shared): Shape {
     active: true,
     step: think, draw: drawStage, score: function () {},
     state: function () { return P },
+    observe: function () { return { kind: 'stage', state: P } },
   }
 }

@@ -43,8 +43,9 @@ that demanded it of both would have added a meaningless number to a shipped game
 | 10 | **No ambient randomness, and no clock below the consumers** | `HARNESS.md` §2.5 | all of `src/` | ✅ `tests/determinism.test.ts` |
 | 11 | **The simulation advances in fixed steps, and input is a timeline rather than a poll** | 18/08, by reading the build order — a stated prerequisite the code never met | every game | ✅ `tests/timestep.test.ts`, sweeps `MICRO_GAMES` at 60, 90 and 144 Hz |
 | 12 | **A recorded play replays exactly** | the same reading of the build order | every game | ✅ `tests/replay.test.ts`, sweeps `MICRO_GAMES`; `bin/play.ts` is the command |
+| 13 | **A winning replay is not ordinary-input exploration** | `/orrery`: the authored route passed while two human routes found a thrown transition and an escapable border | every interactive game | ✅ `tests/explore-play.test.ts` sweeps `MICRO_GAMES` with seeded alternate input; null cases prove an escaped body and non-finite state fail |
 
-**Nine of twelve sweep every game. None has nothing.** #4 and #5 remain partial by judgment
+**Ten of thirteen sweep every game. None has nothing.** #4 and #5 remain partial by judgment
 rather than by neglect — see their rows — and #7 is locked by a grep rather than a sweep.
 
 The three that had nothing were closed on 18/08 in one round, at his instruction. What that

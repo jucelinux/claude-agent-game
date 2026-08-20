@@ -216,8 +216,8 @@ export function makeArena(c: Shared): Shape & ArenaEye {
     var A = A0, you = AR.you, foe = AR.foe
     AR.clock += dt
     if (AR.over !== 0) {
-      if (keys.spaceTap) {
-        keys.spaceTap = false
+      if (keys.primaryTap) {
+        keys.primaryTap = false
         you.x = 0; you.z = -A.radius * 0.45; you.armour = A.armour; you.boost = 0; you.cool = 0
         foe.x = 0; foe.z = A.radius * 0.45; foe.armour = A.armour; foe.boost = 0; foe.cool = 0
         you.h = 0; you.bh = 0; foe.h = 0.5; foe.bh = 0.5
@@ -283,8 +283,8 @@ export function makeArena(c: Shared): Shape & ArenaEye {
     you.cool = Math.max(0, you.cool - dt * 1000)
     you.reload = Math.max(0, you.reload - dt * 1000)
     you.hurt = Math.max(0, you.hurt - dt)
-    if (keys.spaceTap) {
-      keys.spaceTap = false
+    if (keys.primaryTap) {
+      keys.primaryTap = false
       if (you.cool <= 0 && (fwd !== 0 || side !== 0)) {
         you.boost = A.boostMs; you.cool = A.boostCoolMs; you.bf = fwd; you.bs = side
       }
@@ -296,7 +296,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
       var norm = fwd !== 0 && side !== 0 ? 0.7071 : 1
       move(you, fwd * A.speed * norm, side * A.strafe * norm, dt)
     }
-    if (keys.fire && you.reload <= 0) {
+    if (keys.secondary && you.reload <= 0) {
       you.reload = A.reloadMs
       AR.shots.push({ x: you.x, z: you.z, h: you.h, gone: 0, mine: true })
     }
@@ -575,6 +575,7 @@ export function makeArena(c: Shared): Shape & ArenaEye {
     active: true,
     step: arenaStep, draw: drawArena, score: arenaScore,
     state: function () { return AR },
+    observe: function () { return { kind: 'arena', state: AR } },
     // The arena alone hands two functions out: the framing lock has to drive the SHIPPED
     // projection, because the lock that came before it re-implemented one in the test file and
     // so never noticed that this one read a heading in turns as if it were radians.

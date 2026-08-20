@@ -27,7 +27,7 @@
  */
 import type { RGB } from '../core/types.ts'
 import { execute, loadParams } from '../io/load.ts'
-import type { Arena, Climb, Descent, Placement, Runner, Scene } from './types.ts'
+import type { Arena, Climb, Descent, Placement, Platformer, Runner, Scene } from './types.ts'
 import { floorDepth, hazeAt, paintOrder, standRow } from './types.ts'
 
 /** One sprite's whole cycle, cropped, in index space. */
@@ -90,6 +90,7 @@ export type Placed = {
   readonly climber?: Placement['climber']
   readonly runs?: Placement['runs']
   readonly rides?: Placement['rides']
+  readonly keeper?: Placement['keeper']
 }
 
 /**
@@ -136,6 +137,11 @@ export type StageArena = Omit<Arena, 'walk' | 'boost' | 'pillars'> & {
   readonly pillarSeed: number
 }
 
+/** The rotating room with its two sun states resolved to ordinary sprite layers. */
+export type StagePlatformer = Omit<Platformer, 'sun'> & {
+  readonly sun: { readonly dormant: number; readonly lit: number }
+}
+
 export type StageClimb = Omit<Climb, 'perches'> & {
   /** Layer index per platform variant, in the order the scene declared them. */
   readonly perches: readonly number[]
@@ -178,6 +184,8 @@ export type Stage = {
   readonly descent: StageDescent | null
   /** Present on an arena duel, null on every other kind. */
   readonly arena: StageArena | null
+  /** Present on a rotating-room platformer, null on every other kind. */
+  readonly platformer: StagePlatformer | null
   /** Back to front. */
   readonly placed: readonly Placed[]
   /** Distinct colours across every layer — the same cohesion reading, on the same terms. */
@@ -386,6 +394,7 @@ export function toStage(scene: Scene): Stage {
       ...(p.climber === undefined ? {} : { climber: p.climber }),
       ...(p.runs === undefined ? {} : { runs: p.runs }),
       ...(p.rides === undefined ? {} : { rides: p.rides }),
+      ...(p.keeper === undefined ? {} : { keeper: p.keeper }),
       order: paintOrder(p, i),
     })
   }
@@ -506,6 +515,18 @@ export function toStage(scene: Scene): Stage {
     }
   }
 
+  let platformer: StagePlatformer | null = null
+  if (scene.platformer !== undefined) {
+    const { sun, ...rest } = scene.platformer
+    platformer = {
+      ...rest,
+      sun: {
+        dormant: build(sun.dormant, 0, false).layer,
+        lit: build(sun.lit, 0, false).layer,
+      },
+    }
+  }
+
   // The rain was authored as whole passes per scene loop, because a loop was the only clock
   // there was. In seconds it is one number and it stops being tied to anything.
   const field = (scene.fields ?? [])[0]
@@ -557,6 +578,7 @@ export function toStage(scene: Scene): Stage {
   return {
     name: scene.name, w: scene.w, h: scene.h, scale: scene.scale, ground: scene.ground,
     sky: scene.sky, groundRamp: scene.groundRamp, stars: scene.stars ?? null, dust: scene.dust ?? null, rain, floor,
-    layers, climb, runner, descent, arena, placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
+    layers, climb, runner, descent, arena, platformer,
+    placed: placed.map(({ order, ...rest }) => rest), colours: seen.size,
   }
 }

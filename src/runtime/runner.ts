@@ -81,8 +81,8 @@ export function makeRunner(c: Shared): Shape {
   function runner(t: number, dt: number) {
     var N = N0
     if (R.over) {
-      if (keys.jumpTap) {
-        keys.jumpTap = false
+      if (keys.primaryTap) {
+        keys.primaryTap = false
         R.dist = 0; R.y = 0; R.vy = 0; R.jumps = 0; R.state = 'run'; R.clip = 0
         R.speed = N.speed; R.menace = 0; R.passed = -1; R.best = 0; R.over = false
       }
@@ -98,8 +98,8 @@ export function makeRunner(c: Shared): Shape {
      * **The double jump.** The first press works only from the ground; the second only in the
      * air, and only once. 'jumps' is the whole of that rule and it is reset by landing.
      */
-    if (keys.jumpTap) {
-      keys.jumpTap = false
+    if (keys.primaryTap) {
+      keys.primaryTap = false
       if (R.jumps === 0 && R.y === 0) {
         R.vy = -N.jump; R.jumps = 1; R.state = 'leap'; R.clip = 0
       } else if (R.jumps === 1) {
@@ -374,5 +374,6 @@ export function makeRunner(c: Shared): Shape {
     active: true,
     step: runner, draw: drawRunner, score: runnerScore,
     state: function () { return R },
+    observe: function () { return { kind: 'runner', state: R } },
   }
 }

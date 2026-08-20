@@ -28,6 +28,7 @@ import { gorillaIdle } from './creatures/gorilla-idle.ts'
 import { CAT, catTuck } from './creatures/cat.ts'
 import { PHOTOGRAPHER } from './characters/photographer.ts'
 import { ASTRONAUT } from './characters/astronaut.ts'
+import { KEEPER } from './characters/keeper.ts'
 import { BONES, bonesFlip, bonesLeap } from './characters/bones.ts'
 import { skateFlip, skateOllie, skateRoll } from './characters/skater.ts'
 import { tree } from './vegetation/tree.ts'
@@ -44,6 +45,7 @@ import { descentCarve, descentGlide, descentLaunch } from './characters/boarder-
 import { pistePine, pistePuff, pisteRock, pisteSapling, pisteSnowman } from './scenery/piste.ts'
 import { MECH, MECH_BOOST, MECH_WALK } from './vehicles/mech.ts'
 import { hangarPillar } from './scenery/hangar.ts'
+import { ORRERY_SUNS } from './scenery/orrery.ts'
 
 /** shipped = judged usable · probe = built to compare, never content · retired = superseded or failed. */
 export type GrammarStatus = 'shipped' | 'probe' | 'retired'
@@ -212,6 +214,20 @@ export const CATALOG: Readonly<Record<string, CatalogEntry>> = {
     description: 'a hangar pillar — square in plan so it needs no yaw bands of its own, and it is what a turning camera measures its turn against',
     tags: ['ps1', 'facet'],
   }),
+  ...family(KEEPER, {
+    kind: 'character',
+    status: 'shipped',
+    games: ['orrery'],
+    description: 'the orrery keeper — five motion clips on one coat-and-mask body; the trailing signal strap reports acceleration and room turns',
+    tags: ['platformer', 'side-view'],
+  }),
+  ...family(ORRERY_SUNS, {
+    kind: 'prop',
+    status: 'shipped',
+    games: ['orrery'],
+    description: 'dormant and lit states of one twelve-tooth mechanical sun, resolved as ordinary indexed layers',
+    tags: ['platformer', 'mechanical'],
+  }),
 }
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = Object.fromEntries(
@@ -297,6 +313,8 @@ export const PAIRS: readonly { readonly grammar: string; readonly tunables: stri
   ...MECH_WALK.map((g) => ({ grammar: g.name, tunables: 'mech' })),
   ...MECH_BOOST.map((g) => ({ grammar: g.name, tunables: 'mech-boost' })),
   { grammar: hangarPillar.name, tunables: 'hangar' },
+  ...KEEPER.map((g) => ({ grammar: g.name, tunables: 'keeper' })),
+  ...ORRERY_SUNS.map((g) => ({ grammar: g.name, tunables: 'orrery' })),
 ]
 
 export function grammarByName(name: string): Grammar {

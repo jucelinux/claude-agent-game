@@ -145,6 +145,7 @@ the axis it was proven on, never across it.**
 | **discrete scale bands over distance** | `/descent` and `/arena`, both shipped | **the MOTION, not the subject**: a treadmill crosses each boundary once and an arena can park on one. Any new game shape needs `bandHold` checked, not the ladder |
 | **a framed camera** (the aim solved per frame, clamped so two subjects cannot leave the picture) | `/arena` cycle 2, measured: worst 60.2 px off centre of a 79.5 px bound over nine drives | three or more subjects — the bisector is a two-body rule and nothing here has tested a third |
 | **props that are IN the world** (one list for sim and painter, collision, contact shadow, a scale ladder of their own) | `/arena`'s nine columns | props that move, or that a subject can stand on |
+| **one-screen deterministic platformer with a rotating room and a win path** | `/orrery`, his verdict 20/08 — *"Validei o jogo aqui, gostei deste micro jogo."* | progression, persistence, settings, gamepad, multi-room structure and a complete release |
 
 Hypotheses (14/08, still open): **H1** a body with a grammar reaches the bar, a humanoid
 with cloth does not. **H2** "and animate it" raises the ceiling rather than lowering it.

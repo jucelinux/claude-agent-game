@@ -236,6 +236,21 @@ export type Placement = {
     readonly flip: string
   }
   /**
+   * **The keeper of a rotating room.** This actor belongs to the fixed-screen platformer:
+   * unlike a runner it has horizontal acceleration, unlike a climber it chooses when to jump,
+   * and unlike a floor player it collides with explicit boxes on all four sides.
+   *
+   * The names resolve through `clips`; behaviour stays in `Platformer` below. Keeping the two
+   * facts apart means a different body can inhabit the same room without changing its physics.
+   */
+  readonly keeper?: {
+    readonly idle: string
+    readonly run: string
+    readonly rise: string
+    readonly fall: string
+    readonly brace: string
+  }
+  /**
    * **A subject that walks in from an edge, settles at a distance from the player, and runs
    * home when it is struck.** The photographer, and it is named for the behaviour rather than
    * for the character.
@@ -755,6 +770,62 @@ export type Arena = {
   readonly seed: number
 }
 
+/** One axis-aligned solid in the room's authored, unrotated coordinates. */
+export type PlatformBox = { readonly x: number; readonly y: number; readonly w: number; readonly h: number }
+
+/**
+ * **A whole room that turns by exact quarter steps.** The visual may interpolate between two
+ * orientations, but collision commits once, at the end of the turn. That distinction is the
+ * determinism contract: the simulation only ever sees axis-aligned boxes and integer turns.
+ */
+export type Platformer = {
+  readonly startX: number
+  readonly startY: number
+  readonly bodyHalfW: number
+  readonly bodyH: number
+  readonly speed: number
+  readonly accel: number
+  readonly friction: number
+  readonly gravity: number
+  readonly jump: number
+  readonly coyoteMs: number
+  readonly bufferMs: number
+  readonly strideLen: number
+  readonly rotateMs: number
+  /** The navigable interior. Unlike the decorative border boxes, this always contains the body. */
+  readonly bounds: PlatformBox
+  /** Border thickness outside `bounds`; collision and paint derive the same four walls from it. */
+  readonly wall: number
+  readonly solids: readonly PlatformBox[]
+  readonly core: { readonly x: number; readonly y: number; readonly r: number }
+  readonly suns: readonly { readonly x: number; readonly y: number; readonly r: number }[]
+  readonly hatch: PlatformBox
+  readonly sun: {
+    readonly dormant: { readonly grammar: string; readonly tunables: string }
+    readonly lit: { readonly grammar: string; readonly tunables: string }
+  }
+  readonly rings: readonly { readonly r: number; readonly speed: number; readonly spokes: number }[]
+  readonly colors: {
+    readonly void: RGB
+    readonly chamber: RGB
+    readonly chamberHi: RGB
+    readonly ink: RGB
+    readonly brass: RGB
+    readonly brassHi: RGB
+    readonly teal: RGB
+    readonly tealDark: RGB
+    readonly bone: RGB
+    readonly vermilion: RGB
+  }
+  readonly seed: number
+}
+
+/** Physical keys for a game's semantic verbs. Movement remains the shared arrows/WASD plane. */
+export type ActionBindings = {
+  readonly primary: readonly string[]
+  readonly secondary: readonly string[]
+}
+
 export type Scene = {
   readonly name: string
   readonly w: number
@@ -828,6 +899,8 @@ export type Scene = {
   readonly descent?: Descent
   /** Present on an arena duel and absent on every other kind. See `Arena`. */
   readonly arena?: Arena
+  /** Present on a quarter-turn room platformer and absent on every other kind. */
+  readonly platformer?: Platformer
 }
 
 export type Field =

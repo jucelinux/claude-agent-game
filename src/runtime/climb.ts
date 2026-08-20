@@ -156,14 +156,14 @@ export function makeClimb(c: Shared): Shape {
     if (K.over) {
       // One key restarts. It is the same latched press the jump used, so a tap between two
       // animation frames still counts.
-      if (keys.jumpTap) {
-        keys.jumpTap = false
+      if (keys.primaryTap) {
+        keys.primaryTap = false
         K.x = KD.x; K.y = C.startRow; K.vy = 0; K.state = 'fall'; K.tuck = 0
         K.cam = C.startRow - S.h * 0.82; K.top = C.startRow; K.best = 0; K.over = false
       }
       return
     }
-    keys.jumpTap = false
+    keys.primaryTap = false
 
     var dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
     if (dx !== 0) { K.x += dx * C.steer * dt; K.face = dx }
@@ -422,5 +422,6 @@ export function makeClimb(c: Shared): Shape {
     active: true,
     step: climb, draw: drawClimb, score: score,
     state: function () { return K },
+    observe: function () { return { kind: 'climb', state: K } },
   }
 }
