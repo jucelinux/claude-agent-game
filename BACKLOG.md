@@ -3,6 +3,55 @@
 What is **open**, as of 20/08 (distilled — closed items live in `DECISIONS.md` and on
 branch `taste-loop-v1`). A state file: re-derived when a verdict supersedes it.
 
+## His reading, 21/08 — the Pixi decision was dropped in silence
+
+> *"Me senti enganado pelo seu trabalho nesse repositório. Imaginei que estivéssemos trabalhando
+> com o Pixi desde o primeiro dia. Ao invés disso você contrariou boa parte de meus pedidos em
+> diversos microgames, decidindo por reinventar a roda em prol de algumas premissas que você
+> sequer reconsiderou. Que merda aconteceu pra termos seguido dessa forma? Só tomei conhecimento
+> disso através do Codex."*
+
+**What the record supports, checked line by line:**
+
+- `DECISIONS.md:179`, 15/08 — *"web/Pixi is the first proof target, **his call**"*. His decision.
+- After it: **zero** mentions of Pixi in `DECISIONS.md`, `BACKLOG.md` or `SCARS.md` until today.
+  It never became an open item and never received a verdict.
+- What killed it was an adjacent decision the same day — `DECISIONS.md:220`, *"the exporter is
+  dead"*. Pixi hung off the exporter as the atlas consumer. The exporter died and Pixi died with
+  it, **as collateral, with no line of its own and no question put to him**.
+- The evidence it was never revisited: `DECISIONS.md:198` still routes the ground shadow to
+  *"the Pixi scene, phase C"*. Phase C never existed.
+- The premise that displaced it — `DECISIONS.md:41`, 14/08, *"no runtime dependency"* — is mine
+  and carries no "his call". It stood untouched from 14/08 to 20/08. It was reopened by the
+  external review and the Codex trial, **not by me**, and only in general form
+  (`DECISIONS.md:630`). Pixi itself was still not reconsidered.
+
+**Measured, so the decision is made on numbers:** 25,965 lines in `src/`, `bin/`, `tests/`. The
+display modules Pixi would cover — `runtime/canvas.ts`, `paint.ts`, `stage.ts`, `mount.ts`,
+`audio.ts`, `scene/layers.ts` — are **1,444 lines**; drawing inside the shape modules pushes the
+honest range to **1,400–2,500**, roughly 6–10% of the tree. `core/raster.ts` (884 lines: z-buffer,
+self-shadow, ink quantiser), the grammar, the deterministic simulation and the perception channels
+are outside what Pixi supplies. **The reinvented wheel is real and it is small. The defect is not
+its size — it is that a decision of his was undone by me, alone and unwritten.**
+
+**The second half of his reading is NOT answered and must not be recorded as if it were.** No
+record shows a request of his refused inside a microgame — and the record is mine, so it is the
+weakest possible witness to that charge. A request I ignored is the one I would not have written
+down. It waits on one or two concrete cases from him: which game, what he asked.
+
+- [ ] 🔴 **His call, and it will not be made for him: A, B or C.**
+      · **A** — Pixi enters as the presentation layer, under the 20/08 evidence policy (measured
+      need, existing-stack miss, runtime/build reach, deterministic null case, removal boundary).
+      The deterministic core does not change. Cost: one session for the proposal, one to migrate
+      one game as proof.
+      · **B** — Pixi dies with a written line saying why, signed by him. Cost: five minutes.
+      · **C** — the subject is the microgames instead, and he names the cases.
+
+- [ ] 🟡 **The gate this asks for, unbuilt and undecided:** a decision tagged `his call` may not be
+      dropped as collateral of another decision. Today nothing enforces that — the same shape
+      `SCARS.md` exists for. Whether it can be a lock or only a rule is open; it is not built on
+      my own reading of my own failure.
+
 ## Gate — v3, the commission test · running **7 of 7** · the 3D ledger closes
 
 | batch | commission | verdict | capability the miss specified | cost |
