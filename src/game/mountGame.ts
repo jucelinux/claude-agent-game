@@ -1,9 +1,6 @@
 import Phaser from 'phaser'
 import type { CompiledBundle } from '../compiler/types.ts'
-import { LaunchScene } from './launch/LaunchScene.ts'
-import { LandingScene } from './landing/LandingScene.ts'
-import { MoonScene } from './moon/MoonScene.ts'
-import { MOON_WORLD } from './moon/project.ts'
+import { StarterScene, STAGE_HEIGHT, STAGE_WIDTH } from './starter/StarterScene.ts'
 import {
   WORKSPACE_MODE_EVENT,
   WORKSPACE_OVERLAY_EVENT,
@@ -27,9 +24,9 @@ export function mountGame(
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
-    width: MOON_WORLD.width,
-    height: MOON_WORLD.height,
-    backgroundColor: '#07070d',
+    width: STAGE_WIDTH,
+    height: STAGE_HEIGHT,
+    backgroundColor: '#080c13',
     pixelArt: true,
     antialias: false,
     physics: {
@@ -40,12 +37,12 @@ export function mountGame(
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [new LaunchScene(report), new LandingScene(report), new MoonScene(bundle, report)],
+    scene: [new StarterScene(bundle, report)],
   })
 
   let mode: WorkspaceMode = 'play'
   let overlays = false
-  let requestedScene: WorkspaceScene = 'launch'
+  let requestedScene: WorkspaceScene = 'starter'
 
   const syncWorkspaceState = (): void => {
     game.events.emit(WORKSPACE_MODE_EVENT, mode)
@@ -60,8 +57,8 @@ export function mountGame(
       return
     }
 
-    // Core READY may fire while SceneManager is still draining its pending scene queue.
-    // SceneManager.start handles that state itself; looking up the inactive scene first does not.
+    // READY may fire while SceneManager is draining its pending queue. `start` supports that
+    // state; eagerly resolving the scene with `getScene` can return null and break navigation.
     game.scene.start(requestedScene)
     game.events.once(Phaser.Core.Events.POST_RENDER, syncWorkspaceState)
   }

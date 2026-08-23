@@ -1,8 +1,7 @@
 import type { Grammar } from '../core/types.ts'
-import { ASTRONAUT } from './characters/astronaut.ts'
-import { MOON } from './scenery/moon.ts'
 
-export const PROJECT_GRAMMARS: readonly Grammar[] = [...ASTRONAUT, ...MOON]
+/** Procedural content for the active project. Empty on the neutral main branch. */
+export const PROJECT_GRAMMARS: readonly Grammar[] = []
 
 export const GRAMMARS: Readonly<Record<string, Grammar>> = Object.freeze(
   Object.fromEntries(PROJECT_GRAMMARS.map((grammar) => [grammar.name, grammar])),

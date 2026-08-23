@@ -1,7 +1,7 @@
 import { strip } from '../core/render.ts'
-import { validateParams } from '../authoring/params.ts'
 import type { Frame } from '../core/render.ts'
 import type { AssetSource, CompiledBundle, CompiledClip } from './types.ts'
+import { validateParams } from './validateParams.ts'
 
 const checksumBytes = (bytes: Uint8ClampedArray, seed = 0x811c9dc5): number => {
   let hash = seed >>> 0

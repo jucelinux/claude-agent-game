@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { compileBundle, compileClip } from '../src/compiler/compile.ts'
 import { compileProject, PROJECT_ID, PROJECT_SEED } from '../src/authoring/project.ts'
-import { PROJECT_ASSETS } from '../src/authoring/catalog.ts'
+import { COMPILER_FIXTURE } from './fixture.ts'
 
 describe('deterministic project compiler', () => {
   it('produces the same bundle from the same project', () => {
@@ -9,26 +9,35 @@ describe('deterministic project compiler', () => {
     const second = compileProject()
 
     expect(first.checksum).toBe(second.checksum)
-    expect(first.clips.map((clip) => clip.checksum)).toEqual(second.clips.map((clip) => clip.checksum))
-    first.clips.forEach((clip, index) => {
-      expect(clip.atlas.rgba).toEqual(second.clips[index]?.atlas.rgba)
-    })
-  }, 30_000)
+    expect(first.clips).toEqual(second.clips)
+  })
+
+  it('compiles a registered grammar to portable raster metadata', () => {
+    const first = compileClip(COMPILER_FIXTURE, PROJECT_SEED)
+    const second = compileClip(COMPILER_FIXTURE, PROJECT_SEED)
+
+    expect(first.checksum).toBe(second.checksum)
+    expect(first.atlas.rgba).toEqual(second.atlas.rgba)
+    expect(first.frames).toHaveLength(1)
+    expect(first.bounds.w).toBeGreaterThan(0)
+    expect(first.bounds.h).toBeGreaterThan(0)
+    expect(first.atlas.rgba.some((byte, index) => index % 4 === 3 && byte === 255)).toBe(true)
+  })
 
   it('rejects duplicate public asset ids', () => {
-    const source = PROJECT_ASSETS[0]
-    expect(source).toBeDefined()
-    expect(() => compileBundle(PROJECT_ID, [source!, source!], PROJECT_SEED)).toThrow(/duplicate asset id/)
+    expect(() => compileBundle(
+      PROJECT_ID,
+      [COMPILER_FIXTURE, COMPILER_FIXTURE],
+      PROJECT_SEED,
+    )).toThrow(/duplicate asset id/)
   })
 
   it('rejects invalid parameter data at the compiler boundary', () => {
-    const source = PROJECT_ASSETS[0]
-    expect(source).toBeDefined()
     const invalid = {
-      ...source!,
+      ...COMPILER_FIXTURE,
       params: {
-        ...source!.params,
-        canvas: { ...source!.params.canvas, w: Number.NaN },
+        ...COMPILER_FIXTURE.params,
+        canvas: { ...COMPILER_FIXTURE.params.canvas, w: Number.NaN },
       },
     }
     expect(() => compileClip(invalid, PROJECT_SEED)).toThrow(/canvas\.w/)

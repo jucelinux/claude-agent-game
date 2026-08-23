@@ -1,13 +1,11 @@
 # Agent Game Builder
 
-An authoring workspace for a coding agent to build a game. Procedural grammars compile
-to an engine-neutral raster bundle; Phaser consumes that bundle and owns the game.
+An authoring workspace for a coding agent to build one game at a time. Procedural grammars
+compile to an engine-neutral raster bundle; Phaser consumes that bundle and owns the game.
 
-The repository contains one game: a historically grounded procedural campaign recreating the
-Apollo 11 expedition from launch to splashdown. The current builder can switch directly between
-the Chapter 1 launch-day skeleton, the playable P66 terminal descent and the lunar-surface
-foundation. Selecting a compiled character or environment clip opens its pixel-perfect preview
-and authoring metadata. See [`CAMPAIGN.md`](./CAMPAIGN.md).
+The `main` branch is currently a clean starting point. It includes the builder workspace, a
+neutral Phaser scene and the asset-authoring pipelines, but deliberately contains no game
+concept or game-specific art.
 
 ## Start
 
@@ -23,15 +21,23 @@ Open `http://localhost:5177`.
 ## Architecture
 
 - `src/core/` — pure deterministic grammar renderer.
-- `src/grammars/` — astronaut and lunar environment grammar.
-- `src/authoring/` — the current project's asset catalog.
-- `src/compiler/` — portable bundle compiler.
-- `src/phaser/` — Phaser adapter.
-- `src/game/` — the lunar game.
+- `src/grammars/` — procedural grammar content for the current project.
+- `src/authoring/` — the current project's compiled-asset catalog.
+- `src/compiler/` — validation and portable bundle compiler.
+- `src/phaser/` — the Phaser bundle adapter.
+- `src/game/` — project-specific Phaser scenes and rules.
 - `src/ui/` — React development workspace.
+- `scripts/blender/` — reusable offline Blender rendering support.
+- `public/assets/` — imported, generated and offline-rendered raster assets.
 
-Phaser owns scenes, rendering, input, physics, cameras and lifecycle. The repository does
-not wrap those systems in a second engine.
+Phaser owns scenes, rendering, input, physics, cameras, audio and lifecycle. The repository does
+not wrap those systems in a second engine. See [asset authoring](docs/asset-authoring.md) for the
+three supported content paths.
+
+## Preserved work
+
+- `archive/apollo-11-prototype` — the complete Apollo 11 Phaser prototype.
+- `archive/pre-phaser-refactor` — the historical custom-runtime microgame project.
 
 ## Commands
 
@@ -41,6 +47,3 @@ npm run test
 npm run check
 npm run build
 ```
-
-The historical microgame shelf and its custom runtime are preserved on the local branch
-`archive/pre-phaser-refactor`.

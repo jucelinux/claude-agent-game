@@ -146,6 +146,12 @@ button { color: inherit; }
   letter-spacing: 0.13em;
 }
 
+.empty-list {
+  margin: 4px 8px 8px;
+  color: #586679;
+  font: 10px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 .asset-row, .scene-row {
   width: 100%;
   min-height: 29px;
@@ -271,6 +277,28 @@ button { color: inherit; }
 .runtime-values { display: grid; gap: 8px; margin: 0; }
 .runtime-values div { display: flex; justify-content: space-between; gap: 12px; }
 .runtime-section { background: #0b1018; }
+
+.empty-inspector {
+  display: grid;
+  gap: 10px;
+  padding: 22px 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.empty-inspector h2 {
+  margin: 0;
+  color: #dce3ee;
+  font: 600 14px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.empty-inspector p {
+  margin: 0;
+  color: #7e8999;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.empty-inspector code { color: #9eaabd; font-size: 10px; }
 
 .diagnostics {
   display: grid;

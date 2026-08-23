@@ -1,18 +1,18 @@
 # Agent entry point
 
-Read `CLAUDE.md` and `CAMPAIGN.md` before editing this repository.
+Read `CLAUDE.md` before editing this repository.
 
 ## Product boundary
 
 - Phaser is the game engine. Do not build another engine in this repository.
 - Preserve the pure grammar renderer and deterministic asset compiler.
-- Keep Phaser and React out of `src/core/`, `src/grammars/` and `src/compiler/`.
-- Build the current game inside the builder workspace. Do not create a game shelf.
+- Keep Phaser and React out of `src/core/`, `src/grammars/`, `src/authoring/` and `src/compiler/`.
+- Keep `main` neutral until the user approves the next game concept.
+- Build the approved game inside the builder workspace. Do not create a game shelf.
 - Keep only content that the current project uses.
-- Propose product and visual decisions before applying them.
+- Treat generated images and Blender renders as offline asset inputs, not runtime systems.
+- Propose product, visual and authoring-workflow decisions before applying them.
 - Do not use design skills, plugins or MCPs unless the user requests them.
-- Treat official as-flown Apollo 11 evidence as authoritative over recollection or generated
-  reference. Cite every material historical implementation.
 
 ## Commands
 

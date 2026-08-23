@@ -40,4 +40,21 @@ describe('architectural boundary', () => {
     expect(sourceFiles.some((path) => path.startsWith('src/micro/'))).toBe(false)
     expect(sourceFiles.some((path) => path.startsWith('src/scene/'))).toBe(false)
   })
+
+  it('keeps main free of archived game implementations', () => {
+    expect(existsSync('CAMPAIGN.md')).toBe(false)
+    expect(existsSync('src/game/launch')).toBe(false)
+    expect(existsSync('src/game/landing')).toBe(false)
+    expect(existsSync('src/game/moon')).toBe(false)
+    expect(existsSync('src/grammars/characters')).toBe(false)
+    expect(existsSync('src/grammars/scenery')).toBe(false)
+    expect(existsSync('public/assets/launch')).toBe(false)
+    expect(existsSync('public/assets/landing')).toBe(false)
+  })
+
+  it('starts scenes through Phaser without eagerly resolving pending scenes', () => {
+    const source = readFileSync('src/game/mountGame.ts', 'utf8')
+    expect(source).toContain('game.scene.start(requestedScene)')
+    expect(source).not.toContain('getScene(requestedScene)')
+  })
 })
