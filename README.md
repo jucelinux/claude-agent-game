@@ -1,8 +1,13 @@
-# Agent Game Maker
+# Agent Game Builder
 
-A game engine whose authoring interface is a coding agent. A request becomes one playable scene:
-deterministic simulation, procedural indexed art, replayable input and a human verdict on the
-finished game.
+An authoring workspace for a coding agent to build a game. Procedural grammars compile
+to an engine-neutral raster bundle; Phaser consumes that bundle and owns the game.
+
+The repository contains one game: a historically grounded procedural campaign recreating the
+Apollo 11 expedition from launch to splashdown. The current builder can switch directly between
+the Chapter 1 launch-day skeleton, the playable P66 terminal descent and the lunar-surface
+foundation. Selecting a compiled character or environment clip opens its pixel-perfect preview
+and authoring metadata. See [`CAMPAIGN.md`](./CAMPAIGN.md).
 
 ## Start
 
@@ -13,37 +18,29 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:5177`. The root is the shelf; each `/<id>` route is one game. The server
-restarts when imported source changes and invalidates cached stages when tunables change.
-`npm run build` writes the deployable shelf to `dist/micro/`.
-
-Before changing the repository, coding agents read `AGENTS.md` and the session sequence it
-points to. Humans can start with `CLAUDE.md` for the product contract, `TASTE.md` for proven
-visual judgment, and `SCARS.md` for defects promoted into gates.
+Open `http://localhost:5177`.
 
 ## Architecture
 
-- `src/core/` — deterministic grammar renderer; no DOM, clock or ambient randomness.
-- `src/grammars/` — the searchable lexicon of procedural subjects.
-- `tunables/` — anchored parameters; no free-floating tuning numbers.
-- `src/scene/` — authored scenes resolved into runtime stages.
-- `src/runtime/` — typed browser simulation, one module per game shape.
-- `src/micro/` — the shelf, route registry and game scenes.
-- `bin/` — bench, visual eye, replay, inspection and exploration commands.
-- `tests/` — locks over determinism, perception, runtime behaviour and shipped drawing traces.
+- `src/core/` — pure deterministic grammar renderer.
+- `src/grammars/` — astronaut and lunar environment grammar.
+- `src/authoring/` — the current project's asset catalog.
+- `src/compiler/` — portable bundle compiler.
+- `src/phaser/` — Phaser adapter.
+- `src/game/` — the lunar game.
+- `src/ui/` — React development workspace.
 
-## Product rules
+Phaser owns scenes, rendering, input, physics, cameras and lifecycle. The repository does
+not wrap those systems in a second engine.
 
-Keep the deterministic core independent from presentation. Art enters through grammars, input is
-a timeline, and a recorded play must replay identically. Metrics may reject absence or regression;
-they do not replace human taste.
+## Commands
 
-Dependencies are permitted when a measured product need justifies them. They require an explicit
-proposal and must stay outside the deterministic core when they serve presentation.
+```sh
+npm run dev
+npm run test
+npm run check
+npm run build
+```
 
-Run `npm run check` before delivery. Do not regenerate a golden trace merely to make it pass: a
-changed trace is a product change and must be explained.
-
-For a running-game reading, use `node bin/inspect-play.ts <game> [play.json]`. For deterministic
-alternate-input coverage, use `npm run explore` or target one route with
-`node bin/explore-play.ts <game> --seeds 32 --seconds 8`.
+The historical microgame shelf and its custom runtime are preserved on the local branch
+`archive/pre-phaser-refactor`.

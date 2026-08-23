@@ -1,180 +1,51 @@
-# CLAUDE.md
+# Project contract
 
-The project instance, **distilled 20/08** after the first fresh-agent commission.
-The narrative version of every file lives on branch `taste-loop-v1`; history lives in
-`DECISIONS.md` (append-only) and in git. This file holds only what binds.
+## Product
 
-## Session start
+This repository is an authoring workspace for building games with a coding agent.
+It is not a game engine. Phaser owns the game loop, scenes, rendering, input,
+physics, audio, cameras and resource lifecycle.
 
-Read, in order: this file → `TASTE.md` → **`SCARS.md`** → the last 20 lines of `DECISIONS.md`
-→ `BACKLOG.md`.
-Read `TASTE-LOOP.md` and `HARNESS.md` only when running a round or changing the harness.
-Do not write code before that. Then run the cycle open (`TASTE-LOOP.md` §3b) — at its
-**cheap** setting while the method is frozen: rungs 1–3 plus contradiction sweep; skip the
-method-debt items.
+The product surface is one builder workspace around one evolving game: a faithful procedural
+campaign of the Apollo 11 expedition from launch to splashdown. `CAMPAIGN.md` is the binding
+product and historical-fidelity contract. There is no microgame shelf.
 
-## The project
+## What is unique here
 
-- **Name:** agent-game-maker. Formerly claude-ink-2d and claude-agent-game.
-- **What it is:** a game engine whose interface is a coding agent — "o GameMaker dos
-  agentes". He can say exactly what he wants in a game; he cannot draw. The product is the
-  arrangement (harness + engine + drawing grammar) that lets an agent deliver it.
-- **The product surface is ONE thing:** the shelf. `node bin/micro.ts`, port 5177, `/` is
-  the shelf, `/<id>` is a game. The watched server invalidates its per-game stage cache when
-  source or tunables change. Nothing is ever removed from the shelf.
-- **Failure condition:** he decides, from judgment. No metric decides for him.
-- **The defining requirement:** a fresh agent, given only this repository, can build a small
-  game. The first Codex trial shipped `/orrery` after two human-found correctness defects; the
-  comparative protocol and the unsoftened result live in `AGENT-EVAL.md`.
+- Grammar-first procedural art.
+- A deterministic compiler from authored grammar to portable raster bundles.
+- Stable animation, palette, origin, contact and attachment metadata.
+- A workspace that lets a builder play, inspect and diagnose the current game.
+- Optional generated or imported images that enter through the same bundle contract.
 
-## The gate — v3, the commission test
+The deterministic boundary ends at the compiled asset bundle. Phaser gameplay is not
+required to reproduce a repository-owned simulation or replay timeline.
 
-- He names an object and an animation in one sentence. The model delivers a micro game,
-  no back-and-forth. He answers in one word, plus a word of why on a miss.
-- **"Ships"** = usable in a game AND he would be glad to have it there.
-- **A miss is a specification, not a strike.** Its output is the name of the missing
-  capability. Every capability in this grammar was born this way.
-- Two numbers recorded per batch, evidence never thresholds: **hit rate** and **cost to
-  hit** (model cycles + his readings per shipped piece).
-- The reading is written into `BACKLOG.md` the same turn it arrives, in his words,
-  unsoftened. `DECISIONS.md` records that a reading happened, never the tally.
-- A batch spans kinds (creature, prop, character, effect, environment).
-- **Prediction discipline (reduced 16/08):** before he looks, ONE line — verdict +
-  probability + the one reason. After, ONE line scoring it. No essays.
-- Do not build a reading whose setup cost lands on him (gates v1 and v2 died of it).
+## Architecture
 
-## Method status — the freeze paid out, 18/08
+- `src/core/` is the pure grammar renderer. It imports no Phaser, React or browser APIs.
+- `src/grammars/` contains only content used by the current project.
+- `src/authoring/` declares the project asset catalog and parameters.
+- `src/compiler/` produces an engine-neutral bundle.
+- `src/phaser/` is the only adapter from that bundle to a game engine.
+- `src/game/` contains game-specific Phaser scenes and rules.
+- `src/ui/` contains the React builder workspace.
 
-The Taste Loop's **core stays binding**: verdicts compile into knobs/locks/prose; the
-perception channels; miss-as-specification; binary questions in batches; attributability
-bounds a reading (a foundation is bounded by the null case instead, and may accumulate).
+Do not recreate Phaser facilities behind repository-owned abstractions. Game-specific
+rules are allowed; a generic scene, input, physics, camera, audio or lifecycle system is not.
 
-The 16/08 freeze suspended four things "until three batches show a cost". Batches 5, 7 and 8
-ran. **The cost arrived and it was measured:** a lesson recorded in three markdown files still
-shipped missing from three games, including the one it was found in. That releases exactly ONE
-of the four — the round-close ceremony — with the evidence, and only in the form the evidence
-justifies:
+## Working agreement
 
-> **Every defect fixed in a round is classified LOCAL or CROSS-CUTTING. A cross-cutting one
-> becomes a lock that sweeps `MICRO_GAMES` in the same turn, with its exceptions declared in
-> writing. It is entered in `SCARS.md` either way.**
+Read this file and `AGENTS.md` before edits. Run `npm run check` and `npm run build`
+before delivery. Do not add a dependency silently: state its role and boundary first.
 
-The other three stay frozen: method proposals, `TASTE.md` §2a essays, gate redesigns. They have
-no evidence.
+Suggestions that change product direction, visual direction or the authoring workflow
+must be explicit and require Jucelinux's approval. Do not use design skills, plugins or
+MCPs unless he asks for them. Image generation is available, but each material use must
+be proposed before it enters the project.
 
-**Why a markdown line is not enough, in his words:** *"ele é bom em acumular memórias, mas não
-transforma essas memórias em gates."* Markdown is read once at session start; a lock runs on
-every commit. The model uses a memory when it is the SUBJECT and forgets it when it would be a
-CONSTRAINT — so the constraint belongs where the code is, not where the conversation is.
-`SCARS.md` is the ledger of which scars have made that trip.
+Historical claims, assets and mechanics must follow the evidence hierarchy in `CAMPAIGN.md`.
+Generated imagery is never a historical source. Record material simplifications and source
+conflicts explicitly; do not silently turn planned procedure into as-flown history.
 
-## The bench loop — amended 16/08, structured look adopted
-
-1. **The counting channel is non-negotiable and runs every turn.** `node bin/bench.ts`:
-   contact sheet, silhouette, findings, counts. It finds what sight cannot — absence
-   leaves no trace in a picture.
-2. **The model MAY look during the bench loop.** `node bin/see.ts [run] [--set …]` writes
-   a contact-sheet PNG to `.eye/`; Read the file. Use it for the correspondence class —
-   "does this look like the thing" — which counting cannot reach.
-3. **Every fix enters through the grammar.** There is nothing else to edit; pixel
-   retouching does not exist as an operation here.
-4. **Measured:** each round records one line — what looking caught that counting did not.
-   If three batches show nothing, the look retires.
-5. **References at intake:** before authoring a NEW subject kind, look at 2–3 reference
-   images (his, or CC0) and extract **structural numbers** — proportions, landmarks,
-   ratios — into the grammar as anchored tunables. `refs/` stays gitignored.
-
-## Collaboration
-
-- **Delivery format:** everything he asks for is born as an object belonging to a game —
-  a cloud arrives as a sky a cloud crosses. He says when a new micro game starts.
-- **Async checkpoints (adopted 16/08, his ask):** when a feature slice stands on its route
-  — the skater, the track, the background — announce it in ONE line, keep working. His
-  silence means continue; his comment enters the running round as insight, not as a formal
-  reading. Never block on a checkpoint.
-- **Slice a commission into visible features** (skeleton in scene → environment →
-  mechanic → polish), each appearing on the route when it stands. The number to watch:
-  his notes getting shorter.
-- **The ask format, binding:** what to open · what to do · how long it takes · what a pass
-  looks like · what each answer changes. Plain language a fifteen-year-old follows.
-- **Language rule:** reports to him in ASD-STE100 Simplified Technical English (or the
-  simplified aeronautical Portuguese). Short sentences, active voice, one idea per
-  sentence, no metaphor. Numbers, costs and misses stay exact; if a result is bad, say it
-  is bad. Scope: reports. Repository files keep their (now dry) style.
-- **Cadence:** several batches per week; availability raises frequency, never batch size.
-- His imprecise report is a sensor, near perfect on *that*, rarely right on *where* —
-  hunt the root, never patch the symptom. A complaint names a layer; the cause is often in
-  another (check how a thing is SHOWN before touching how it is DRAWN).
-- When a verdict is about feel, the model owes a number that moved with it.
-- Mastery is spent, not re-litigated: a commission touching a mastered subject on a read
-  axis proceeds freely; on an unread axis it gets one line at delivery naming the risk.
-  The ledger is `TASTE.md` §2b.
-
-## Build order — as of 16/08
-
-1. ~~Round zero~~ · 2. ~~grammar slice~~ · 3. ~~exporter~~ (dead) — done or dead.
-4. **Finish the drawing via commission batches.** "Finish" = commissions ship reliably
-   across kinds. Known gaps, built only when a miss names them: pattern inside a part ·
-   effects (fire, smoke) · full 3D pitch (roll exists) · generativity beyond trees.
-5. **Then the engine slice:** one-screen platformer — deterministic headless sim, fixed
-   timestep, box collision, replayable input, animation state machine. **Five of five done as
-   of 20/08**; `/orrery` supplied shared box/circle collision and the first explicit typed
-   transition graph. Older shapes remain unmigrated until their behaviour asks for it.
-6. **The differentiator: the agent's perception of a RUNNING game.** Same pattern as the
-   sprite channel, one level up.
-7. **Then a production slice:** one small complete game, accepted 20/08. It proves progression,
-   save, settings, input devices, audio, release and human completion rather than another engine
-   capability. Held until his intermediate task is finished.
-8. Judging apparatus — only if judging becomes the bottleneck.
-
-Drawing capacity is upstream of the engine: production capacity bounds game diversity.
-
-## Architecture — prerequisites, not preferences
-
-- The deterministic core imports nothing from presentation. `sprite(grammar, params,
-  seed)` is closed-form; the browser is a consumer.
-- **A recorded input replays identically, and as of 18/08 that is enforced rather than claimed.**
-  The simulation advances in whole 1/120 s steps and input is a TIMELINE — each event carries its
-  own timestamp and is applied to the step it belongs to, not to the frame that noticed it.
-  Locked at three refresh rates (`tests/timestep.test.ts`); a play is recorded by `bin/play.ts`.
-- **The browser runtime is `src/runtime/`: one typed module per game shape.** It was 2014 lines
-  inside a template literal, where the compiler could not read it, backticks were forbidden and
-  nine games shared one scope. `src/micro/bundle.ts` turns the modules into the one classic
-  script the page serves — Node strips the types, the registry is twelve lines, no dependency
-  and no build step. Generated modules carry `sourceURL`, so browser errors name their owning
-  runtime file. **A string cannot contradict the agent writing it**, and the first hour
-  after the move the compiler found a sprite that had never been drawn in a shipped game.
-- Physical keys become semantic `primary` and `secondary` actions at the runtime boundary.
-  Shapes do not know key names. Every shape exposes one typed `Observation`; inspection and
-  seeded exploration consume that same contract rather than copying simulation state.
-- `tests/golden.test.ts` holds the draw trace of every game, folded to one number. A refactor
-  that changes it changed the product; regenerating it to go green is the one forbidden move.
-- The unit of work is the **grammar**, never a sprite. Animation transforms anchored
-  parts; frames are never redrawn.
-- Every tunable lives in `tunables/`, anchored, locked. Depth is solved (z-buffer, 2.5D),
-  never authored. One placement rule (`rowOf`); one renderer.
-- The ink idiom: five tones over a wide value range, with a drawn line (his run-8
-  ranking). Value range AND region structure, both or neither counts.
-- Declared per part because no measurement can infer intent: `marking`, `weld`, `cut`,
-  symmetric-pair exemptions.
-
-## Don'ts
-
-- **Dependencies are evidence decisions, not forbidden.** Before adding one, state the measured
-  product need, why the existing stack misses it, its runtime/build reach, its deterministic
-  null case and its removal boundary. Approval is required. Presentation libraries such as Pixi
-  may consume the core; they never enter it. No dependency is added merely to look production-ready.
-- No pixel retouching. No judging stills — everything he sees is in motion.
-- Do not design generality; harvest it from two working subjects.
-- Do not enrich the counting channel into a picture — the look is `bin/see.ts`, separate,
-  and the counts stay primary for absence.
-- Do not mechanise his judgment. Any rule that would spare a conversation is suspect.
-- Commit only when he asks or a batch closes.
-
-## The human
-
-Jucelinux. Software engineer, author of the Taste Loop. Plays a great deal; can say
-exactly what he wants in a game; delegates the hand, not the judgment. He stretches the
-rope on purpose — a naive-sounding question is usually a harness probe. He picks the
-medium, delegates the taste inside it, and wants the reasoning out loud before it is
-applied.
+Do not commit unless asked.

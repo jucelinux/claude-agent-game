@@ -112,41 +112,70 @@ export const earth: Grammar = {
 }
 
 /**
- * **A crater.** Two rings and a floor: a bright rim on the sunward side, a dark one opposite,
- * and a shadowed bowl. On the moon a crater is the only relief there is, and it is what stops
- * a grey plane from being a grey plane.
- *
- * They are authored as a **circle seen at an angle** — his correction of 16/08: *"o solo lunar
- * é mais memorável por suas crateras... trocar essas pedras maiores por crateras circulares"*.
- * The first version was 0.42 as tall as it was wide, which is a circle viewed almost edge-on
- * and reads as a puddle. 0.66 is a circle seen from about forty degrees above, and that single
- * ratio is the whole of the perspective in this scene — it has to agree with how much floor
- * the astronaut can walk into, and it now does.
+ * A crater is authored as a terrain decal, never as a loose ellipsoid. The outer apron is an
+ * almost-flat patch of disturbed soil. The cut owns the cavity, two bright shapes describe the
+ * sun-facing wall and the last dark shape leaves a deep floor. Their offsets deliberately expose
+ * a bright crescent at lower-right and a dark overhang at upper-left: with the sun at upper-left,
+ * that is the lighting logic of a depression rather than a boulder.
  */
 function makeCrater(name: string, r: number, seed: number): Grammar {
+  const ellipse = (cx: number, cy: number, rx: number, ry: number, rz: number) =>
+    ({ kind: 'ellipse', cx, cy, rx, ry, rz } as const)
+
   return {
     name,
     palette: SPACE,
     skeleton: { bones: [{ name: 'c', parent: null, x: 0, y: 0, z: 0, angle: 0 }] },
     parts: [
-      // The bowl: a shallow dish, one step down from the plain.
-      { name: 'bowl', bone: 'c', material: 'regolith', shift: -1, shape: { kind: 'lobed', cx: 0, cy: 0, rx: r, ry: r * 0.66, rz: r * 0.5, lobes: 6, depth: 0.09, phase: seed, octaves: 2 } },
-      /**
-       * **The rim and the shadow, and both now agree with the lamp.**
-       *
-       * The sun is at (-0.55, -0.5): upper left. For a *depression* that means the inner wall
-       * on the upper-left faces down and away from it and pools shadow, while the raised rim
-       * catches light on its upper-left outer edge. The first version put the shadow on the
-       * lower right, which is the lit side — so every crater in the scene disagreed with the
-       * Earth hanging above it about where the sun was. His reading: *"quando observo a terra
-       * tenho um indicador claro de onde está o sol. Porém quando olho para o terreno da lua...
-       * o foco de luz não fica claro"*.
-       *
-       * These are markings rather than solids, so a crater is a hole in the ground rather than
-       * a lid on it, and none of the three rings draws an inner line.
-       */
-      { name: 'rim', bone: 'c', material: 'regolith', marking: true, shift: 1, z: -1, shape: { kind: 'lobed', cx: -r * 0.1, cy: -r * 0.2, rx: r * 0.96, ry: r * 0.58, rz: r * 0.44, lobes: 6, depth: 0.09, phase: seed + 0.3, octaves: 2 } },
-      { name: 'shade', bone: 'c', material: 'regolith', marking: true, shift: -2, z: -2, shape: { kind: 'lobed', cx: -r * 0.2, cy: -r * 0.04, rx: r * 0.62, ry: r * 0.38, rz: r * 0.34, lobes: 5, depth: 0.12, phase: seed + 1.7, octaves: 2 } },
+      {
+        name: 'ejecta-apron',
+        bone: 'c',
+        material: 'regolith',
+        shift: -1,
+        shape: {
+          kind: 'lobed', cx: 0, cy: 0, rx: r * 0.94, ry: r * 0.54, rz: 0.8,
+          lobes: 7, depth: 0.075, phase: seed, octaves: 3,
+        },
+      },
+      {
+        name: 'cavity',
+        bone: 'c',
+        material: 'regolith',
+        cut: true,
+        z: -0.2,
+        shape: {
+          kind: 'lobed', cx: 0, cy: 0, rx: r * 0.76, ry: r * 0.43, rz: r * 0.28,
+          lobes: 7, depth: 0.055, phase: seed + 0.65, octaves: 2,
+        },
+      },
+      // Broken highlights keep the rim geological rather than turning it into a perfect ring.
+      {
+        name: 'rim-west', bone: 'c', material: 'regolith', marking: true, shift: 2, z: -0.3,
+        shape: {
+          kind: 'capsule', x0: -r * 0.86, y0: -r * 0.02,
+          x1: -r * 0.46, y1: -r * 0.37, r: Math.max(1, r * 0.085), r1: Math.max(0.8, r * 0.06),
+        },
+      },
+      {
+        name: 'rim-crown', bone: 'c', material: 'regolith', marking: true, shift: 2, z: -0.3,
+        shape: {
+          kind: 'capsule', x0: -r * 0.38, y0: -r * 0.39,
+          x1: r * 0.24, y1: -r * 0.43, r: Math.max(1, r * 0.075), r1: Math.max(0.8, r * 0.055),
+        },
+      },
+      // A larger bright wall followed by a smaller dark floor leaves the lit inner crescent.
+      {
+        name: 'sunward-inner-wall', bone: 'c', material: 'regolith', marking: true, shift: 2, z: -0.4,
+        shape: ellipse(r * 0.07, r * 0.09, r * 0.68, r * 0.34, r * 0.2),
+      },
+      {
+        name: 'bowl-floor', bone: 'c', material: 'regolith', marking: true, shift: -4, z: -0.5,
+        shape: ellipse(-r * 0.08, -r * 0.07, r * 0.57, r * 0.255, r * 0.16),
+      },
+      {
+        name: 'floor-glint', bone: 'c', material: 'regolith', marking: true, shift: -2, z: -0.6,
+        shape: ellipse(r * 0.08, r * 0.045, r * 0.24, r * 0.075, r * 0.08),
+      },
     ],
     gait: STILL,
   }

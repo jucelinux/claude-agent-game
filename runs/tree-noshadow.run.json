@@ -1,6 +1,0 @@
-{
-  "grammar": "tree",
-  "tunables": "tree",
-  "seed": 1,
-  "overrides": { "shadow.strength": 0 }
-}

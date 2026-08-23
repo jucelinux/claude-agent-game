@@ -1,21 +1,22 @@
 # Agent entry point
 
-This repository is agent-neutral. `CLAUDE.md` is the historical filename of the binding project
-contract; its rules apply to every coding agent. Read its session-start sequence before edits.
+Read `CLAUDE.md` and `CAMPAIGN.md` before editing this repository.
 
-## Operational contract
+## Product boundary
 
-- Preserve the deterministic core, typed runtime, replay timeline and grammar-first art path.
-- A human verdict decides taste. A metric finds absence, contradiction or regression.
-- Build a requested object inside a playable scene. Do not deliver an isolated sprite.
-- Turn a cross-game defect into a sweeping lock and record it in `SCARS.md`.
-- Do not silently add a dependency. Follow the evidence policy in `CLAUDE.md`.
-- Use this repository's perception channels. External design systems require an explicit request.
+- Phaser is the game engine. Do not build another engine in this repository.
+- Preserve the pure grammar renderer and deterministic asset compiler.
+- Keep Phaser and React out of `src/core/`, `src/grammars/` and `src/compiler/`.
+- Build the current game inside the builder workspace. Do not create a game shelf.
+- Keep only content that the current project uses.
+- Propose product and visual decisions before applying them.
+- Do not use design skills, plugins or MCPs unless the user requests them.
+- Treat official as-flown Apollo 11 evidence as authoritative over recollection or generated
+  reference. Cite every material historical implementation.
 
 ## Commands
 
-- `npm run dev` — watched live shelf at port 5177.
-- `npm run check` — typecheck and all locks.
-- `npm run build` — static shelf and one route per game.
-- `node bin/inspect-play.ts <game> [play.json]` — typed semantic observation.
-- `node bin/explore-play.ts <game|all>` — seeded input exploration and invariant checks.
+- `npm run dev` — Vite builder workspace at port 5177.
+- `npm run test` — deterministic compiler and contract tests.
+- `npm run check` — typecheck and tests.
+- `npm run build` — production workspace build.

@@ -1,6 +1,0 @@
-{
-  "grammar": "probe-c",
-  "tunables": "probe-c-value",
-  "seed": 1,
-  "overrides": {}
-}

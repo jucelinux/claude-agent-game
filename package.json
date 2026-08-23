@@ -1,25 +1,30 @@
 {
-  "name": "agent-game-maker",
+  "name": "agent-game-builder",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=24"
   },
   "scripts": {
-    "dev": "node --watch --watch-preserve-output bin/micro.ts",
-    "build": "node bin/micro.ts --static",
+    "dev": "vite --host 0.0.0.0 --port 5177",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 5177",
     "check": "npm run typecheck && npm test",
     "test": "vitest run",
-    "run": "node bin/run.ts",
-    "bench": "node bin/bench.ts",
-    "record": "node bin/record.ts",
-    "explore": "node bin/explore-play.ts all",
-    "baseline": "node bin/run.ts runs/fixture.run.json --write-baseline",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.runtime.json --noEmit"
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "phaser": "^4.2.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^5.2.0",
     "typescript": "^5.9.3",
+    "vite": "^7.3.6",
     "vitest": "^3.2.4"
   }
 }
