@@ -54,6 +54,7 @@ describe('architectural boundary', () => {
 
   it('starts scenes through Phaser without eagerly resolving pending scenes', () => {
     const source = readFileSync('src/game/mountGame.ts', 'utf8')
+    expect(source).toContain('game.scene.stop(activeScene.scene.key)')
     expect(source).toContain('game.scene.start(requestedScene)')
     expect(source).not.toContain('getScene(requestedScene)')
   })

@@ -1,9 +1,11 @@
 import Phaser from 'phaser'
 import type { CompiledBundle } from '../compiler/types.ts'
-import { StarterScene, STAGE_HEIGHT, STAGE_WIDTH } from './starter/StarterScene.ts'
+import { DepthStudyScene, STAGE_HEIGHT, STAGE_WIDTH } from './depth/DepthStudyScene.ts'
+import { GlyphWorldScene } from './glyph/GlyphWorldScene.ts'
 import {
   WORKSPACE_MODE_EVENT,
   WORKSPACE_OVERLAY_EVENT,
+  type PrototypeProgress,
   type RuntimeSnapshot,
   type WorkspaceMode,
   type WorkspaceScene,
@@ -21,6 +23,14 @@ export function mountGame(
   bundle: CompiledBundle,
   report: (snapshot: RuntimeSnapshot) => void,
 ): GameHandle {
+  let mode: WorkspaceMode = 'play'
+  let overlays = false
+  let requestedScene: WorkspaceScene = 'depth-study'
+  const reportScene = (snapshot: RuntimeSnapshot): void => {
+    report(snapshot)
+  }
+  const progress: PrototypeProgress = { puzzleComplete: false }
+
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
@@ -37,12 +47,12 @@ export function mountGame(
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [new StarterScene(bundle, report)],
+    scene: [
+      new DepthStudyScene(bundle, reportScene, progress),
+      new GlyphWorldScene(bundle, reportScene, progress, 'puzzle'),
+      new GlyphWorldScene(bundle, reportScene, progress, 'platform'),
+    ],
   })
-
-  let mode: WorkspaceMode = 'play'
-  let overlays = false
-  let requestedScene: WorkspaceScene = 'starter'
 
   const syncWorkspaceState = (): void => {
     game.events.emit(WORKSPACE_MODE_EVENT, mode)
@@ -51,10 +61,14 @@ export function mountGame(
 
   const startRequestedScene = (): void => {
     if (!game.isBooted) return
-    const active = game.scene.getScenes(true)[0]
-    if (active?.scene.key === requestedScene) {
+    const activeScenes = game.scene.getScenes(true)
+    if (activeScenes.length === 1 && activeScenes[0]?.scene.key === requestedScene) {
       syncWorkspaceState()
       return
+    }
+
+    for (const activeScene of activeScenes) {
+      if (activeScene.scene.key !== requestedScene) game.scene.stop(activeScene.scene.key)
     }
 
     // READY may fire while SceneManager is draining its pending queue. `start` supports that

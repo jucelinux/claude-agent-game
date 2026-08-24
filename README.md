@@ -2,10 +2,15 @@
 
 An authoring workspace for a coding agent to build one game at a time. Procedural grammars
 compile to an engine-neutral raster bundle; Phaser consumes that bundle and owns the game.
+The root screen catalogs the prototypes that are currently available and opens each one in its
+own Agent Game Builder workspace.
 
-The `main` branch is currently a clean starting point. It includes the builder workspace, a
-neutral Phaser scene and the asset-authoring pipelines, but deliberately contains no game
-concept or game-specific art.
+The active prototype takes place inside an Egyptian pyramid and tests a mixed 3D/2D gameplay
+loop. The player explores a low-resolution polygonal chamber in third person and interacts with
+glowing hieroglyphic murals painted onto its walls. The left mural leads to a compact puzzle;
+the player must break a clay vessel and recover its golden key before the right mural awakens.
+That mural leads to a short platform fight against the watching guardian, with the traveler
+rendered as a painted figure.
 
 ## Start
 

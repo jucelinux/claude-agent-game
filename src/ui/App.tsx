@@ -9,13 +9,20 @@ import {
 } from '../game/types.ts'
 import CompilerWorker from '../workers/compiler.worker.ts?worker'
 import type { CompilerWorkerResult } from '../workers/compiler.worker.ts'
+import {
+  PROTOTYPES,
+  resolvePrototypeId,
+  type PrototypeId,
+} from './prototypes.ts'
 
 const INITIAL_SCENE = WORKSPACE_SCENES[0].id
 const EMPTY_RUNTIME: RuntimeSnapshot = {
   scene: INITIAL_SCENE,
   mode: 'play',
-  pointerX: 0,
-  pointerY: 0,
+  playerX: 0,
+  playerY: 0,
+  playerDepth: 1.5,
+  interaction: null,
   fps: 0,
 }
 
@@ -131,24 +138,42 @@ function ClipInspector({ clip }: { readonly clip: CompiledClip }): React.JSX.Ele
 function EmptyInspector(): React.JSX.Element {
   return (
     <section className="empty-inspector">
-      <span className="eyebrow">Asset inspector</span>
-      <h2>No compiled assets yet</h2>
+      <span className="eyebrow">Scene geometry</span>
+      <h2>Gameplay blockout</h2>
       <p>
-        Add procedural assets in <code>src/authoring/catalog.ts</code>. Generated images and
-        Blender renders live under <code>public/assets</code> and are loaded by the game scene.
+        The prototype uses scene-authored 3D faces and native Phaser shapes for the 2D world.
+        Compiled assets remain empty while the interaction loop is being established.
       </p>
     </section>
   )
 }
 
-function LoadingWorkspace({ error }: { readonly error: string | null }): React.JSX.Element {
+function BuilderBrand({ onExit }: { readonly onExit: () => void }): React.JSX.Element {
+  return (
+    <div className="workspace-brand-group">
+      <button className="catalog-return" onClick={onExit} aria-label="Back to prototype catalog">
+        <span aria-hidden="true">←</span>
+        Prototypes
+      </button>
+      <div className="brand">
+        <span className="brand-mark">AG</span>
+        <div><strong>Agent Game Builder</strong><span>Pyramid glyph prototype</span></div>
+      </div>
+    </div>
+  )
+}
+
+function LoadingWorkspace({
+  error,
+  onExit,
+}: {
+  readonly error: string | null
+  readonly onExit: () => void
+}): React.JSX.Element {
   return (
     <main className="loading-shell">
       <header className="topbar">
-        <div className="brand">
-          <span className="brand-mark">AG</span>
-          <div><strong>Agent Game Builder</strong><span>Untitled game</span></div>
-        </div>
+        <BuilderBrand onExit={onExit} />
       </header>
       <section className="loading-workspace" aria-live="polite">
         <div className={`compiler-pulse ${error === null ? '' : 'failed'}`} />
@@ -160,7 +185,7 @@ function LoadingWorkspace({ error }: { readonly error: string | null }): React.J
   )
 }
 
-export function App(): React.JSX.Element {
+function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JSX.Element {
   const [compilation, setCompilation] = useState<CompilerWorkerResult | null>(null)
   const [compileError, setCompileError] = useState<string | null>(null)
   const [mode, setMode] = useState<WorkspaceMode>('play')
@@ -192,7 +217,7 @@ export function App(): React.JSX.Element {
     void import('../game/mountGame.ts').then(({ mountGame }) => {
       if (disposed) return
       mounted = mountGame(host, compilation.bundle, (snapshot) => {
-        if (snapshot.scene !== requestedScene.current) return
+        requestedScene.current = snapshot.scene
         setRuntime(snapshot)
         setActiveScene(snapshot.scene)
       })
@@ -214,7 +239,7 @@ export function App(): React.JSX.Element {
   useEffect(() => gameHandle.current?.setMode(mode), [mode])
   useEffect(() => gameHandle.current?.setOverlays(overlays), [overlays])
 
-  if (compilation === null) return <LoadingWorkspace error={compileError} />
+  if (compilation === null) return <LoadingWorkspace error={compileError} onExit={onExit} />
 
   const characterClips = compilation.bundle.clips.filter((clip) => clip.kind === 'character')
   const environmentClips = compilation.bundle.clips.filter((clip) => clip.kind === 'environment')
@@ -223,6 +248,10 @@ export function App(): React.JSX.Element {
   const frameCount = compilation.bundle.clips.reduce((total, clip) => total + clip.frames.length, 0)
   const byteCount = compilation.bundle.clips.reduce((total, clip) => total + clip.atlas.rgba.byteLength, 0)
   const scene = WORKSPACE_SCENES.find((entry) => entry.id === activeScene) ?? WORKSPACE_SCENES[0]
+  const isGlyphScene = runtime.scene !== 'depth-study'
+  const position = isGlyphScene
+    ? `position ${runtime.playerX.toFixed(1)}, ${runtime.playerY.toFixed(1)}`
+    : `position ${runtime.playerX.toFixed(1)} · depth ${runtime.playerDepth.toFixed(1)}`
 
   const selectScene = (nextScene: WorkspaceScene): void => {
     requestedScene.current = nextScene
@@ -238,10 +267,7 @@ export function App(): React.JSX.Element {
   return (
     <main className="workspace-shell">
       <header className="topbar">
-        <div className="brand">
-          <span className="brand-mark">AG</span>
-          <div><strong>Agent Game Builder</strong><span>Untitled game</span></div>
-        </div>
+        <BuilderBrand onExit={onExit} />
 
         <div className="mode-switch" role="group" aria-label="Workspace mode">
           <button className={mode === 'play' ? 'active' : ''} onClick={() => setMode('play')}>Play</button>
@@ -315,7 +341,13 @@ export function App(): React.JSX.Element {
             <div>
               <span className="eyebrow">Phaser scene</span>
               <strong>{scene.label}</strong>
-              <span className="blockout-badge">blank project</span>
+              <span className="blockout-badge">
+                {activeScene === 'glyph-puzzle'
+                  ? '2D puzzle'
+                  : activeScene === 'glyph-platform'
+                    ? '2D platform'
+                    : '3D chambers'}
+              </span>
             </div>
             <label className="toggle">
               <input
@@ -334,7 +366,7 @@ export function App(): React.JSX.Element {
           </div>
           <div className="transport-bar">
             <span>{scene.detail}</span>
-            <span>pointer {runtime.pointerX}, {runtime.pointerY}</span>
+            <span>{position}</span>
             <span className="runtime-fps">{runtime.fps || '—'} fps</span>
           </div>
         </section>
@@ -347,7 +379,14 @@ export function App(): React.JSX.Element {
             <dl className="runtime-values">
               <div><dt>Scene</dt><dd>{runtime.scene}</dd></div>
               <div><dt>Mode</dt><dd>{runtime.mode}</dd></div>
-              <div><dt>Pointer</dt><dd>{runtime.pointerX}, {runtime.pointerY}</dd></div>
+              <div><dt>Horizontal</dt><dd>{runtime.playerX.toFixed(2)}</dd></div>
+              <div>
+                <dt>{isGlyphScene ? 'Vertical' : 'Depth'}</dt>
+                <dd>
+                  {(isGlyphScene ? runtime.playerY : runtime.playerDepth).toFixed(2)}
+                </dd>
+              </div>
+              <div><dt>Interaction</dt><dd>{runtime.interaction ?? 'none'}</dd></div>
             </dl>
           </section>
         </aside>
@@ -361,4 +400,136 @@ export function App(): React.JSX.Element {
       </footer>
     </main>
   )
+}
+
+function PyramidPreview(): React.JSX.Element {
+  return (
+    <div className="pyramid-preview" aria-hidden="true">
+      <span className="preview-ceiling" />
+      <span className="preview-floor" />
+      <span className="preview-wall preview-wall-left" />
+      <span className="preview-wall preview-wall-right" />
+      <span className="preview-back-wall" />
+      <span className="preview-column preview-column-left" />
+      <span className="preview-column preview-column-right" />
+      <span className="preview-mural preview-mural-left" />
+      <span className="preview-mural preview-mural-right" />
+      <span className="preview-traveler" />
+      <span className="preview-pixel preview-pixel-one" />
+      <span className="preview-pixel preview-pixel-two" />
+      <span className="preview-pixel preview-pixel-three" />
+    </div>
+  )
+}
+
+function PrototypeCatalog({
+  onOpen,
+}: {
+  readonly onOpen: (id: PrototypeId) => void
+}): React.JSX.Element {
+  return (
+    <main className="catalog-shell">
+      <header className="catalog-topbar">
+        <div className="brand">
+          <span className="brand-mark">AG</span>
+          <div><strong>Agent Game Builder</strong><span>Prototype catalog</span></div>
+        </div>
+        <div className="catalog-availability">
+          <span className="status-dot" />
+          {PROTOTYPES.length} {PROTOTYPES.length === 1 ? 'prototype' : 'prototypes'} available
+        </div>
+      </header>
+
+      <div className="catalog-content">
+        <section className="catalog-hero">
+          <div>
+            <span className="eyebrow">Playable studies</span>
+            <h1>Choose a prototype<br />to enter the Builder.</h1>
+          </div>
+          <p>
+            Each prototype opens as its own authoring workspace, with playable scenes,
+            runtime diagnostics and project-specific assets.
+          </p>
+        </section>
+
+        <section className="catalog-library" aria-labelledby="prototype-library-title">
+          <div className="catalog-section-heading">
+            <div>
+              <span className="eyebrow">Current library</span>
+              <h2 id="prototype-library-title">Prototypes</h2>
+            </div>
+            <span>
+              {String(PROTOTYPES.length).padStart(2, '0')}{' '}
+              {PROTOTYPES.length === 1 ? 'entry' : 'entries'}
+            </span>
+          </div>
+
+          <div className="prototype-grid">
+            {PROTOTYPES.map((prototype) => (
+              <button
+                key={prototype.id}
+                className="prototype-card"
+                onClick={() => onOpen(prototype.id)}
+                aria-label={`Open ${prototype.title} in Agent Game Builder`}
+              >
+                <PyramidPreview />
+                <span className="prototype-card-copy">
+                  <span className="prototype-card-kicker">
+                    <span>{prototype.status}</span>
+                    {prototype.eyebrow}
+                  </span>
+                  <strong>{prototype.title}</strong>
+                  <span className="prototype-description">{prototype.description}</span>
+                  <span className="prototype-meta">
+                    <span>{prototype.sceneCount} scenes</span>
+                    <span>{prototype.format}</span>
+                    <span className="prototype-open">Open builder <b aria-hidden="true">↗</b></span>
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <footer className="catalog-footer">
+        <span>Agent Game Builder</span>
+        <span>Local prototype workspace</span>
+      </footer>
+    </main>
+  )
+}
+
+export function App(): React.JSX.Element {
+  const [activePrototype, setActivePrototype] = useState<PrototypeId | null>(() =>
+    resolvePrototypeId(new URLSearchParams(window.location.search).get('prototype')),
+  )
+
+  useEffect(() => {
+    const handlePopState = (): void => {
+      setActivePrototype(
+        resolvePrototypeId(new URLSearchParams(window.location.search).get('prototype')),
+      )
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  useEffect(() => {
+    document.title = activePrototype === null
+      ? 'Prototype Catalog — Agent Game Builder'
+      : 'Pyramid Glyph Prototype — Agent Game Builder'
+  }, [activePrototype])
+
+  const navigateToPrototype = (prototype: PrototypeId | null): void => {
+    const url = new URL(window.location.href)
+    if (prototype === null) url.searchParams.delete('prototype')
+    else url.searchParams.set('prototype', prototype)
+    window.history.pushState({ prototype }, '', url)
+    setActivePrototype(prototype)
+  }
+
+  return activePrototype === null
+    ? <PrototypeCatalog onOpen={(id) => navigateToPrototype(id)} />
+    : <BuilderWorkspace onExit={() => navigateToPrototype(null)} />
 }

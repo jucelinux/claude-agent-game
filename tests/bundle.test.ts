@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { compileProject, PROJECT_ID, PROJECT_SEED } from '../src/authoring/project.ts'
 
 describe('portable bundle contract', () => {
-  it('starts as a valid neutral project bundle', () => {
+  it('builds the active project bundle', () => {
     const bundle = compileProject()
 
     expect(bundle).toMatchObject({
@@ -12,7 +12,7 @@ describe('portable bundle contract', () => {
       seed: PROJECT_SEED,
       clips: [],
     })
-    expect(bundle.project).toBe('untitled-game')
+    expect(bundle.project).toBe('pyramid-glyph-prototype')
     expect(bundle.checksum).toMatch(/^[0-9a-f]{8}$/)
   })
 
