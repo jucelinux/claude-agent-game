@@ -5,12 +5,13 @@ compile to an engine-neutral raster bundle; Phaser consumes that bundle and owns
 The root screen catalogs the prototypes that are currently available and opens each one in its
 own Agent Game Builder workspace.
 
-The active prototype takes place inside an Egyptian pyramid and tests a mixed 3D/2D gameplay
-loop. The player explores a low-resolution polygonal chamber in third person and interacts with
-glowing hieroglyphic murals painted onto its walls. The left mural leads to a compact puzzle;
-the player must break a clay vessel and recover its golden key before the right mural awakens.
-That mural leads to a short platform fight against the watching guardian, with the traveler
-rendered as a painted figure.
+The catalog currently contains two active studies:
+
+- **Pyramid Glyph Prototype** — a mixed 3D/2D adventure through an Egyptian chamber, living
+  murals, a compact key puzzle and a platform boss encounter.
+- **Ashfall Expanse** — a wide post-apocalyptic isometric environment with a compiled
+  eight-direction low-poly traveler atlas
+  through ruined districts, broken infrastructure and dry canals.
 
 ## Start
 

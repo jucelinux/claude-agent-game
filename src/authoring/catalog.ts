@@ -1,4 +1,18 @@
 import type { AssetSource } from '../compiler/types.ts'
+import type { PrototypeId } from '../projects/manifest.ts'
+import { WASTELAND_TRAVELER_3D_ATLAS_ASSETS } from './wastelandTraveler3dAtlas.ts'
 
 /** The current geometric blockout does not use compiled raster assets yet. */
 export const PROJECT_ASSETS: readonly AssetSource[] = []
+
+/** The Blender bake uses a human motion-capture cycle retargeted to the low-poly traveler. */
+export const ASHFALL_ASSETS: readonly AssetSource[] = WASTELAND_TRAVELER_3D_ATLAS_ASSETS
+
+const PROJECT_ASSETS_BY_ID: Readonly<Record<PrototypeId, readonly AssetSource[]>> = {
+  'pyramid-glyph-prototype': PROJECT_ASSETS,
+  'ashfall-prototype': ASHFALL_ASSETS,
+}
+
+export function getProjectAssets(projectId: PrototypeId): readonly AssetSource[] {
+  return PROJECT_ASSETS_BY_ID[projectId]
+}

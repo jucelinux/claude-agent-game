@@ -1,5 +1,5 @@
 import type { Grammar, Params } from '../src/core/types.ts'
-import type { AssetSource } from '../src/compiler/types.ts'
+import type { GrammarAssetSource } from '../src/compiler/types.ts'
 
 const FIXTURE_GRAMMAR: Grammar = {
   name: 'compiler-fixture',
@@ -41,7 +41,7 @@ const FIXTURE_PARAMS: Params = {
   _anchors: {},
 }
 
-export const COMPILER_FIXTURE: AssetSource = {
+export const COMPILER_FIXTURE: GrammarAssetSource = {
   id: 'compiler-fixture',
   kind: 'environment',
   grammar: FIXTURE_GRAMMAR,

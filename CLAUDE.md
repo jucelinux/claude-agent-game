@@ -41,8 +41,10 @@ allowed; a generic scene, input, physics, camera, audio or lifecycle system is n
 
 ## Working agreement
 
-Read this file and `AGENTS.md` before edits. Run `npm run check` and `npm run build` before
-delivery. Do not add a dependency silently: state its role and boundary first.
+Read this file, `AGENTS.md` and `SCARS.md` before edits. `SCARS.md` is the branch's persistent
+learning memory: its gates must shape implementation planning, not merely be cited after the
+same mistake happens again. Run `npm run check` and `npm run build` before delivery. Do not add
+a dependency silently: state its role and boundary first.
 
 Suggestions that change product direction, visual direction or the authoring workflow must be
 explicit and require the user's approval. Do not use design skills, plugins or MCPs unless the

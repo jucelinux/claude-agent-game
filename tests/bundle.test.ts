@@ -19,4 +19,23 @@ describe('portable bundle contract', () => {
   it('keeps an empty catalog deterministic', () => {
     expect(compileProject()).toEqual(compileProject())
   })
+
+  it('builds an isolated deterministic bundle for Ashfall Expanse', () => {
+    const first = compileProject('ashfall-prototype')
+    const second = compileProject('ashfall-prototype')
+
+    expect(first.checksum).toBe(second.checksum)
+    expect(first.clips.map((clip) => clip.checksum))
+      .toEqual(second.clips.map((clip) => clip.checksum))
+    expect(first.project).toBe('ashfall-prototype')
+    expect(first.clips).toHaveLength(16)
+    expect(first.clips.every((clip) => clip.kind === 'character')).toBe(true)
+    expect(first.clips.some((clip) => clip.id.includes('-procedural-'))).toBe(false)
+    expect(first.clips.filter((clip) => clip.id.endsWith('-idle'))
+      .every((clip) => clip.frames.length === 4)).toBe(true)
+    expect(first.clips.filter((clip) => clip.id.endsWith('-walk'))
+      .every((clip) => clip.frames.length === 16)).toBe(true)
+    expect(first.seed).not.toBe(PROJECT_SEED)
+    expect(first.checksum).not.toBe(compileProject().checksum)
+  })
 })

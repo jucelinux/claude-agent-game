@@ -19,10 +19,15 @@ export function installBundle(scene: Phaser.Scene, bundle: CompiledBundle): void
     if (!scene.anims.exists(clip.id)) {
       const firstFrame = clip.frames[0]
       if (firstFrame === undefined) throw new Error(`${clip.id}: no animation frames`)
+      const baseDuration = Math.min(...clip.frames.map((frame) => frame.durationMs))
       scene.anims.create({
         key: clip.id,
-        frames: clip.frames.map((frame) => ({ key: clip.textureKey, frame: frame.index })),
-        frameRate: 1000 / firstFrame.durationMs,
+        frames: clip.frames.map((frame) => ({
+          key: clip.textureKey,
+          frame: frame.index,
+          duration: frame.durationMs - baseDuration,
+        })),
+        frameRate: 1000 / baseDuration,
         repeat: clip.loops ? -1 : 0,
       })
     }

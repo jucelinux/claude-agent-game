@@ -2,9 +2,12 @@ import Phaser from 'phaser'
 import type { CompiledBundle } from '../compiler/types.ts'
 import { DepthStudyScene, STAGE_HEIGHT, STAGE_WIDTH } from './depth/DepthStudyScene.ts'
 import { GlyphWorldScene } from './glyph/GlyphWorldScene.ts'
+import { WastelandMapScene } from './wasteland/WastelandMapScene.ts'
 import {
+  getPrototypeScenes,
   WORKSPACE_MODE_EVENT,
   WORKSPACE_OVERLAY_EVENT,
+  type PrototypeId,
   type PrototypeProgress,
   type RuntimeSnapshot,
   type WorkspaceMode,
@@ -21,22 +24,32 @@ export type GameHandle = {
 export function mountGame(
   parent: HTMLElement,
   bundle: CompiledBundle,
+  prototypeId: PrototypeId,
   report: (snapshot: RuntimeSnapshot) => void,
 ): GameHandle {
   let mode: WorkspaceMode = 'play'
   let overlays = false
-  let requestedScene: WorkspaceScene = 'depth-study'
+  const firstScene = getPrototypeScenes(prototypeId)[0]
+  if (firstScene === undefined) throw new Error(`prototype ${prototypeId} has no scenes`)
+  let requestedScene: WorkspaceScene = firstScene.id
   const reportScene = (snapshot: RuntimeSnapshot): void => {
     report(snapshot)
   }
   const progress: PrototypeProgress = { puzzleComplete: false }
+  const scenes = prototypeId === 'pyramid-glyph-prototype'
+    ? [
+        new DepthStudyScene(bundle, reportScene, progress),
+        new GlyphWorldScene(bundle, reportScene, progress, 'puzzle'),
+        new GlyphWorldScene(bundle, reportScene, progress, 'platform'),
+      ]
+    : [new WastelandMapScene(bundle, reportScene)]
 
   const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
     width: STAGE_WIDTH,
     height: STAGE_HEIGHT,
-    backgroundColor: '#080c13',
+    backgroundColor: prototypeId === 'ashfall-prototype' ? '#0b1015' : '#080c13',
     pixelArt: true,
     antialias: false,
     physics: {
@@ -47,11 +60,7 @@ export function mountGame(
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [
-      new DepthStudyScene(bundle, reportScene, progress),
-      new GlyphWorldScene(bundle, reportScene, progress, 'puzzle'),
-      new GlyphWorldScene(bundle, reportScene, progress, 'platform'),
-    ],
+    scene: scenes,
   })
 
   const syncWorkspaceState = (): void => {

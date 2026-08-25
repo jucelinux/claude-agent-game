@@ -2,29 +2,31 @@ import { useEffect, useRef, useState } from 'react'
 import type { CompiledClip } from '../compiler/types.ts'
 import type { GameHandle } from '../game/mountGame.ts'
 import {
-  WORKSPACE_SCENES,
+  getPrototypeScenes,
   type RuntimeSnapshot,
   type WorkspaceMode,
   type WorkspaceScene,
 } from '../game/types.ts'
 import CompilerWorker from '../workers/compiler.worker.ts?worker'
-import type { CompilerWorkerResult } from '../workers/compiler.worker.ts'
+import type {
+  CompilerWorkerRequest,
+  CompilerWorkerResult,
+} from '../workers/compiler.worker.ts'
 import {
   PROTOTYPES,
   resolvePrototypeId,
   type PrototypeId,
 } from './prototypes.ts'
 
-const INITIAL_SCENE = WORKSPACE_SCENES[0].id
-const EMPTY_RUNTIME: RuntimeSnapshot = {
-  scene: INITIAL_SCENE,
+const emptyRuntime = (scene: WorkspaceScene): RuntimeSnapshot => ({
+  scene,
   mode: 'play',
   playerX: 0,
   playerY: 0,
   playerDepth: 1.5,
   interaction: null,
   fps: 0,
-}
+})
 
 const formatBytes = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`
@@ -34,6 +36,8 @@ const formatBytes = (bytes: number): string => {
 
 const paletteColor = (color: readonly [number, number, number]): string =>
   `rgb(${color[0]} ${color[1]} ${color[2]})`
+
+const prototypeCount: number = PROTOTYPES.length
 
 function ClipPreview({ clip }: { readonly clip: CompiledClip }): React.JSX.Element {
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -141,14 +145,20 @@ function EmptyInspector(): React.JSX.Element {
       <span className="eyebrow">Scene geometry</span>
       <h2>Gameplay blockout</h2>
       <p>
-        The prototype uses scene-authored 3D faces and native Phaser shapes for the 2D world.
-        Compiled assets remain empty while the interaction loop is being established.
+        This prototype uses scene-authored geometry and native Phaser shapes.
+        Compiled assets remain empty while its interaction loop is being established.
       </p>
     </section>
   )
 }
 
-function BuilderBrand({ onExit }: { readonly onExit: () => void }): React.JSX.Element {
+function BuilderBrand({
+  onExit,
+  prototypeTitle,
+}: {
+  readonly onExit: () => void
+  readonly prototypeTitle: string
+}): React.JSX.Element {
   return (
     <div className="workspace-brand-group">
       <button className="catalog-return" onClick={onExit} aria-label="Back to prototype catalog">
@@ -157,7 +167,7 @@ function BuilderBrand({ onExit }: { readonly onExit: () => void }): React.JSX.El
       </button>
       <div className="brand">
         <span className="brand-mark">AG</span>
-        <div><strong>Agent Game Builder</strong><span>Pyramid glyph prototype</span></div>
+        <div><strong>Agent Game Builder</strong><span>{prototypeTitle}</span></div>
       </div>
     </div>
   )
@@ -166,14 +176,16 @@ function BuilderBrand({ onExit }: { readonly onExit: () => void }): React.JSX.El
 function LoadingWorkspace({
   error,
   onExit,
+  prototypeTitle,
 }: {
   readonly error: string | null
   readonly onExit: () => void
+  readonly prototypeTitle: string
 }): React.JSX.Element {
   return (
     <main className="loading-shell">
       <header className="topbar">
-        <BuilderBrand onExit={onExit} />
+        <BuilderBrand onExit={onExit} prototypeTitle={prototypeTitle} />
       </header>
       <section className="loading-workspace" aria-live="polite">
         <div className={`compiler-pulse ${error === null ? '' : 'failed'}`} />
@@ -185,17 +197,28 @@ function LoadingWorkspace({
   )
 }
 
-function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JSX.Element {
+function BuilderWorkspace({
+  onExit,
+  prototypeId,
+}: {
+  readonly onExit: () => void
+  readonly prototypeId: PrototypeId
+}): React.JSX.Element {
+  const prototype = PROTOTYPES.find((entry) => entry.id === prototypeId)
+  if (prototype === undefined) throw new Error(`unknown prototype ${prototypeId}`)
+  const workspaceScenes = getPrototypeScenes(prototypeId)
+  const initialScene = workspaceScenes[0]
+  if (initialScene === undefined) throw new Error(`prototype ${prototypeId} has no scenes`)
   const [compilation, setCompilation] = useState<CompilerWorkerResult | null>(null)
   const [compileError, setCompileError] = useState<string | null>(null)
   const [mode, setMode] = useState<WorkspaceMode>('play')
   const [overlays, setOverlays] = useState(false)
-  const [runtime, setRuntime] = useState<RuntimeSnapshot>(EMPTY_RUNTIME)
-  const [activeScene, setActiveScene] = useState<WorkspaceScene>(INITIAL_SCENE)
+  const [runtime, setRuntime] = useState<RuntimeSnapshot>(() => emptyRuntime(initialScene.id))
+  const [activeScene, setActiveScene] = useState<WorkspaceScene>(initialScene.id)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const gameHost = useRef<HTMLDivElement>(null)
   const gameHandle = useRef<GameHandle | null>(null)
-  const requestedScene = useRef<WorkspaceScene>(INITIAL_SCENE)
+  const requestedScene = useRef<WorkspaceScene>(initialScene.id)
   const workspaceState = useRef({ mode, overlays })
   const inspector = useRef<HTMLElement>(null)
   workspaceState.current = { mode, overlays }
@@ -204,8 +227,9 @@ function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JS
     const worker = new CompilerWorker()
     worker.onmessage = (event: MessageEvent<CompilerWorkerResult>) => setCompilation(event.data)
     worker.onerror = (event) => setCompileError(event.message || 'The asset compiler failed.')
+    worker.postMessage({ prototypeId } satisfies CompilerWorkerRequest)
     return () => worker.terminate()
-  }, [])
+  }, [prototypeId])
 
   useEffect(() => {
     if (compilation === null) return
@@ -216,7 +240,7 @@ function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JS
 
     void import('../game/mountGame.ts').then(({ mountGame }) => {
       if (disposed) return
-      mounted = mountGame(host, compilation.bundle, (snapshot) => {
+      mounted = mountGame(host, compilation.bundle, prototypeId, (snapshot) => {
         requestedScene.current = snapshot.scene
         setRuntime(snapshot)
         setActiveScene(snapshot.scene)
@@ -234,12 +258,20 @@ function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JS
       gameHandle.current = null
       mounted?.destroy()
     }
-  }, [compilation])
+  }, [compilation, prototypeId])
 
   useEffect(() => gameHandle.current?.setMode(mode), [mode])
   useEffect(() => gameHandle.current?.setOverlays(overlays), [overlays])
 
-  if (compilation === null) return <LoadingWorkspace error={compileError} onExit={onExit} />
+  if (compilation === null) {
+    return (
+      <LoadingWorkspace
+        error={compileError}
+        onExit={onExit}
+        prototypeTitle={prototype.title}
+      />
+    )
+  }
 
   const characterClips = compilation.bundle.clips.filter((clip) => clip.kind === 'character')
   const environmentClips = compilation.bundle.clips.filter((clip) => clip.kind === 'environment')
@@ -247,11 +279,14 @@ function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JS
     ?? compilation.bundle.clips[0]
   const frameCount = compilation.bundle.clips.reduce((total, clip) => total + clip.frames.length, 0)
   const byteCount = compilation.bundle.clips.reduce((total, clip) => total + clip.atlas.rgba.byteLength, 0)
-  const scene = WORKSPACE_SCENES.find((entry) => entry.id === activeScene) ?? WORKSPACE_SCENES[0]
-  const isGlyphScene = runtime.scene !== 'depth-study'
-  const position = isGlyphScene
+  const scene = workspaceScenes.find((entry) => entry.id === activeScene) ?? initialScene
+  const isGlyphScene = runtime.scene === 'glyph-puzzle' || runtime.scene === 'glyph-platform'
+  const isMapScene = runtime.scene === 'wasteland-map'
+  const position = isMapScene
     ? `position ${runtime.playerX.toFixed(1)}, ${runtime.playerY.toFixed(1)}`
-    : `position ${runtime.playerX.toFixed(1)} · depth ${runtime.playerDepth.toFixed(1)}`
+    : isGlyphScene
+      ? `position ${runtime.playerX.toFixed(1)}, ${runtime.playerY.toFixed(1)}`
+      : `position ${runtime.playerX.toFixed(1)} · depth ${runtime.playerDepth.toFixed(1)}`
 
   const selectScene = (nextScene: WorkspaceScene): void => {
     requestedScene.current = nextScene
@@ -267,7 +302,7 @@ function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JS
   return (
     <main className="workspace-shell">
       <header className="topbar">
-        <BuilderBrand onExit={onExit} />
+        <BuilderBrand onExit={onExit} prototypeTitle={prototype.title} />
 
         <div className="mode-switch" role="group" aria-label="Workspace mode">
           <button className={mode === 'play' ? 'active' : ''} onClick={() => setMode('play')}>Play</button>
@@ -291,7 +326,7 @@ function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JS
           <nav aria-label="Project content">
             <section className="asset-group">
               <h2>Scenes</h2>
-              {WORKSPACE_SCENES.map((entry) => (
+              {workspaceScenes.map((entry) => (
                 <button
                   key={entry.id}
                   className={`scene-row ${activeScene === entry.id ? 'active-scene' : ''}`}
@@ -346,7 +381,9 @@ function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JS
                   ? '2D puzzle'
                   : activeScene === 'glyph-platform'
                     ? '2D platform'
-                    : '3D chambers'}
+                    : activeScene === 'wasteland-map'
+                      ? 'isometric map'
+                      : '3D chambers'}
               </span>
             </div>
             <label className="toggle">
@@ -381,9 +418,9 @@ function BuilderWorkspace({ onExit }: { readonly onExit: () => void }): React.JS
               <div><dt>Mode</dt><dd>{runtime.mode}</dd></div>
               <div><dt>Horizontal</dt><dd>{runtime.playerX.toFixed(2)}</dd></div>
               <div>
-                <dt>{isGlyphScene ? 'Vertical' : 'Depth'}</dt>
+                <dt>{isGlyphScene ? 'Vertical' : isMapScene ? 'Map Y' : 'Depth'}</dt>
                 <dd>
-                  {(isGlyphScene ? runtime.playerY : runtime.playerDepth).toFixed(2)}
+                  {(isGlyphScene || isMapScene ? runtime.playerY : runtime.playerDepth).toFixed(2)}
                 </dd>
               </div>
               <div><dt>Interaction</dt><dd>{runtime.interaction ?? 'none'}</dd></div>
@@ -422,6 +459,26 @@ function PyramidPreview(): React.JSX.Element {
   )
 }
 
+function WastelandPreview(): React.JSX.Element {
+  return (
+    <div className="wasteland-preview" aria-hidden="true">
+      <span className="waste-horizon waste-horizon-left" />
+      <span className="waste-horizon waste-horizon-right" />
+      <span className="waste-ground" />
+      <span className="waste-building waste-building-left" />
+      <span className="waste-building waste-building-right" />
+      <span className="waste-overpass waste-overpass-left" />
+      <span className="waste-overpass waste-overpass-right" />
+      <span className="waste-canal" />
+      <span className="waste-tower" />
+      <span className="waste-beacon" />
+      <span className="waste-rubble waste-rubble-one" />
+      <span className="waste-rubble waste-rubble-two" />
+      <span className="waste-rubble waste-rubble-three" />
+    </div>
+  )
+}
+
 function PrototypeCatalog({
   onOpen,
 }: {
@@ -436,7 +493,7 @@ function PrototypeCatalog({
         </div>
         <div className="catalog-availability">
           <span className="status-dot" />
-          {PROTOTYPES.length} {PROTOTYPES.length === 1 ? 'prototype' : 'prototypes'} available
+          {prototypeCount} {prototypeCount === 1 ? 'prototype' : 'prototypes'} available
         </div>
       </header>
 
@@ -459,8 +516,8 @@ function PrototypeCatalog({
               <h2 id="prototype-library-title">Prototypes</h2>
             </div>
             <span>
-              {String(PROTOTYPES.length).padStart(2, '0')}{' '}
-              {PROTOTYPES.length === 1 ? 'entry' : 'entries'}
+              {String(prototypeCount).padStart(2, '0')}{' '}
+              {prototypeCount === 1 ? 'entry' : 'entries'}
             </span>
           </div>
 
@@ -472,7 +529,7 @@ function PrototypeCatalog({
                 onClick={() => onOpen(prototype.id)}
                 aria-label={`Open ${prototype.title} in Agent Game Builder`}
               >
-                <PyramidPreview />
+                {prototype.visual === 'pyramid' ? <PyramidPreview /> : <WastelandPreview />}
                 <span className="prototype-card-copy">
                   <span className="prototype-card-kicker">
                     <span>{prototype.status}</span>
@@ -516,9 +573,10 @@ export function App(): React.JSX.Element {
   }, [])
 
   useEffect(() => {
-    document.title = activePrototype === null
+    const prototype = PROTOTYPES.find((entry) => entry.id === activePrototype)
+    document.title = prototype === undefined
       ? 'Prototype Catalog — Agent Game Builder'
-      : 'Pyramid Glyph Prototype — Agent Game Builder'
+      : `${prototype.title} — Agent Game Builder`
   }, [activePrototype])
 
   const navigateToPrototype = (prototype: PrototypeId | null): void => {
@@ -531,5 +589,11 @@ export function App(): React.JSX.Element {
 
   return activePrototype === null
     ? <PrototypeCatalog onOpen={(id) => navigateToPrototype(id)} />
-    : <BuilderWorkspace onExit={() => navigateToPrototype(null)} />
+    : (
+        <BuilderWorkspace
+          key={activePrototype}
+          prototypeId={activePrototype}
+          onExit={() => navigateToPrototype(null)}
+        />
+      )
 }
