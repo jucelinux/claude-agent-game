@@ -10,17 +10,17 @@ describe('portable bundle contract', () => {
       version: 1,
       project: PROJECT_ID,
       seed: PROJECT_SEED,
-      clips: [],
     })
-    expect(bundle.project).toBe('pyramid-glyph-prototype')
+    expect(bundle.project).toBe('ashfall-prototype')
+    expect(bundle.clips).toHaveLength(16)
     expect(bundle.checksum).toMatch(/^[0-9a-f]{8}$/)
   })
 
-  it('keeps an empty catalog deterministic', () => {
+  it('keeps the active bundle deterministic', () => {
     expect(compileProject()).toEqual(compileProject())
   })
 
-  it('builds an isolated deterministic bundle for Ashfall Expanse', () => {
+  it('builds an explicit deterministic bundle for Ashfall Expanse', () => {
     const first = compileProject('ashfall-prototype')
     const second = compileProject('ashfall-prototype')
 
@@ -35,7 +35,17 @@ describe('portable bundle contract', () => {
       .every((clip) => clip.frames.length === 4)).toBe(true)
     expect(first.clips.filter((clip) => clip.id.endsWith('-walk'))
       .every((clip) => clip.frames.length === 16)).toBe(true)
+    expect(first.seed).toBe(PROJECT_SEED)
+    expect(first).toEqual(compileProject())
+  })
+
+  it('keeps the true-3D terrain study engine-neutral and deterministic', () => {
+    const first = compileProject('sunlit-earth-prototype')
+    const second = compileProject('sunlit-earth-prototype')
+
+    expect(first).toEqual(second)
+    expect(first.project).toBe('sunlit-earth-prototype')
+    expect(first.clips).toEqual([])
     expect(first.seed).not.toBe(PROJECT_SEED)
-    expect(first.checksum).not.toBe(compileProject().checksum)
   })
 })

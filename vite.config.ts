@@ -6,7 +6,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
-    // Phaser is intentionally isolated in one lazy engine chunk. The builder shell and
+    // Babylon is intentionally isolated in one lazy engine chunk. The builder shell and
     // deterministic compiler worker remain separate and load first.
     chunkSizeWarningLimit: 1_500,
   },

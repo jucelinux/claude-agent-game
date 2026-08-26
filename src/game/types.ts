@@ -10,19 +10,12 @@ export {
 
 export type WorkspaceMode = 'play' | 'inspect'
 
-export type PrototypeProgress = {
-  puzzleComplete: boolean
-}
-
-export const WORKSPACE_MODE_EVENT = 'workspace:mode'
-export const WORKSPACE_OVERLAY_EVENT = 'workspace:overlays'
-
 export type RuntimeSnapshot = {
   readonly scene: WorkspaceScene
   readonly mode: WorkspaceMode
   readonly playerX: number
   readonly playerY: number
   readonly playerDepth: number
-  readonly interaction: 'mural' | 'locked-mural' | null
+  readonly interaction: null
   readonly fps: number
 }

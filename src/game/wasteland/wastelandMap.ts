@@ -1,3 +1,8 @@
+import {
+  WASTELAND_TRAVELER_DIRECTIONS,
+  type WastelandTravelerDirection,
+} from '../character/wastelandTraveler.ts'
+
 export type WastelandRect = {
   readonly x: number
   readonly y: number
@@ -53,16 +58,28 @@ export function wastelandScreenInputToWorldDelta(
   const normalizedX = screenX / length
   const normalizedY = screenY / length
   const screenDistance = WASTELAND_PLAYER_SCREEN_SPEED * deltaSeconds
+  // The fixed Babylon camera looks from +X/-Z. On its ground plane, screen-right
+  // follows +X/+Z while screen-down follows +X/-Z.
   return {
     x: (
       normalizedX / (WASTELAND_TILE_HALF_WIDTH * 2)
       + normalizedY / (WASTELAND_TILE_HALF_HEIGHT * 2)
     ) * screenDistance,
     y: (
-      -normalizedX / (WASTELAND_TILE_HALF_WIDTH * 2)
-      + normalizedY / (WASTELAND_TILE_HALF_HEIGHT * 2)
+      normalizedX / (WASTELAND_TILE_HALF_WIDTH * 2)
+      - normalizedY / (WASTELAND_TILE_HALF_HEIGHT * 2)
     ) * screenDistance,
   }
+}
+
+export function wastelandDirectionFromScreenInput(
+  screenX: number,
+  screenY: number,
+): WastelandTravelerDirection {
+  if (screenX === 0 && screenY === 0) return 's'
+  const count = WASTELAND_TRAVELER_DIRECTIONS.length
+  const index = ((Math.round(Math.atan2(screenY, screenX) / (Math.PI / 4)) % count) + count) % count
+  return WASTELAND_TRAVELER_DIRECTIONS[index] ?? 's'
 }
 
 export const WASTELAND_BUILDINGS: readonly WastelandBuildingGeometry[] = [

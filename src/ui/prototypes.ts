@@ -6,17 +6,6 @@ import {
 
 export const PROTOTYPES = [
   {
-    id: 'pyramid-glyph-prototype',
-    title: 'Pyramid Glyph Prototype',
-    eyebrow: 'Ancient Egypt · Another World study',
-    description:
-      'A mixed 3D and 2D adventure through pyramid chambers, living hieroglyphs, puzzles and a compact boss encounter.',
-    status: 'Playable',
-    format: '3D chamber + 2D glyph worlds',
-    sceneCount: getPrototypeScenes('pyramid-glyph-prototype').length,
-    visual: 'pyramid',
-  },
-  {
     id: 'ashfall-prototype',
     title: 'Ashfall Expanse',
     eyebrow: 'Post-apocalypse · Isometric exploration',
@@ -26,6 +15,17 @@ export const PROTOTYPES = [
     format: 'Wide isometric traversal',
     sceneCount: getPrototypeScenes('ashfall-prototype').length,
     visual: 'wasteland',
+  },
+  {
+    id: 'sunlit-earth-prototype',
+    title: 'Sunlit Earth',
+    eyebrow: 'True 3D · Environment study',
+    description:
+      'A quiet sunlit landscape with warm earth, open sky and room for the next gameplay direction.',
+    status: 'Playable',
+    format: 'Babylon.js true-3D environment',
+    sceneCount: getPrototypeScenes('sunlit-earth-prototype').length,
+    visual: 'sunlit',
   },
 ] as const
 

@@ -145,7 +145,7 @@ function EmptyInspector(): React.JSX.Element {
       <span className="eyebrow">Scene geometry</span>
       <h2>Gameplay blockout</h2>
       <p>
-        This prototype uses scene-authored geometry and native Phaser shapes.
+        This prototype uses scene-authored geometry and native Babylon meshes.
         Compiled assets remain empty while its interaction loop is being established.
       </p>
     </section>
@@ -280,13 +280,10 @@ function BuilderWorkspace({
   const frameCount = compilation.bundle.clips.reduce((total, clip) => total + clip.frames.length, 0)
   const byteCount = compilation.bundle.clips.reduce((total, clip) => total + clip.atlas.rgba.byteLength, 0)
   const scene = workspaceScenes.find((entry) => entry.id === activeScene) ?? initialScene
-  const isGlyphScene = runtime.scene === 'glyph-puzzle' || runtime.scene === 'glyph-platform'
   const isMapScene = runtime.scene === 'wasteland-map'
   const position = isMapScene
     ? `position ${runtime.playerX.toFixed(1)}, ${runtime.playerY.toFixed(1)}`
-    : isGlyphScene
-      ? `position ${runtime.playerX.toFixed(1)}, ${runtime.playerY.toFixed(1)}`
-      : `position ${runtime.playerX.toFixed(1)} · depth ${runtime.playerDepth.toFixed(1)}`
+    : `position ${runtime.playerX.toFixed(1)} · depth ${runtime.playerDepth.toFixed(1)}`
 
   const selectScene = (nextScene: WorkspaceScene): void => {
     requestedScene.current = nextScene
@@ -333,7 +330,7 @@ function BuilderWorkspace({
                   aria-pressed={activeScene === entry.id}
                   onClick={() => selectScene(entry.id)}
                 >
-                  <span className="tree-glyph">◇</span>
+                  <span className="tree-icon">◇</span>
                   {entry.label}
                 </button>
               ))}
@@ -374,16 +371,10 @@ function BuilderWorkspace({
         <section className="stage-column">
           <div className="stage-toolbar">
             <div>
-              <span className="eyebrow">Phaser scene</span>
+              <span className="eyebrow">Babylon scene</span>
               <strong>{scene.label}</strong>
               <span className="blockout-badge">
-                {activeScene === 'glyph-puzzle'
-                  ? '2D puzzle'
-                  : activeScene === 'glyph-platform'
-                    ? '2D platform'
-                    : activeScene === 'wasteland-map'
-                      ? 'isometric map'
-                      : '3D chambers'}
+                {activeScene === 'wasteland-map' ? 'isometric map' : 'true 3D terrain'}
               </span>
             </div>
             <label className="toggle">
@@ -412,15 +403,15 @@ function BuilderWorkspace({
           {selected === undefined ? <EmptyInspector /> : <ClipInspector clip={selected} />}
 
           <section className="inspector-section runtime-section">
-            <div className="section-heading"><h3>Live scene</h3><span>Phaser</span></div>
+            <div className="section-heading"><h3>Live scene</h3><span>Babylon</span></div>
             <dl className="runtime-values">
               <div><dt>Scene</dt><dd>{runtime.scene}</dd></div>
               <div><dt>Mode</dt><dd>{runtime.mode}</dd></div>
               <div><dt>Horizontal</dt><dd>{runtime.playerX.toFixed(2)}</dd></div>
               <div>
-                <dt>{isGlyphScene ? 'Vertical' : isMapScene ? 'Map Y' : 'Depth'}</dt>
+                <dt>{isMapScene ? 'Map Y' : 'Depth'}</dt>
                 <dd>
-                  {(isGlyphScene || isMapScene ? runtime.playerY : runtime.playerDepth).toFixed(2)}
+                  {(isMapScene ? runtime.playerY : runtime.playerDepth).toFixed(2)}
                 </dd>
               </div>
               <div><dt>Interaction</dt><dd>{runtime.interaction ?? 'none'}</dd></div>
@@ -436,26 +427,6 @@ function BuilderWorkspace({
         <div className="log-metric">bundle v{compilation.bundle.version}</div>
       </footer>
     </main>
-  )
-}
-
-function PyramidPreview(): React.JSX.Element {
-  return (
-    <div className="pyramid-preview" aria-hidden="true">
-      <span className="preview-ceiling" />
-      <span className="preview-floor" />
-      <span className="preview-wall preview-wall-left" />
-      <span className="preview-wall preview-wall-right" />
-      <span className="preview-back-wall" />
-      <span className="preview-column preview-column-left" />
-      <span className="preview-column preview-column-right" />
-      <span className="preview-mural preview-mural-left" />
-      <span className="preview-mural preview-mural-right" />
-      <span className="preview-traveler" />
-      <span className="preview-pixel preview-pixel-one" />
-      <span className="preview-pixel preview-pixel-two" />
-      <span className="preview-pixel preview-pixel-three" />
-    </div>
   )
 }
 
@@ -475,6 +446,21 @@ function WastelandPreview(): React.JSX.Element {
       <span className="waste-rubble waste-rubble-one" />
       <span className="waste-rubble waste-rubble-two" />
       <span className="waste-rubble waste-rubble-three" />
+    </div>
+  )
+}
+
+function SunlitPreview(): React.JSX.Element {
+  return (
+    <div className="sunlit-preview" aria-hidden="true">
+      <span className="sunlit-sun" />
+      <span className="sunlit-haze" />
+      <span className="sunlit-ground" />
+      <span className="sunlit-ridge sunlit-ridge-left" />
+      <span className="sunlit-ridge sunlit-ridge-right" />
+      <span className="sunlit-rock sunlit-rock-one" />
+      <span className="sunlit-rock sunlit-rock-two" />
+      <span className="sunlit-rock sunlit-rock-three" />
     </div>
   )
 }
@@ -529,7 +515,7 @@ function PrototypeCatalog({
                 onClick={() => onOpen(prototype.id)}
                 aria-label={`Open ${prototype.title} in Agent Game Builder`}
               >
-                {prototype.visual === 'pyramid' ? <PyramidPreview /> : <WastelandPreview />}
+                {prototype.visual === 'wasteland' ? <WastelandPreview /> : <SunlitPreview />}
                 <span className="prototype-card-copy">
                   <span className="prototype-card-kicker">
                     <span>{prototype.status}</span>

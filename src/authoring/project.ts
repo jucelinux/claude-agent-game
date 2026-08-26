@@ -3,12 +3,12 @@ import type { CompiledBundle } from '../compiler/types.ts'
 import type { PrototypeId } from '../projects/manifest.ts'
 import { getProjectAssets } from './catalog.ts'
 
-export const PROJECT_ID = 'pyramid-glyph-prototype'
-export const PROJECT_SEED = 0x1a6e17
+export const PROJECT_ID = 'ashfall-prototype'
+export const PROJECT_SEED = 0x5ec707
 
 const PROJECT_SEEDS: Readonly<Record<PrototypeId, number>> = {
-  'pyramid-glyph-prototype': PROJECT_SEED,
-  'ashfall-prototype': 0x5ec707,
+  'ashfall-prototype': PROJECT_SEED,
+  'sunlit-earth-prototype': 0x51a17e,
 }
 
 export function compileProject(projectId: PrototypeId = PROJECT_ID): CompiledBundle {

@@ -4,6 +4,7 @@ import {
   isWastelandGroundCenterVisible,
   isWastelandWalkable,
   sliceWastelandRectForPainter,
+  wastelandDirectionFromScreenInput,
   wastelandScreenInputToWorldDelta,
   WASTELAND_BRIDGE_RAILS,
   WASTELAND_BRIDGES,
@@ -68,9 +69,33 @@ describe('Ashfall traversal map', () => {
   it('moves at one screen-space speed in cardinal and diagonal directions', () => {
     for (const [screenX, screenY] of [[1, 0], [0, 1], [1, 1], [-1, 1]] as const) {
       const delta = wastelandScreenInputToWorldDelta(screenX, screenY, 1)
-      const projectedX = (delta.x - delta.y) * WASTELAND_TILE_HALF_WIDTH
-      const projectedY = (delta.x + delta.y) * WASTELAND_TILE_HALF_HEIGHT
+      const projectedX = (delta.x + delta.y) * WASTELAND_TILE_HALF_WIDTH
+      const projectedY = (delta.x - delta.y) * WASTELAND_TILE_HALF_HEIGHT
       expect(Math.hypot(projectedX, projectedY)).toBeCloseTo(WASTELAND_PLAYER_SCREEN_SPEED)
+    }
+  })
+
+  it('maps all eight key combinations to Babylon screen motion and matching clips', () => {
+    const cases = [
+      { input: [1, 0], direction: 'e' },
+      { input: [1, 1], direction: 'se' },
+      { input: [0, 1], direction: 's' },
+      { input: [-1, 1], direction: 'sw' },
+      { input: [-1, 0], direction: 'w' },
+      { input: [-1, -1], direction: 'nw' },
+      { input: [0, -1], direction: 'n' },
+      { input: [1, -1], direction: 'ne' },
+    ] as const
+
+    for (const { input: [screenX, screenY], direction } of cases) {
+      const length = Math.hypot(screenX, screenY)
+      const delta = wastelandScreenInputToWorldDelta(screenX, screenY, 1)
+      const projectedX = (delta.x + delta.y) * WASTELAND_TILE_HALF_WIDTH
+      const projectedY = (delta.x - delta.y) * WASTELAND_TILE_HALF_HEIGHT
+
+      expect(projectedX).toBeCloseTo(screenX / length * WASTELAND_PLAYER_SCREEN_SPEED)
+      expect(projectedY).toBeCloseTo(screenY / length * WASTELAND_PLAYER_SCREEN_SPEED)
+      expect(wastelandDirectionFromScreenInput(screenX, screenY)).toBe(direction)
     }
   })
 

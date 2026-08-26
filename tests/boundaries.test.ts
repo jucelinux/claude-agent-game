@@ -14,12 +14,12 @@ const filesUnder = (root: string): string[] => {
 }
 
 describe('architectural boundary', () => {
-  it('keeps Phaser and React out of authoring and compilation', () => {
+  it('keeps Babylon and React out of authoring and compilation', () => {
     const roots = ['src/core', 'src/grammars', 'src/authoring', 'src/compiler']
     for (const root of roots) {
       for (const file of filesUnder(root).filter((path) => path.endsWith('.ts'))) {
         const source = readFileSync(file, 'utf8')
-        expect(source, relative(process.cwd(), file)).not.toMatch(/from ['"](?:phaser|react)/)
+        expect(source, relative(process.cwd(), file)).not.toMatch(/from ['"](?:@babylonjs\/|react)/)
       }
     }
   })
@@ -52,10 +52,29 @@ describe('architectural boundary', () => {
     expect(existsSync('public/assets/landing')).toBe(false)
   })
 
-  it('starts scenes through Phaser without eagerly resolving pending scenes', () => {
+  it('does not retain the removed Pyramid Glyph prototype', () => {
+    const source = filesUnder('src')
+      .filter((path) => /\.(?:ts|tsx)$/.test(path))
+      .map((path) => readFileSync(path, 'utf8'))
+      .join('\n')
+
+    expect(existsSync('src/game/pyramid')).toBe(false)
+    expect(existsSync('src/game/glyph')).toBe(false)
+    expect(existsSync('src/game/character/hieroglyphTraveler.ts')).toBe(false)
+    expect(source).not.toContain('pyramid-glyph-prototype')
+  })
+
+  it('uses Babylon as the only active runtime engine', () => {
     const source = readFileSync('src/game/mountGame.ts', 'utf8')
-    expect(source).toContain('game.scene.stop(activeScene.scene.key)')
-    expect(source).toContain('game.scene.start(requestedScene)')
-    expect(source).not.toContain('getScene(requestedScene)')
+    const packageJson = readFileSync('package.json', 'utf8')
+    const sourceFiles = filesUnder('src').filter((path) => path.endsWith('.ts'))
+
+    expect(source).toContain('new Engine(canvas')
+    expect(source).toContain('visible?.scene.render()')
+    expect(packageJson).toContain('@babylonjs/core')
+    expect(packageJson).not.toContain('"phaser"')
+    for (const file of sourceFiles) {
+      expect(readFileSync(file, 'utf8'), relative(process.cwd(), file)).not.toMatch(/from ['"]phaser['"]/)
+    }
   })
 })

@@ -62,6 +62,24 @@ sprite or its transparent bounds.
 sort compact solids against the actor's foot contact, and depth-slice long structures wherever
 an actor can pass through their depth interval. Use the same footprint for collision and
 visibility, with a stable tie-break at shared boundaries. A scalar depth may order the resulting
-pieces; it must not stand in for splitting them. For the current single-actor prototype, the
+pieces; it must not stand in for splitting them. In a deliberately 2D isometric renderer, the
 behind/actor/foreground composition is sufficient once the pieces are correct; do not build a
-generic rendering engine in place of Phaser.
+generic rendering engine in place of the selected runtime engine.
+
+## Scar 03 — real 3D requires a real 3D renderer
+
+**Evidence.** An earlier chamber study used genuine 3D coordinates, a perspective divide,
+near-plane clipping and painter-sorted faces, but ultimately rasterized every face through a 2D
+graphics API. It was effective for one constrained room and also produced recurring failures
+around occlusion, transparent walls and camera-dependent face order. The next open, sunlit
+environment would additionally require a depth buffer, terrain, normals, lights, shadows,
+materials and a model pipeline.
+
+**Lesson.** A software projection can be a useful visual probe, but it stops being economical
+when the requested experience depends on the canonical facilities of a 3D renderer. At that
+point, adding more projection code is not iteration on the game; it is accidental engine work.
+
+**Obligation.** Runtime 3D uses Babylon.js meshes, cameras, materials, lights and GPU depth.
+Blender content enters through GLB/glTF. Deliberate 2D scenes may use Babylon sprites, GUI or
+dynamic textures, but no scene may reimplement a general projection, visibility or lighting
+pipeline. The engine-neutral compiler remains independent from Babylon.

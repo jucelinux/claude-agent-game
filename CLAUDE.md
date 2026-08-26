@@ -2,13 +2,12 @@
 
 ## Product
 
-This repository is an authoring workspace for building one game with a coding agent. It is not
-a game engine. Phaser owns the game loop, scenes, rendering, input, physics, audio, cameras and
-resource lifecycle.
+This repository is an authoring workspace for building games with a coding agent. It is not a
+game engine. Babylon.js owns the game loop, scenes, rendering, cameras, scene graph, animation,
+audio and resource lifecycle. Engine facilities are added only when a prototype needs them.
 
-The `main` branch intentionally has no active game concept. Keep it neutral until the user
-approves the next game direction; then build that game inside this workspace. Do not create a
-game shelf.
+The `main` branch publishes the user-approved studies in the Agent Game Builder catalog. New
+game concepts enter that catalog only after explicit user approval.
 
 The Apollo 11 prototype is preserved on `archive/apollo-11-prototype`. The older pre-Phaser
 project is preserved on `archive/pre-phaser-refactor`.
@@ -18,26 +17,27 @@ project is preserved on `archive/pre-phaser-refactor`.
 - Grammar-first procedural art.
 - A deterministic compiler from authored grammar to portable raster bundles.
 - Stable animation, palette, origin, contact and attachment metadata.
-- A workspace that lets a builder play, inspect and diagnose the current game.
+- A workspace that lets a builder play, inspect and diagnose approved prototypes.
 - Offline image-generation and Blender workflows that produce ordinary game assets.
 
-The deterministic boundary ends at the compiled asset bundle. Phaser gameplay does not need to
-reproduce a repository-owned simulation or replay timeline.
+The deterministic boundary ends at the compiled asset bundle. Babylon gameplay does not need
+to reproduce a repository-owned simulation or replay timeline.
 
 ## Architecture
 
-- `src/core/` is the pure grammar renderer. It imports no Phaser, React or browser APIs.
+- `src/core/` is the pure grammar renderer. It imports no Babylon.js, React or browser APIs.
 - `src/grammars/` contains only procedural content used by the current project.
 - `src/authoring/` declares the current project asset catalog.
 - `src/compiler/` validates and produces an engine-neutral bundle.
-- `src/phaser/` is the only adapter from that bundle to Phaser.
-- `src/game/` contains project-specific Phaser scenes and rules.
+- `src/babylon/` is the only adapter between the Builder contract and Babylon.js.
+- `src/game/` contains project-specific Babylon scenes and rules.
 - `src/ui/` contains the React builder workspace.
 - `scripts/blender/` contains offline render helpers, never runtime code.
 - `public/assets/` receives generated, imported or Blender-rendered raster assets.
 
-Do not recreate Phaser facilities behind repository-owned abstractions. Game-specific rules are
-allowed; a generic scene, input, physics, camera, audio or lifecycle system is not.
+Do not recreate Babylon facilities behind repository-owned abstractions. Game-specific rules
+and a thin Builder adapter are allowed; a generic scene, rendering, physics, camera, audio or
+lifecycle system is not.
 
 ## Working agreement
 

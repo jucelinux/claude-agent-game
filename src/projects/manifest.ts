@@ -1,33 +1,23 @@
 export const PROTOTYPE_IDS = [
-  'pyramid-glyph-prototype',
   'ashfall-prototype',
+  'sunlit-earth-prototype',
 ] as const
 
 export type PrototypeId = (typeof PROTOTYPE_IDS)[number]
 
 export const PROTOTYPE_SCENES = {
-  'pyramid-glyph-prototype': [
-    {
-      id: 'depth-study',
-      label: 'Pyramid chambers',
-      detail: 'WASD / arrows · E or Space enters a glowing mural',
-    },
-    {
-      id: 'glyph-puzzle',
-      label: 'Glyph puzzle',
-      detail: 'Find the golden key · E breaks the vessel',
-    },
-    {
-      id: 'glyph-platform',
-      label: 'Glyph platform',
-      detail: 'Climb and face the guardian · E throws stones',
-    },
-  ],
   'ashfall-prototype': [
     {
       id: 'wasteland-map',
       label: 'Ashfall Expanse',
       detail: 'WASD / arrows walk · explore Sector 07',
+    },
+  ],
+  'sunlit-earth-prototype': [
+    {
+      id: 'sunlit-earth',
+      label: 'Sunlit Earth',
+      detail: 'WASD moves · mouse looks · a first true-3D terrain study',
     },
   ],
 } as const

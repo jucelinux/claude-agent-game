@@ -60,7 +60,7 @@ button { color: inherit; }
   min-height: 620px;
   overflow: auto;
   display: grid;
-  grid-template-rows: 64px minmax(0, 1fr) 48px;
+  grid-template-rows: 64px auto 48px;
   background:
     radial-gradient(circle at 72% 15%, rgba(91, 231, 255, 0.075), transparent 26%),
     radial-gradient(circle at 18% 72%, rgba(228, 183, 92, 0.055), transparent 30%),
@@ -124,48 +124,6 @@ button { color: inherit; }
 .prototype-card:hover { transform: translateY(-3px); border-color: #486174; box-shadow: 0 25px 70px rgba(0, 0, 0, 0.34), 0 0 28px rgba(91, 231, 255, 0.045); }
 .prototype-card:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
 
-.pyramid-preview {
-  position: relative;
-  height: 218px;
-  overflow: hidden;
-  border-bottom: 1px solid #2c3748;
-  background: #1b120a;
-  image-rendering: pixelated;
-}
-
-.pyramid-preview > span { position: absolute; display: block; }
-.preview-ceiling { inset: 0 0 62%; background: #4f341c; }
-.preview-back-wall { left: 37%; right: 37%; top: 30%; bottom: 32%; background: #c9a261; }
-.preview-floor { inset: 52% 0 0; background: #b98b4c; clip-path: polygon(37% 0, 63% 0, 100% 100%, 0 100%); }
-.preview-wall { top: 25%; bottom: 0; background: #c9a261; }
-.preview-wall-left { left: 0; width: 43%; clip-path: polygon(0 0, 87% 14%, 67% 100%, 0 100%); }
-.preview-wall-right { right: 0; width: 43%; clip-path: polygon(13% 14%, 100% 0, 100% 100%, 33% 100%); }
-
-.preview-column {
-  top: 33%;
-  width: 10px;
-  height: 50%;
-  background: #a87d46;
-  box-shadow: -3px 0 0 #c09152;
-  transform: skewY(-2deg);
-}
-
-.preview-column::before, .preview-column::after { content: ""; position: absolute; left: -6px; width: 22px; height: 6px; background: #bd8a3d; }
-.preview-column::before { top: -6px; }
-.preview-column::after { bottom: -5px; }
-.preview-column-left { left: 24%; }
-.preview-column-right { right: 24%; transform: skewY(2deg); }
-
-.preview-mural { top: 44%; width: 7px; height: 18px; border: 1px solid #5be7dc; background: #744f31; box-shadow: 0 0 7px 3px rgba(47, 180, 164, 0.5), 0 0 20px 8px rgba(47, 180, 164, 0.18); }
-.preview-mural-left { left: 15%; transform: skewY(12deg); }
-.preview-mural-right { right: 15%; transform: skewY(-12deg); }
-
-.preview-traveler { left: 50%; bottom: 18%; width: 8px; height: 30px; transform: translateX(-50%); border-radius: 3px 3px 1px 1px; background: linear-gradient(to bottom, #b97855 0 20%, #111315 20% 58%, #285777 58% 100%); box-shadow: -3px 28px 0 -1px #202427, 3px 28px 0 -1px #202427, 0 4px 0 1px #211915; }
-.preview-pixel { width: 2px; height: 2px; background: #e7b64c; opacity: 0.7; }
-.preview-pixel-one { left: 33%; top: 46%; }
-.preview-pixel-two { right: 38%; top: 61%; }
-.preview-pixel-three { left: 45%; top: 73%; }
-
 .wasteland-preview {
   position: relative;
   height: 218px;
@@ -198,6 +156,25 @@ button { color: inherit; }
 .waste-rubble-one { left: 27%; bottom: 22%; }
 .waste-rubble-two { right: 26%; bottom: 19%; transform: skewY(-24deg); }
 .waste-rubble-three { left: 46%; bottom: 31%; width: 8px; height: 5px; }
+
+.sunlit-preview {
+  position: relative;
+  height: 218px;
+  overflow: hidden;
+  border-bottom: 1px solid #2c3748;
+  background: linear-gradient(#5ea1d0 0 54%, #b9b385 72%, #9d693c 100%);
+}
+.sunlit-preview > span { position: absolute; display: block; }
+.sunlit-sun { top: 19px; right: 44px; width: 36px; height: 36px; border-radius: 50%; background: #fff1bd; box-shadow: 0 0 34px 12px rgba(255, 223, 145, 0.46); }
+.sunlit-haze { inset: 43% 0 auto; height: 30%; background: linear-gradient(rgba(225, 218, 164, 0), rgba(225, 218, 164, 0.68)); }
+.sunlit-ground { left: -8%; right: -8%; bottom: -26%; height: 76%; border-radius: 50% 50% 0 0 / 18% 18% 0 0; background: #8b5430; box-shadow: inset 0 28px 44px rgba(244, 185, 103, 0.16); }
+.sunlit-ridge { bottom: 35%; width: 58%; height: 19%; background: #9c6b43; }
+.sunlit-ridge-left { left: -8%; clip-path: polygon(0 68%, 38% 24%, 65% 43%, 100% 0, 100% 100%, 0 100%); }
+.sunlit-ridge-right { right: -8%; clip-path: polygon(0 29%, 35% 0, 62% 48%, 100% 20%, 100% 100%, 0 100%); }
+.sunlit-rock { bottom: 19%; width: 28px; height: 16px; border-radius: 48% 52% 20% 18%; background: #68442f; box-shadow: inset -7px -5px 0 rgba(53, 31, 23, 0.28); }
+.sunlit-rock-one { left: 19%; transform: scale(0.72); }
+.sunlit-rock-two { left: 59%; bottom: 25%; transform: scale(1.08); }
+.sunlit-rock-three { right: 11%; bottom: 11%; transform: scale(0.48); }
 
 .prototype-card-copy { display: grid; gap: 10px; padding: 18px 19px 17px; }
 .prototype-card-kicker { display: flex; align-items: center; gap: 9px; color: #778497; font-size: 9px; text-transform: uppercase; letter-spacing: 0.09em; }
@@ -351,7 +328,7 @@ button { color: inherit; }
 .scene-row { justify-content: flex-start; }
 .scene-row.active-scene { color: #dce3ee; background: #121925; }
 .scene-row.indent { padding-left: 22px; }
-.tree-glyph { width: 12px; color: #60758a; text-align: center; }
+.tree-icon { width: 12px; color: #60758a; text-align: center; }
 
 .stage-column { min-width: 0; min-height: 0; display: grid; grid-template-rows: 44px minmax(0, 1fr) 36px; background: #090c12; }
 
@@ -389,7 +366,7 @@ button { color: inherit; }
 }
 
 .game-host { position: absolute; inset: 0; }
-.game-host canvas { display: block; }
+.game-host canvas { display: block; width: 100%; height: 100%; outline: 0; touch-action: none; }
 
 .inspect-notice {
   position: absolute;
@@ -505,7 +482,7 @@ button { color: inherit; }
 }
 
 @media (max-width: 700px) {
-  .catalog-shell { min-height: 100vh; grid-template-rows: 58px minmax(0, 1fr) 42px; }
+  .catalog-shell { min-height: 100vh; grid-template-rows: 58px auto 42px; }
   .catalog-topbar { padding: 0 14px; }
   .catalog-availability { font-size: 0; }
   .catalog-availability .status-dot { display: block; }
@@ -515,7 +492,7 @@ button { color: inherit; }
   .catalog-hero p { font-size: 11px; }
   .catalog-library { padding-top: 26px; }
   .prototype-grid { grid-template-columns: minmax(0, 1fr); }
-  .pyramid-preview, .wasteland-preview { height: 180px; }
+  .wasteland-preview, .sunlit-preview { height: 180px; }
   .prototype-meta { flex-wrap: wrap; }
   .prototype-open { width: 100%; margin: 3px 0 0; }
   .prototype-open::before { display: none; }
