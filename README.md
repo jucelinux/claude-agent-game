@@ -6,13 +6,11 @@ game scenes.
 The root screen catalogs the prototypes that are currently available and opens each one in its
 own Agent Game Builder workspace.
 
-The catalog currently contains two active studies:
+The catalog currently contains one entry:
 
-- **Ashfall Expanse** — a wide post-apocalyptic isometric environment with a compiled
-  eight-direction low-poly traveler atlas
-  through ruined districts, broken infrastructure and dry canals.
-- **Sunlit Earth** — a true-3D environment study with open sky, directional sunlight and a
-  simple warm earthen terrain.
+- **New Project** — a blank Babylon stage with ground, sky, key light and a walk camera,
+  waiting for the next game concept. The Ashfall Expanse and Sunlit Earth studies are preserved
+  on `archive/babylon-prototypes`.
 
 ## Start
 

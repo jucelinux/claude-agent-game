@@ -124,57 +124,32 @@ button { color: inherit; }
 .prototype-card:hover { transform: translateY(-3px); border-color: #486174; box-shadow: 0 25px 70px rgba(0, 0, 0, 0.34), 0 0 28px rgba(91, 231, 255, 0.045); }
 .prototype-card:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
 
-.wasteland-preview {
+.blank-preview {
   position: relative;
   height: 218px;
   overflow: hidden;
   border-bottom: 1px solid #2c3748;
+  background: linear-gradient(#141b24 0 58%, #101720 100%);
+}
+.blank-preview > span { position: absolute; display: block; }
+.blank-horizon { left: 0; right: 0; top: 58%; height: 1px; background: rgba(91, 231, 255, 0.22); }
+.blank-floor {
+  left: -20%; right: -20%; top: 58%; bottom: 0;
   background:
-    linear-gradient(rgba(180, 102, 61, 0.08), transparent 38%),
-    linear-gradient(#0b1015 0 30%, #1b1d1c 52%, #080b0d 100%);
-  image-rendering: pixelated;
+    repeating-linear-gradient(90deg, rgba(91, 231, 255, 0.13) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(rgba(91, 231, 255, 0.11) 0 1px, transparent 1px 22px);
+  mask-image: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.85));
+  transform: perspective(220px) rotateX(62deg);
+  transform-origin: top center;
 }
-
-.wasteland-preview > span { position: absolute; display: block; }
-.waste-horizon { bottom: 43%; background: #11171a; }
-.waste-horizon-left { left: 0; width: 29%; height: 34%; clip-path: polygon(0 16%, 24% 16%, 24% 0, 54% 0, 54% 31%, 75% 31%, 75% 9%, 100% 9%, 100% 100%, 0 100%); }
-.waste-horizon-right { right: 0; width: 27%; height: 39%; clip-path: polygon(0 28%, 18% 28%, 18% 0, 56% 0, 56% 39%, 79% 39%, 79% 17%, 100% 17%, 100% 100%, 0 100%); }
-.waste-ground { left: 7%; right: 7%; bottom: -17%; height: 79%; transform: rotate(0deg); background: #4d473d; clip-path: polygon(50% 0, 100% 47%, 50% 100%, 0 47%); box-shadow: inset 0 25px 45px rgba(0, 0, 0, 0.28); }
-.waste-building { bottom: 40%; background: #2a2d2c; }
-.waste-building::after { content: ""; position: absolute; inset: 14% 16%; background: repeating-linear-gradient(90deg, #111617 0 5px, transparent 5px 11px); opacity: 0.7; }
-.waste-building-left { left: 14%; width: 19%; height: 39%; clip-path: polygon(0 11%, 66% 0, 100% 14%, 100% 100%, 0 81%); }
-.waste-building-right { right: 14%; width: 16%; height: 32%; clip-path: polygon(0 13%, 57% 0, 100% 12%, 100% 83%, 0 100%); }
-.waste-overpass { top: 48%; width: 37%; height: 10%; background: #454743; border-top: 3px solid #5e5d55; box-shadow: 0 9px 0 -6px #1b1e1e; }
-.waste-overpass-left { left: 4%; transform: skewY(12deg); clip-path: polygon(0 0, 100% 23%, 90% 100%, 0 72%); }
-.waste-overpass-right { right: 4%; transform: skewY(-12deg); clip-path: polygon(0 23%, 100% 0, 100% 72%, 10% 100%); }
-.waste-canal { left: 3%; right: 3%; bottom: -5%; height: 30%; background: #211c19; clip-path: polygon(25% 0, 75% 0, 100% 55%, 50% 100%, 0 55%); border-top: 4px solid #272a29; }
-.waste-tower { left: 61%; bottom: 31%; width: 5px; height: 43%; transform: skewY(-4deg); background: #70432f; box-shadow: -6px 23px 0 -2px #3d2b25, 6px 23px 0 -2px #3d2b25; }
-.waste-tower::before { content: ""; position: absolute; left: -10px; top: 30%; width: 25px; height: 5px; background: #555650; }
-.waste-tower::after { content: ""; position: absolute; left: -7px; bottom: -5px; width: 19px; height: 7px; background: #303331; }
-.waste-beacon { left: calc(61% - 3px); bottom: 73%; width: 11px; height: 11px; border: 1px solid #61d7cf; border-radius: 50%; box-shadow: 0 0 8px #61d7cf, 0 0 24px rgba(97, 215, 207, 0.42); }
-.waste-rubble { width: 13px; height: 7px; transform: skewY(24deg); background: #5b4a3b; box-shadow: 9px 5px 0 #343331; }
-.waste-rubble-one { left: 27%; bottom: 22%; }
-.waste-rubble-two { right: 26%; bottom: 19%; transform: skewY(-24deg); }
-.waste-rubble-three { left: 46%; bottom: 31%; width: 8px; height: 5px; }
-
-.sunlit-preview {
-  position: relative;
-  height: 218px;
-  overflow: hidden;
-  border-bottom: 1px solid #2c3748;
-  background: linear-gradient(#5ea1d0 0 54%, #b9b385 72%, #9d693c 100%);
+.blank-marker {
+  left: 50%; top: 44%;
+  width: 40px; height: 40px;
+  margin-left: -20px;
+  border: 1px solid rgba(163, 178, 196, 0.5);
+  background: rgba(163, 178, 196, 0.08);
+  box-shadow: 0 16px 26px -14px rgba(0, 0, 0, 0.7);
 }
-.sunlit-preview > span { position: absolute; display: block; }
-.sunlit-sun { top: 19px; right: 44px; width: 36px; height: 36px; border-radius: 50%; background: #fff1bd; box-shadow: 0 0 34px 12px rgba(255, 223, 145, 0.46); }
-.sunlit-haze { inset: 43% 0 auto; height: 30%; background: linear-gradient(rgba(225, 218, 164, 0), rgba(225, 218, 164, 0.68)); }
-.sunlit-ground { left: -8%; right: -8%; bottom: -26%; height: 76%; border-radius: 50% 50% 0 0 / 18% 18% 0 0; background: #8b5430; box-shadow: inset 0 28px 44px rgba(244, 185, 103, 0.16); }
-.sunlit-ridge { bottom: 35%; width: 58%; height: 19%; background: #9c6b43; }
-.sunlit-ridge-left { left: -8%; clip-path: polygon(0 68%, 38% 24%, 65% 43%, 100% 0, 100% 100%, 0 100%); }
-.sunlit-ridge-right { right: -8%; clip-path: polygon(0 29%, 35% 0, 62% 48%, 100% 20%, 100% 100%, 0 100%); }
-.sunlit-rock { bottom: 19%; width: 28px; height: 16px; border-radius: 48% 52% 20% 18%; background: #68442f; box-shadow: inset -7px -5px 0 rgba(53, 31, 23, 0.28); }
-.sunlit-rock-one { left: 19%; transform: scale(0.72); }
-.sunlit-rock-two { left: 59%; bottom: 25%; transform: scale(1.08); }
-.sunlit-rock-three { right: 11%; bottom: 11%; transform: scale(0.48); }
 
 .prototype-card-copy { display: grid; gap: 10px; padding: 18px 19px 17px; }
 .prototype-card-kicker { display: flex; align-items: center; gap: 9px; color: #778497; font-size: 9px; text-transform: uppercase; letter-spacing: 0.09em; }
@@ -492,7 +467,7 @@ button { color: inherit; }
   .catalog-hero p { font-size: 11px; }
   .catalog-library { padding-top: 26px; }
   .prototype-grid { grid-template-columns: minmax(0, 1fr); }
-  .wasteland-preview, .sunlit-preview { height: 180px; }
+  .blank-preview { height: 180px; }
   .prototype-meta { flex-wrap: wrap; }
   .prototype-open { width: 100%; margin: 3px 0 0; }
   .prototype-open::before { display: none; }

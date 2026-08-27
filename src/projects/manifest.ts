@@ -1,23 +1,15 @@
 export const PROTOTYPE_IDS = [
-  'ashfall-prototype',
-  'sunlit-earth-prototype',
+  'new-project-prototype',
 ] as const
 
 export type PrototypeId = (typeof PROTOTYPE_IDS)[number]
 
 export const PROTOTYPE_SCENES = {
-  'ashfall-prototype': [
+  'new-project-prototype': [
     {
-      id: 'wasteland-map',
-      label: 'Ashfall Expanse',
-      detail: 'WASD / arrows walk · explore Sector 07',
-    },
-  ],
-  'sunlit-earth-prototype': [
-    {
-      id: 'sunlit-earth',
-      label: 'Sunlit Earth',
-      detail: 'WASD moves · mouse looks · a first true-3D terrain study',
+      id: 'new-project',
+      label: 'Blank Scene',
+      detail: 'WASD moves · mouse looks · empty Babylon stage for the next game',
     },
   ],
 } as const

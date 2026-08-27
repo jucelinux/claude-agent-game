@@ -52,6 +52,20 @@ describe('architectural boundary', () => {
     expect(existsSync('public/assets/landing')).toBe(false)
   })
 
+  it('does not retain the archived Babylon prototypes', () => {
+    const source = filesUnder('src')
+      .filter((path) => /\.(?:ts|tsx)$/.test(path))
+      .map((path) => readFileSync(path, 'utf8'))
+      .join('\n')
+
+    expect(existsSync('src/game/wasteland')).toBe(false)
+    expect(existsSync('src/game/sunlit')).toBe(false)
+    expect(existsSync('src/game/character')).toBe(false)
+    expect(existsSync('public/assets/ashfall')).toBe(false)
+    expect(source).not.toContain('ashfall-prototype')
+    expect(source).not.toContain('sunlit-earth-prototype')
+  })
+
   it('does not retain the removed Pyramid Glyph prototype', () => {
     const source = filesUnder('src')
       .filter((path) => /\.(?:ts|tsx)$/.test(path))

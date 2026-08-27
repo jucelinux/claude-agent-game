@@ -146,7 +146,7 @@ function EmptyInspector(): React.JSX.Element {
       <h2>Gameplay blockout</h2>
       <p>
         This prototype uses scene-authored geometry and native Babylon meshes.
-        Compiled assets remain empty while its interaction loop is being established.
+        Compiled assets remain empty until the new project declares its first asset.
       </p>
     </section>
   )
@@ -280,10 +280,8 @@ function BuilderWorkspace({
   const frameCount = compilation.bundle.clips.reduce((total, clip) => total + clip.frames.length, 0)
   const byteCount = compilation.bundle.clips.reduce((total, clip) => total + clip.atlas.rgba.byteLength, 0)
   const scene = workspaceScenes.find((entry) => entry.id === activeScene) ?? initialScene
-  const isMapScene = runtime.scene === 'wasteland-map'
-  const position = isMapScene
-    ? `position ${runtime.playerX.toFixed(1)}, ${runtime.playerY.toFixed(1)}`
-    : `position ${runtime.playerX.toFixed(1)} · depth ${runtime.playerDepth.toFixed(1)}`
+  const position =
+    `position ${runtime.playerX.toFixed(1)} · depth ${runtime.playerDepth.toFixed(1)}`
 
   const selectScene = (nextScene: WorkspaceScene): void => {
     requestedScene.current = nextScene
@@ -373,9 +371,7 @@ function BuilderWorkspace({
             <div>
               <span className="eyebrow">Babylon scene</span>
               <strong>{scene.label}</strong>
-              <span className="blockout-badge">
-                {activeScene === 'wasteland-map' ? 'isometric map' : 'true 3D terrain'}
-              </span>
+              <span className="blockout-badge">{prototype.format}</span>
             </div>
             <label className="toggle">
               <input
@@ -408,12 +404,8 @@ function BuilderWorkspace({
               <div><dt>Scene</dt><dd>{runtime.scene}</dd></div>
               <div><dt>Mode</dt><dd>{runtime.mode}</dd></div>
               <div><dt>Horizontal</dt><dd>{runtime.playerX.toFixed(2)}</dd></div>
-              <div>
-                <dt>{isMapScene ? 'Map Y' : 'Depth'}</dt>
-                <dd>
-                  {(isMapScene ? runtime.playerY : runtime.playerDepth).toFixed(2)}
-                </dd>
-              </div>
+              <div><dt>Height</dt><dd>{runtime.playerY.toFixed(2)}</dd></div>
+              <div><dt>Depth</dt><dd>{runtime.playerDepth.toFixed(2)}</dd></div>
               <div><dt>Interaction</dt><dd>{runtime.interaction ?? 'none'}</dd></div>
             </dl>
           </section>
@@ -430,37 +422,12 @@ function BuilderWorkspace({
   )
 }
 
-function WastelandPreview(): React.JSX.Element {
+function BlankStagePreview(): React.JSX.Element {
   return (
-    <div className="wasteland-preview" aria-hidden="true">
-      <span className="waste-horizon waste-horizon-left" />
-      <span className="waste-horizon waste-horizon-right" />
-      <span className="waste-ground" />
-      <span className="waste-building waste-building-left" />
-      <span className="waste-building waste-building-right" />
-      <span className="waste-overpass waste-overpass-left" />
-      <span className="waste-overpass waste-overpass-right" />
-      <span className="waste-canal" />
-      <span className="waste-tower" />
-      <span className="waste-beacon" />
-      <span className="waste-rubble waste-rubble-one" />
-      <span className="waste-rubble waste-rubble-two" />
-      <span className="waste-rubble waste-rubble-three" />
-    </div>
-  )
-}
-
-function SunlitPreview(): React.JSX.Element {
-  return (
-    <div className="sunlit-preview" aria-hidden="true">
-      <span className="sunlit-sun" />
-      <span className="sunlit-haze" />
-      <span className="sunlit-ground" />
-      <span className="sunlit-ridge sunlit-ridge-left" />
-      <span className="sunlit-ridge sunlit-ridge-right" />
-      <span className="sunlit-rock sunlit-rock-one" />
-      <span className="sunlit-rock sunlit-rock-two" />
-      <span className="sunlit-rock sunlit-rock-three" />
+    <div className="blank-preview" aria-hidden="true">
+      <span className="blank-horizon" />
+      <span className="blank-floor" />
+      <span className="blank-marker" />
     </div>
   )
 }
@@ -515,7 +482,7 @@ function PrototypeCatalog({
                 onClick={() => onOpen(prototype.id)}
                 aria-label={`Open ${prototype.title} in Agent Game Builder`}
               >
-                {prototype.visual === 'wasteland' ? <WastelandPreview /> : <SunlitPreview />}
+                <BlankStagePreview />
                 <span className="prototype-card-copy">
                   <span className="prototype-card-kicker">
                     <span>{prototype.status}</span>

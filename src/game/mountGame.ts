@@ -1,7 +1,7 @@
 import { Engine } from '@babylonjs/core/Engines/engine.js'
 import { KeyboardState, type BabylonSceneController } from '../babylon/runtime.ts'
 import type { CompiledBundle } from '../compiler/types.ts'
-import { createSunlitEarthScene } from './sunlit/SunlitEarthScene.ts'
+import { createNewProjectScene } from './newProject/NewProjectScene.ts'
 import {
   getPrototypeScenes,
   type PrototypeId,
@@ -9,7 +9,6 @@ import {
   type WorkspaceMode,
   type WorkspaceScene,
 } from './types.ts'
-import { createBabylonWastelandScene } from './wasteland/BabylonWastelandScene.ts'
 
 export type GameHandle = {
   readonly setMode: (mode: WorkspaceMode) => void
@@ -62,9 +61,7 @@ export function mountGame(
     bundle,
     input,
   }
-  const created = prototypeId === 'ashfall-prototype'
-    ? [createBabylonWastelandScene(sceneContext)]
-    : [createSunlitEarthScene(sceneContext)]
+  const created = [createNewProjectScene(sceneContext)]
   for (const controller of created) controllers.set(controller.id, controller)
   activate(firstScene.id)
 

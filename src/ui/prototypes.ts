@@ -6,26 +6,15 @@ import {
 
 export const PROTOTYPES = [
   {
-    id: 'ashfall-prototype',
-    title: 'Ashfall Expanse',
-    eyebrow: 'Post-apocalypse · Isometric exploration',
+    id: 'new-project-prototype',
+    title: 'New Project',
+    eyebrow: 'Blank slate · Babylon scene',
     description:
-      'A wide ruined district made for quiet traversal through broken infrastructure, dry canals and cities disappearing into dust.',
-    status: 'Playable',
-    format: 'Wide isometric traversal',
-    sceneCount: getPrototypeScenes('ashfall-prototype').length,
-    visual: 'wasteland',
-  },
-  {
-    id: 'sunlit-earth-prototype',
-    title: 'Sunlit Earth',
-    eyebrow: 'True 3D · Environment study',
-    description:
-      'A quiet sunlit landscape with warm earth, open sky and room for the next gameplay direction.',
-    status: 'Playable',
-    format: 'Babylon.js true-3D environment',
-    sceneCount: getPrototypeScenes('sunlit-earth-prototype').length,
-    visual: 'sunlit',
+      'An empty Babylon stage with ground, sky, key light and a walk camera, waiting for the next game concept.',
+    status: 'Scaffold',
+    format: 'Empty Babylon.js 3D scene',
+    sceneCount: getPrototypeScenes('new-project-prototype').length,
+    visual: 'blank',
   },
 ] as const
 

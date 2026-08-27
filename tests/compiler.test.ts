@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { compileBundle, compileClip } from '../src/compiler/compile.ts'
 import { compileProject, PROJECT_ID, PROJECT_SEED } from '../src/authoring/project.ts'
-import { WASTELAND_TRAVELER_3D_ATLAS_ASSETS } from '../src/authoring/wastelandTraveler3dAtlas.ts'
 import { COMPILER_FIXTURE } from './fixture.ts'
 
 describe('deterministic project compiler', () => {
@@ -42,36 +41,5 @@ describe('deterministic project compiler', () => {
       },
     }
     expect(() => compileClip(invalid, PROJECT_SEED)).toThrow(/canvas\.w/)
-  })
-
-  it('compiles authored indexed frames into a deterministic animation atlas', () => {
-    const source = WASTELAND_TRAVELER_3D_ATLAS_ASSETS.find(
-      (asset) => asset.id === 'ashfall-traveler-s-walk',
-    )
-    if (source === undefined) throw new Error('missing south walk atlas fixture')
-    const first = compileClip(source, PROJECT_SEED)
-    const second = compileClip(source, PROJECT_SEED)
-
-    expect(first).toEqual(second)
-    expect(first.frames).toHaveLength(16)
-    expect(first.frames.every((frame) => frame.durationMs === 62)).toBe(true)
-    expect(first.bounds.h).toBeGreaterThan(24)
-    expect(first.palette).toHaveLength(17)
-  })
-
-  it('compiles the Blender rig bake into the active directional atlas', () => {
-    const source = WASTELAND_TRAVELER_3D_ATLAS_ASSETS.find(
-      (asset) => asset.id === 'ashfall-traveler-n-walk',
-    )
-    if (source === undefined) throw new Error('missing north Blender walk atlas fixture')
-    const compiled = compileClip(source, PROJECT_SEED)
-    const uniqueFrames = new Set(source.raster.frames.map((frame) =>
-      Array.from(frame.buf.data).join(','),
-    ))
-
-    expect(compiled.frames).toHaveLength(16)
-    expect(uniqueFrames.size).toBeGreaterThanOrEqual(8)
-    expect(compiled.bounds.h).toBeGreaterThan(24)
-    expect(compiled.materials[0]?.name).toBe('Blender low-poly + CMU mocap retarget')
   })
 })

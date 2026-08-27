@@ -9,8 +9,10 @@ audio and resource lifecycle. Engine facilities are added only when a prototype 
 The `main` branch publishes the user-approved studies in the Agent Game Builder catalog. New
 game concepts enter that catalog only after explicit user approval.
 
-The Apollo 11 prototype is preserved on `archive/apollo-11-prototype`. The older pre-Phaser
-project is preserved on `archive/pre-phaser-refactor`.
+The Ashfall Expanse and Sunlit Earth prototypes are preserved on
+`archive/babylon-prototypes`. The Apollo 11 prototype is preserved on
+`archive/apollo-11-prototype`. The older pre-Phaser project is preserved on
+`archive/pre-phaser-refactor`.
 
 ## What is unique here
 
