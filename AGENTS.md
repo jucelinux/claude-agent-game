@@ -20,5 +20,6 @@ Read `CLAUDE.md` before editing this repository.
 
 - `npm run dev` — Vite builder workspace at port 5177.
 - `npm run test` — deterministic compiler and contract tests.
-- `npm run check` — typecheck and tests.
+- `npm run test:visual` — Playwright browser checks for the active scaffold.
+- `npm run check` — typecheck, deterministic tests and visual checks.
 - `npm run build` — production workspace build.

@@ -286,8 +286,9 @@ function BuilderWorkspace({
   const frameCount = compilation.bundle.clips.reduce((total, clip) => total + clip.frames.length, 0)
   const byteCount = compilation.bundle.clips.reduce((total, clip) => total + clip.atlas.rgba.byteLength, 0)
   const scene = workspaceScenes.find((entry) => entry.id === activeScene) ?? initialScene
-  const position =
-    `position ${runtime.playerX.toFixed(1)} · height ${runtime.playerY.toFixed(1)}`
+  const position = `position ${[runtime.playerX, runtime.playerY, runtime.playerDepth]
+    .map((value) => value.toFixed(1))
+    .join(' · ')}`
 
   const selectScene = (nextScene: WorkspaceScene): void => {
     requestedScene.current = nextScene
@@ -438,29 +439,14 @@ function BuilderWorkspace({
   )
 }
 
-function LcdPlatformerPreview(): React.JSX.Element {
+function BlankStagePreview(): React.JSX.Element {
   return (
-    <div className="lcd-preview" aria-hidden="true">
-      <div className="lcd-preview-mecha" />
+    <div className="blank-preview" aria-hidden="true">
+      <span className="blank-horizon" />
+      <span className="blank-floor" />
+      <span className="blank-marker" />
     </div>
   )
-}
-
-function EinsteinDioramaPreview(): React.JSX.Element {
-  return (
-    <div className="einstein-preview" aria-hidden="true">
-      <img src="/assets/einstein-diorama/preview.png" alt="" />
-      <span>wave / particle</span>
-    </div>
-  )
-}
-
-function PrototypePreview({
-  visual,
-}: {
-  readonly visual: (typeof PROTOTYPES)[number]['visual']
-}): React.JSX.Element {
-  return visual === 'lcd' ? <LcdPlatformerPreview /> : <EinsteinDioramaPreview />
 }
 
 function PrototypeCatalog({
@@ -513,7 +499,7 @@ function PrototypeCatalog({
                 onClick={() => onOpen(prototype.id)}
                 aria-label={`Open ${prototype.title} in Agent Game Builder`}
               >
-                <PrototypePreview visual={prototype.visual} />
+                <BlankStagePreview />
                 <span className="prototype-card-copy">
                   <span className="prototype-card-kicker">
                     <span>{prototype.status}</span>

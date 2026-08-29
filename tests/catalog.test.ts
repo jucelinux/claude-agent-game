@@ -4,17 +4,12 @@ import { PROTOTYPES, resolvePrototypeId } from '../src/ui/prototypes.ts'
 describe('prototype catalog', () => {
   it('contains every user-approved Babylon prototype', () => {
     expect(PROTOTYPES.map((prototype) => prototype.id)).toEqual([
-      'lcd-platformer-prototype',
-      'einstein-low-poly-prototype',
+      'new-project-prototype',
     ])
   })
 
   it('accepts known deep links and rejects unknown ones', () => {
-    expect(resolvePrototypeId('lcd-platformer-prototype')).toBe('lcd-platformer-prototype')
-    expect(resolvePrototypeId('einstein-low-poly-prototype')).toBe(
-      'einstein-low-poly-prototype',
-    )
-    expect(resolvePrototypeId('new-project-prototype')).toBeNull()
+    expect(resolvePrototypeId('new-project-prototype')).toBe('new-project-prototype')
     expect(resolvePrototypeId('ashfall-prototype')).toBeNull()
     expect(resolvePrototypeId('sunlit-earth-prototype')).toBeNull()
     expect(resolvePrototypeId('pyramid-glyph-prototype')).toBeNull()

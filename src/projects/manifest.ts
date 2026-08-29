@@ -1,23 +1,15 @@
 export const PROTOTYPE_IDS = [
-  'lcd-platformer-prototype',
-  'einstein-low-poly-prototype',
+  'new-project-prototype',
 ] as const
 
 export type PrototypeId = (typeof PROTOTYPE_IDS)[number]
 
 export const PROTOTYPE_SCENES = {
-  'lcd-platformer-prototype': [
+  'new-project-prototype': [
     {
-      id: 'lcd-platformer',
-      label: 'Colossal PCB Chamber',
-      detail: 'A/D or arrows move · W/↑/Space jumps · R resets',
-    },
-  ],
-  'einstein-low-poly-prototype': [
-    {
-      id: 'einstein-subatomic',
-      label: "Einstein's Quantum Field",
-      detail: 'WASD/arrows move · left click waves · right click particles · R resets',
+      id: 'new-project',
+      label: 'Blank Scene',
+      detail: 'WASD moves · mouse looks · empty Babylon stage for the next game',
     },
   ],
 } as const

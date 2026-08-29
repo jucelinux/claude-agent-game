@@ -25,30 +25,26 @@ Generated imagery is an authoring input, not a source of factual truth. For pixe
 the intended logical resolution and display with nearest-neighbour sampling; do not depend on
 runtime downscaling to invent the style.
 
+The retained atlas compositor turns a numbered frame sequence into a deterministic raster atlas:
+
+```sh
+npm run compose:atlas -- \
+  --input-dir /tmp/rendered-frames --output public/assets/example/atlas.png \
+  --columns 8 --rows 4 --cell-size 256
+```
+
 ## Blender renders
 
 Blender is an offline authoring tool for perspective, lighting, animation or geometry that is
 more dependable in 3D. Keep project-specific `.blend` files and scripts with their feature, then
-render PNG output into `public/assets/<feature>/`. Babylon only sees the exported images or an
-explicitly approved GLB; Blender is never a runtime dependency.
+render PNG or GLB output into `public/assets/<feature>/`. Babylon only sees the exported asset;
+Blender is never a runtime dependency.
 
-Install the pinned portable Blender LTS build into the ignored `.tools/` cache:
+Install the checksum-pinned portable Blender LTS build into the ignored `.tools/` cache:
 
 ```sh
 npm run setup:blender
 ```
-
-Feature pipelines may pin their own offline inputs in the same cache. The LCD mecha uses the
-CC0 Quaternius Universal Animation Library as a biomechanical base:
-
-```sh
-npm run setup:motion-source
-npm run author:mecha-motion
-```
-
-The source archive and Blender distribution are verified by SHA-256. Only the resulting atlas
-and its provenance are committed; the source rig, unused clips and authoring binary stay out of
-the runtime and production bundle.
 
 The reusable render entry point is:
 

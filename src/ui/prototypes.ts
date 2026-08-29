@@ -6,38 +6,21 @@ import {
 
 export const PROTOTYPES = [
   {
-    id: 'lcd-platformer-prototype',
-    title: 'LCD Platformer',
-    eyebrow: '2D study · articulated mecha',
+    id: 'new-project-prototype',
+    title: 'New Project',
+    eyebrow: 'Blank slate · Babylon scene',
     description:
-      'A maintenance mecha traverses giant chip packages, soldered terminals and a ruptured power rail inside colossal hardware.',
-    status: 'Playable',
-    format: 'Babylon.js 2D · Sprite + meshes',
-    sceneCount: getPrototypeScenes('lcd-platformer-prototype').length,
-    visual: 'lcd',
-    characterSummary: 'Mecha motion atlas · 60f',
-    environmentSummary: 'Colossal PCB · Babylon meshes',
-    inspectorEyebrow: 'Playable environment study',
-    inspectorTitle: 'Maintenance unit inside colossal hardware',
+      'An empty Babylon stage with ground, sky, key light and a walk camera, waiting for the next game concept.',
+    status: 'Scaffold',
+    format: 'Empty Babylon.js 3D scene',
+    sceneCount: getPrototypeScenes('new-project-prototype').length,
+    visual: 'blank',
+    characterSummary: 'No character assets',
+    environmentSummary: 'Native Babylon scaffold',
+    inspectorEyebrow: 'Reusable Builder foundation',
+    inspectorTitle: 'A clean stage with proven tooling',
     inspectorDescription:
-      'A Blender-authored profile mecha traverses a processor package, oversized chip leads, exposed copper and a burnt power rail built directly from native Babylon geometry.',
-  },
-  {
-    id: 'einstein-low-poly-prototype',
-    title: 'Einstein: Quantum Field',
-    eyebrow: '3D action study · wave/particle duality',
-    description:
-      'Einstein crosses a luminous subatomic field and projects photons as particles or propagating waves.',
-    status: 'Playable',
-    format: 'Babylon.js 3D · Animated GLB + native meshes',
-    sceneCount: getPrototypeScenes('einstein-low-poly-prototype').length,
-    visual: 'einstein',
-    characterSummary: 'Professor rig · CC0 idle + walk',
-    environmentSummary: 'Subatomic field · native Babylon meshes',
-    inspectorEyebrow: 'Playable quantum action study',
-    inspectorTitle: 'Wave and particle, at Einstein’s fingertips',
-    inspectorDescription:
-      'The animated character is authored offline in Blender. Babylon owns the procedural quantum field, aiming, photon motion, locomotion playback, lighting, shadows and scene lifecycle.',
+      'The project is empty of game content while retaining Babylon lifecycle, runtime diagnostics, deterministic compilation, visual tests and offline authoring support.',
   },
 ] as const
 

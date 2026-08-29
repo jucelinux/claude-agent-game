@@ -6,17 +6,11 @@ game scenes.
 The root screen catalogs the prototypes that are currently available and opens each one in its
 own Agent Game Builder workspace.
 
-The catalog currently contains two entries:
+The catalog currently contains one entry:
 
-- **LCD Platformer** — a side-profile maintenance mecha whose CC0-based motion is rendered
-  offline in Blender and played through native Babylon sprites inside a colossal PCB chamber
-  assembled from processor packages, soldered terminals and exposed copper.
-- **Einstein: Quantum Field** — a playable subatomic arena with a wild-haired physicist
-  caricature, CC0-based humanoid locomotion, native Babylon field geometry and two photon
-  forms: particle projectiles on right click and propagating waves on left click.
-
-The Ashfall Expanse and Sunlit Earth studies are preserved on
-  `archive/babylon-prototypes`.
+- **New Project** — a blank Babylon stage with ground, sky, key light and a walk camera,
+  waiting for the next game concept. It retains the Builder infrastructure proven by the
+  archived prototypes without carrying their game-specific content.
 
 ## Start
 
@@ -24,7 +18,6 @@ Requires Node 24 or newer.
 
 ```sh
 npm ci
-npm run setup:authoring
 npm run dev
 ```
 
@@ -46,16 +39,16 @@ Babylon.js owns scenes, rendering, cameras, animation, audio and lifecycle. The 
 not wrap those systems in a second engine. See [asset authoring](docs/asset-authoring.md) for the
 three supported content paths.
 
-`npm run setup:blender` installs the pinned Blender LTS authoring binary under the ignored
-`.tools/` cache. Blender is an offline authoring dependency and never enters the browser bundle.
-`npm run setup:motion-source` installs the checksum-pinned CC0 locomotion data in that same
-cache. Regenerate the committed mecha atlas with `npm run author:mecha-motion`.
-Regenerate the animated Einstein GLB, its 16 × 16 character textures and catalog preview with
-`npm run author:einstein-diorama`. Blender authors ordinary offline content; the browser uses
-Babylon's official glTF loader and never runs Blender code.
+The neutral scaffold keeps the accumulated Builder improvements: lifecycle-safe Babylon scene
+mounting, keyboard input, live motion diagnostics, the deterministic raster compiler, official
+glTF loader support, Playwright visual checks, a pinned Blender LTS launcher and deterministic
+PNG atlas composition.
 
 ## Preserved work
 
+- `archive/pcb-einstein-prototypes` — the LCD/PCB platformer and Einstein's subatomic field,
+  including their complete assets, authoring pipelines and tests.
+- `archive/babylon-prototypes` — the Ashfall Expanse and Sunlit Earth Babylon studies.
 - `archive/apollo-11-prototype` — the complete historical Apollo 11 Phaser prototype.
 - `archive/pre-phaser-refactor` — the historical custom-runtime microgame project.
 
@@ -64,6 +57,8 @@ Babylon's official glTF loader and never runs Blender code.
 ```sh
 npm run dev
 npm run test
+npm run test:visual
 npm run check
 npm run build
+npm run setup:blender
 ```

@@ -12,7 +12,8 @@ game concepts enter that catalog only after explicit user approval.
 The Ashfall Expanse and Sunlit Earth prototypes are preserved on
 `archive/babylon-prototypes`. The Apollo 11 prototype is preserved on
 `archive/apollo-11-prototype`. The older pre-Phaser project is preserved on
-`archive/pre-phaser-refactor`.
+`archive/pre-phaser-refactor`. The LCD/PCB platformer and Einstein's subatomic field are
+preserved together on `archive/pcb-einstein-prototypes`.
 
 ## What is unique here
 

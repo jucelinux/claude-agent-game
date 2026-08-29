@@ -11,7 +11,7 @@ describe('portable bundle contract', () => {
       project: PROJECT_ID,
       seed: PROJECT_SEED,
     })
-    expect(bundle.project).toBe('lcd-platformer-prototype')
+    expect(bundle.project).toBe('new-project-prototype')
     expect(bundle.checksum).toMatch(/^[0-9a-f]{8}$/)
   })
 
@@ -19,19 +19,10 @@ describe('portable bundle contract', () => {
     expect(compileProject()).toEqual(compileProject())
   })
 
-  it('keeps the imported mecha atlas outside the procedural asset bundle', () => {
-    const bundle = compileProject('lcd-platformer-prototype')
+  it('leaves the blank scaffold without compiled assets', () => {
+    const bundle = compileProject('new-project-prototype')
 
     expect(bundle.clips).toEqual([])
     expect(bundle).toEqual(compileProject())
-  })
-
-  it('keeps the imported low-poly GLB outside the procedural asset bundle', () => {
-    const bundle = compileProject('einstein-low-poly-prototype')
-
-    expect(bundle.project).toBe('einstein-low-poly-prototype')
-    expect(bundle.clips).toEqual([])
-    expect(bundle.checksum).toMatch(/^[0-9a-f]{8}$/)
-    expect(bundle).toEqual(compileProject('einstein-low-poly-prototype'))
   })
 })

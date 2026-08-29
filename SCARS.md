@@ -83,3 +83,35 @@ point, adding more projection code is not iteration on the game; it is accidenta
 Blender content enters through GLB/glTF. Deliberate 2D scenes may use Babylon sprites, GUI or
 dynamic textures, but no scene may reimplement a general projection, visibility or lighting
 pipeline. The engine-neutral compiler remains independent from Babylon.
+
+## Scar 04 — movement direction is a screen-space contract
+
+**Evidence.** Einstein's first camera-relative movement implementation computed its lateral
+basis with the cross-product operands reversed. World coordinates and animation remained
+internally consistent, yet A moved right and D moved left from the player's view. Correcting the
+basis and asserting the resulting world-coordinate signs in a browser test closed the defect.
+
+**Lesson.** A mathematically plausible camera basis is not enough to establish the player's
+left and right. Handedness, view direction and the runtime's camera convention meet at the
+screen, which is where the control contract must be evaluated.
+
+**Obligation.** Camera-relative controls must derive their basis from Babylon camera state and
+include a rendered or browser-level test that independently exercises left and right. Validate
+the observed screen direction after camera changes; do not infer correctness only from non-zero
+movement or a unit-vector calculation.
+
+## Scar 05 — visible motion needs rendered-frame tests
+
+**Evidence.** The LCD mecha and animated Einstein could both satisfy state and position tests
+while still risking invisible, cropped or visually discontinuous frames. Playwright canvas
+sampling caught the presentation boundary by checking character pixels during starts, reversals,
+jumps and input transitions. The same harness verified lighting and action effects in Babylon.
+
+**Lesson.** Simulation tests prove state transitions; they do not prove that the player can see
+the result. Animation, camera framing, alpha, asset loading and render timing form a separate
+contract that only exists in rendered output.
+
+**Obligation.** Every approved playable prototype needs at least one browser-level smoke test
+that loads its Babylon scene without page errors and samples or captures the canvas. Motion-heavy
+features must exercise their risky transitions frame-by-frame. Keep deterministic logic in fast
+unit tests and reserve Playwright for the visible contract.
