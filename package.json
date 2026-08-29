@@ -7,9 +7,17 @@
   },
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5177",
+    "dev:test": "vite --host 127.0.0.1 --port 5187 --strictPort",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0 --port 5177",
-    "check": "npm run typecheck && npm test",
+    "check": "npm run typecheck && npm test && npm run test:visual",
+    "test:visual": "playwright test",
+    "motion:review": "playwright test tests/visual/lcdPlatformer.motion.spec.ts",
+    "setup:blender": "bash scripts/blender/setup.sh",
+    "setup:motion-source": "bash scripts/assets/setup-motion-source.sh",
+    "setup:authoring": "npm run setup:blender && npm run setup:motion-source",
+    "author:mecha-motion": "bash scripts/blender/build_mecha_motion.sh",
+    "blender": "bash scripts/blender/run.sh",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -19,10 +27,13 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^5.2.0",
+    "pngjs": "^7.0.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.6",
     "vitest": "^3.2.4"

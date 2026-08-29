@@ -1,15 +1,15 @@
 export const PROTOTYPE_IDS = [
-  'new-project-prototype',
+  'lcd-platformer-prototype',
 ] as const
 
 export type PrototypeId = (typeof PROTOTYPE_IDS)[number]
 
 export const PROTOTYPE_SCENES = {
-  'new-project-prototype': [
+  'lcd-platformer-prototype': [
     {
-      id: 'new-project',
-      label: 'Blank Scene',
-      detail: 'WASD moves · mouse looks · empty Babylon stage for the next game',
+      id: 'lcd-platformer',
+      label: 'Colossal PCB Chamber',
+      detail: 'A/D or arrows move · W/↑/Space jumps · R resets',
     },
   ],
 } as const

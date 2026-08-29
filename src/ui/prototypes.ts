@@ -6,15 +6,15 @@ import {
 
 export const PROTOTYPES = [
   {
-    id: 'new-project-prototype',
-    title: 'New Project',
-    eyebrow: 'Blank slate · Babylon scene',
+    id: 'lcd-platformer-prototype',
+    title: 'LCD Platformer',
+    eyebrow: '2D study · articulated mecha',
     description:
-      'An empty Babylon stage with ground, sky, key light and a walk camera, waiting for the next game concept.',
-    status: 'Scaffold',
-    format: 'Empty Babylon.js 3D scene',
-    sceneCount: getPrototypeScenes('new-project-prototype').length,
-    visual: 'blank',
+      'A maintenance mecha traverses giant chip packages, soldered terminals and a ruptured power rail inside colossal hardware.',
+    status: 'Playable',
+    format: 'Babylon.js 2D · Sprite + meshes',
+    sceneCount: getPrototypeScenes('lcd-platformer-prototype').length,
+    visual: 'lcd',
   },
 ] as const
 

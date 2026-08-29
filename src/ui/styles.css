@@ -124,31 +124,21 @@ button { color: inherit; }
 .prototype-card:hover { transform: translateY(-3px); border-color: #486174; box-shadow: 0 25px 70px rgba(0, 0, 0, 0.34), 0 0 28px rgba(91, 231, 255, 0.045); }
 .prototype-card:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
 
-.blank-preview {
+.lcd-preview {
   position: relative;
   height: 218px;
   overflow: hidden;
   border-bottom: 1px solid #2c3748;
-  background: linear-gradient(#141b24 0 58%, #101720 100%);
+  background: #10191b;
 }
-.blank-preview > span { position: absolute; display: block; }
-.blank-horizon { left: 0; right: 0; top: 58%; height: 1px; background: rgba(91, 231, 255, 0.22); }
-.blank-floor {
-  left: -20%; right: -20%; top: 58%; bottom: 0;
-  background:
-    repeating-linear-gradient(90deg, rgba(91, 231, 255, 0.13) 0 1px, transparent 1px 34px),
-    repeating-linear-gradient(rgba(91, 231, 255, 0.11) 0 1px, transparent 1px 22px);
-  mask-image: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.85));
-  transform: perspective(220px) rotateX(62deg);
-  transform-origin: top center;
-}
-.blank-marker {
-  left: 50%; top: 44%;
-  width: 40px; height: 40px;
-  margin-left: -20px;
-  border: 1px solid rgba(163, 178, 196, 0.5);
-  background: rgba(163, 178, 196, 0.08);
-  box-shadow: 0 16px 26px -14px rgba(0, 0, 0, 0.7);
+.lcd-preview-mecha {
+  position: absolute;
+  top: 29px;
+  left: 50%;
+  width: 160px;
+  height: 160px;
+  transform: translateX(-50%);
+  background: url('/assets/lcd-platformer/mecha/motion-atlas.png') 0 0 / 1200% 500% no-repeat;
 }
 
 .prototype-card-copy { display: grid; gap: 10px; padding: 18px 19px 17px; }
@@ -467,7 +457,7 @@ button { color: inherit; }
   .catalog-hero p { font-size: 11px; }
   .catalog-library { padding-top: 26px; }
   .prototype-grid { grid-template-columns: minmax(0, 1fr); }
-  .blank-preview { height: 180px; }
+  .lcd-preview { height: 180px; }
   .prototype-meta { flex-wrap: wrap; }
   .prototype-open { width: 100%; margin: 3px 0 0; }
   .prototype-open::before { display: none; }

@@ -23,7 +23,12 @@ const emptyRuntime = (scene: WorkspaceScene): RuntimeSnapshot => ({
   mode: 'play',
   playerX: 0,
   playerY: 0,
-  playerDepth: 1.5,
+  playerDepth: 0,
+  playerFacing: 'right',
+  motionState: 'idle',
+  motionPhase: 0,
+  velocityX: 0,
+  velocityY: 0,
   interaction: null,
   fps: 0,
 })
@@ -142,11 +147,11 @@ function ClipInspector({ clip }: { readonly clip: CompiledClip }): React.JSX.Ele
 function EmptyInspector(): React.JSX.Element {
   return (
     <section className="empty-inspector">
-      <span className="eyebrow">Scene geometry</span>
-      <h2>Gameplay blockout</h2>
+      <span className="eyebrow">Playable environment study</span>
+      <h2>Maintenance unit inside colossal hardware</h2>
       <p>
-        This prototype uses scene-authored geometry and native Babylon meshes.
-        Compiled assets remain empty until the new project declares its first asset.
+        A Blender-authored profile mecha traverses a processor package, oversized chip leads,
+        exposed copper and a burnt power rail built directly from native Babylon geometry.
       </p>
     </section>
   )
@@ -281,7 +286,7 @@ function BuilderWorkspace({
   const byteCount = compilation.bundle.clips.reduce((total, clip) => total + clip.atlas.rgba.byteLength, 0)
   const scene = workspaceScenes.find((entry) => entry.id === activeScene) ?? initialScene
   const position =
-    `position ${runtime.playerX.toFixed(1)} · depth ${runtime.playerDepth.toFixed(1)}`
+    `position ${runtime.playerX.toFixed(1)} · height ${runtime.playerY.toFixed(1)}`
 
   const selectScene = (nextScene: WorkspaceScene): void => {
     requestedScene.current = nextScene
@@ -336,7 +341,7 @@ function BuilderWorkspace({
 
             <section className="asset-group">
               <h2>Character clips</h2>
-              {characterClips.length === 0 && <p className="empty-list">No character assets</p>}
+              {characterClips.length === 0 && <p className="empty-list">Mecha motion atlas · 60f</p>}
               {characterClips.map((clip) => (
                 <button
                   key={clip.id}
@@ -351,7 +356,7 @@ function BuilderWorkspace({
 
             <section className="asset-group">
               <h2>Environment</h2>
-              {environmentClips.length === 0 && <p className="empty-list">No environment assets</p>}
+              {environmentClips.length === 0 && <p className="empty-list">Colossal PCB · Babylon meshes</p>}
               {environmentClips.map((clip) => (
                 <button
                   key={clip.id}
@@ -406,6 +411,10 @@ function BuilderWorkspace({
               <div><dt>Horizontal</dt><dd>{runtime.playerX.toFixed(2)}</dd></div>
               <div><dt>Height</dt><dd>{runtime.playerY.toFixed(2)}</dd></div>
               <div><dt>Depth</dt><dd>{runtime.playerDepth.toFixed(2)}</dd></div>
+              <div><dt>Facing</dt><dd>{runtime.playerFacing}</dd></div>
+              <div><dt>Motion</dt><dd>{runtime.motionState}</dd></div>
+              <div><dt>Phase</dt><dd>{runtime.motionPhase.toFixed(3)}</dd></div>
+              <div><dt>Velocity</dt><dd>{runtime.velocityX.toFixed(2)}, {runtime.velocityY.toFixed(2)}</dd></div>
               <div><dt>Interaction</dt><dd>{runtime.interaction ?? 'none'}</dd></div>
             </dl>
           </section>
@@ -422,12 +431,10 @@ function BuilderWorkspace({
   )
 }
 
-function BlankStagePreview(): React.JSX.Element {
+function LcdPlatformerPreview(): React.JSX.Element {
   return (
-    <div className="blank-preview" aria-hidden="true">
-      <span className="blank-horizon" />
-      <span className="blank-floor" />
-      <span className="blank-marker" />
+    <div className="lcd-preview" aria-hidden="true">
+      <div className="lcd-preview-mecha" />
     </div>
   )
 }
@@ -482,7 +489,7 @@ function PrototypeCatalog({
                 onClick={() => onOpen(prototype.id)}
                 aria-label={`Open ${prototype.title} in Agent Game Builder`}
               >
-                <BlankStagePreview />
+                <LcdPlatformerPreview />
                 <span className="prototype-card-copy">
                   <span className="prototype-card-kicker">
                     <span>{prototype.status}</span>

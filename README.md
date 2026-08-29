@@ -8,9 +8,10 @@ own Agent Game Builder workspace.
 
 The catalog currently contains one entry:
 
-- **New Project** — a blank Babylon stage with ground, sky, key light and a walk camera,
-  waiting for the next game concept. The Ashfall Expanse and Sunlit Earth studies are preserved
-  on `archive/babylon-prototypes`.
+- **LCD Platformer** — a side-profile maintenance mecha whose CC0-based motion is rendered
+  offline in Blender and played through native Babylon sprites inside a colossal PCB chamber
+  assembled from processor packages, soldered terminals and exposed copper. The Ashfall Expanse and Sunlit Earth studies are preserved on
+  `archive/babylon-prototypes`.
 
 ## Start
 
@@ -18,6 +19,7 @@ Requires Node 24 or newer.
 
 ```sh
 npm ci
+npm run setup:authoring
 npm run dev
 ```
 
@@ -38,6 +40,11 @@ Open `http://localhost:5177`.
 Babylon.js owns scenes, rendering, cameras, animation, audio and lifecycle. The repository does
 not wrap those systems in a second engine. See [asset authoring](docs/asset-authoring.md) for the
 three supported content paths.
+
+`npm run setup:blender` installs the pinned Blender LTS authoring binary under the ignored
+`.tools/` cache. Blender is an offline authoring dependency and never enters the browser bundle.
+`npm run setup:motion-source` installs the checksum-pinned CC0 locomotion data in that same
+cache. Regenerate the committed mecha atlas with `npm run author:mecha-motion`.
 
 ## Preserved work
 

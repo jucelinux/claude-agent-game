@@ -16,6 +16,11 @@ export type RuntimeSnapshot = {
   readonly playerX: number
   readonly playerY: number
   readonly playerDepth: number
-  readonly interaction: null
+  readonly playerFacing: 'left' | 'right'
+  readonly motionState: string
+  readonly motionPhase: number
+  readonly velocityX: number
+  readonly velocityY: number
+  readonly interaction: string | null
   readonly fps: number
 }

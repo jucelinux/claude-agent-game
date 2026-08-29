@@ -5,3 +5,5 @@ dist/
 *.blend1
 .eye/
 .tools/
+test-results/
+playwright-report/

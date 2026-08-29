@@ -1,7 +1,7 @@
 import { Engine } from '@babylonjs/core/Engines/engine.js'
 import { KeyboardState, type BabylonSceneController } from '../babylon/runtime.ts'
 import type { CompiledBundle } from '../compiler/types.ts'
-import { createNewProjectScene } from './newProject/NewProjectScene.ts'
+import { createLcdPlatformerScene } from './lcdPlatformer/LcdPlatformerScene.ts'
 import {
   getPrototypeScenes,
   type PrototypeId,
@@ -61,7 +61,7 @@ export function mountGame(
     bundle,
     input,
   }
-  const created = [createNewProjectScene(sceneContext)]
+  const created = [createLcdPlatformerScene(sceneContext)]
   for (const controller of created) controllers.set(controller.id, controller)
   activate(firstScene.id)
 
