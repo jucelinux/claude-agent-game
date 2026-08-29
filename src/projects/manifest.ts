@@ -15,9 +15,9 @@ export const PROTOTYPE_SCENES = {
   ],
   'einstein-low-poly-prototype': [
     {
-      id: 'einstein-diorama',
-      label: 'The Relativity Workshop',
-      detail: 'WASD/arrows move · drag orbits · wheel zooms · R resets',
+      id: 'einstein-subatomic',
+      label: "Einstein's Quantum Field",
+      detail: 'WASD/arrows move · left click waves · right click particles · R resets',
     },
   ],
 } as const

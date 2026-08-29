@@ -450,7 +450,7 @@ function EinsteinDioramaPreview(): React.JSX.Element {
   return (
     <div className="einstein-preview" aria-hidden="true">
       <img src="/assets/einstein-diorama/preview.png" alt="" />
-      <span>16 px texture study</span>
+      <span>wave / particle</span>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-"""Build the low-poly professor laboratory diorama and export it as GLB.
+"""Build the animated low-poly professor character and export it as GLB.
 
 The script is deliberately self-contained: meshes and tiny raster textures are authored
 offline in pinned Blender, while Babylon.js owns the runtime camera, lights and rendering.
@@ -16,7 +16,7 @@ import math
 import os
 import sys
 from pathlib import Path
-from typing import Callable, Iterable, Sequence
+from typing import Callable, Sequence
 
 import bpy
 from mathutils import Vector
@@ -27,7 +27,7 @@ Color = tuple[float, float, float, float]
 
 def parse_args() -> argparse.Namespace:
     payload = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
-    parser = argparse.ArgumentParser(description="Author the low-poly professor diorama")
+    parser = argparse.ArgumentParser(description="Author the animated low-poly professor")
     parser.add_argument("--output", required=True, help="Output GLB path")
     parser.add_argument("--preview", required=True, help="Output preview PNG path")
     parser.add_argument("--motion-source", required=True, help="Quaternius CC0 animation GLB")
@@ -256,32 +256,6 @@ def bone_segment(
     return obj
 
 
-def polyline(
-    name: str,
-    points: Iterable[Sequence[float]],
-    radius: float,
-    material: bpy.types.Material,
-) -> bpy.types.Object:
-    coordinates = list(points)
-    curve_data = bpy.data.curves.new(name=f"{name}_curve", type="CURVE")
-    curve_data.dimensions = "3D"
-    curve_data.resolution_u = 1
-    curve_data.bevel_depth = radius
-    curve_data.bevel_resolution = 0
-    spline = curve_data.splines.new(type="POLY")
-    spline.points.add(len(coordinates) - 1)
-    for point, coordinate in zip(spline.points, coordinates):
-        point.co = (*coordinate, 1.0)
-    obj = bpy.data.objects.new(name, curve_data)
-    bpy.context.collection.objects.link(obj)
-    assign_material(obj, material)
-    bpy.context.view_layer.objects.active = obj
-    obj.select_set(True)
-    bpy.ops.object.convert(target="MESH")
-    obj.select_set(False)
-    return obj
-
-
 def look_at(obj: bpy.types.Object, target: Sequence[float]) -> None:
     direction = Vector(target) - obj.location
     obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
@@ -289,30 +263,6 @@ def look_at(obj: bpy.types.Object, target: Sequence[float]) -> None:
 
 def build_materials(output_dir: Path) -> dict[str, bpy.types.Material]:
     images = {
-        "wall": pixel_image(
-            output_dir,
-            "tex-wall-16",
-            [srgb("#32424a"), srgb("#29383f"), srgb("#43565d")],
-            lambda x, y: 2 if (x + y * 3) % 13 == 0 else (x // 4 + y // 4) % 2,
-        ),
-        "floor": pixel_image(
-            output_dir,
-            "tex-floor-16",
-            [srgb("#263134"), srgb("#303d3e"), srgb("#1d272a")],
-            lambda x, y: 2 if x % 8 == 0 or y % 8 == 0 else (x // 8 + y // 8) % 2,
-        ),
-        "wood": pixel_image(
-            output_dir,
-            "tex-wood-16",
-            [srgb("#70472e"), srgb("#83593a"), srgb("#543320")],
-            lambda x, y: 2 if (y * 5 + x) % 11 == 0 else y % 2,
-        ),
-        "board": pixel_image(
-            output_dir,
-            "tex-board-16",
-            [srgb("#132b2b"), srgb("#173333"), srgb("#22403c")],
-            lambda x, y: 2 if (x * 7 + y * 11) % 29 == 0 else (x + y) % 2,
-        ),
         "suit": pixel_image(
             output_dir,
             "tex-suit-16",
@@ -330,18 +280,6 @@ def build_materials(output_dir: Path) -> dict[str, bpy.types.Material]:
             "tex-hair-16",
             [srgb("#ddd8c9"), srgb("#f2eedf"), srgb("#a9aa9f")],
             lambda x, y: 2 if (x * 3 + y * 5) % 7 == 0 else (x // 3 + y // 2) % 2,
-        ),
-        "metal": pixel_image(
-            output_dir,
-            "tex-metal-16",
-            [srgb("#6a7475"), srgb("#829093"), srgb("#40494b")],
-            lambda x, y: 2 if x % 7 == 0 else (x + y) % 2,
-        ),
-        "brass": pixel_image(
-            output_dir,
-            "tex-brass-16",
-            [srgb("#aa7531"), srgb("#d09a45"), srgb("#765022")],
-            lambda x, y: 2 if (x - y) % 8 == 0 else (x // 3 + y // 3) % 2,
         ),
         "chalk": pixel_image(
             output_dir,
@@ -361,96 +299,15 @@ def build_materials(output_dir: Path) -> dict[str, bpy.types.Material]:
             [srgb("#d7cfaa"), srgb("#eee6c8"), srgb("#9d8f70")],
             lambda x, y: 2 if y in (4, 9, 13) else (x + y) % 2,
         ),
-        "glow": pixel_image(
-            output_dir,
-            "tex-glow-16",
-            [srgb("#f2b950"), srgb("#ffe29a"), srgb("#d47c2d")],
-            lambda x, y: 1 if 4 <= x <= 11 and 4 <= y <= 11 else (x + y) % 2,
-        ),
     }
     return {
-        "wall": textured_material("MAT_Wall_Pixel", images["wall"]),
-        "floor": textured_material("MAT_Floor_Pixel", images["floor"]),
-        "wood": textured_material("MAT_Wood_Pixel", images["wood"]),
-        "board": textured_material("MAT_Board_Pixel", images["board"], roughness=0.92),
         "suit": textured_material("MAT_Suit_Pixel", images["suit"]),
         "skin": textured_material("MAT_Skin_Pixel", images["skin"]),
         "hair": textured_material("MAT_Hair_Pixel", images["hair"], roughness=0.94),
-        "metal": textured_material("MAT_Metal_Pixel", images["metal"], metallic=0.6, roughness=0.45),
-        "brass": textured_material("MAT_Brass_Pixel", images["brass"], metallic=0.72, roughness=0.35),
         "chalk": textured_material("MAT_Chalk_Pixel", images["chalk"], roughness=1.0),
         "dark": textured_material("MAT_Dark_Pixel", images["dark"], roughness=0.68),
         "paper": textured_material("MAT_Paper_Pixel", images["paper"], roughness=0.94),
-        "glow": textured_material(
-            "MAT_Lamp_Glow",
-            images["glow"],
-            roughness=0.5,
-            emission=srgb("#ffb84b"),
-            emission_strength=2.2,
-        ),
     }
-
-
-def build_room(materials: dict[str, bpy.types.Material]) -> None:
-    floor = materials["floor"]
-    wall = materials["wall"]
-    wood = materials["wood"]
-    board = materials["board"]
-    chalk = materials["chalk"]
-    metal = materials["metal"]
-    brass = materials["brass"]
-    paper = materials["paper"]
-    glow = materials["glow"]
-    dark = materials["dark"]
-
-    cube("Environment_Floor", (0, 0, 0), (4.15, 3.05, 0.12), floor, bevel_width=0.06)
-    cube("Environment_BackWall", (0, 2.92, 2.35), (4.15, 0.11, 2.35), wall, bevel_width=0.03)
-    cube("Environment_LeftWall", (-4.04, 0, 2.35), (0.11, 3.0, 2.35), wall, bevel_width=0.03)
-    cube("Environment_BackTrim", (0, 2.76, 0.36), (4.0, 0.06, 0.11), wood, bevel_width=0.02)
-    cube("Environment_LeftTrim", (-3.88, 0, 0.36), (0.06, 2.85, 0.11), wood, bevel_width=0.02)
-
-    # Blackboard, deliberately made from chunky pieces instead of an untextured plane.
-    cube("Environment_Blackboard", (0.35, 2.72, 2.82), (2.18, 0.075, 1.18), board, bevel_width=0.035)
-    cube("Environment_BoardFrameTop", (0.35, 2.62, 4.04), (2.3, 0.08, 0.07), wood)
-    cube("Environment_BoardFrameBottom", (0.35, 2.62, 1.60), (2.3, 0.08, 0.07), wood)
-    cube("Environment_BoardFrameLeft", (-1.94, 2.62, 2.82), (0.07, 0.08, 1.17), wood)
-    cube("Environment_BoardFrameRight", (2.64, 2.62, 2.82), (0.07, 0.08, 1.17), wood)
-    cube("Environment_ChalkTray", (0.35, 2.50, 1.51), (1.35, 0.14, 0.055), wood)
-
-    board_y = 2.52
-    # A relativity cone and a curved field diagram; readable symbols without font assets.
-    polyline("Environment_ChalkLightCone", [(-1.25, board_y, 2.0), (-0.45, board_y, 3.62), (0.35, board_y, 2.0)], 0.018, chalk)
-    polyline("Environment_ChalkWorldLine", [(-0.45, board_y - 0.01, 1.95), (-0.45, board_y - 0.01, 3.67)], 0.018, chalk)
-    for offset in (-0.28, 0.0, 0.28):
-        points = []
-        for index in range(13):
-            angle = math.tau * index / 12
-            points.append((1.35 + math.cos(angle) * 0.72, board_y, 2.83 + math.sin(angle) * (0.24 + abs(offset))))
-        polyline(f"Environment_ChalkOrbit_{offset}", points, 0.014, chalk)
-    ico("Environment_ChalkParticle", (1.35, board_y - 0.015, 2.83), (0.09, 0.05, 0.09), chalk)
-
-    # Workbench and instruments on the open side of the diorama.
-    cube("Environment_DeskTop", (-2.15, 0.72, 1.08), (1.28, 0.63, 0.105), wood, bevel_width=0.055)
-    for x in (-3.18, -1.12):
-        for y in (0.28, 1.15):
-            cube(f"Environment_DeskLeg_{x}_{y}", (x, y, 0.53), (0.09, 0.09, 0.53), dark, bevel_width=0.018)
-    cube("Environment_Notebook", (-2.42, 0.42, 1.23), (0.42, 0.29, 0.055), paper, rotation=(0, 0, -0.14), bevel_width=0.02)
-    cube("Environment_Book", (-1.57, 0.87, 1.26), (0.38, 0.25, 0.11), board, rotation=(0, 0, 0.11), bevel_width=0.025)
-    cylinder("Environment_LampBase", (-2.98, 0.93, 1.22), 0.22, 0.10, brass, vertices=10)
-    cylinder_between("Environment_LampStem", (-2.98, 0.93, 1.27), (-2.91, 0.93, 2.02), 0.045, brass)
-    cylinder("Environment_LampShade", (-2.91, 0.93, 2.08), 0.27, 0.30, brass, vertices=8)
-    ico("Environment_LampBulb", (-2.91, 0.93, 1.91), (0.11, 0.11, 0.14), glow)
-
-    # A compact brass apparatus makes the room specific rather than a generic study.
-    cylinder("Environment_CoilBase", (-1.55, 0.22, 1.27), 0.22, 0.10, dark, vertices=10)
-    cylinder_between("Environment_CoilCore", (-1.55, 0.22, 1.31), (-1.55, 0.22, 1.95), 0.06, metal)
-    for z in (1.40, 1.54, 1.68, 1.82):
-        cylinder("Environment_CoilRing", (-1.55, 0.22, z), 0.18, 0.045, brass, vertices=12)
-    ico("Environment_CoilCap", (-1.55, 0.22, 2.02), (0.17, 0.17, 0.17), brass)
-
-    # Floor cables and loose chalk introduce a few intentional diagonal pixels in silhouette.
-    polyline("Environment_FloorCable", [(-2.0, 0.2, 0.14), (-1.25, -0.4, 0.14), (-0.45, -0.18, 0.14)], 0.035, dark)
-    cylinder("Environment_LooseChalk", (1.0, 2.44, 1.59), 0.025, 0.23, chalk, vertices=6, rotation=(0, math.pi / 2, 0.08))
 
 
 def build_professor(
@@ -622,7 +479,7 @@ def configure_preview(preview_path: Path, armature: bpy.types.Object) -> None:
     if idle is None:
         raise RuntimeError("motion source is missing Idle_Loop")
     armature.animation_data.action = idle
-    armature.location = (0.85, 0.14, 0.13)
+    armature.location = (0, 0, 0.13)
     scene.frame_set(18)
     bpy.context.view_layer.update()
     scene.render.engine = "BLENDER_EEVEE"
@@ -648,7 +505,7 @@ def configure_preview(preview_path: Path, armature: bpy.types.Object) -> None:
     bpy.context.collection.objects.link(camera)
     camera.location = (7.7, -9.6, 6.2)
     camera_data.lens = 54
-    look_at(camera, (0.0, 0.55, 1.75))
+    look_at(camera, (0.0, 0.0, 1.72))
     scene.camera = camera
 
     key_data = bpy.data.lights.new("PreviewKey", type="AREA")
@@ -716,6 +573,16 @@ def main() -> None:
         raise FileNotFoundError(motion_source)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     preview_path.parent.mkdir(parents=True, exist_ok=True)
+    for stale_texture in (
+        "tex-wall-16.png",
+        "tex-floor-16.png",
+        "tex-wood-16.png",
+        "tex-board-16.png",
+        "tex-metal-16.png",
+        "tex-brass-16.png",
+        "tex-glow-16.png",
+    ):
+        (output_path.parent / stale_texture).unlink(missing_ok=True)
 
     reset_scene()
     bpy.ops.import_scene.gltf(filepath=str(motion_source))
@@ -737,7 +604,6 @@ def main() -> None:
     armature.animation_data_create()
 
     materials = build_materials(output_path.parent)
-    build_room(materials)
     build_professor(materials, armature)
     configure_preview(preview_path, armature)
 

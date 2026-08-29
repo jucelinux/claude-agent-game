@@ -1,10 +1,8 @@
 import '@babylonjs/loaders/glTF/2.0/glTFLoader.js'
 import '@babylonjs/loaders/glTF/2.0/Extensions/KHR_materials_emissive_strength.js'
-import '@babylonjs/core/Collisions/collisionCoordinator.js'
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera.js'
 import type { AnimationGroup } from '@babylonjs/core/Animations/animationGroup.js'
 import { Color3, Color4 } from '@babylonjs/core/Maths/math.color.js'
-import { Ray } from '@babylonjs/core/Culling/ray.js'
 import { Vector3 } from '@babylonjs/core/Maths/math.vector.js'
 import { DirectionalLight } from '@babylonjs/core/Lights/directionalLight.js'
 import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight.js'
@@ -27,13 +25,16 @@ import {
   stepProfessorMotion,
   type ProfessorMotionState,
 } from './motion.ts'
+import { createSubatomicWorld, type PhotonKind } from './SubatomicWorld.ts'
 
 const MODEL_ROOT = '/assets/einstein-diorama/'
 const MODEL_FILE = 'einstein-lab.glb'
-const SPAWN = { x: 0.85, z: -0.14, heading: 0 } as const
-// Blender's front-facing -Y is converted to Babylon's +Z by the glTF loader.
-const CAMERA_POSITION = new Vector3(7.7, 6.2, 9.6)
-const CAMERA_TARGET = new Vector3(0, 1.75, -0.55)
+const SPAWN = { x: 0, z: 0, heading: 0 } as const
+const CAMERA_POSITION = new Vector3(7.4, 7.2, 9.4)
+const CAMERA_TARGET = new Vector3(0, 1.45, 0)
+const ARENA_RADIUS = 7.05
+const PARTICLE_COOLDOWN_MS = 130
+const WAVE_COOLDOWN_MS = 260
 
 const clamp01 = (value: number): number => Math.max(0, Math.min(1, value))
 const smoothstep = (value: number): number => {
@@ -45,17 +46,16 @@ export function createEinsteinDioramaScene(
   context: BabylonSceneContext,
 ): BabylonSceneController {
   const scene = new Scene(context.engine)
-  scene.clearColor = new Color4(0.018, 0.042, 0.055, 1)
-  scene.ambientColor = new Color3(0.08, 0.1, 0.12)
-  scene.collisionsEnabled = true
+  scene.clearColor = new Color4(0.003, 0.006, 0.025, 1)
+  scene.ambientColor = new Color3(0.055, 0.075, 0.16)
   scene.imageProcessingConfiguration.toneMappingEnabled = true
   scene.imageProcessingConfiguration.toneMappingType =
     ImageProcessingConfiguration.TONEMAPPING_ACES
-  scene.imageProcessingConfiguration.exposure = 1.32
-  scene.imageProcessingConfiguration.contrast = 1.06
+  scene.imageProcessingConfiguration.exposure = 1.42
+  scene.imageProcessingConfiguration.contrast = 1.13
 
   const camera = new ArcRotateCamera(
-    'professor-diorama-camera',
+    'professor-quantum-camera',
     0,
     0,
     12,
@@ -63,48 +63,44 @@ export function createEinsteinDioramaScene(
     scene,
   )
   camera.setPosition(CAMERA_POSITION)
-  camera.fov = 0.62
+  camera.fov = 0.66
   camera.minZ = 0.05
-  camera.maxZ = 80
-  camera.lowerRadiusLimit = 9.4
-  camera.upperRadiusLimit = 14.4
-  camera.lowerBetaLimit = 0.72
-  camera.upperBetaLimit = 1.31
-  camera.lowerAlphaLimit = camera.alpha - 0.56
-  camera.upperAlphaLimit = camera.alpha + 0.56
+  camera.maxZ = 90
+  camera.lowerRadiusLimit = camera.radius
+  camera.upperRadiusLimit = camera.radius
+  camera.lowerBetaLimit = camera.beta
+  camera.upperBetaLimit = camera.beta
+  camera.lowerAlphaLimit = camera.alpha
+  camera.upperAlphaLimit = camera.alpha
   camera.panningSensibility = 0
-  camera.wheelDeltaPercentage = 0.015
-  camera.inertia = 0.72
-  camera.angularSensibilityX = 1_100
-  camera.angularSensibilityY = 1_100
   camera.keysUp = []
   camera.keysDown = []
   camera.keysLeft = []
   camera.keysRight = []
   scene.activeCamera = camera
 
-  const ambient = new HemisphericLight('professor-ambient', new Vector3(0, 1, 0), scene)
-  ambient.intensity = 0.82
-  ambient.diffuse = new Color3(0.48, 0.68, 0.78)
-  ambient.groundColor = new Color3(0.09, 0.055, 0.035)
+  const ambient = new HemisphericLight('quantum-ambient', new Vector3(0, 1, 0), scene)
+  ambient.intensity = 0.9
+  ambient.diffuse = new Color3(0.33, 0.52, 0.95)
+  ambient.groundColor = new Color3(0.06, 0.025, 0.16)
 
   const key = new DirectionalLight(
-    'professor-warm-key',
-    new Vector3(0.42, -1, -0.72),
+    'quantum-magenta-key',
+    new Vector3(0.38, -1, -0.64),
     scene,
   )
-  key.position = new Vector3(-4.5, 8.5, 6.5)
-  key.intensity = 3.1
-  key.diffuse = new Color3(1, 0.58, 0.3)
+  key.position = new Vector3(-5.5, 9.5, 7.5)
+  key.intensity = 2.9
+  key.diffuse = new Color3(1, 0.28, 0.58)
 
   const rim = new DirectionalLight(
-    'professor-cool-rim',
-    new Vector3(-0.48, -0.76, 0.58),
+    'quantum-cyan-rim',
+    new Vector3(-0.5, -0.72, 0.54),
     scene,
   )
-  rim.position = new Vector3(4, 6.5, -4.5)
-  rim.intensity = 1.65
-  rim.diffuse = new Color3(0.3, 0.62, 1)
+  rim.position = new Vector3(5, 7.5, -5.5)
+  rim.intensity = 2.15
+  rim.diffuse = new Color3(0.18, 0.78, 1)
 
   const shadows = new ShadowGenerator(1024, key)
   shadows.usePercentageCloserFiltering = true
@@ -112,28 +108,7 @@ export function createEinsteinDioramaScene(
   shadows.bias = 0.0008
   shadows.normalBias = 0.018
 
-  const collisionMeshes: AbstractMesh[] = []
-  const collisionBox = (
-    name: string,
-    position: Vector3,
-    width: number,
-    height: number,
-    depth: number,
-  ): AbstractMesh => {
-    const mesh = MeshBuilder.CreateBox(name, { width, height, depth }, scene)
-    mesh.position.copyFrom(position)
-    mesh.isVisible = false
-    mesh.isPickable = false
-    mesh.checkCollisions = true
-    collisionMeshes.push(mesh)
-    return mesh
-  }
-  collisionBox('Collision_RoomLeft', new Vector3(-3.82, 1.1, 0), 0.18, 2.2, 5.6)
-  collisionBox('Collision_RoomRight', new Vector3(3.82, 1.1, 0), 0.18, 2.2, 5.6)
-  collisionBox('Collision_RoomBack', new Vector3(0, 1.1, -2.72), 7.8, 2.2, 0.18)
-  collisionBox('Collision_RoomFront', new Vector3(0, 1.1, 2.72), 7.8, 2.2, 0.18)
-  collisionBox('Collision_Workbench', new Vector3(-2.15, 0.7, -0.72), 2.7, 1.4, 1.42)
-
+  const world = createSubatomicWorld(scene)
   const playerCollider = MeshBuilder.CreateBox(
     'Professor_CollisionBody',
     { width: 0.56, height: 1.7, depth: 0.56 },
@@ -142,28 +117,28 @@ export function createEinsteinDioramaScene(
   playerCollider.position.set(SPAWN.x, 0, SPAWN.z)
   playerCollider.isVisible = false
   playerCollider.isPickable = false
-  playerCollider.checkCollisions = true
-  playerCollider.ellipsoid.set(0.28, 0.84, 0.28)
-  playerCollider.ellipsoidOffset.set(0, 0.84, 0)
-  collisionMeshes.push(playerCollider)
 
   let mode: WorkspaceMode = 'play'
   let active = false
   let overlays = false
   let disposed = false
   let ready = false
-  let meshes: AbstractMesh[] = []
-  let occlusionWalls: AbstractMesh[] = []
-  let leftWallContents: AbstractMesh[] = []
-  let backWallContents: AbstractMesh[] = []
+  let importedMeshes: AbstractMesh[] = []
   let idleAnimation: AnimationGroup | undefined
   let walkAnimation: AnimationGroup | undefined
   let motion: ProfessorMotionState = createProfessorMotionState(SPAWN)
-  let interaction: string | null = 'loading animated low-poly diorama'
+  let interaction: string | null = 'loading Einstein into the quantum field'
+  let interactionExpiresAt = 0
+  let sceneTimeMs = 0
+  let aimDirection = new Vector3(0, 0, 1)
+  const lastShotAt: Record<PhotonKind, number> = {
+    particle: -Infinity,
+    wave: -Infinity,
+  }
 
   const syncControls = (): void => {
     camera.detachControl()
-    if (active && mode === 'play') camera.attachControl(context.canvas, true)
+    if (active && mode === 'play') context.canvas.focus({ preventScroll: true })
   }
 
   const syncAnimation = (): void => {
@@ -176,32 +151,84 @@ export function createEinsteinDioramaScene(
     }
   }
 
+  const showInteraction = (message: string, durationMs = 1_150): void => {
+    interaction = message
+    interactionExpiresAt = sceneTimeMs + durationMs
+  }
+
   const reset = (): void => {
     motion = createProfessorMotionState(SPAWN)
     playerCollider.position.set(SPAWN.x, 0, SPAWN.z)
     playerCollider.rotation.y = SPAWN.heading
-    for (const wall of occlusionWalls) wall.isVisible = true
+    aimDirection.set(0, 0, 1)
     walkAnimation?.goToFrame(walkAnimation.from)
     syncAnimation()
-    interaction = 'professor returned to the chalk mark'
+    showInteraction('Einstein returned to the field origin')
   }
+
+  const pickQuantumFloor = (event: PointerEvent): Vector3 | null => {
+    const bounds = context.canvas.getBoundingClientRect()
+    if (bounds.width <= 0 || bounds.height <= 0) return null
+    const renderX = (event.clientX - bounds.left) * context.engine.getRenderWidth() / bounds.width
+    const renderY = (event.clientY - bounds.top) * context.engine.getRenderHeight() / bounds.height
+    const pick = scene.pick(
+      renderX,
+      renderY,
+      (candidate) => candidate === world.aimingGround,
+      false,
+      camera,
+    )
+    return pick?.pickedPoint ?? null
+  }
+
+  const updateAim = (event: PointerEvent): void => {
+    const point = pickQuantumFloor(event)
+    world.setAimPoint(point)
+    if (point !== null) {
+      const nextAim = point.subtract(playerCollider.position)
+      nextAim.y = 0
+      if (nextAim.lengthSquared() > 0.04) aimDirection = nextAim.normalize()
+    }
+  }
+
+  const onPointerMove = (event: PointerEvent): void => {
+    if (!active || mode !== 'play') return
+    updateAim(event)
+  }
+
+  const onPointerDown = (event: PointerEvent): void => {
+    if (!active || mode !== 'play' || !ready || (event.button !== 0 && event.button !== 2)) return
+    event.preventDefault()
+    updateAim(event)
+    const kind: PhotonKind = event.button === 2 ? 'particle' : 'wave'
+    const cooldown = kind === 'particle' ? PARTICLE_COOLDOWN_MS : WAVE_COOLDOWN_MS
+    if (sceneTimeMs - lastShotAt[kind] < cooldown) return
+    lastShotAt[kind] = sceneTimeMs
+    world.fire(kind, playerCollider.position, aimDirection)
+    showInteraction(
+      kind === 'particle'
+        ? 'particle photon fired · right mouse'
+        : 'wave photon fired · left mouse',
+    )
+  }
+
+  const onPointerLeave = (): void => world.setAimPoint(null)
+  const onContextMenu = (event: MouseEvent): void => event.preventDefault()
+  context.canvas.addEventListener('pointermove', onPointerMove)
+  context.canvas.addEventListener('pointerdown', onPointerDown)
+  context.canvas.addEventListener('pointerleave', onPointerLeave)
+  context.canvas.addEventListener('contextmenu', onContextMenu)
 
   void SceneLoader.ImportMeshAsync('', MODEL_ROOT, MODEL_FILE, scene).then((result) => {
     if (disposed) {
       for (const mesh of result.meshes) mesh.dispose()
       return
     }
-    meshes = result.meshes
-    leftWallContents = meshes.filter((mesh) => mesh.name.startsWith('Environment_Left'))
-    backWallContents = meshes.filter((mesh) =>
-      mesh.name.startsWith('Environment_Back')
-      || mesh.name.startsWith('Environment_Blackboard')
-      || mesh.name.startsWith('Environment_Board')
-      || mesh.name.startsWith('Environment_Chalk'))
-    occlusionWalls = meshes.filter((mesh) =>
-      mesh.name === 'Environment_BackWall' || mesh.name === 'Environment_LeftWall')
-    for (const mesh of meshes) {
-      mesh.receiveShadows = true
+    importedMeshes = result.meshes
+    for (const mesh of importedMeshes) {
+      // Older committed assets contained the workshop; the runtime consumes only Einstein.
+      if (mesh.name.startsWith('Environment_')) mesh.setEnabled(false)
+      mesh.receiveShadows = false
       mesh.showBoundingBox = overlays
       if (mesh.name.startsWith('Character_')) shadows.addShadowCaster(mesh)
     }
@@ -225,12 +252,14 @@ export function createEinsteinDioramaScene(
     walkAnimation.goToFrame(walkAnimation.from)
     syncAnimation()
     ready = true
-    interaction = 'WASD or arrows move · drag to orbit · R resets'
+    interaction = 'WASD/arrows move · left wave · right particle · R resets'
   }).catch((error: unknown) => {
     interaction = error instanceof Error ? error.message : String(error)
   })
 
-  const updateScene = (deltaSeconds: number): void => {
+  const updateScene = (deltaSeconds: number, timeMs: number): void => {
+    sceneTimeMs = timeMs
+    world.update(deltaSeconds, timeMs)
     if (!ready || mode !== 'play') return
     if (context.input.consume('KeyR')) reset()
 
@@ -242,79 +271,60 @@ export function createEinsteinDioramaScene(
     cameraForward.y = 0
     if (cameraForward.lengthSquared() < 0.0001) cameraForward.set(0, 0, -1)
     cameraForward.normalize()
-    const cameraRight = Vector3.Cross(cameraForward, Vector3.Up()).normalize()
+    // Babylon's screen-right direction is Up × Forward for this view. The former
+    // Forward × Up order made A and D visibly swap sides.
+    const cameraRight = Vector3.Cross(Vector3.Up(), cameraForward).normalize()
     const worldInput = cameraForward.scale(vertical).addInPlace(cameraRight.scale(horizontal))
 
-    const previous = motion
     let next = stepProfessorMotion(motion, { x: worldInput.x, z: worldInput.z }, deltaSeconds)
     if (next.locomotionStarted) walkAnimation?.goToFrame(walkAnimation.from)
-    const requested = new Vector3(
-      next.positionX - previous.positionX,
-      0,
-      next.positionZ - previous.positionZ,
-    )
-    const before = playerCollider.position.clone()
-    playerCollider.moveWithCollisions(requested)
-    const actualDistance = Vector3.Distance(before, playerCollider.position)
-    const blocked = requested.lengthSquared() > 0.000001
-      && actualDistance < requested.length() * 0.35
-    next = reconcileProfessorMotion(
-      next,
-      playerCollider.position.x,
-      playerCollider.position.z,
-      blocked,
-    )
+    const requested = new Vector3(next.positionX, 0, next.positionZ)
+    const requestedRadius = Math.hypot(requested.x, requested.z)
+    const blocked = requestedRadius > ARENA_RADIUS
+    if (blocked) requested.scaleInPlace(ARENA_RADIUS / requestedRadius)
+    playerCollider.position.copyFrom(requested)
+    next = reconcileProfessorMotion(next, requested.x, requested.z, blocked)
     motion = next
     playerCollider.rotation.y = motion.heading
     syncAnimation()
 
-    const followTarget = new Vector3(motion.positionX, 1.72, motion.positionZ)
+    const followTarget = new Vector3(motion.positionX, 1.45, motion.positionZ)
     const followWeight = 1 - Math.exp(-5.5 * Math.max(0, Math.min(0.04, deltaSeconds)))
     camera.target.copyFrom(Vector3.Lerp(camera.target, followTarget, followWeight))
-    const occlusionRay = Ray.CreateNewFromTo(camera.position, followTarget)
-    // Picking ignores hidden meshes, so expose both candidates for the query and
-    // apply the cutaway result before Babylon renders this frame.
-    for (const wall of occlusionWalls) wall.isVisible = true
-    const cutawayWall = scene.pickWithRay(
-      occlusionRay,
-      (candidate) => occlusionWalls.includes(candidate),
-      false,
-    )?.pickedMesh
-    const hideLeftWall = cutawayWall?.name === 'Environment_LeftWall'
-    const hideBackWall = cutawayWall?.name === 'Environment_BackWall'
-    for (const mesh of leftWallContents) mesh.isVisible = !hideLeftWall
-    for (const mesh of backWallContents) mesh.isVisible = !hideBackWall
-    interaction = blocked
-      ? 'the room or workbench blocks this route'
-      : 'WASD or arrows move · drag to orbit · R resets'
+    if (blocked) {
+      interaction = 'the quantum boundary bends this route back inward'
+    } else if (sceneTimeMs >= interactionExpiresAt) {
+      interaction = 'WASD/arrows move · left wave · right particle · R resets'
+    }
   }
 
   return {
-    id: 'einstein-diorama',
+    id: 'einstein-subatomic',
     scene,
     setActive: (nextActive) => {
       active = nextActive
+      if (!active) world.setAimPoint(null)
       syncControls()
       if (active) context.canvas.focus({ preventScroll: true })
     },
     setMode: (nextMode) => {
       mode = nextMode
+      if (mode !== 'play') world.setAimPoint(null)
       syncControls()
     },
     setOverlays: (visible) => {
       overlays = visible
-      for (const mesh of meshes) mesh.showBoundingBox = overlays
-      for (const mesh of collisionMeshes) mesh.showBoundingBox = overlays
+      for (const mesh of scene.meshes) mesh.showBoundingBox = overlays
     },
     update: updateScene,
     snapshot: (): RuntimeSnapshot => ({
-      scene: 'einstein-diorama',
+      scene: 'einstein-subatomic',
       mode,
       playerX: Number(motion.positionX.toFixed(2)),
       playerY: 0,
       playerDepth: Number(motion.positionZ.toFixed(2)),
       playerFacing: Math.sin(motion.heading) < 0 ? 'left' : 'right',
-      motionState: ready ? motion.state : 'loading-study',
+      motionState: ready ? motion.state : 'loading-field',
       motionPhase: Number(motion.locomotionPhase.toFixed(3)),
       velocityX: Number(motion.velocityX.toFixed(2)),
       velocityY: Number(motion.velocityZ.toFixed(2)),
@@ -324,10 +334,11 @@ export function createEinsteinDioramaScene(
     dispose: () => {
       disposed = true
       camera.detachControl()
-      meshes = []
-      occlusionWalls = []
-      leftWallContents = []
-      backWallContents = []
+      context.canvas.removeEventListener('pointermove', onPointerMove)
+      context.canvas.removeEventListener('pointerdown', onPointerDown)
+      context.canvas.removeEventListener('pointerleave', onPointerLeave)
+      context.canvas.removeEventListener('contextmenu', onContextMenu)
+      importedMeshes = []
       shadows.dispose()
       scene.dispose()
     },

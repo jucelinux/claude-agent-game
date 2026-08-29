@@ -14,8 +14,8 @@ function readGlbJson(buffer: Buffer): Record<string, unknown> {
   return JSON.parse(buffer.subarray(20, 20 + jsonLength).toString('utf8')) as Record<string, unknown>
 }
 
-describe('low-poly professor diorama asset', () => {
-  it('ships a named GLB scene with a recognizable character silhouette', async () => {
+describe('low-poly professor character asset', () => {
+  it('ships a character-only GLB with a recognizable silhouette', async () => {
     const buffer = await readFile(resolve(ASSET_DIR, 'einstein-lab.glb'))
     const gltf = readGlbJson(buffer)
     const nodes = gltf.nodes as readonly { readonly name?: string }[]
@@ -25,15 +25,14 @@ describe('low-poly professor diorama asset', () => {
     const animations = gltf.animations as readonly { readonly name?: string }[]
     const names = nodes.map((node) => node.name ?? '')
 
-    expect(buffer.byteLength).toBeGreaterThan(200_000)
-    expect(meshes.length).toBeGreaterThanOrEqual(80)
-    expect(materials.length).toBeGreaterThanOrEqual(10)
-    expect(images.length).toBe(13)
+    expect(buffer.byteLength).toBeGreaterThan(150_000)
+    expect(meshes.length).toBeGreaterThanOrEqual(35)
+    expect(materials.length).toBe(6)
+    expect(images.length).toBe(6)
     expect(names).toContain('Character_Head')
     expect(names).toContain('Character_Mustache_L')
     expect(names.filter((name) => name.startsWith('Character_Hair_')).length).toBeGreaterThan(10)
-    expect(names).toContain('Environment_Blackboard')
-    expect(names).toContain('Environment_CoilCore')
+    expect(names.some((name) => name.startsWith('Environment_'))).toBe(false)
     expect(names).toContain('Character_Rig')
     expect(animations.map((animation) => animation.name)).toEqual(['Idle_Loop', 'Walk_Loop'])
   })
@@ -41,7 +40,7 @@ describe('low-poly professor diorama asset', () => {
   it('retains tiny source textures and the authored catalog preview', async () => {
     const files = await readdir(ASSET_DIR)
     const textures = files.filter((name) => name.startsWith('tex-') && name.endsWith('.png'))
-    expect(textures).toHaveLength(13)
+    expect(textures).toHaveLength(6)
 
     for (const texture of textures) {
       const png = PNG.sync.read(await readFile(resolve(ASSET_DIR, texture)))

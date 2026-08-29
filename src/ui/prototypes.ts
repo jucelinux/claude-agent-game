@@ -24,20 +24,20 @@ export const PROTOTYPES = [
   },
   {
     id: 'einstein-low-poly-prototype',
-    title: 'The Relativity Workshop',
-    eyebrow: '3D study · low-poly professor',
+    title: 'Einstein: Quantum Field',
+    eyebrow: '3D action study · wave/particle duality',
     description:
-      'A wild-haired physicist stands inside a cutaway laboratory built from faceted geometry and tiny pixel textures.',
+      'Einstein crosses a luminous subatomic field and projects photons as particles or propagating waves.',
     status: 'Playable',
-    format: 'Babylon.js 3D · Animated GLB + 16px textures',
+    format: 'Babylon.js 3D · Animated GLB + native meshes',
     sceneCount: getPrototypeScenes('einstein-low-poly-prototype').length,
     visual: 'einstein',
     characterSummary: 'Professor rig · CC0 idle + walk',
-    environmentSummary: 'Cutaway laboratory · 16px textures',
-    inspectorEyebrow: 'Playable low-poly study',
-    inspectorTitle: 'A miniature workshop for impossible ideas',
+    environmentSummary: 'Subatomic field · native Babylon meshes',
+    inspectorEyebrow: 'Playable quantum action study',
+    inspectorTitle: 'Wave and particle, at Einstein’s fingertips',
     inspectorDescription:
-      'The character and room are authored offline in Blender as ordinary animated GLB content. Babylon owns locomotion playback, collisions, orbital camera, lighting, shadows and scene lifecycle.',
+      'The animated character is authored offline in Blender. Babylon owns the procedural quantum field, aiming, photon motion, locomotion playback, lighting, shadows and scene lifecycle.',
   },
 ] as const
 

@@ -2,23 +2,25 @@ import { expect, test, type Locator, type Page, type TestInfo } from '@playwrigh
 import { PNG } from 'pngjs'
 
 const PROTOTYPE_URL = '/?prototype=einstein-low-poly-prototype'
-const MINIMUM_HAIR_PIXELS = 200
+const MINIMUM_HAIR_PIXELS = 180
 
-type DioramaSample = {
+type QuantumSample = {
   readonly buffer: Buffer
   readonly lightHairPixels: number
-  readonly warmPixels: number
-  readonly tealPixels: number
+  readonly cyanPixels: number
+  readonly magentaPixels: number
+  readonly amberPixels: number
   readonly width: number
   readonly height: number
 }
 
-async function sampleCanvas(canvas: Locator): Promise<DioramaSample> {
+async function sampleCanvas(canvas: Locator): Promise<QuantumSample> {
   const buffer = await canvas.screenshot()
   const png = PNG.sync.read(buffer)
   let lightHairPixels = 0
-  let warmPixels = 0
-  let tealPixels = 0
+  let cyanPixels = 0
+  let magentaPixels = 0
+  let amberPixels = 0
 
   for (let index = 0; index < png.data.length; index += 4) {
     const red = png.data[index] ?? 0
@@ -27,22 +29,24 @@ async function sampleCanvas(canvas: Locator): Promise<DioramaSample> {
     const alpha = png.data[index + 3] ?? 0
     if (alpha === 0) continue
     const spread = Math.max(red, green, blue) - Math.min(red, green, blue)
-    if (red > 135 && green > 125 && blue > 105 && spread < 70) lightHairPixels++
-    if (red > 95 && red > green + 18 && green > blue + 10) warmPixels++
-    if (blue > red + 8 && green > red + 6 && blue > 34) tealPixels++
+    if (red > 130 && green > 120 && blue > 105 && spread < 75) lightHairPixels++
+    if (green > red + 18 && blue > red + 28 && blue > 70) cyanPixels++
+    if (red > green + 30 && blue > green + 5 && red > 85) magentaPixels++
+    if (red > 130 && green > 65 && red > blue + 50) amberPixels++
   }
 
   return {
     buffer,
     lightHairPixels,
-    warmPixels,
-    tealPixels,
+    cyanPixels,
+    magentaPixels,
+    amberPixels,
     width: png.width,
     height: png.height,
   }
 }
 
-async function openDiorama(page: Page): Promise<Locator> {
+async function openQuantumField(page: Page): Promise<Locator> {
   const pageErrors: string[] = []
   page.on('pageerror', (error) => pageErrors.push(error.message))
   await page.goto(PROTOTYPE_URL)
@@ -50,6 +54,7 @@ async function openDiorama(page: Page): Promise<Locator> {
   await expect(canvas).toBeVisible()
   await page.waitForTimeout(2_000)
   expect(pageErrors).toEqual([])
+  await expect(page.locator('.runtime-values')).toContainText('einstein-subatomic')
   await expect(page.locator('.runtime-values')).toContainText('idle', { timeout: 12_000 })
   return canvas
 }
@@ -69,109 +74,70 @@ async function runtimePosition(page: Page): Promise<readonly [x: number, depth: 
   ]
 }
 
-const positionDistance = (
-  first: readonly [number, number],
-  second: readonly [number, number],
-): number => Math.hypot(second[0] - first[0], second[1] - first[1])
-
-test('the low-poly professor mockup loads with its authored lighting and textures', async ({ page }, testInfo: TestInfo) => {
-  const canvas = await openDiorama(page)
+test('Einstein loads in a luminous subatomic field without the workshop', async ({ page }, testInfo: TestInfo) => {
+  const canvas = await openQuantumField(page)
   const sample = await sampleCanvas(canvas)
-  await canvas.screenshot({ path: testInfo.outputPath('relativity-workshop.png') })
-  await testInfo.attach('relativity-workshop', {
+  await canvas.screenshot({ path: testInfo.outputPath('einstein-quantum-field.png') })
+  await testInfo.attach('einstein-quantum-field', {
     body: sample.buffer,
     contentType: 'image/png',
   })
 
   expect(sample.width).toBeGreaterThan(500)
   expect(sample.height).toBeGreaterThan(400)
-  expect(sample.lightHairPixels).toBeGreaterThan(500)
-  expect(sample.warmPixels).toBeGreaterThan(2_000)
-  expect(sample.tealPixels).toBeGreaterThan(2_000)
+  expect(sample.lightHairPixels).toBeGreaterThan(MINIMUM_HAIR_PIXELS)
+  expect(sample.cyanPixels).toBeGreaterThan(1_000)
+  expect(sample.magentaPixels).toBeGreaterThan(400)
+  await expect(page.getByText("Einstein's Quantum Field", { exact: true })).toBeVisible()
+})
 
-  const beforeOrbit = sample.buffer
+test('A moves left and D moves right in camera space', async ({ page }) => {
+  const canvas = await openQuantumField(page)
+  await canvas.focus()
+
+  await page.keyboard.down('KeyA')
+  await page.waitForTimeout(1_100)
+  await page.keyboard.up('KeyA')
+  const afterA = await runtimePosition(page)
+  expect(afterA[0]).toBeGreaterThan(0.12)
+  expect(afterA[1]).toBeLessThan(-0.12)
+
+  await page.keyboard.press('KeyR')
+  await page.waitForTimeout(250)
+  await page.keyboard.down('KeyD')
+  await page.waitForTimeout(1_100)
+  await page.keyboard.up('KeyD')
+  const afterD = await runtimePosition(page)
+  expect(afterD[0]).toBeLessThan(-0.12)
+  expect(afterD[1]).toBeGreaterThan(0.12)
+  expect((await sampleCanvas(canvas)).lightHairPixels).toBeGreaterThan(MINIMUM_HAIR_PIXELS)
+})
+
+test('left click fires a wave and right click fires a particle', async ({ page }, testInfo: TestInfo) => {
+  const canvas = await openQuantumField(page)
   const bounds = await canvas.boundingBox()
   expect(bounds).not.toBeNull()
-  if (bounds !== null) {
-    await page.mouse.move(bounds.x + bounds.width * 0.55, bounds.y + bounds.height * 0.52)
-    await page.mouse.down()
-    await page.mouse.move(bounds.x + bounds.width * 0.42, bounds.y + bounds.height * 0.52, { steps: 8 })
-    await page.mouse.up()
-  }
-  await page.waitForTimeout(250)
-  const afterOrbit = await canvas.screenshot()
-  expect(afterOrbit.equals(beforeOrbit)).toBe(false)
-})
+  if (bounds === null) return
 
-test('WASD moves the professor camera-relative without losing the character', async ({ page }, testInfo: TestInfo) => {
-  const canvas = await openDiorama(page)
-  await canvas.click()
-
-  for (const key of ['KeyW', 'KeyA', 'KeyS', 'KeyD']) {
-    await page.keyboard.press('KeyR')
-    await expect(page.locator('.runtime-values')).toContainText('idle')
-    const start = await runtimePosition(page)
-
-    await page.keyboard.down(key)
-    await expect(page.locator('.runtime-values')).toContainText(/start|walk|turn/)
-    await page.waitForTimeout(850)
-    const moving = await sampleCanvas(canvas)
-    await page.keyboard.up(key)
-
-    const finish = await runtimePosition(page)
-    expect(positionDistance(start, finish)).toBeGreaterThan(0.18)
-    await testInfo.attach(`locomotion-${key}`, {
-      body: moving.buffer,
-      contentType: 'image/png',
-    })
-    await canvas.screenshot({ path: testInfo.outputPath(`locomotion-${key}.png`) })
-    expect(moving.lightHairPixels).toBeGreaterThan(MINIMUM_HAIR_PIXELS)
-  }
-})
-
-test('a reversal turns before walking and every transition frame stays visible', async ({ page }, testInfo: TestInfo) => {
-  const canvas = await openDiorama(page)
-  await canvas.click()
-
-  await page.keyboard.down('KeyS')
-  await page.waitForTimeout(900)
-  await page.keyboard.up('KeyS')
-  const forwardPosition = await runtimePosition(page)
-
-  await page.keyboard.down('KeyW')
-  const samples: DioramaSample[] = []
-  for (let frame = 0; frame < 12; frame++) {
-    await page.waitForTimeout(40)
-    samples.push(await sampleCanvas(canvas))
-  }
-  await page.waitForTimeout(900)
-  await page.keyboard.up('KeyW')
-  const reversedPosition = await runtimePosition(page)
-
-  for (const sample of samples) {
-    expect(sample.lightHairPixels).toBeGreaterThan(MINIMUM_HAIR_PIXELS)
-  }
-  expect(reversedPosition[0]).toBeLessThan(forwardPosition[0] - 0.08)
-  expect(reversedPosition[1]).toBeLessThan(forwardPosition[1] - 0.08)
-  await testInfo.attach('reversal-middle-frame', {
-    body: samples[6]!.buffer,
-    contentType: 'image/png',
+  await canvas.click({
+    button: 'left',
+    position: { x: bounds.width * 0.68, y: bounds.height * 0.6 },
   })
-})
+  await expect(page.locator('.runtime-values')).toContainText('wave photon fired')
+  await page.waitForTimeout(120)
+  const wave = await sampleCanvas(canvas)
+  await testInfo.attach('wave-photon', { body: wave.buffer, contentType: 'image/png' })
 
-test('native room collisions stop the professor inside the visible floor', async ({ page }) => {
-  const canvas = await openDiorama(page)
-  await canvas.click()
+  await canvas.click({
+    button: 'right',
+    position: { x: bounds.width * 0.72, y: bounds.height * 0.55 },
+  })
+  await expect(page.locator('.runtime-values')).toContainText('particle photon fired')
+  await page.waitForTimeout(120)
+  const particle = await sampleCanvas(canvas)
+  await testInfo.attach('particle-photon', { body: particle.buffer, contentType: 'image/png' })
 
-  await page.keyboard.down('KeyS')
-  await page.waitForTimeout(4_800)
-  const atBoundary = await runtimePosition(page)
-  await page.waitForTimeout(1_000)
-  const stillAtBoundary = await runtimePosition(page)
-  await page.keyboard.up('KeyS')
-
-  expect(positionDistance(atBoundary, stillAtBoundary)).toBeLessThan(0.08)
-  expect(Math.abs(stillAtBoundary[0])).toBeLessThan(3.55)
-  expect(Math.abs(stillAtBoundary[1])).toBeLessThan(2.5)
-  expect((await sampleCanvas(canvas)).lightHairPixels).toBeGreaterThan(MINIMUM_HAIR_PIXELS)
+  expect(wave.cyanPixels).toBeGreaterThan(1_000)
+  expect(particle.amberPixels).toBeGreaterThan(20)
+  expect(particle.lightHairPixels).toBeGreaterThan(MINIMUM_HAIR_PIXELS)
 })
