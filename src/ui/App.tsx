@@ -144,15 +144,16 @@ function ClipInspector({ clip }: { readonly clip: CompiledClip }): React.JSX.Ele
   )
 }
 
-function EmptyInspector(): React.JSX.Element {
+function EmptyInspector({
+  prototype,
+}: {
+  readonly prototype: (typeof PROTOTYPES)[number]
+}): React.JSX.Element {
   return (
     <section className="empty-inspector">
-      <span className="eyebrow">Playable environment study</span>
-      <h2>Maintenance unit inside colossal hardware</h2>
-      <p>
-        A Blender-authored profile mecha traverses a processor package, oversized chip leads,
-        exposed copper and a burnt power rail built directly from native Babylon geometry.
-      </p>
+      <span className="eyebrow">{prototype.inspectorEyebrow}</span>
+      <h2>{prototype.inspectorTitle}</h2>
+      <p>{prototype.inspectorDescription}</p>
     </section>
   )
 }
@@ -341,7 +342,9 @@ function BuilderWorkspace({
 
             <section className="asset-group">
               <h2>Character clips</h2>
-              {characterClips.length === 0 && <p className="empty-list">Mecha motion atlas · 60f</p>}
+              {characterClips.length === 0 && (
+                <p className="empty-list">{prototype.characterSummary}</p>
+              )}
               {characterClips.map((clip) => (
                 <button
                   key={clip.id}
@@ -356,7 +359,9 @@ function BuilderWorkspace({
 
             <section className="asset-group">
               <h2>Environment</h2>
-              {environmentClips.length === 0 && <p className="empty-list">Colossal PCB · Babylon meshes</p>}
+              {environmentClips.length === 0 && (
+                <p className="empty-list">{prototype.environmentSummary}</p>
+              )}
               {environmentClips.map((clip) => (
                 <button
                   key={clip.id}
@@ -401,7 +406,9 @@ function BuilderWorkspace({
         </section>
 
         <aside ref={inspector} className="inspector panel">
-          {selected === undefined ? <EmptyInspector /> : <ClipInspector clip={selected} />}
+          {selected === undefined
+            ? <EmptyInspector prototype={prototype} />
+            : <ClipInspector clip={selected} />}
 
           <section className="inspector-section runtime-section">
             <div className="section-heading"><h3>Live scene</h3><span>Babylon</span></div>
@@ -437,6 +444,23 @@ function LcdPlatformerPreview(): React.JSX.Element {
       <div className="lcd-preview-mecha" />
     </div>
   )
+}
+
+function EinsteinDioramaPreview(): React.JSX.Element {
+  return (
+    <div className="einstein-preview" aria-hidden="true">
+      <img src="/assets/einstein-diorama/preview.png" alt="" />
+      <span>16 px texture study</span>
+    </div>
+  )
+}
+
+function PrototypePreview({
+  visual,
+}: {
+  readonly visual: (typeof PROTOTYPES)[number]['visual']
+}): React.JSX.Element {
+  return visual === 'lcd' ? <LcdPlatformerPreview /> : <EinsteinDioramaPreview />
 }
 
 function PrototypeCatalog({
@@ -489,7 +513,7 @@ function PrototypeCatalog({
                 onClick={() => onOpen(prototype.id)}
                 aria-label={`Open ${prototype.title} in Agent Game Builder`}
               >
-                <LcdPlatformerPreview />
+                <PrototypePreview visual={prototype.visual} />
                 <span className="prototype-card-copy">
                   <span className="prototype-card-kicker">
                     <span>{prototype.status}</span>

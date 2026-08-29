@@ -1,6 +1,7 @@
 import { Engine } from '@babylonjs/core/Engines/engine.js'
 import { KeyboardState, type BabylonSceneController } from '../babylon/runtime.ts'
 import type { CompiledBundle } from '../compiler/types.ts'
+import { createEinsteinDioramaScene } from './einsteinDiorama/EinsteinDioramaScene.ts'
 import { createLcdPlatformerScene } from './lcdPlatformer/LcdPlatformerScene.ts'
 import {
   getPrototypeScenes,
@@ -61,7 +62,9 @@ export function mountGame(
     bundle,
     input,
   }
-  const created = [createLcdPlatformerScene(sceneContext)]
+  const created = prototypeId === 'lcd-platformer-prototype'
+    ? [createLcdPlatformerScene(sceneContext)]
+    : [createEinsteinDioramaScene(sceneContext)]
   for (const controller of created) controllers.set(controller.id, controller)
   activate(firstScene.id)
 

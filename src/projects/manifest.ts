@@ -1,5 +1,6 @@
 export const PROTOTYPE_IDS = [
   'lcd-platformer-prototype',
+  'einstein-low-poly-prototype',
 ] as const
 
 export type PrototypeId = (typeof PROTOTYPE_IDS)[number]
@@ -10,6 +11,13 @@ export const PROTOTYPE_SCENES = {
       id: 'lcd-platformer',
       label: 'Colossal PCB Chamber',
       detail: 'A/D or arrows move · W/↑/Space jumps · R resets',
+    },
+  ],
+  'einstein-low-poly-prototype': [
+    {
+      id: 'einstein-diorama',
+      label: 'The Relativity Workshop',
+      detail: 'WASD/arrows move · drag orbits · wheel zooms · R resets',
     },
   ],
 } as const

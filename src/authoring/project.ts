@@ -8,6 +8,7 @@ export const PROJECT_SEED = 0x0be91
 
 const PROJECT_SEEDS: Readonly<Record<PrototypeId, number>> = {
   'lcd-platformer-prototype': PROJECT_SEED,
+  'einstein-low-poly-prototype': 0x0e157e1,
 }
 
 export function compileProject(projectId: PrototypeId = PROJECT_ID): CompiledBundle {

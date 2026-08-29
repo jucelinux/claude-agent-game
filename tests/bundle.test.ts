@@ -25,4 +25,13 @@ describe('portable bundle contract', () => {
     expect(bundle.clips).toEqual([])
     expect(bundle).toEqual(compileProject())
   })
+
+  it('keeps the imported low-poly GLB outside the procedural asset bundle', () => {
+    const bundle = compileProject('einstein-low-poly-prototype')
+
+    expect(bundle.project).toBe('einstein-low-poly-prototype')
+    expect(bundle.clips).toEqual([])
+    expect(bundle.checksum).toMatch(/^[0-9a-f]{8}$/)
+    expect(bundle).toEqual(compileProject('einstein-low-poly-prototype'))
+  })
 })

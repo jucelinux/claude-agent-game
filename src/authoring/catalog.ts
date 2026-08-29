@@ -6,6 +6,7 @@ const EMPTY_PROJECT_ASSETS: readonly AssetSource[] = []
 
 const PROJECT_ASSETS_BY_ID: Readonly<Record<PrototypeId, readonly AssetSource[]>> = {
   'lcd-platformer-prototype': EMPTY_PROJECT_ASSETS,
+  'einstein-low-poly-prototype': EMPTY_PROJECT_ASSETS,
 }
 
 export function getProjectAssets(projectId: PrototypeId): readonly AssetSource[] {

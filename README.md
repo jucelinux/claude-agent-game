@@ -6,11 +6,16 @@ game scenes.
 The root screen catalogs the prototypes that are currently available and opens each one in its
 own Agent Game Builder workspace.
 
-The catalog currently contains one entry:
+The catalog currently contains two entries:
 
 - **LCD Platformer** — a side-profile maintenance mecha whose CC0-based motion is rendered
   offline in Blender and played through native Babylon sprites inside a colossal PCB chamber
-  assembled from processor packages, soldered terminals and exposed copper. The Ashfall Expanse and Sunlit Earth studies are preserved on
+  assembled from processor packages, soldered terminals and exposed copper.
+- **The Relativity Workshop** — a playable low-poly laboratory diorama with a wild-haired
+  physicist caricature, CC0-based humanoid locomotion, a GLB-authored environment and
+  deliberately tiny 16 × 16 textures sampled by Babylon with nearest filtering.
+
+The Ashfall Expanse and Sunlit Earth studies are preserved on
   `archive/babylon-prototypes`.
 
 ## Start
@@ -45,6 +50,9 @@ three supported content paths.
 `.tools/` cache. Blender is an offline authoring dependency and never enters the browser bundle.
 `npm run setup:motion-source` installs the checksum-pinned CC0 locomotion data in that same
 cache. Regenerate the committed mecha atlas with `npm run author:mecha-motion`.
+Regenerate the low-poly laboratory GLB, its 16 × 16 material textures and catalog preview with
+`npm run author:einstein-diorama`. Blender authors ordinary offline content; the browser uses
+Babylon's official glTF loader and never runs Blender code.
 
 ## Preserved work
 
