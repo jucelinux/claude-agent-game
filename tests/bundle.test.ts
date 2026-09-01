@@ -11,7 +11,7 @@ describe('portable bundle contract', () => {
       project: PROJECT_ID,
       seed: PROJECT_SEED,
     })
-    expect(bundle.project).toBe('new-project-prototype')
+    expect(bundle.project).toBe('tokyo-neon-89')
     expect(bundle.checksum).toMatch(/^[0-9a-f]{8}$/)
   })
 
@@ -19,8 +19,8 @@ describe('portable bundle contract', () => {
     expect(compileProject()).toEqual(compileProject())
   })
 
-  it('leaves the blank scaffold without compiled assets', () => {
-    const bundle = compileProject('new-project-prototype')
+  it('keeps the Babylon-authored environment outside the raster bundle', () => {
+    const bundle = compileProject('tokyo-neon-89')
 
     expect(bundle.clips).toEqual([])
     expect(bundle).toEqual(compileProject())

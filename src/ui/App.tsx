@@ -14,6 +14,7 @@ import type {
 } from '../workers/compiler.worker.ts'
 import {
   PROTOTYPES,
+  PROTOTYPE_MATURITY_LABELS,
   resolvePrototypeId,
   type PrototypeId,
 } from './prototypes.ts'
@@ -439,12 +440,19 @@ function BuilderWorkspace({
   )
 }
 
-function BlankStagePreview(): React.JSX.Element {
+function NeonCityPreview(): React.JSX.Element {
   return (
-    <div className="blank-preview" aria-hidden="true">
-      <span className="blank-horizon" />
-      <span className="blank-floor" />
-      <span className="blank-marker" />
+    <div className="neon-preview" aria-hidden="true">
+      <span className="neon-preview-glow" />
+      <span className="neon-preview-building building-left" />
+      <span className="neon-preview-building building-right" />
+      <span className="neon-preview-building building-back" />
+      <span className="neon-preview-sign sign-cyan">夜光</span>
+      <span className="neon-preview-sign sign-pink">ゲーム</span>
+      <span className="neon-preview-rail"><i /></span>
+      <span className="neon-preview-road" />
+      <span className="neon-preview-crossing" />
+      <span className="neon-preview-rain" />
     </div>
   )
 }
@@ -470,12 +478,12 @@ function PrototypeCatalog({
       <div className="catalog-content">
         <section className="catalog-hero">
           <div>
-            <span className="eyebrow">Playable studies</span>
+            <span className="eyebrow">Approved concepts · Honest maturity</span>
             <h1>Choose a prototype<br />to enter the Builder.</h1>
           </div>
           <p>
-            Each prototype opens as its own authoring workspace, with playable scenes,
-            runtime diagnostics and project-specific assets.
+            Each approved concept opens at its actual production stage, with scene diagnostics,
+            review evidence and project-specific assets. Blockout does not mean finished art.
           </p>
         </section>
 
@@ -499,10 +507,12 @@ function PrototypeCatalog({
                 onClick={() => onOpen(prototype.id)}
                 aria-label={`Open ${prototype.title} in Agent Game Builder`}
               >
-                <BlankStagePreview />
+                <NeonCityPreview />
                 <span className="prototype-card-copy">
                   <span className="prototype-card-kicker">
-                    <span>{prototype.status}</span>
+                    <span className={`maturity-badge ${prototype.maturity}`}>
+                      {PROTOTYPE_MATURITY_LABELS[prototype.maturity]}
+                    </span>
                     {prototype.eyebrow}
                   </span>
                   <strong>{prototype.title}</strong>

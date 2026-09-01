@@ -8,9 +8,8 @@ own Agent Game Builder workspace.
 
 The catalog currently contains one entry:
 
-- **New Project** — a blank Babylon stage with ground, sky, key light and a walk camera,
-  waiting for the next game concept. It retains the Builder infrastructure proven by the
-  archived prototypes without carrying their game-specific content.
+- **Tokyo Neon ’89** — a technical first-person blockout. Its concept is approved; its current
+  visual interpretation is not. See the [visual direction brief](docs/visual-direction/tokyo-neon-89.md).
 
 ## Start
 
@@ -39,10 +38,24 @@ Babylon.js owns scenes, rendering, cameras, animation, audio and lifecycle. The 
 not wrap those systems in a second engine. See [asset authoring](docs/asset-authoring.md) for the
 three supported content paths.
 
-The neutral scaffold keeps the accumulated Builder improvements: lifecycle-safe Babylon scene
+The active prototype keeps the accumulated Builder improvements: lifecycle-safe Babylon scene
 mounting, keyboard input, live motion diagnostics, the deterministic raster compiler, official
 glTF loader support, Playwright visual checks, a pinned Blender LTS launcher and deterministic
 PNG atlas composition.
+
+## Visual review
+
+Visual maturity is tracked independently from technical completion. The required stages,
+evidence and review rubric live in the [visual direction workflow](docs/visual-direction/README.md).
+Generate the active prototypes' canonical views and labeled contact sheets with:
+
+```sh
+npm run capture:visual
+```
+
+Review output is written to `artifacts/visual-review/` and is intentionally ignored by Git. A
+passing browser test or generated contact sheet never promotes a scene without explicit visual
+approval.
 
 ## Preserved work
 
@@ -58,6 +71,7 @@ PNG atlas composition.
 npm run dev
 npm run test
 npm run test:visual
+npm run capture:visual
 npm run check
 npm run build
 npm run setup:blender

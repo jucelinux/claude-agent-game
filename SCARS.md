@@ -115,3 +115,24 @@ contract that only exists in rendered output.
 that loads its Babylon scene without page errors and samples or captures the canvas. Motion-heavy
 features must exercise their risky transitions frame-by-frame. Keep deterministic logic in fast
 unit tests and reserve Playwright for the visible contract.
+
+## Scar 06 — rendering checks cannot approve art direction
+
+**Evidence.** The first Tokyo Neon '89 scene translated broad prompts into the fastest available
+symbols: box buildings, cyan and magenta emission, rain, bloom and decorative Japanese glyphs.
+It was promoted as playable after tests confirmed dark pixels, neon-colored pixels, movement and
+camera reset. Those checks were accurate about the canvas and irrelevant to whether the scene
+had observed architecture, an authored shape language, cultural specificity, environmental
+storytelling or a compelling composition. The result was technically coherent and visually
+generic.
+
+**Lesson.** A verbal style label is not a visual target, low-poly is not permission to use
+unconsidered primitives, and a collection of genre signifiers is not art direction. Automated
+tests can prevent rendering regressions only after a human-approved visual result exists; they
+cannot turn the first implementation into that result.
+
+**Obligation.** Visually led work starts with a provenance-aware reference packet, explicit
+anti-references, a target frame and an asset plan. Keep blockouts visibly classified as
+blockouts. Generate canonical review captures and compare them against the target before
+claiming an art pass is complete. Pixel statistics may assert visibility or regression, never
+quality. Only explicit user review may promote a scene to `approved`.

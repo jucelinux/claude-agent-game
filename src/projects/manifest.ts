@@ -1,15 +1,15 @@
 export const PROTOTYPE_IDS = [
-  'new-project-prototype',
+  'tokyo-neon-89',
 ] as const
 
 export type PrototypeId = (typeof PROTOTYPE_IDS)[number]
 
 export const PROTOTYPE_SCENES = {
-  'new-project-prototype': [
+  'tokyo-neon-89': [
     {
-      id: 'new-project',
-      label: 'Blank Scene',
-      detail: 'WASD moves · mouse looks · empty Babylon stage for the next game',
+      id: 'neon-crossing',
+      label: 'Shinjuku Back Alley',
+      detail: 'WASD moves · drag looks · R resets · 1–5 selects review views',
     },
   ],
 } as const

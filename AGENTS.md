@@ -15,11 +15,14 @@ Read `CLAUDE.md` before editing this repository.
 - Treat generated images and Blender renders as offline asset inputs, not runtime systems.
 - Propose product, visual and authoring-workflow decisions before applying them.
 - Do not use design skills, plugins or MCPs unless the user requests them.
+- Follow the visual maturity gate in `CLAUDE.md`. Never present a blockout as finished art or use
+  automated render checks as evidence of visual quality.
 
 ## Commands
 
 - `npm run dev` — Vite builder workspace at port 5177.
 - `npm run test` — deterministic compiler and contract tests.
 - `npm run test:visual` — Playwright browser checks for the active scaffold.
+- `npm run capture:visual` — canonical review views and contact sheets in `artifacts/`.
 - `npm run check` — typecheck, deterministic tests and visual checks.
 - `npm run build` — production workspace build.

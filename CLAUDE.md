@@ -42,6 +42,31 @@ Do not recreate Babylon facilities behind repository-owned abstractions. Game-sp
 and a thin Builder adapter are allowed; a generic scene, rendering, physics, camera, audio or
 lifecycle system is not.
 
+## Visual quality gate
+
+Visual implementation and visual approval are separate product decisions. A concept approval
+does not approve the first rendered interpretation of that concept.
+
+Before materially implementing a visually led scene:
+
+1. Create `docs/visual-direction/<prototype-id>.md` from the repository template.
+2. Establish a reference packet with provenance, an explicit anti-reference list and a target
+   frame. The user must approve the target before an art pass begins.
+3. State the asset plan: what uses Babylon primitives, authored procedural geometry, Blender/GLB,
+   generated offline input or licensed third-party material. Primitives are valid for blockout;
+   convenience does not make them final art.
+4. Mark the catalog maturity honestly. A scene remains `reference` or `blockout` until its
+   approved target and asset plan have materially shaped the rendered result.
+5. Capture the canonical review views and assess each one against the approved target and the
+   rubric in `docs/visual-direction/README.md`. Automated canvas tests prove presentation
+   correctness, not taste or visual quality.
+6. Require explicit user visual approval before marking a prototype `approved` or describing it
+   as a finished playable study.
+
+If the reference packet is missing, pause visual production and request either user-supplied
+references or permission to research them. The existing restriction on design skills, plugins,
+MCPs and image generation still applies; this gate does not grant that permission by itself.
+
 ## Working agreement
 
 Read this file, `AGENTS.md` and `SCARS.md` before edits. `SCARS.md` is the branch's persistent
